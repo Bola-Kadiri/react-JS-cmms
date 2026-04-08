@@ -1,0 +1,82 @@
+{
+  "management": "Asset Management",
+  "title": {
+    "create": "Create New Asset",
+    "edit": "Edit Asset",
+    "details": "Asset Details"
+  },
+  "fields": {
+    "serialNumber": "Serial Number",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "type": "Type",
+    "model": "Model",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "status": "Status",
+    "partNumber": "Part Number",
+    "assetTag": "Asset Tag",
+    "location": "Location",
+    "flags": "Flags",
+    "purchaseDate": "Purchase Date",
+    "warrantyEnd": "Warranty Until",
+    "owner": "Owner ID",
+    "reorderLevel": "Reorder Level",
+    "minStockLevel": "Minimum Stock",
+    "maxStockLevel": "Maximum Stock",
+    "amount": "Amount",
+    "lastUpdated": "Last Updated"
+  },
+  "types": {
+    "asset": "Asset",
+    "consumable": "Consumable"
+  },
+  "status": {
+    "available": "Available",
+    "inUse": "In Use",
+    "underMaintenance": "Under Maintenance",
+    "disposed": "Disposed"
+  },
+  "placeholders": {
+    "selectType": "Select type",
+    "assetModel": "Asset model",
+    "selectCategory": "Select Category",
+    "selectSubcategory": "Select Subcategory",
+    "partNumber": "Part number",
+    "assetTag": "Asset tag",
+    "serialNumber": "Serial number",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "reorderLevel": "Reorder level",
+    "minStockLevel": "Minimum stock level",
+    "maxStockLevel": "Maximum stock level",
+    "location": "Location",
+    "flags": "Flags",
+    "selectStatus": "Select status",
+    "ownerID": "Owner ID",
+    "searchAssets": "Search assets..."
+  },
+  "messages": {
+    "loading": "Loading assets...",
+    "loadingDetails": "Loading asset details...",
+    "error": "Error loading assets",
+    "notFound": "Asset not found"
+  },
+  "inventory": {
+    "status": "Current Inventory Status",
+    "currentQuantity": "Current Quantity:"
+  },
+  "tabs": {
+    "details": "Details",
+    "inventory": "Inventory",
+    "category": "Category"
+  },
+  "actions": {
+    "addAsset": "Add Asset",
+    "editAsset": "Edit Asset",
+    "viewDetails": "View Details",
+    "tryAgain": "Try Again",
+    "backToList": "Back to List"
+  }
+}

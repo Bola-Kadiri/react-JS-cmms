@@ -1,0 +1,17 @@
+{
+  "header": {
+    "serialNo": "N° de Série",
+    "category": "Catégorie",
+    "subcategory": "Sous-catégorie",
+    "type": "Type",
+    "quantity": "Quantité",
+    "unitPrice": "Prix Unitaire",
+    "status": "Statut",
+    "actions": "Actions"
+  },
+  "empty": "Aucun élément trouvé",
+  "pagination": {
+    "rowsPerPage": "Lignes par page",
+    "showing": "Affichage de {{from}} à {{to}} sur {{total}} entrées"
+  }
+}

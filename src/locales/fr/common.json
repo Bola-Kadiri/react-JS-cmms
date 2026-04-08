@@ -1,0 +1,31 @@
+{
+  "actions": {
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "back": "Retour",
+    "edit": "Modifier",
+    "view": "Afficher"
+  },
+  "status": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "confirmation": {
+    "delete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "confirmButton": "Confirmer",
+    "cancelButton": "Annuler"
+  },
+  "notSet": "Non défini",
+  "noItemsFound": "Aucun élément trouvé",
+  "search": "Rechercher...",
+  "currency": {
+    "NGN": "₦",
+    "USD": "$",
+    "EUR": "€",
+    "GBP": "£"
+  }
+}

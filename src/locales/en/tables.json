@@ -1,0 +1,17 @@
+{
+  "header": {
+    "serialNo": "Serial No",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "type": "Type",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "empty": "No items found",
+  "pagination": {
+    "rowsPerPage": "Rows per page",
+    "showing": "Showing {{from}} to {{to}} of {{total}} entries"
+  }
+}

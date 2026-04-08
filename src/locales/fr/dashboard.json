@@ -1,0 +1,144 @@
+{
+  "navigation": {
+    "work": {
+      "line1": "CMMS",
+      "line2": "PPM"
+    },
+    "inventory": {
+      "line1": "DEMANDE", 
+      "line2": "FLUX"
+    },
+    "materials": {
+      "line1": "MATÉRIEL",
+      "line2": "GESTION"
+    },
+    "procurement": {
+      "line1": "CONTRAT &",
+      "line2": "APPROVISIONNEMENT"
+    },
+    "facility": {
+      "line1": "INSPECTION",
+      "line2": "INSTALLATION"
+    },
+    "staff": {
+      "line1": "PRÉSENCE",
+      "line2": "PERSONNEL"
+    },
+    "call": {
+      "line1": "CALLBX",
+      "line2": ""
+    },
+    "predictive": {
+      "line1": "TABLEAU DE BORD",
+      "line2": "PRÉDICTIF"
+    }
+  },
+  "tabs": {
+    "workRequest": "DEMANDE DE TRAVAIL",
+    "workOrder": "ORDRE DE TRAVAIL",
+    "stockLevel": "NIVEAUX DE STOCK",
+    "transactions": "TRANSACTIONS",
+    "purchaseRequests": "DEMANDES D'ACHAT",
+    "purchaseOrders": "BONS DE COMMANDE"
+  },
+  "headers": {
+    "inventory": {
+      "overview": "APERÇU DE L'INVENTAIRE :",
+      "alerts": "ALERTES D'INVENTAIRE :"
+    },
+    "procurement": {
+      "overview": "APERÇU DES APPROVISIONNEMENTS :",
+      "alerts": "ALERTES D'APPROVISIONNEMENT :"
+    },
+    "escalated": "ESCALADÉ À MOI :",
+    "ppmDue": "MPP À ÉCHÉANCE :"
+  },
+  "cards": {
+    "title": {
+      "total": "Total",
+      "low": "Bas",
+      "items": "Articles",
+      "pending": "En attente",
+      "expiring": "En expiration",
+      "damaged": "Endommagé",
+      "overstock": "Surstock",
+      "work": "Travail",
+      "payment": "Paiement",
+      "quotation": "Devis",
+      "over": "Dépassé",
+      "almost": "Presque",
+      "due": "Dû",
+      "new": "Nouveau",
+      "open": "Ouvert",
+      "started": "Commencé",
+      "completed": "Terminé",
+      "overDue": "En retard",
+      "awaiting": "En attente",
+      "draft": "Brouillon",
+      "sent": "Envoyé",
+      "received": {
+        "partially": "Partiellement reçu",
+        "fully": "Entièrement reçu"
+      },
+      "cancelled": "Annulé",
+      "purchase": "Achat",
+      "monthly": "Mensuel",
+      "urgent": "Urgent",
+      "delayed": "Retardé",
+      "contract": "Contrat",
+      "electronics": "Électronique",
+      "furniture": "Mobilier",
+      "officeSupplies": "Fournitures de bureau",
+      "maintenance": "Entretien",
+      "safetyEquipment": "Équipement de sécurité",
+      "misc": "Divers",
+      "receivedToday": "Reçu aujourd'hui",
+      "issuedToday": "Émis aujourd'hui",
+      "pendingTransfer": "Transfert en attente",
+      "returns": "Retours",
+      "adjustments": "Ajustements",
+      "inReview": "En révision",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "convertingToPO": "Conversion en BC"
+    },
+    "subtitle": {
+      "items": "Articles",
+      "stock": "Stock",
+      "order": "Commande",
+      "delivery": "Livraison",
+      "soon": "Bientôt",
+      "return": "Retour",
+      "requests": "Demandes",
+      "orders": "Commandes",
+      "approval": "Approbation",
+      "spending": "Dépenses",
+      "budget": "Budget",
+      "deliveries": "Livraisons",
+      "renewals": "Renouvellements",
+      "request": "Demande",
+      "req": "Dem",
+      "due": "Dû",
+      "today": "Aujourd'hui"
+    }
+  },
+  "status": {
+    "new": "Nouveau",
+    "open": "Ouvert",
+    "started": "Commencé",
+    "completed": "Terminé",
+    "overDue": "En retard",
+    "awaiting": "En attente",
+    "pending": "En attente",
+    "draft": "Brouillon",
+    "sent": "Envoyé",
+    "received": {
+      "partially": "Partiellement reçu",
+      "fully": "Entièrement reçu"
+    },
+    "cancelled": "Annulé",
+    "critical": "Critique : Stock en dessous du niveau minimum ! Commandez immédiatement.",
+    "warning": "Avertissement : Stock en dessous du point de réapprovisionnement. Envisagez de réapprovisionner bientôt.",
+    "healthy": "État : Les niveaux de stock sont sains."
+  }
+}

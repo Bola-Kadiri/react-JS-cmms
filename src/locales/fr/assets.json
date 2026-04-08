@@ -1,0 +1,82 @@
+{
+  "management": "Gestion des Actifs",
+  "title": {
+    "create": "Créer un Nouvel Actif",
+    "edit": "Modifier l'Actif",
+    "details": "Détails de l'Actif"
+  },
+  "fields": {
+    "serialNumber": "Numéro de Série",
+    "category": "Catégorie",
+    "subcategory": "Sous-catégorie",
+    "type": "Type",
+    "model": "Modèle",
+    "quantity": "Quantité",
+    "unitPrice": "Prix Unitaire",
+    "status": "Statut",
+    "partNumber": "Numéro de Pièce",
+    "assetTag": "Étiquette d'Actif",
+    "location": "Emplacement",
+    "flags": "Indicateurs",
+    "purchaseDate": "Date d'Achat",
+    "warrantyEnd": "Garantie Jusqu'à",
+    "owner": "ID Propriétaire",
+    "reorderLevel": "Niveau de Réapprovisionnement",
+    "minStockLevel": "Stock Minimum",
+    "maxStockLevel": "Stock Maximum",
+    "amount": "Montant",
+    "lastUpdated": "Dernière Mise à Jour"
+  },
+  "types": {
+    "asset": "Actif",
+    "consumable": "Consommable"
+  },
+  "status": {
+    "available": "Disponible",
+    "inUse": "En Utilisation",
+    "underMaintenance": "En Maintenance",
+    "disposed": "Mis au Rebut"
+  },
+  "placeholders": {
+    "selectType": "Sélectionner le type",
+    "assetModel": "Modèle d'actif",
+    "selectCategory": "Sélectionner la catégorie",
+    "selectSubcategory": "Sélectionner la sous-catégorie",
+    "partNumber": "Numéro de pièce",
+    "assetTag": "Étiquette d'actif",
+    "serialNumber": "Numéro de série",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "reorderLevel": "Niveau de réapprovisionnement",
+    "minStockLevel": "Niveau de stock minimum",
+    "maxStockLevel": "Niveau de stock maximum",
+    "location": "Emplacement",
+    "flags": "Indicateurs",
+    "selectStatus": "Sélectionner le statut",
+    "ownerID": "ID du propriétaire",
+    "searchAssets": "Rechercher des actifs..."
+  },
+  "messages": {
+    "loading": "Chargement des actifs...",
+    "loadingDetails": "Chargement des détails de l'actif...",
+    "error": "Erreur lors du chargement des actifs",
+    "notFound": "Actif non trouvé"
+  },
+  "inventory": {
+    "status": "État Actuel de l'Inventaire",
+    "currentQuantity": "Quantité Actuelle:"
+  },
+  "tabs": {
+    "details": "Détails",
+    "inventory": "Inventaire",
+    "category": "Catégorie"
+  },
+  "actions": {
+    "addAsset": "Ajouter un Actif",
+    "editAsset": "Modifier l'Actif",
+    "viewDetails": "Voir les Détails",
+    "tryAgain": "Réessayer",
+    "backToList": "Retour à la Liste"
+  }
+}

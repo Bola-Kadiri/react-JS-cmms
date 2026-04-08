@@ -1,0 +1,1194 @@
+src/App.tsx:import { Toaster } from "@/components/ui/toaster";
+src/App.tsx:import { Toaster as Sonner } from "@/components/ui/sonner";
+src/App.tsx:import { TooltipProvider } from "@/components/ui/tooltip";
+src/App.tsx:import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+src/App.tsx:// import { BrowserRouter, Routes, Route } from "react-router-dom";
+src/App.tsx:// import Index from "./pages/Index";
+src/App.tsx:// import NotFound from "./pages/NotFound";
+src/App.tsx:// import { RouterProvider } from "react-router-dom";
+src/App.tsx:import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+src/App.tsx:// import { router } from "./routes";
+src/App.tsx:import routes from "./routes";
+src/App.tsx:import { AuthProvider } from "./contexts/AuthContext";
+src/App.tsx:import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+src/App.tsx:import { ReactNode } from 'react';
+src/App.tsx:import { createQueryClient } from './lib/queryClient';
+src/App.tsx:          <Route path="/" element={<Index />} />
+src/App.tsx:          <Route path="*" element={<NotFound />} />
+src/components/auth/LogoutButton.tsx:import { Button } from '@/components/ui/button';
+src/components/auth/LogoutButton.tsx:import { useLogout } from '@/hooks/auth/useLogout';
+src/components/auth/LogoutButton.tsx:  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+src/components/auth/LogoutButton.tsx:const LogoutButton = ({ className = '', variant = 'default' }: LogoutButtonProps) => {
+src/components/auth/LogoutButton.tsx:      {isPending ? 'Logging out...' : 'Logout'}
+src/components/auth/SignInForm.tsx:import { useState } from 'react';
+src/components/auth/SignInForm.tsx:import { Link, useLocation, useNavigate } from 'react-router-dom';
+src/components/auth/SignInForm.tsx:import { zodResolver } from '@hookform/resolvers/zod';
+src/components/auth/SignInForm.tsx:import { useForm } from 'react-hook-form';
+src/components/auth/SignInForm.tsx:import { z } from 'zod';
+src/components/auth/SignInForm.tsx:import { Button } from '@/components/ui/button';
+src/components/auth/SignInForm.tsx:import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+src/components/auth/SignInForm.tsx:import { Input } from '../ui/input';
+src/components/auth/SignInForm.tsx:import { useLogin } from '@/hooks/auth/useLogin';
+src/components/auth/SignInForm.tsx:import { Spinner } from '../Spinner';
+src/components/auth/SignInForm.tsx:  email: z.string().email({ message: 'Please, provide a valid EmailID' }),
+src/components/auth/SignInForm.tsx:  password: z.string().min(5, 'Please, provide at least 5 character(s)'),
+src/components/auth/SignInForm.tsx:      email: '',
+src/components/auth/SignInForm.tsx:      password: '',
+src/components/auth/SignInForm.tsx:  const from = (location.state as any)?.from || '/';
+src/components/auth/SignInForm.tsx:                      'Login failed. Please try again.');
+src/components/auth/SignInForm.tsx:        className="space-y-8 w-[60%] mb-8"
+src/components/auth/SignInForm.tsx:          <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded">
+src/components/auth/SignInForm.tsx:            name="email"
+src/components/auth/SignInForm.tsx:            label="Email"
+src/components/auth/SignInForm.tsx:            placeholder="Email"
+src/components/auth/SignInForm.tsx:              name="email"
+src/components/auth/SignInForm.tsx:                    <Input type="email" placeholder="john.doe@example.com" {...field} />
+src/components/auth/SignInForm.tsx:        <div className="">
+src/components/auth/SignInForm.tsx:            name="password"
+src/components/auth/SignInForm.tsx:            label="Password"
+src/components/auth/SignInForm.tsx:            placeholder="Password"
+src/components/auth/SignInForm.tsx:                name="password"
+src/components/auth/SignInForm.tsx:                      <Input type="password" placeholder="••••••••" {...field} />
+src/components/auth/SignInForm.tsx:        <Button type="submit" className="w-full">
+src/components/auth/SignInForm.tsx:          {isPending ? <Spinner text="Loading..." /> : 'Login'}
+src/components/crud/CrudForm.tsx:import React from 'react';
+src/components/crud/CrudForm.tsx:import { useForm, FieldValues, SubmitHandler, DefaultValues, Path } from 'react-hook-form';
+src/components/crud/CrudForm.tsx:import { zodResolver } from '@hookform/resolvers/zod';
+src/components/crud/CrudForm.tsx:import { z } from 'zod';
+src/components/crud/CrudForm.tsx:} from '@/components/ui/form';
+src/components/crud/CrudForm.tsx:import { Input } from '@/components/ui/input';
+src/components/crud/CrudForm.tsx:import { Button } from '@/components/ui/button';
+src/components/crud/CrudForm.tsx:} from '@/components/ui/select';
+src/components/crud/CrudForm.tsx:import { Checkbox } from '@/components/ui/checkbox';
+src/components/crud/CrudForm.tsx:import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+src/components/crud/CrudForm.tsx:import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+src/components/crud/CrudForm.tsx:import { Spinner } from '../Spinner';
+src/components/crud/CrudForm.tsx:import { Textarea } from '@/components/ui/textarea';
+src/components/crud/CrudForm.tsx:  type: 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'textarea';
+src/components/crud/CrudForm.tsx:  width?: 'full' | 'half'; // Control if field takes full width or half width
+src/components/crud/CrudForm.tsx:      if (field.type === 'checkbox') {
+src/components/crud/CrudForm.tsx:                                 defaultValues[field.name as keyof typeof defaultValues] === 'true',
+src/components/crud/CrudForm.tsx:      if (field.type === 'checkbox') {
+src/components/crud/CrudForm.tsx:  const buttonText = isEditing ? 'Update' : 'Create';
+src/components/crud/CrudForm.tsx:      <DialogContent className="sm:max-w-[800px] w-full max-h-[80vh] overflow-y-auto">
+src/components/crud/CrudForm.tsx:          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+src/components/crud/CrudForm.tsx:            <div className="grid grid-cols-2 gap-4">
+src/components/crud/CrudForm.tsx:                      className={field.width === 'full' ? 'col-span-2' : 'col-span-1'}
+src/components/crud/CrudForm.tsx:                        {field.type === 'select' && field.options ? (
+src/components/crud/CrudForm.tsx:                              <SelectValue placeholder="Select..." />
+src/components/crud/CrudForm.tsx:                        ) : field.type === 'checkbox' ? (
+src/components/crud/CrudForm.tsx:                          <div className="flex items-center h-10 space-x-2">
+src/components/crud/CrudForm.tsx:                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+src/components/crud/CrudForm.tsx:                        ) : field.type === 'radio' && field.options ? (
+src/components/crud/CrudForm.tsx:                            className="flex flex-col space-y-1"
+src/components/crud/CrudForm.tsx:                              <div key={option.value} className="flex items-center space-x-2">
+src/components/crud/CrudForm.tsx:                        ) : field.type === 'textarea' ? (
+src/components/crud/CrudForm.tsx:                            className="min-h-[100px]"
+src/components/crud/CrudForm.tsx:            <div className="flex justify-end space-x-2 pt-4">
+src/components/crud/CrudForm.tsx:                variant="outline" 
+src/components/crud/CrudForm.tsx:                type="button" 
+src/components/crud/CrudForm.tsx:                type="submit"
+src/components/crud/CrudForm.tsx:                  <Spinner text={isEditing ? 'Updating...' : 'Creating...'} />
+src/components/crud/CrudTable.tsx:import React, { useState } from 'react';
+src/components/crud/CrudTable.tsx:import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
+src/components/crud/CrudTable.tsx:} from '@/components/ui/table';
+src/components/crud/CrudTable.tsx:import { Button } from '@/components/ui/button';
+src/components/crud/CrudTable.tsx:} from '@/components/ui/dropdown-menu';
+src/components/crud/CrudTable.tsx:} from '@/components/ui/dialog';
+src/components/crud/CrudTable.tsx:} from '@/components/ui/pagination';
+src/components/crud/CrudTable.tsx:import { Spinner } from '../Spinner';
+src/components/crud/CrudTable.tsx:        console.error("Cannot delete item with undefined ID:", item);
+src/components/crud/CrudTable.tsx:      console.error("Error preparing item for deletion:", error);
+src/components/crud/CrudTable.tsx:        console.error("Error during deletion:", error);
+src/components/crud/CrudTable.tsx:      console.log("Editing item:", item);
+src/components/crud/CrudTable.tsx:      console.error("Error during edit action:", error);
+src/components/crud/CrudTable.tsx:        console.log("Viewing item:", item);
+src/components/crud/CrudTable.tsx:      console.error("Error during view action:", error);
+src/components/crud/CrudTable.tsx:      console.error("Error checking if item is being deleted:", error, id);
+src/components/crud/CrudTable.tsx:      return '';
+src/components/crud/CrudTable.tsx:    if (typeof value === 'object') {
+src/components/crud/CrudTable.tsx:        return '[Complex Object]';
+src/components/crud/CrudTable.tsx:    <div className="space-y-4">
+src/components/crud/CrudTable.tsx:      <div className="bg-white rounded-md shadow border">
+src/components/crud/CrudTable.tsx:              <TableHead className="text-right">Actions</TableHead>
+src/components/crud/CrudTable.tsx:                  className="text-center h-32"
+src/components/crud/CrudTable.tsx:                    <div className="flex justify-center items-center">
+src/components/crud/CrudTable.tsx:                      <Spinner text="Loading..." />
+src/components/crud/CrudTable.tsx:                    "No items found"
+src/components/crud/CrudTable.tsx:                  <TableCell className="text-right">
+src/components/crud/CrudTable.tsx:                        <Button variant="ghost" className="h-8 w-8 p-0">
+src/components/crud/CrudTable.tsx:                          <MoreHorizontal className="h-4 w-4" />
+src/components/crud/CrudTable.tsx:                      <DropdownMenuContent align="end">
+src/components/crud/CrudTable.tsx:                            <Eye className="mr-2 h-4 w-4" />
+src/components/crud/CrudTable.tsx:                          <Edit className="mr-2 h-4 w-4" />
+src/components/crud/CrudTable.tsx:                          className="text-red-600"
+src/components/crud/CrudTable.tsx:                          <Trash2 className="mr-2 h-4 w-4" />
+src/components/crud/CrudTable.tsx:                className={`${currentPage === 1 || isLoading ? 'pointer-events-none opacity-50' : ''}`}
+src/components/crud/CrudTable.tsx:                  className={isLoading ? "cursor-not-allowed opacity-50" : ""}
+src/components/crud/CrudTable.tsx:                className={`${currentPage === totalPages || isLoading ? 'pointer-events-none opacity-50' : ''}`}
+src/components/crud/CrudTable.tsx:              variant="outline" 
+src/components/crud/CrudTable.tsx:              variant="destructive" 
+src/components/crud/CrudTable.tsx:                <Spinner text="Deleting..." /> : 'Delete'}
+src/components/dashboard/DashboardCard.tsx:import { ReactNode } from "react";
+src/components/dashboard/DashboardCard.tsx:import { Card, CardContent } from "@/components/ui/card";
+src/components/dashboard/DashboardCard.tsx:import { cn } from "@/lib/utils";
+src/components/dashboard/DashboardCard.tsx:    <Card className={cn("overflow-hidden", className)}>
+src/components/dashboard/DashboardCard.tsx:      <CardContent className="p-6">
+src/components/dashboard/DashboardCard.tsx:        <div className="flex justify-between items-start">
+src/components/dashboard/DashboardCard.tsx:            <div className="flex flex-col gap-1">
+src/components/dashboard/DashboardCard.tsx:              <h3 className="font-semibold text-lg">{title}</h3>
+src/components/dashboard/DashboardCard.tsx:                <p className="text-sm text-muted-foreground">
+src/components/dashboard/DashboardCard.tsx:            <p className="text-3xl font-bold mt-2">{value}</p>
+src/components/dashboard/DashboardCard.tsx:          <div className="rounded-full p-2">{icon}</div>
+src/components/dashboard/Header.tsx:// import { Bell, MessageSquare, Menu } from "lucide-react";
+src/components/dashboard/Header.tsx:import { useState } from "react";
+src/components/dashboard/Header.tsx:import { Bell, MessageSquare } from "lucide-react";
+src/components/dashboard/Header.tsx:import { Button } from "@/components/ui/button";
+src/components/dashboard/Header.tsx:import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+src/components/dashboard/Header.tsx:} from "@/components/ui/dropdown-menu";
+src/components/dashboard/Header.tsx:import { Badge } from "@/components/ui/badge";
+src/components/dashboard/Header.tsx:import { SidebarTrigger } from "@/components/ui/sidebar";
+src/components/dashboard/Header.tsx:import { useNavigate } from "react-router-dom";
+src/components/dashboard/Header.tsx:import LogoutButton from "../auth/LogoutButton";
+src/components/dashboard/Header.tsx:export type ActiveTab = "WORK" | "INVENTORY" | "PROCUREMENT";
+src/components/dashboard/Header.tsx:    if (tab === "WORK") {
+src/components/dashboard/Header.tsx:      navigate("/");
+src/components/dashboard/Header.tsx:    } else if (tab === "INVENTORY") {
+src/components/dashboard/Header.tsx:      navigate("/asset/inventory");
+src/components/dashboard/Header.tsx:    } else if (tab === "PROCUREMENT") {
+src/components/dashboard/Header.tsx:      navigate("/");
+src/components/dashboard/Header.tsx:    <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-green-800 text-white px-4 shadow-md md:px-6">
+src/components/dashboard/Header.tsx:      <div className="flex items-center">
+src/components/dashboard/Header.tsx:        {/* <SidebarTrigger className="mr-4 md:hidden" />
+src/components/dashboard/Header.tsx:        <div className="hidden md:flex items-center space-x-4">
+src/components/dashboard/Header.tsx:          <Button variant="secondary" className="font-medium">
+src/components/dashboard/Header.tsx:          <Button variant="ghost" className="font-medium">
+src/components/dashboard/Header.tsx:          <Button variant="ghost" className="font-medium">
+src/components/dashboard/Header.tsx:<SidebarTrigger className="mr-4 md:hidden text-white" />
+src/components/dashboard/Header.tsx:        <div className="hidden md:flex items-center space-x-4">
+src/components/dashboard/Header.tsx:            variant={activeTab === "WORK" ? "secondary" : "ghost"} 
+src/components/dashboard/Header.tsx:            className={`font-medium ${activeTab === "WORK" ? "bg-green-700" : "hover:bg-green-700 text-green-100"}`}
+src/components/dashboard/Header.tsx:            onClick={() => handleTabChange("WORK")}
+src/components/dashboard/Header.tsx:            variant={activeTab === "INVENTORY" ? "secondary" : "ghost"} 
+src/components/dashboard/Header.tsx:            className={`font-medium ${activeTab === "INVENTORY" ? "bg-green-700" : "hover:bg-green-700 text-green-100"}`}
+src/components/dashboard/Header.tsx:            onClick={() => handleTabChange("INVENTORY")}
+src/components/dashboard/Header.tsx:            variant={activeTab === "PROCUREMENT" ? "secondary" : "ghost"} 
+src/components/dashboard/Header.tsx:            className={`font-medium ${activeTab === "PROCUREMENT" ? "bg-green-700" : "hover:bg-green-700 text-green-100"}`}
+src/components/dashboard/Header.tsx:            onClick={() => handleTabChange("PROCUREMENT")}
+src/components/dashboard/Header.tsx:      <div className="flex items-center space-x-4">
+src/components/dashboard/Header.tsx:          <Button variant="ghost" size="icon" className="relative text-white hover:bg-green-700">
+src/components/dashboard/Header.tsx:              <Bell className="h-5 w-5" />
+src/components/dashboard/Header.tsx:              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-amber-500 text-white" variant="destructive">
+src/components/dashboard/Header.tsx:          <DropdownMenuContent align="end" className="w-80">
+src/components/dashboard/Header.tsx:            <div className="max-h-96 overflow-auto">
+src/components/dashboard/Header.tsx:                <DropdownMenuItem key={item} className="flex flex-col items-start py-2">
+src/components/dashboard/Header.tsx:                  <div className="font-medium">New Work Request</div>
+src/components/dashboard/Header.tsx:                  <div className="text-sm text-muted-foreground">Request #43{item} requires your attention</div>
+src/components/dashboard/Header.tsx:            <DropdownMenuItem className="justify-center text-green-700 font-medium">
+src/components/dashboard/Header.tsx:          <Button variant="ghost" size="icon" className="relative text-white hover:bg-green-700">
+src/components/dashboard/Header.tsx:              <MessageSquare className="h-5 w-5" />
+src/components/dashboard/Header.tsx:              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-amber-500 text-white">
+src/components/dashboard/Header.tsx:          <DropdownMenuContent align="end" className="w-80">
+src/components/dashboard/Header.tsx:            <div className="max-h-96 overflow-auto">
+src/components/dashboard/Header.tsx:                <DropdownMenuItem key={item} className="flex flex-col items-start py-2">
+src/components/dashboard/Header.tsx:                  <div className="font-medium">John Smith</div>
+src/components/dashboard/Header.tsx:                  <div className="text-sm text-muted-foreground">
+src/components/dashboard/Header.tsx:            <DropdownMenuItem className="justify-center text-green-700 font-medium">
+src/components/dashboard/Header.tsx:          <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-green-700">
+src/components/dashboard/Header.tsx:              <Avatar className="h-8 w-8">
+src/components/dashboard/Header.tsx:                <AvatarImage src="/lovable-uploads/ada4d7eb-1146-4719-a391-7c3b97c32b03.png" alt="Profile" />
+src/components/dashboard/Header.tsx:              <span className="hidden md:inline-flex text-sm font-medium">
+src/components/dashboard/Header.tsx:          <DropdownMenuContent align="end">
+src/components/dashboard/InventoryContent.tsx:  } from "lucide-react";
+src/components/dashboard/InventoryContent.tsx:  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+src/components/dashboard/InventoryContent.tsx:  import DashboardCard from "@/components/dashboard/DashboardCard";
+src/components/dashboard/InventoryContent.tsx:      <div className="space-y-6">
+src/components/dashboard/InventoryContent.tsx:        {/* <h1 className="text-2xl font-bold tracking-tight">Inventory Dashboard</h1> */}
+src/components/dashboard/InventoryContent.tsx:        <div className="grid gap-6">
+src/components/dashboard/InventoryContent.tsx:            <h2 className="text-lg font-semibold mb-4">INVENTORY OVERVIEW:</h2>
+src/components/dashboard/InventoryContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/InventoryContent.tsx:                title="Total"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Items"
+src/components/dashboard/InventoryContent.tsx:                value="1,245"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-blue-50"
+src/components/dashboard/InventoryContent.tsx:                title="Low"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Stock"
+src/components/dashboard/InventoryContent.tsx:                value="28"
+src/components/dashboard/InventoryContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-red-50"
+src/components/dashboard/InventoryContent.tsx:                title="Items on"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Order"
+src/components/dashboard/InventoryContent.tsx:                value="124"
+src/components/dashboard/InventoryContent.tsx:                icon={<ShoppingCart className="h-8 w-8 text-green-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-green-50"
+src/components/dashboard/InventoryContent.tsx:                title="Pending"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Delivery"
+src/components/dashboard/InventoryContent.tsx:                value="56"
+src/components/dashboard/InventoryContent.tsx:                icon={<Truck className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-purple-50"
+src/components/dashboard/InventoryContent.tsx:            <h2 className="text-lg font-semibold mb-4">INVENTORY ALERTS:</h2>
+src/components/dashboard/InventoryContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/InventoryContent.tsx:                title="Expiring"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Soon"
+src/components/dashboard/InventoryContent.tsx:                value="32"
+src/components/dashboard/InventoryContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-amber-50"
+src/components/dashboard/InventoryContent.tsx:                title="Damaged"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Items"
+src/components/dashboard/InventoryContent.tsx:                value="8"
+src/components/dashboard/InventoryContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-red-50"
+src/components/dashboard/InventoryContent.tsx:                title="Overstock"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Items"
+src/components/dashboard/InventoryContent.tsx:                value="17"
+src/components/dashboard/InventoryContent.tsx:                icon={<BarChart className="h-8 w-8 text-indigo-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-indigo-50"
+src/components/dashboard/InventoryContent.tsx:                title="Pending"
+src/components/dashboard/InventoryContent.tsx:                subtitle="Return"
+src/components/dashboard/InventoryContent.tsx:                value="12"
+src/components/dashboard/InventoryContent.tsx:                icon={<Truck className="h-8 w-8 text-orange-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-orange-50"
+src/components/dashboard/InventoryContent.tsx:        <Tabs defaultValue="stockLevel" className="space-y-4">
+src/components/dashboard/InventoryContent.tsx:            <TabsTrigger value="stockLevel">STOCK LEVELS</TabsTrigger>
+src/components/dashboard/InventoryContent.tsx:            <TabsTrigger value="transactions">TRANSACTIONS</TabsTrigger>
+src/components/dashboard/InventoryContent.tsx:          <TabsContent value="stockLevel" className="space-y-4">
+src/components/dashboard/InventoryContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/InventoryContent.tsx:                title="Electronics"
+src/components/dashboard/InventoryContent.tsx:                value="245"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Furniture"
+src/components/dashboard/InventoryContent.tsx:                value="189"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-green-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Office Supplies"
+src/components/dashboard/InventoryContent.tsx:                value="367"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Maintenance"
+src/components/dashboard/InventoryContent.tsx:                value="213"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Safety Equipment"
+src/components/dashboard/InventoryContent.tsx:                value="98"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-red-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Misc"
+src/components/dashboard/InventoryContent.tsx:                value="133"
+src/components/dashboard/InventoryContent.tsx:                icon={<Package className="h-8 w-8 text-indigo-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:          <TabsContent value="transactions" className="space-y-4">
+src/components/dashboard/InventoryContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/InventoryContent.tsx:                title="Received Today"
+src/components/dashboard/InventoryContent.tsx:                value="12"
+src/components/dashboard/InventoryContent.tsx:                icon={<Truck className="h-8 w-8 text-green-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Issued Today"
+src/components/dashboard/InventoryContent.tsx:                value="28"
+src/components/dashboard/InventoryContent.tsx:                icon={<ShoppingCart className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Pending Transfer"
+src/components/dashboard/InventoryContent.tsx:                value="7"
+src/components/dashboard/InventoryContent.tsx:                icon={<Truck className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Returns"
+src/components/dashboard/InventoryContent.tsx:                value="4"
+src/components/dashboard/InventoryContent.tsx:                icon={<Truck className="h-8 w-8 text-red-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/InventoryContent.tsx:                title="Adjustments"
+src/components/dashboard/InventoryContent.tsx:                value="9"
+src/components/dashboard/InventoryContent.tsx:                icon={<BarChart className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/InventoryContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:  } from "lucide-react";
+src/components/dashboard/ProcurementContent.tsx:  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+src/components/dashboard/ProcurementContent.tsx:  import DashboardCard from "@/components/dashboard/DashboardCard";
+src/components/dashboard/ProcurementContent.tsx:      <div className="space-y-6">
+src/components/dashboard/ProcurementContent.tsx:        {/* <h1 className="text-2xl font-bold tracking-tight">Procurement Dashboard</h1> */}
+src/components/dashboard/ProcurementContent.tsx:        <div className="grid gap-6">
+src/components/dashboard/ProcurementContent.tsx:            <h2 className="text-lg font-semibold mb-4">PROCUREMENT OVERVIEW:</h2>
+src/components/dashboard/ProcurementContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/ProcurementContent.tsx:                title="Purchase"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Requests"
+src/components/dashboard/ProcurementContent.tsx:                value="56"
+src/components/dashboard/ProcurementContent.tsx:                icon={<ShoppingCart className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-blue-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Purchase"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Orders"
+src/components/dashboard/ProcurementContent.tsx:                value="42"
+src/components/dashboard/ProcurementContent.tsx:                icon={<FileText className="h-8 w-8 text-green-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-green-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Pending"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Approval"
+src/components/dashboard/ProcurementContent.tsx:                value="18"
+src/components/dashboard/ProcurementContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-amber-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Monthly"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Spending"
+src/components/dashboard/ProcurementContent.tsx:                value="$45.2K"
+src/components/dashboard/ProcurementContent.tsx:                icon={<DollarSign className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-purple-50"
+src/components/dashboard/ProcurementContent.tsx:            <h2 className="text-lg font-semibold mb-4">PROCUREMENT ALERTS:</h2>
+src/components/dashboard/ProcurementContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/ProcurementContent.tsx:                title="Over"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Budget"
+src/components/dashboard/ProcurementContent.tsx:                value="7"
+src/components/dashboard/ProcurementContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-red-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Urgent"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Requests"
+src/components/dashboard/ProcurementContent.tsx:                value="9"
+src/components/dashboard/ProcurementContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-red-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Delayed"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Deliveries"
+src/components/dashboard/ProcurementContent.tsx:                value="12"
+src/components/dashboard/ProcurementContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-amber-50"
+src/components/dashboard/ProcurementContent.tsx:                title="Contract"
+src/components/dashboard/ProcurementContent.tsx:                subtitle="Renewals"
+src/components/dashboard/ProcurementContent.tsx:                value="5"
+src/components/dashboard/ProcurementContent.tsx:                icon={<FileText className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-blue-50"
+src/components/dashboard/ProcurementContent.tsx:        <Tabs defaultValue="purchaseRequests" className="space-y-4">
+src/components/dashboard/ProcurementContent.tsx:            <TabsTrigger value="purchaseRequests">PURCHASE REQUESTS</TabsTrigger>
+src/components/dashboard/ProcurementContent.tsx:            <TabsTrigger value="purchaseOrders">PURCHASE ORDERS</TabsTrigger>
+src/components/dashboard/ProcurementContent.tsx:          <TabsContent value="purchaseRequests" className="space-y-4">
+src/components/dashboard/ProcurementContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/ProcurementContent.tsx:                title="New"
+src/components/dashboard/ProcurementContent.tsx:                value="23"
+src/components/dashboard/ProcurementContent.tsx:                icon={<FileText className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="In Review"
+src/components/dashboard/ProcurementContent.tsx:                value="15"
+src/components/dashboard/ProcurementContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Approved"
+src/components/dashboard/ProcurementContent.tsx:                value="12"
+src/components/dashboard/ProcurementContent.tsx:                icon={<CheckCircle className="h-8 w-8 text-green-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Rejected"
+src/components/dashboard/ProcurementContent.tsx:                value="6"
+src/components/dashboard/ProcurementContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Converting to PO"
+src/components/dashboard/ProcurementContent.tsx:                value="8"
+src/components/dashboard/ProcurementContent.tsx:                icon={<FileText className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:          <TabsContent value="purchaseOrders" className="space-y-4">
+src/components/dashboard/ProcurementContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/ProcurementContent.tsx:                title="Draft"
+src/components/dashboard/ProcurementContent.tsx:                value="14"
+src/components/dashboard/ProcurementContent.tsx:                icon={<FileText className="h-8 w-8 text-gray-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Sent"
+src/components/dashboard/ProcurementContent.tsx:                value="18"
+src/components/dashboard/ProcurementContent.tsx:                icon={<CheckCircle className="h-8 w-8 text-green-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Partially Received"
+src/components/dashboard/ProcurementContent.tsx:                value="7"
+src/components/dashboard/ProcurementContent.tsx:                icon={<ShoppingCart className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Fully Received"
+src/components/dashboard/ProcurementContent.tsx:                value="10"
+src/components/dashboard/ProcurementContent.tsx:                icon={<CheckCircle className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/ProcurementContent.tsx:                title="Cancelled"
+src/components/dashboard/ProcurementContent.tsx:                value="3"
+src/components/dashboard/ProcurementContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/ProcurementContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/Sidebar.tsx:import { useState } from "react";
+src/components/dashboard/Sidebar.tsx:import { Link, useLocation } from "react-router-dom";
+src/components/dashboard/Sidebar.tsx:} from "lucide-react";
+src/components/dashboard/Sidebar.tsx:import { cn } from "@/lib/utils";
+src/components/dashboard/Sidebar.tsx:} from "@/components/ui/sidebar";
+src/components/dashboard/Sidebar.tsx:    work: location.pathname.includes('/work'),
+src/components/dashboard/Sidebar.tsx:    asset: location.pathname.includes('/asset'),
+src/components/dashboard/Sidebar.tsx:    procurement: location.pathname.includes('/procurement'),
+src/components/dashboard/Sidebar.tsx:    facility: location.pathname.includes('/facility'),
+src/components/dashboard/Sidebar.tsx:    reports: location.pathname.includes('/reports'),
+src/components/dashboard/Sidebar.tsx:    accounts: location.pathname.includes('/accounts'),
+src/components/dashboard/Sidebar.tsx:    <SidebarComponent className="bg-emerald-800 text-white border-r-0">
+src/components/dashboard/Sidebar.tsx:      <SidebarHeader className="pt-4 pb-2 mb-8">
+src/components/dashboard/Sidebar.tsx:        <Link to="/" className="flex items-center gap-2 px-2">
+src/components/dashboard/Sidebar.tsx:          <div className="flex items-center justify-center w-8 h-8 bg-white rounded-md">
+src/components/dashboard/Sidebar.tsx:            <span className="text-emerald-800 font-bold text-lg">A</span>
+src/components/dashboard/Sidebar.tsx:          <span className="text-xl font-bold">Alpha CMMS</span>
+src/components/dashboard/Sidebar.tsx:              isActive={isActive('/')} 
+src/components/dashboard/Sidebar.tsx:              tooltip="Dashboard"
+src/components/dashboard/Sidebar.tsx:              <Link to="/">
+src/components/dashboard/Sidebar.tsx:                <LayoutDashboard className="mr-2" />
+src/components/dashboard/Sidebar.tsx:              isActive={isActive('/calendar')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Work Calendar"
+src/components/dashboard/Sidebar.tsx:              <Link to="/calendar">
+src/components/dashboard/Sidebar.tsx:              <Calendar className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/work')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Work"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('work')}
+src/components/dashboard/Sidebar.tsx:              <Briefcase className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/calendar')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/calendar">
+src/components/dashboard/Sidebar.tsx:                      <Calendar className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/requests')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/requests">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/orders')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/orders">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/payment-comments')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/payment-comments">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/payment-items')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/payment-items">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/payment-requisitions')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/payment-requisitions">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/work/ppms')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/work/ppms">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/asset')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Asset & Inventory"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('asset')}
+src/components/dashboard/Sidebar.tsx:              <Package className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/warehouses')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/warehouses">
+src/components/dashboard/Sidebar.tsx:                      <Database className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/assets')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/assets">
+src/components/dashboard/Sidebar.tsx:                      <Database className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/inventories')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/inventories">
+src/components/dashboard/Sidebar.tsx:                      <Database className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/items')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/items">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/request')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/request">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/transfers')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/transfers">
+src/components/dashboard/Sidebar.tsx:                      <ArrowRightLeft className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/asset/movement')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/asset/movement">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/procurement')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Procurement"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('procurement')}
+src/components/dashboard/Sidebar.tsx:              <BookOpen className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/procurement/purchase-order')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/procurement/purchase-order">
+src/components/dashboard/Sidebar.tsx:                    <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/procurement/po-requisition')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/procurement/po-requisition">
+src/components/dashboard/Sidebar.tsx:                    <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/procurement/request-quotation')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/procurement/request-quotation">
+src/components/dashboard/Sidebar.tsx:                    <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/procurement/goods-received-note')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/procurement/goods-received-note">
+src/components/dashboard/Sidebar.tsx:                    <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/facility')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Facility"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('facility')}
+src/components/dashboard/Sidebar.tsx:              <Briefcase className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/list')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/list">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/stores')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/stores">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/buildings')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/buildings">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/landlords')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/landlords">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/apartment-type')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/apartment-type">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/facility/apartments')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/facility/apartments">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/reports')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Reports"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('reports')}
+src/components/dashboard/Sidebar.tsx:              <BarChart2 className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/reports/schedule')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/reports/schedule">
+src/components/dashboard/Sidebar.tsx:                    <Users className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/reports/user-facility')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/reports/user-facility">
+src/components/dashboard/Sidebar.tsx:                      <Database className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/reports/user-audit')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/reports/user-audit">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/reports/usage')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/reports/usage">
+src/components/dashboard/Sidebar.tsx:                      <ArrowRightLeft className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:              isActive={isMenuActive('/accounts')}
+src/components/dashboard/Sidebar.tsx:              tooltip="Reference"
+src/components/dashboard/Sidebar.tsx:              onClick={() => toggleMenu('accounts')}
+src/components/dashboard/Sidebar.tsx:              <BookOpen className="mr-2" />
+src/components/dashboard/Sidebar.tsx:                <ChevronDown className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                <ChevronRight className="ml-auto h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/users')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/users">
+src/components/dashboard/Sidebar.tsx:                    <Users className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/personnels')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/personnels">
+src/components/dashboard/Sidebar.tsx:                      <Database className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/vendors')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/vendors">
+src/components/dashboard/Sidebar.tsx:                      <FileText className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/client')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/client">
+src/components/dashboard/Sidebar.tsx:                      <ArrowRightLeft className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/categories')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/categories">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/subcategories')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/subcategories">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/departments')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/departments">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/bank-accounts')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/bank-accounts">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/Sidebar.tsx:                    isActive={isActive('/accounts/unit-measurements')}
+src/components/dashboard/Sidebar.tsx:                    <Link to="/accounts/unit-measurements">
+src/components/dashboard/Sidebar.tsx:                      <History className="mr-2 h-4 w-4" />
+src/components/dashboard/WorkContent.tsx:  } from "lucide-react";
+src/components/dashboard/WorkContent.tsx:  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+src/components/dashboard/WorkContent.tsx:  import DashboardCard from "@/components/dashboard/DashboardCard";
+src/components/dashboard/WorkContent.tsx:      <div className="space-y-6">
+src/components/dashboard/WorkContent.tsx:        {/* <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1> */}
+src/components/dashboard/WorkContent.tsx:        <div className="grid gap-6">
+src/components/dashboard/WorkContent.tsx:            <h2 className="text-lg font-semibold mb-4">ESCALATED TO ME:</h2>
+src/components/dashboard/WorkContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/WorkContent.tsx:                title="Work"
+src/components/dashboard/WorkContent.tsx:                subtitle="Request"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<Mail className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-blue-50"
+src/components/dashboard/WorkContent.tsx:                title="Work"
+src/components/dashboard/WorkContent.tsx:                subtitle="Order"
+src/components/dashboard/WorkContent.tsx:                value="64"
+src/components/dashboard/WorkContent.tsx:                icon={<Mail className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-blue-50"
+src/components/dashboard/WorkContent.tsx:                title="Payment"
+src/components/dashboard/WorkContent.tsx:                subtitle="Req"
+src/components/dashboard/WorkContent.tsx:                value="24"
+src/components/dashboard/WorkContent.tsx:                icon={<DollarSign className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-purple-50"
+src/components/dashboard/WorkContent.tsx:                title="Quotation"
+src/components/dashboard/WorkContent.tsx:                subtitle="Req"
+src/components/dashboard/WorkContent.tsx:                value="18"
+src/components/dashboard/WorkContent.tsx:                icon={<DollarSign className="h-8 w-8 text-purple-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-purple-50"
+src/components/dashboard/WorkContent.tsx:            <h2 className="text-lg font-semibold mb-4">PPM DUE:</h2>
+src/components/dashboard/WorkContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+src/components/dashboard/WorkContent.tsx:                title="Over"
+src/components/dashboard/WorkContent.tsx:                subtitle="Due"
+src/components/dashboard/WorkContent.tsx:                value="14"
+src/components/dashboard/WorkContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-red-50"
+src/components/dashboard/WorkContent.tsx:                title="Almost"
+src/components/dashboard/WorkContent.tsx:                subtitle="Due"
+src/components/dashboard/WorkContent.tsx:                value="15"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-amber-50"
+src/components/dashboard/WorkContent.tsx:                title="Due"
+src/components/dashboard/WorkContent.tsx:                subtitle="Today"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-amber-50"
+src/components/dashboard/WorkContent.tsx:                title="Pending"
+src/components/dashboard/WorkContent.tsx:                subtitle="Approval"
+src/components/dashboard/WorkContent.tsx:                value="22"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-amber-50"
+src/components/dashboard/WorkContent.tsx:        <Tabs defaultValue="workRequest" className="space-y-4">
+src/components/dashboard/WorkContent.tsx:            <TabsTrigger value="workRequest">WORK REQUEST</TabsTrigger>
+src/components/dashboard/WorkContent.tsx:            <TabsTrigger value="workOrder">WORK ORDER</TabsTrigger>
+src/components/dashboard/WorkContent.tsx:          <TabsContent value="workRequest" className="space-y-4">
+src/components/dashboard/WorkContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/WorkContent.tsx:                title="New"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<FilePlus className="h-8 w-8 text-green-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Open"
+src/components/dashboard/WorkContent.tsx:                value="64"
+src/components/dashboard/WorkContent.tsx:                icon={<FolderOpen className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Quotation"
+src/components/dashboard/WorkContent.tsx:                value="44"
+src/components/dashboard/WorkContent.tsx:                icon={<DollarSign className="h-8 w-8 text-green-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Awaiting"
+src/components/dashboard/WorkContent.tsx:                value="4"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Completed"
+src/components/dashboard/WorkContent.tsx:                value="32"
+src/components/dashboard/WorkContent.tsx:                icon={<CheckCircle className="h-8 w-8 text-green-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:          <TabsContent value="workOrder" className="space-y-4">
+src/components/dashboard/WorkContent.tsx:            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+src/components/dashboard/WorkContent.tsx:                title="New"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<FilePlus className="h-8 w-8 text-green-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Open"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<FolderOpen className="h-8 w-8 text-blue-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Started"
+src/components/dashboard/WorkContent.tsx:                value="15"
+src/components/dashboard/WorkContent.tsx:                icon={<Play className="h-8 w-8 text-green-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Over-Due"
+src/components/dashboard/WorkContent.tsx:                value="15"
+src/components/dashboard/WorkContent.tsx:                icon={<AlertCircle className="h-8 w-8 text-red-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Awaiting"
+src/components/dashboard/WorkContent.tsx:                value="45"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/dashboard/WorkContent.tsx:                title="Pending"
+src/components/dashboard/WorkContent.tsx:                value="53"
+src/components/dashboard/WorkContent.tsx:                icon={<Clock className="h-8 w-8 text-amber-500" />}
+src/components/dashboard/WorkContent.tsx:                className="bg-white shadow-sm"
+src/components/Pagination.tsx:import React from 'react';
+src/components/Pagination.tsx:import { Button } from '@/components/ui/button';
+src/components/Pagination.tsx:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+src/components/Pagination.tsx:import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
+src/components/Pagination.tsx:        pages.push('...');
+src/components/Pagination.tsx:        pages.push('...');
+src/components/Pagination.tsx:    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+src/components/Pagination.tsx:      <div className="text-sm text-muted-foreground">
+src/components/Pagination.tsx:      <div className="flex items-center space-x-4">
+src/components/Pagination.tsx:        <div className="flex items-center space-x-2">
+src/components/Pagination.tsx:          <span className="text-sm text-muted-foreground">Rows per page</span>
+src/components/Pagination.tsx:            <SelectTrigger className="h-8 w-[70px]">
+src/components/Pagination.tsx:        <div className="flex items-center space-x-1">
+src/components/Pagination.tsx:            variant="outline"
+src/components/Pagination.tsx:            size="icon"
+src/components/Pagination.tsx:            className="h-8 w-8"
+src/components/Pagination.tsx:            <ChevronsLeft className="h-4 w-4" />
+src/components/Pagination.tsx:            variant="outline"
+src/components/Pagination.tsx:            size="icon"
+src/components/Pagination.tsx:            className="h-8 w-8"
+src/components/Pagination.tsx:            <ChevronLeft className="h-4 w-4" />
+src/components/Pagination.tsx:              {page === '...' ? (
+src/components/Pagination.tsx:                <span className="px-2">...</span>
+src/components/Pagination.tsx:                  variant={currentPage === page ? "default" : "outline"}
+src/components/Pagination.tsx:                  size="icon"
+src/components/Pagination.tsx:                  onClick={() => typeof page === 'number' && onPageChange(page)}
+src/components/Pagination.tsx:                  className="h-8 w-8"
+src/components/Pagination.tsx:            variant="outline"
+src/components/Pagination.tsx:            size="icon"
+src/components/Pagination.tsx:            className="h-8 w-8"
+src/components/Pagination.tsx:            <ChevronRight className="h-4 w-4" />
+src/components/Pagination.tsx:            variant="outline"
+src/components/Pagination.tsx:            size="icon"
+src/components/Pagination.tsx:            className="h-8 w-8"
+src/components/Pagination.tsx:            <ChevronsRight className="h-4 w-4" />
+src/components/ProtectedRoute.tsx:import { Navigate, Outlet, useLocation } from 'react-router-dom';
+src/components/ProtectedRoute.tsx:import { useAuth } from '../contexts/AuthContext';
+src/components/ProtectedRoute.tsx:import { useEffect, useState } from 'react';
+src/components/ProtectedRoute.tsx:import { tokenManager } from '../services/apiClient';
+src/components/ProtectedRoute.tsx:    console.log('[ProtectedRoute] Initial check:', { 
+src/components/ProtectedRoute.tsx:    console.log('[ProtectedRoute] Loading state:', { isLoading, checkingTokens });
+src/components/ProtectedRoute.tsx:      <div className="flex justify-center items-center h-screen">
+src/components/ProtectedRoute.tsx:        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+src/components/ProtectedRoute.tsx:  console.log('[ProtectedRoute] Auth decision:', { 
+src/components/ProtectedRoute.tsx:    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+src/components/SearchFilter.tsx:import { useState, useEffect, useRef } from 'react';
+src/components/SearchFilter.tsx:import { Input } from '@/components/ui/input';
+src/components/SearchFilter.tsx:import { Button } from '@/components/ui/button';
+src/components/SearchFilter.tsx:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+src/components/SearchFilter.tsx:import { Search, X } from 'lucide-react';
+src/components/SearchFilter.tsx:import { useDebounce } from '@/hooks/useDebounce';
+src/components/SearchFilter.tsx:  placeholder = 'Search...',
+src/components/SearchFilter.tsx:  initialSearchValue = '',
+src/components/SearchFilter.tsx:    setSearchValue('');
+src/components/SearchFilter.tsx:    <div className="flex flex-col md:flex-row gap-2 w-full">
+src/components/SearchFilter.tsx:      <div className="relative flex-1">
+src/components/SearchFilter.tsx:          className="pl-9 pr-9"
+src/components/SearchFilter.tsx:        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+src/components/SearchFilter.tsx:            variant="ghost"
+src/components/SearchFilter.tsx:            size="icon"
+src/components/SearchFilter.tsx:            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 text-gray-400 hover:text-gray-600"
+src/components/SearchFilter.tsx:            <X className="h-4 w-4" />
+src/components/SearchFilter.tsx:        <div key={filter.key} className="flex-none md:w-48">
+src/components/SearchFilter.tsx:                const apiValue = value === "_all" || value === "_empty" ? "" : value;
+src/components/SearchFilter.tsx:            defaultValue="_all"
+src/components/SearchFilter.tsx:              <SelectItem value="_all">All {filter.label}</SelectItem>
+src/components/SearchFilter.tsx:                <SelectItem key={option.value} value={option.value || "_empty"}>
+src/components/Spinner.tsx:import { Loader2 } from "lucide-react";
+src/components/Spinner.tsx:import { cn } from "@/lib/utils";
+src/components/Spinner.tsx:  size?: "small" | "medium" | "large";
+src/components/Spinner.tsx:export const Spinner = ({ className, size = "medium", text }: SpinnerProps) => {
+src/components/Spinner.tsx:    small: "h-4 w-4",
+src/components/Spinner.tsx:    medium: "h-6 w-6",
+src/components/Spinner.tsx:    large: "h-10 w-10",
+src/components/Spinner.tsx:    <div className="flex justify-center items-center gap-1">
+src/components/Spinner.tsx:        "animate-spin text-[#fff]",
+src/contexts/AuthContext-2.tsx:import React, { createContext, useContext, useEffect, useState } from 'react';
+src/contexts/AuthContext-2.tsx:import { useNavigate } from 'react-router-dom';
+src/contexts/AuthContext-2.tsx:import { useQuery, useQueryClient } from '@tanstack/react-query';
+src/contexts/AuthContext-2.tsx:import { api, tokenManager } from '../services/apiClient'
+src/contexts/AuthContext-2.tsx:  const cachedAuthData = queryClient.getQueryData<{isAuthenticated: boolean, user: User | null}>(['auth']);
+src/contexts/AuthContext-2.tsx:    queryKey: ['auth'],
+src/contexts/AuthContext-2.tsx:        const { data } = await api.post('auth/token/verify/', {
+src/contexts/AuthContext-2.tsx:          user: data.user || { id: 'authenticated', email: 'authenticated' } // Fallback if user data not returned
+src/contexts/AuthContext-2.tsx:        if (!['/login', '/register', '/forgot-password'].includes(currentPath)) {
+src/contexts/AuthContext-2.tsx:          navigate('/login');
+src/contexts/AuthContext.tsx:import React, { createContext, useContext, useEffect } from 'react';
+src/contexts/AuthContext.tsx:import { useNavigate } from 'react-router-dom';
+src/contexts/AuthContext.tsx:import { useQuery, useQueryClient } from '@tanstack/react-query';
+src/contexts/AuthContext.tsx:import { api, tokenManager } from '../services/apiClient';
+src/contexts/AuthContext.tsx:  const cachedAuthState = queryClient.getQueryData<AuthState>(['auth']);
+src/contexts/AuthContext.tsx:    queryKey: ['auth'],
+src/contexts/AuthContext.tsx:          await api.post('auth/token/verify/', {
+src/contexts/AuthContext.tsx:            const { data } = await api.post('auth/token/refresh/', {
+src/contexts/AuthContext.tsx:        const { data } = await api.post('auth/token/verify/', {
+src/contexts/AuthContext.tsx:          user: data.user || { id: 'authenticated', email: 'authenticated' },
+src/contexts/AuthContext.tsx:          const { data } = await api.post('auth/token/refresh/', {
+src/contexts/AuthContext.tsx:            user: data.user || { id: 'authenticated', email: 'authenticated' },
+src/contexts/AuthContext.tsx:      user: userData || { id: 'authenticated', email: 'authenticated' },
+src/contexts/AuthContext.tsx:    queryClient.setQueryData(['auth'], newAuthState);
+src/contexts/AuthContext.tsx:    queryClient.setQueryData(['auth'], { isAuthenticated: false, user: null });
+src/contexts/AuthContext.tsx:    queryClient.invalidateQueries({queryKey: ['auth']});
+src/contexts/AuthContext.tsx:    navigate('/login');
+src/contexts/AuthContext.tsx:      console.error('Auth error:', authError);
+src/contexts/AuthContext.tsx:        if (!['/login', '/register', '/forgot-password'].includes(currentPath)) {
+src/contexts/AuthContext.tsx:          navigate('/login');
+src/contexts/AuthContext.tsx:    console.log('[AuthContext] Auth state:', {
+src/contexts/ToastContext.tsx:import React, { createContext, useContext, ReactNode } from 'react';
+src/contexts/ToastContext.tsx:} from "@/components/ui/toast";
+src/contexts/ToastContext.tsx:import { useToast } from "@/components/ui/use-toast";
+src/contexts/ToastContext.tsx:// export { useToast } from "@/components/ui/use-toast";
+src/contexts/ToastContext.tsx:  const showSuccess = (message: string, title = 'Success') => {
+src/contexts/ToastContext.tsx:      variant: 'default',
+src/contexts/ToastContext.tsx:      className: 'bg-green-50 border-green-200 text-green-800',
+src/contexts/ToastContext.tsx:  const showError = (message: string, title = 'Error') => {
+src/contexts/ToastContext.tsx:      variant: 'destructive',
+src/contexts/ToastContext.tsx:  const showInfo = (message: string, title = 'Information') => {
+src/contexts/ToastContext.tsx:      variant: 'default',
+src/contexts/ToastContext.tsx:      className: 'bg-blue-50 border-blue-200 text-blue-800',
+src/contexts/ToastContext.tsx:  const showWarning = (message: string, title = 'Warning') => {
+src/contexts/ToastContext.tsx:      variant: 'default',
+src/contexts/ToastContext.tsx:      className: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+src/features/asset/asset/AssetDetailView.tsx:import { useParams, useNavigate } from 'react-router-dom';
+src/features/asset/asset/AssetDetailView.tsx:import { format, parseISO } from 'date-fns';
+src/features/asset/asset/AssetDetailView.tsx:import { Button } from '@/components/ui/button';
+src/features/asset/asset/AssetDetailView.tsx:import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+src/features/asset/asset/AssetDetailView.tsx:import { Separator } from '@/components/ui/separator';
+src/features/asset/asset/AssetDetailView.tsx:import { Badge } from '@/components/ui/badge';
+src/features/asset/asset/AssetDetailView.tsx:import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+src/features/asset/asset/AssetDetailView.tsx:} from 'lucide-react';
+src/features/asset/asset/AssetDetailView.tsx:import { useAssetQuery } from '@/hooks/asset/useAssetQueries';
+src/features/asset/asset/AssetDetailView.tsx:import { useToast } from '@/components/ui/use-toast';
+src/features/asset/asset/AssetDetailView.tsx:    navigate('/asset/assets');
+src/features/asset/asset/AssetDetailView.tsx:      case 'active':
+src/features/asset/asset/AssetDetailView.tsx:        return 'bg-green-100 text-green-800 hover:bg-green-100';
+src/features/asset/asset/AssetDetailView.tsx:      case 'inactive':
+src/features/asset/asset/AssetDetailView.tsx:        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+src/features/asset/asset/AssetDetailView.tsx:      case 'disposed':
+src/features/asset/asset/AssetDetailView.tsx:        return 'bg-red-100 text-red-800 hover:bg-red-100';
+src/features/asset/asset/AssetDetailView.tsx:      case 'maintenance':
+src/features/asset/asset/AssetDetailView.tsx:        return 'bg-amber-100 text-amber-800 hover:bg-amber-100';
+src/features/asset/asset/AssetDetailView.tsx:        return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
+src/features/asset/asset/AssetDetailView.tsx:    if (!dateString) return 'Not set';
+src/features/asset/asset/AssetDetailView.tsx:      return format(parseISO(dateString), 'PPP'); // Format: 'April 29, 2025'
+src/features/asset/asset/AssetDetailView.tsx:    if (!amount) return '₦0.00';
+src/features/asset/asset/AssetDetailView.tsx:    return new Intl.NumberFormat('en-NG', {
+src/features/asset/asset/AssetDetailView.tsx:      style: 'currency',
+src/features/asset/asset/AssetDetailView.tsx:      currency: 'NGN',
+src/features/asset/asset/AssetDetailView.tsx:      <div className="flex justify-center items-center h-64">
+src/features/asset/asset/AssetDetailView.tsx:        <div className="flex flex-col items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+src/features/asset/asset/AssetDetailView.tsx:          <p className="text-sm text-muted-foreground">Loading asset details...</p>
+src/features/asset/asset/AssetDetailView.tsx:      <div className="flex flex-col items-center justify-center h-64 gap-4">
+src/features/asset/asset/AssetDetailView.tsx:        <div className="text-red-500 text-xl">Error loading asset details</div>
+src/features/asset/asset/AssetDetailView.tsx:        <p className="text-sm text-muted-foreground mb-4">
+src/features/asset/asset/AssetDetailView.tsx:          {error instanceof Error ? error.message : 'An unknown error occurred'}
+src/features/asset/asset/AssetDetailView.tsx:        <Button onClick={handleBack} variant="outline">
+src/features/asset/asset/AssetDetailView.tsx:      <div className="flex flex-col items-center justify-center h-64 gap-4">
+src/features/asset/asset/AssetDetailView.tsx:        <div className="text-red-500 text-xl">Asset not found</div>
+src/features/asset/asset/AssetDetailView.tsx:        <Button onClick={handleBack} variant="outline">
+src/features/asset/asset/AssetDetailView.tsx:    <div className="container mx-auto py-6">
+src/features/asset/asset/AssetDetailView.tsx:      <div className="flex items-center justify-between mb-6">
+src/features/asset/asset/AssetDetailView.tsx:        <div className="flex items-center gap-4">
+src/features/asset/asset/AssetDetailView.tsx:            variant="outline" 
+src/features/asset/asset/AssetDetailView.tsx:            size="icon" 
+src/features/asset/asset/AssetDetailView.tsx:            <ArrowLeft className="h-4 w-4" />
+src/features/asset/asset/AssetDetailView.tsx:            <h1 className="text-2xl font-bold flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:              {/* <Package className="h-5 w-5 text-primary" />  */}
+src/features/asset/asset/AssetDetailView.tsx:            {/* <p className="text-sm text-muted-foreground">
+src/features/asset/asset/AssetDetailView.tsx:        <div className="flex gap-3">
+src/features/asset/asset/AssetDetailView.tsx:            <Edit className="mr-2 h-4 w-4" /> Edit Asset
+src/features/asset/asset/AssetDetailView.tsx:      <Tabs defaultValue="details" className="w-full">
+src/features/asset/asset/AssetDetailView.tsx:        <TabsList className="mb-4">
+src/features/asset/asset/AssetDetailView.tsx:          <TabsTrigger value="details">Details</TabsTrigger>
+src/features/asset/asset/AssetDetailView.tsx:          <TabsTrigger value="inventory">Inventory</TabsTrigger>
+src/features/asset/asset/AssetDetailView.tsx:          <TabsTrigger value="category">Category</TabsTrigger>
+src/features/asset/asset/AssetDetailView.tsx:        <TabsContent value="details" className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+src/features/asset/asset/AssetDetailView.tsx:            <Card className="lg:col-span-2">
+src/features/asset/asset/AssetDetailView.tsx:                <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                  <Tag className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Type</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base font-medium">{asset.type}</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Model</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base">{asset.model}</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">
+src/features/asset/asset/AssetDetailView.tsx:                        <span className="flex items-center gap-1">
+src/features/asset/asset/AssetDetailView.tsx:                          <Hash className="h-3.5 w-3.5" /> Part Number
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base">{asset.part_no}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Asset Tag</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base">{asset.asset_tag}</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Serial Number</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base">{asset.serial_number}</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">
+src/features/asset/asset/AssetDetailView.tsx:                        <span className="flex items-center gap-1">
+src/features/asset/asset/AssetDetailView.tsx:                          <MapPin className="h-3.5 w-3.5" /> Location
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base">{asset.location || 'Not specified'}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="mt-4">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+src/features/asset/asset/AssetDetailView.tsx:                      <Flag className="h-3.5 w-3.5" /> Flags
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-base mt-1 p-2 bg-gray-50 rounded-md">{asset.flags}</p>
+src/features/asset/asset/AssetDetailView.tsx:                <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                  <Calendar className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:              <CardContent className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Purchase Date</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-base">{formatDate(asset.purchase_date)}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Warranty Until</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-base">{formatDate(asset.warranty_end_date)}</p>
+src/features/asset/asset/AssetDetailView.tsx:                        ? 'bg-red-100 text-red-800 hover:bg-red-100' 
+src/features/asset/asset/AssetDetailView.tsx:                        : 'bg-green-100 text-green-800 hover:bg-green-100'}>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-base">{formatDate(asset.updated_at)}</p>
+src/features/asset/asset/AssetDetailView.tsx:              <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                <DollarSign className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Unit Price</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xl font-semibold text-primary">{formatCurrency(asset.unit_price)}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Quantity</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xl font-semibold">{asset.quantity}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xl font-semibold text-primary">{formatCurrency(asset.amount)}</p>
+src/features/asset/asset/AssetDetailView.tsx:              <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                <User className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:                <p className="text-sm font-medium text-muted-foreground">Owner ID</p>
+src/features/asset/asset/AssetDetailView.tsx:                <p className="text-base">{asset.owner}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  variant="link" 
+src/features/asset/asset/AssetDetailView.tsx:                  className="px-0 py-1 h-auto text-primary"
+src/features/asset/asset/AssetDetailView.tsx:                      title: "Owner Details",
+src/features/asset/asset/AssetDetailView.tsx:                      description: "Navigating to owner details is not implemented yet.",
+src/features/asset/asset/AssetDetailView.tsx:        <TabsContent value="inventory" className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:              <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                <Layers className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+src/features/asset/asset/AssetDetailView.tsx:                <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex items-center justify-between">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-amber-800">Reorder Level</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-2xl font-bold text-amber-800 mt-2">{asset.reorder_level}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xs text-amber-700 mt-1">
+src/features/asset/asset/AssetDetailView.tsx:                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex items-center justify-between">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-red-800">Minimum Stock</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <AlertTriangle className="h-4 w-4 text-red-600" />
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-2xl font-bold text-red-800 mt-2">{asset.min_stock_level}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xs text-red-700 mt-1">
+src/features/asset/asset/AssetDetailView.tsx:                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex items-center justify-between">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-green-800">Maximum Stock</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <ShieldCheck className="h-4 w-4 text-green-600" />
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-2xl font-bold text-green-800 mt-2">{asset.max_stock_level}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <p className="text-xs text-green-700 mt-1">
+src/features/asset/asset/AssetDetailView.tsx:              <div className="mt-6">
+src/features/asset/asset/AssetDetailView.tsx:                <p className="text-sm font-medium mb-2">Current Inventory Status</p>
+src/features/asset/asset/AssetDetailView.tsx:                <div className="w-full bg-gray-200 rounded-full h-2.5">
+src/features/asset/asset/AssetDetailView.tsx:                        ? 'bg-red-600' 
+src/features/asset/asset/AssetDetailView.tsx:                          ? 'bg-amber-500' 
+src/features/asset/asset/AssetDetailView.tsx:                          : 'bg-green-600'
+src/features/asset/asset/AssetDetailView.tsx:                <div className="flex justify-between mt-2 text-xs text-gray-600">
+src/features/asset/asset/AssetDetailView.tsx:                  <span className="text-red-600">{asset.min_stock_level}</span>
+src/features/asset/asset/AssetDetailView.tsx:                  <span className="text-amber-600">{asset.reorder_level}</span>
+src/features/asset/asset/AssetDetailView.tsx:                  <span className="text-green-600">{asset.max_stock_level}</span>
+src/features/asset/asset/AssetDetailView.tsx:                <div className="mt-4 p-3 bg-gray-50 rounded-md border">
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex items-center justify-between">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="font-medium">Current Quantity:</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="font-bold text-lg">{asset.quantity}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="mt-2">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm text-muted-foreground">
+src/features/asset/asset/AssetDetailView.tsx:                        ? 'Critical: Stock below minimum level! Order immediately.'
+src/features/asset/asset/AssetDetailView.tsx:                          ? 'Warning: Stock below reorder point. Consider reordering soon.'
+src/features/asset/asset/AssetDetailView.tsx:                          : 'Status: Stock levels are healthy.'}
+src/features/asset/asset/AssetDetailView.tsx:        <TabsContent value="category" className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:              <CardTitle className="flex items-center gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                <Bookmark className="h-5 w-5 text-primary" /> 
+src/features/asset/asset/AssetDetailView.tsx:              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+src/features/asset/asset/AssetDetailView.tsx:                <div className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-muted-foreground">Category</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <div className="flex items-center gap-2 mt-1">
+src/features/asset/asset/AssetDetailView.tsx:                      <Badge variant="outline" className="font-medium">{asset.category_detail?.code}</Badge>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base font-medium">{asset.category_detail?.title}</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm text-muted-foreground mt-1">
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-sm font-medium text-muted-foreground">Problem Type</p>
+src/features/asset/asset/AssetDetailView.tsx:                    <p className="text-base">{asset.category_detail?.problem_type}</p>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="flex flex-wrap gap-2">
+src/features/asset/asset/AssetDetailView.tsx:                      <Badge variant="secondary">Power</Badge>
+src/features/asset/asset/AssetDetailView.tsx:                      <Badge variant="secondary">Payment Requisition</Badge>
+src/features/asset/asset/AssetDetailView.tsx:                      <Badge variant="secondary">Exclude Costing</Badge>
+src/features/asset/asset/AssetDetailView.tsx:                  <div className="space-y-4">
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Subcategory</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-base font-medium">{asset.subcategory_detail?.title}</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm text-muted-foreground">
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Work Request Action</p>
+src/features/asset/asset/AssetDetailView.tsx:                      <Badge className="mt-1">
+src/features/asset/asset/AssetDetailView.tsx:                      <p className="text-sm font-medium text-muted-foreground">Status</p>
+src/features/asset/asset/AssetDetailView.tsx:                        asset.subcategory_detail?.status === 'Active' 
+src/features/asset/asset/AssetDetailView.tsx:                          ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+src/features/asset/asset/AssetDetailView.tsx:                          : 'bg-red-100 text-red-800 hover:bg-red-100'
+src/features/asset/asset/AssetForm.tsx:import { useState, useEffect } from 'react';
+src/features/asset/asset/AssetForm.tsx:import { useNavigate, useParams } from 'react-router-dom';
+src/features/asset/asset/AssetForm.tsx:import { z } from 'zod';
+src/features/asset/asset/AssetForm.tsx:import { useForm } from 'react-hook-form';
+src/features/asset/asset/AssetForm.tsx:import { zodResolver } from '@hookform/resolvers/zod';
+src/features/asset/asset/AssetForm.tsx:import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+src/features/asset/asset/AssetForm.tsx:import { Input } from '@/components/ui/input';
+src/features/asset/asset/AssetForm.tsx:import { Button } from '@/components/ui/button';
+src/features/asset/asset/AssetForm.tsx:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+src/features/asset/asset/AssetForm.tsx:import { Textarea } from '@/components/ui/textarea';
+src/features/asset/asset/AssetForm.tsx:import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+src/features/asset/asset/AssetForm.tsx:import { ArrowLeft, Loader2 } from 'lucide-react';
+src/features/asset/asset/AssetForm.tsx:import { Asset } from '@/types/asset';
+src/features/asset/asset/AssetForm.tsx:import { useList } from '@/hooks/crud/useCrudOperations';
+src/features/asset/asset/AssetForm.tsx:import { Category } from '@/types/category';
+src/features/asset/asset/AssetForm.tsx:import { Subcategory } from '@/types/subcategory';
+src/features/asset/asset/AssetForm.tsx:import { useAssetQuery, useCreateAsset, useUpdateAsset } from '@/hooks/asset/useAssetQueries';
+src/features/asset/asset/AssetForm.tsx:const endpoint1 = 'accounts/api/categories/';
+src/features/asset/asset/AssetForm.tsx:const endpoint2 = 'accounts/api/subcategories/';
+src/features/asset/asset/AssetForm.tsx:  type: z.enum(['Asset', 'Consumable']).default('Asset'),
+src/features/asset/asset/AssetForm.tsx:  model: z.string().min(1, 'Model is required'),
+src/features/asset/asset/AssetForm.tsx:  status: z.enum(['Available', 'In Use', 'Under Maintenance', 'Disposed']).default('Available'),
+src/features/asset/asset/AssetForm.tsx:      type: 'Asset',
+src/features/asset/asset/AssetForm.tsx:      model: '',
+src/features/asset/asset/AssetForm.tsx:      part_no: '',
+src/features/asset/asset/AssetForm.tsx:      asset_tag: '',
+src/features/asset/asset/AssetForm.tsx:      serial_number: '',
+src/features/asset/asset/AssetForm.tsx:      quantity: '',
+src/features/asset/asset/AssetForm.tsx:      unit_price: '', 
+src/features/asset/asset/AssetForm.tsx:      amount: '',
+src/features/asset/asset/AssetForm.tsx:      reorder_level: '',
+src/features/asset/asset/AssetForm.tsx:      min_stock_level: '',
+src/features/asset/asset/AssetForm.tsx:      max_stock_level: '',
+src/features/asset/asset/AssetForm.tsx:      location: '',
+src/features/asset/asset/AssetForm.tsx:      flags: '',
+src/features/asset/asset/AssetForm.tsx:      purchase_date: '',
+src/features/asset/asset/AssetForm.tsx:      warranty_end_date: '',
+src/features/asset/asset/AssetForm.tsx:      owner: '',
+src/features/asset/asset/AssetForm.tsx:      category: '',
+src/features/asset/asset/AssetForm.tsx:      subcategory: '',
+src/features/asset/asset/AssetForm.tsx:      status: 'Available',
+src/features/asset/asset/AssetForm.tsx:  const { data: categories = [] } = useList<Category>('categories', endpoint1);
+src/features/asset/asset/AssetForm.tsx:  const { data: subcategories = [] } = useList<Subcategory>('subcategories', endpoint2);
+src/features/asset/asset/AssetForm.tsx:        { onSuccess: () => navigate('/asset/assets') }
+src/features/asset/asset/AssetForm.tsx:        data as Omit<Asset, 'id'>,
+src/features/asset/asset/AssetForm.tsx:        { onSuccess: () => navigate('/asset/assets') }
+src/features/asset/asset/AssetForm.tsx:    navigate('/asset/assets');
+src/features/asset/asset/AssetForm.tsx:      <div className="flex justify-center items-center h-64">
+src/features/asset/asset/AssetForm.tsx:        <div className="flex flex-col items-center gap-2">
+src/features/asset/asset/AssetForm.tsx:          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+src/features/asset/asset/AssetForm.tsx:          <p className="text-sm text-muted-foreground">Loading asset details...</p>
+src/features/asset/asset/AssetForm.tsx:      <div className="flex flex-col items-center justify-center h-64 gap-4">
+src/features/asset/asset/AssetForm.tsx:        <div className="text-red-500 text-xl">Error loading asset details</div>
+src/features/asset/asset/AssetForm.tsx:        <p className="text-sm text-muted-foreground mb-4">
+src/features/asset/asset/AssetForm.tsx:          {assetError instanceof Error ? assetError.message : 'An unknown error occurred'}
+src/features/asset/asset/AssetForm.tsx:        <Button onClick={handleCancel} variant="outline">
+src/features/asset/asset/AssetForm.tsx:    <div className="container mx-auto py-8">
+src/features/asset/asset/AssetForm.tsx:      <div className="flex items-center justify-between mb-6">
+src/features/asset/asset/AssetForm.tsx:        <div className="flex items-center gap-4">
+src/features/asset/asset/AssetForm.tsx:            variant="outline" 
+src/features/asset/asset/AssetForm.tsx:            size="icon" 
+src/features/asset/asset/AssetForm.tsx:            <ArrowLeft className="h-4 w-4" />
+src/features/asset/asset/AssetForm.tsx:          <h1 className="text-2xl font-bold">
+src/features/asset/asset/AssetForm.tsx:            {isEditMode ? 'Edit Asset' : 'Create New Asset'}
+src/features/asset/asset/AssetForm.tsx:        <form onSubmit={assetForm.handleSubmit(onSubmitAsset)} className="space-y-6">
+src/features/asset/asset/AssetForm.tsx:          <div className="space-y-4">
+src/features/asset/asset/AssetForm.tsx:            <Collapsible defaultOpen={true} className="w-full">
+src/features/asset/asset/AssetForm.tsx:              <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 text-black rounded-t-md">
+src/features/asset/asset/AssetForm.tsx:                <h2 className="text-lg font-medium">Asset Details</h2>
+src/features/asset/asset/AssetForm.tsx:                {/* <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
+src/features/asset/asset/AssetForm.tsx:              <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
+src/features/asset/asset/AssetForm.tsx:                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">                  
+src/features/asset/asset/AssetForm.tsx:                    name="type"
+src/features/asset/asset/AssetForm.tsx:                              <SelectValue placeholder="Select type" />
+src/features/asset/asset/AssetForm.tsx:                            <SelectItem value="Asset">Asset</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                            <SelectItem value="Consumable">Consumable</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                    name="model"
+src/features/asset/asset/AssetForm.tsx:                          <Input placeholder="Asset model" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="category"
+src/features/asset/asset/AssetForm.tsx:                              <SelectValue placeholder="Select Category" />
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem key={category.id} value={String(category.id) || "0"}>
+src/features/asset/asset/AssetForm.tsx:                    name="subcategory"
+src/features/asset/asset/AssetForm.tsx:                              <SelectValue placeholder="Select Subcategory" />
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem key={subcategory.id} value={String(subcategory.id) || "0"}>
+src/features/asset/asset/AssetForm.tsx:                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+src/features/asset/asset/AssetForm.tsx:                    name="part_no"
+src/features/asset/asset/AssetForm.tsx:                          <Input placeholder="Part number" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="asset_tag"
+src/features/asset/asset/AssetForm.tsx:                          <Input placeholder="Asset tag" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="serial_number"
+src/features/asset/asset/AssetForm.tsx:                          <Input placeholder="Serial number" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="quantity"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Quantity" {...field} />
+src/features/asset/asset/AssetForm.tsx:                <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+src/features/asset/asset/AssetForm.tsx:                    name="unit_price"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Unit price" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="amount"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Amount" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="reorder_level"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Reorder level" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="min_stock_level"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Minimum stock level" {...field} />
+src/features/asset/asset/AssetForm.tsx:                <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+src/features/asset/asset/AssetForm.tsx:                      name="max_stock_level"
+src/features/asset/asset/AssetForm.tsx:                            <Input type="number" placeholder="Maximum stock level" {...field} />
+src/features/asset/asset/AssetForm.tsx:                      name="location"
+src/features/asset/asset/AssetForm.tsx:                            <Input placeholder="Location" {...field} />
+src/features/asset/asset/AssetForm.tsx:                      name="flags"
+src/features/asset/asset/AssetForm.tsx:                            <Input placeholder="Flags" {...field} />
+src/features/asset/asset/AssetForm.tsx:                      name="status"
+src/features/asset/asset/AssetForm.tsx:                                <SelectValue placeholder="Select status" />
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem value="Available">Available</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem value="In Use">In Use</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem value="Under Maintenance">Under Maintenance</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                              <SelectItem value="Disposed">Disposed</SelectItem>
+src/features/asset/asset/AssetForm.tsx:                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+src/features/asset/asset/AssetForm.tsx:                    name="purchase_date"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="date" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="warranty_end_date"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="date" {...field} />
+src/features/asset/asset/AssetForm.tsx:                    name="owner"
+src/features/asset/asset/AssetForm.tsx:                          <Input type="number" placeholder="Owner ID" {...field} />
+src/features/asset/asset/AssetForm.tsx:          <div className="flex justify-between pt-4">
+src/features/asset/asset/AssetForm.tsx:              type="button" 
+src/features/asset/asset/AssetForm.tsx:              variant="outline" 
+src/features/asset/asset/AssetForm.tsx:              type="submit"
+src/features/asset/asset/AssetForm.tsx:                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+src/features/asset/asset/AssetForm.tsx:              {isEditMode ? 'Update' : 'Save'}
+src/features/asset/asset/AssetManagement.tsx:import { useState, useEffect, useMemo } from 'react';
+src/features/asset/asset/AssetManagement.tsx:import { useNavigate } from 'react-router-dom';
+src/features/asset/asset/AssetManagement.tsx:import { useQueryClient } from '@tanstack/react-query';
+src/features/asset/asset/AssetManagement.tsx:import { Helmet } from 'react-helmet-async';
+src/features/asset/asset/AssetManagement.tsx:import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+src/features/asset/asset/AssetManagement.tsx:import { Button } from '@/components/ui/button';
+src/features/asset/asset/AssetManagement.tsx:import { Card } from '@/components/ui/card';
+src/features/asset/asset/AssetManagement.tsx:import { Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
+src/features/asset/asset/AssetManagement.tsx:import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+src/features/asset/asset/AssetManagement.tsx:import { SearchFilter } from '@/components/SearchFilter';
+src/features/asset/asset/AssetManagement.tsx:import { Pagination } from '@/components/Pagination';
+src/features/asset/asset/AssetManagement.tsx:import { useAssetsQuery, useDeleteAsset } from '@/hooks/asset/useAssetQueries';
+src/features/asset/asset/AssetManagement.tsx:import { useList } from '@/hooks/crud/useCrudOperations';
+src/features/asset/asset/AssetManagement.tsx:import { Asset } from '@/types/asset';
+src/features/asset/asset/AssetManagement.tsx:import { AssetQueryParams } from '@/services/assetsApi';
+src/features/asset/asset/AssetManagement.tsx:// import { Facility } from '@/pages/facility/facilities/FacilityManagementPage';
+src/features/asset/asset/AssetManagement.tsx:  const [searchValue, setSearchValue] = useState('');
+src/features/asset/asset/AssetManagement.tsx:  const [statusFilter, setStatusFilter] = useState('');
+src/features/asset/asset/AssetManagement.tsx:  const [typeFilter, setTypeFilter] = useState('');
+src/features/asset/asset/AssetManagement.tsx:  // const [facilityFilter, setFacilityFilter] = useState('');
+src/features/asset/asset/AssetManagement.tsx:  // } = useList<Facility>('facilities', 'facility/api/api/facilities/');
+src/features/asset/asset/AssetManagement.tsx:    if (!amount) return '₦0.00';
+src/features/asset/asset/AssetManagement.tsx:    return new Intl.NumberFormat('en-NG', {
+src/features/asset/asset/AssetManagement.tsx:      style: 'currency',
+src/features/asset/asset/AssetManagement.tsx:      currency: 'NGN',
+src/features/asset/asset/AssetManagement.tsx:    navigate('/asset/assets/create');
+src/features/asset/asset/AssetManagement.tsx:    if (key === 'status') {
+src/features/asset/asset/AssetManagement.tsx:    } else if (key === 'type') {
+src/features/asset/asset/AssetManagement.tsx:      key: 'status',
+src/features/asset/asset/AssetManagement.tsx:      label: 'Status',
+src/features/asset/asset/AssetManagement.tsx:        { value: 'Available', label: 'Available' },
+src/features/asset/asset/AssetManagement.tsx:        { value: 'In Use', label: 'In Use' },
+src/features/asset/asset/AssetManagement.tsx:        { value: 'Under Maintenance', label: 'Under Maintenance' },
+src/features/asset/asset/AssetManagement.tsx:        { value: 'Disposed', label: 'Disposed' }
+src/features/asset/asset/AssetManagement.tsx:      key: 'type',
+src/features/asset/asset/AssetManagement.tsx:      label: 'Type',
+src/features/asset/asset/AssetManagement.tsx:        { value: 'Asset', label: 'Asset' },
+src/features/asset/asset/AssetManagement.tsx:        { value: 'Consumable', label: 'Consumable' }
+src/features/asset/asset/AssetManagement.tsx:      <div className="flex justify-center items-center h-64">
+src/features/asset/asset/AssetManagement.tsx:        <div className="flex flex-col items-center gap-2">
+src/features/asset/asset/AssetManagement.tsx:          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+src/features/asset/asset/AssetManagement.tsx:          <p className="text-sm text-muted-foreground">Loading assets...</p>
+src/features/asset/asset/AssetManagement.tsx:      <div className="flex flex-col items-center justify-center h-64 gap-4">
+src/features/asset/asset/AssetManagement.tsx:        <div className="text-red-500 text-xl">Error loading assets</div>
+src/features/asset/asset/AssetManagement.tsx:        <Button onClick={() => refetch()} variant="outline">
+src/features/asset/asset/AssetManagement.tsx:    <div className="py-8">
+src/features/asset/asset/AssetManagement.tsx:      <div className="flex justify-between items-center mb-6">
+src/features/asset/asset/AssetManagement.tsx:        <h1 className="text-2xl font-bold">Asset Management</h1>
+src/features/asset/asset/AssetManagement.tsx:          <Plus className="mr-2 h-4 w-4" /> Add Asset
+src/features/asset/asset/AssetManagement.tsx:      <div className="mb-6">
+src/features/asset/asset/AssetManagement.tsx:          placeholder="Search assets..."
+src/features/asset/asset/AssetManagement.tsx:      <Card className="w-full shadow-sm">
+src/features/asset/asset/AssetManagement.tsx:        <div className="bg-white rounded-lg overflow-hidden">
+src/features/asset/asset/AssetManagement.tsx:              <TableRow className="bg-gray-50">
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Serial No</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Category</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Subcategory</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Type</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Quantity</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Unit Price</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600">Status</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+src/features/asset/asset/AssetManagement.tsx:                  <TableCell colSpan={6} className="h-24 text-center">
+src/features/asset/asset/AssetManagement.tsx:                  <TableRow key={asset.id} className="border-b border-gray-100 hover:bg-gray-50">
+src/features/asset/asset/AssetManagement.tsx:                    <TableCell>{asset.serial_number || 'N/A'}</TableCell>
+src/features/asset/asset/AssetManagement.tsx:                        asset.type === 'Asset' 
+src/features/asset/asset/AssetManagement.tsx:                          ? 'bg-green-500 text-white'
+src/features/asset/asset/AssetManagement.tsx:                          : 'bg-yellow-600 text-white'
+src/features/asset/asset/AssetManagement.tsx:                    <TableCell className="w-[20%]">
+src/features/asset/asset/AssetManagement.tsx:                        asset.status === 'Available' 
+src/features/asset/asset/AssetManagement.tsx:                          ? 'bg-green-500 text-white'
+src/features/asset/asset/AssetManagement.tsx:                          : asset.status === 'In Use' 
+src/features/asset/asset/AssetManagement.tsx:                          ? 'bg-blue-500 text-white'
+src/features/asset/asset/AssetManagement.tsx:                          : asset.status === 'Under Maintenance' 
+src/features/asset/asset/AssetManagement.tsx:                          ? 'bg-orange-500 text-white'
+src/features/asset/asset/AssetManagement.tsx:                          : 'bg-red-500 text-white'
+src/features/asset/asset/AssetManagement.tsx:                    <TableCell className="text-right">
+src/features/asset/asset/AssetManagement.tsx:                      <div className="flex justify-end">
+src/features/asset/asset/AssetManagement.tsx:                          variant="ghost" 
+src/features/asset/asset/AssetManagement.tsx:                          size="icon" 
+src/features/asset/asset/AssetManagement.tsx:                          className="h-8 w-8"
+src/features/asset/asset/AssetManagement.tsx:                          <Eye className="h-4 w-4" />
+src/features/asset/asset/AssetManagement.tsx:                          variant="ghost" 
+src/features/asset/asset/AssetManagement.tsx:                          size="icon" 
+src/features/asset/asset/AssetManagement.tsx:                          className="h-8 w-8"
+src/features/asset/asset/AssetManagement.tsx:                          <Edit className="h-4 w-4" />
+src/features/asset/asset/AssetManagement.tsx:                          variant="ghost" 
+src/features/asset/asset/AssetManagement.tsx:                          size="icon" 
+src/features/asset/asset/AssetManagement.tsx:                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+src/features/asset/asset/AssetManagement.tsx:                          <Trash2 className="h-4 w-4" />
+src/features/asset/asset/AssetManagement.tsx:            <div className="p-4 border-t">
+src/features/asset/asset/AssetManagement.tsx:              className="bg-red-500 hover:bg-red-600"
+src/features/asset/asset/AssetManagement.tsx:                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+src/features/asset/asset/AssetManagement.tsx:                'Delete'

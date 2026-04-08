@@ -1,0 +1,178 @@
+html, body {
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    background: #ffffff;
+    color: #333;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(115deg, #dbf7b7 0%, #c3cfe2 100%);
+    background-attachment: fixed;
+    animation: gradientAnimation 10s ease infinite;
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+    padding-bottom: 60px;
+}
+
+.navbar, .footer {
+    background: #28a745 !important;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-brand, .navbar-nav .nav-link, .footer-brand, .footer-nav .nav-link {
+    color: #fff !important;
+}
+
+.navbar-nav .nav-link:hover, .footer-nav .nav-link:hover {
+    color: #f8f9fa !important;
+}
+
+.circle-container {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    margin: 4rem auto 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('../public/images/brand-logo.png'); /* Corrected path */
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+}
+
+.chart-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+/* Rest of your existing styles */
+.hero-section {
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1rem 0;
+    border-radius: 15px;
+    margin: 2rem auto;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.icon-card {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: #f0efef;
+    border: 1px solid #29f07c;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+.icon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 12px rgba(3, 129, 9, 0.9);
+}
+
+.icon-card i {
+    font-size: 2rem;
+    color: #28a745;
+    margin-bottom: 0.5rem;
+}
+
+.icon-card span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #555;
+    line-height: 1;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.description-bar {
+    position: absolute;
+    background: #343a40;
+    color: #fff;
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    width: 150px;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.icon-card:hover .description-bar {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .circle-container {
+        width: 400px;
+        height: 400px;
+        margin: 4rem auto 5rem;
+    }
+
+    .chart-container {
+        width: 150px;
+        height: 150px;
+        padding: 10px;
+    }
+
+    .icon-card {
+        width: 90px;
+        height: 90px;
+        padding: 0.5rem;
+    }
+
+    .icon-card i {
+        font-size: 1.5rem;
+    }
+
+    .icon-card span {
+        font-size: 0.8rem;
+    }
+
+    .description-bar {
+        width: 120px;
+        font-size: 0.7rem;
+        top: 110px;
+    }
+} 

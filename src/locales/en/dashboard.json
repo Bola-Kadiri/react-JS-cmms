@@ -1,0 +1,144 @@
+{
+  "navigation": {
+    "work": {
+      "line1": "CMMS",
+      "line2": "PPM"
+    },
+    "inventory": {
+      "line1": "REQUEST", 
+      "line2": "FLOW"
+    },
+    "materials": {
+      "line1": "MATERIAL",
+      "line2": "MANAGEMENT"
+    },
+    "procurement": {
+      "line1": "CONTRACT &",
+      "line2": "PROCUREMENT"
+    },
+    "facility": {
+      "line1": "FACILITY",
+      "line2": "INSPECTION"
+    },
+    "staff": {
+      "line1": "STAFF",
+      "line2": "ATTENDANCE"
+    },
+    "call": {
+      "line1": "CALLBX",
+      "line2": ""
+    },
+    "predictive": {
+      "line1": "PREDICTIVE",
+      "line2": "DASHBOARD"
+    }
+  },
+  "tabs": {
+    "workRequest": "WORK REQUEST",
+    "workOrder": "WORK ORDER",
+    "stockLevel": "STOCK LEVELS",
+    "transactions": "TRANSACTIONS",
+    "purchaseRequests": "PURCHASE REQUESTS",
+    "purchaseOrders": "PURCHASE ORDERS"
+  },
+  "headers": {
+    "inventory": {
+      "overview": "INVENTORY OVERVIEW:",
+      "alerts": "INVENTORY ALERTS:"
+    },
+    "procurement": {
+      "overview": "PROCUREMENT OVERVIEW:",
+      "alerts": "PROCUREMENT ALERTS:"
+    },
+    "escalated": "ESCALATED TO ME:",
+    "ppmDue": "PPM DUE:"
+  },
+  "cards": {
+    "title": {
+      "total": "Total",
+      "low": "Low",
+      "items": "Items",
+      "pending": "Pending",
+      "expiring": "Expiring",
+      "damaged": "Damaged",
+      "overstock": "Overstock",
+      "work": "Work",
+      "payment": "Payment",
+      "quotation": "Quotation",
+      "over": "Over",
+      "almost": "Almost",
+      "due": "Due",
+      "new": "New",
+      "open": "Open",
+      "started": "Started",
+      "completed": "Completed",
+      "overDue": "Over-Due",
+      "awaiting": "Awaiting",
+      "draft": "Draft",
+      "sent": "Sent",
+      "received": {
+        "partially": "Partially Received",
+        "fully": "Fully Received"
+      },
+      "cancelled": "Cancelled",
+      "purchase": "Purchase",
+      "monthly": "Monthly",
+      "urgent": "Urgent",
+      "delayed": "Delayed",
+      "contract": "Contract",
+      "electronics": "Electronics",
+      "furniture": "Furniture",
+      "officeSupplies": "Office Supplies",
+      "maintenance": "Maintenance",
+      "safetyEquipment": "Safety Equipment",
+      "misc": "Misc",
+      "receivedToday": "Received Today",
+      "issuedToday": "Issued Today",
+      "pendingTransfer": "Pending Transfer",
+      "returns": "Returns",
+      "adjustments": "Adjustments",
+      "inReview": "In Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "convertingToPO": "Converting to PO"
+    },
+    "subtitle": {
+      "items": "Items",
+      "stock": "Stock",
+      "order": "Order",
+      "delivery": "Delivery",
+      "soon": "Soon",
+      "return": "Return",
+      "requests": "Requests",
+      "orders": "Orders",
+      "approval": "Approval",
+      "spending": "Spending",
+      "budget": "Budget",
+      "deliveries": "Deliveries",
+      "renewals": "Renewals",
+      "request": "Request",
+      "req": "Req",
+      "due": "Due",
+      "today": "Today"
+    }
+  },
+  "status": {
+    "new": "New",
+    "open": "Open",
+    "started": "Started",
+    "completed": "Completed",
+    "overDue": "Over-Due",
+    "awaiting": "Awaiting",
+    "pending": "Pending",
+    "draft": "Draft",
+    "sent": "Sent",
+    "received": {
+      "partially": "Partially Received",
+      "fully": "Fully Received"
+    },
+    "cancelled": "Cancelled",
+    "critical": "Critical: Stock below minimum level! Order immediately.",
+    "warning": "Warning: Stock below reorder point. Consider reordering soon.",
+    "healthy": "Status: Stock levels are healthy."
+  }
+}

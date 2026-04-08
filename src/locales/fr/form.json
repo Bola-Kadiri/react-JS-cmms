@@ -1,0 +1,8 @@
+{
+  "validation": {
+    "required": "{{field}} est requis",
+    "email": "Veuillez fournir une adresse email valide",
+    "min": "Veuillez fournir au moins {{count}} caractère(s)",
+    "max": "Veuillez fournir au maximum {{count}} caractère(s)"
+  }
+}

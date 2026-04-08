@@ -1,0 +1,79 @@
+{
+  "appName": "Alpha CMMS",
+  "dashboard": "Tableau de Bord",
+  "calendar": {
+    "title": "Calendrier de Travail",
+    "ppmCalendar": "Calendrier de PPM",
+    "eventCalendar": "Calendrier des événements",
+    "ppm": "MPP"
+  },
+  "work": {
+    "title": "Flux de Demande",
+    "requests": "Demandes de Travail",
+    "orders": "Ordres de Travail",
+    "workOrderCompletions": "Attestation d'Achèvement des Travaux",
+    "invoiceItems": "Articles de Facture",
+    "paymentComments": "Attestation d'Achèvement des Travaux",
+    "paymentItems": "Factures",
+    "paymentRequisitions": "Réquisitions de Paiement"
+  },
+  "asset": {
+    "title": "Gestion des Matériaux",
+    "warehouses": "Entrepôts",
+    "assetRegister": "Registre des Actifs",
+    "inventoryRegister": "Registre d'Inventaire",
+    "items": "Articles",
+    "itemRequest": "Demande d'Article",
+    "transferForm": "Formulaire de Transfert",
+    "movementHistory": "Historique des Mouvements",
+    "materialsReference": {
+      "title": "Référence des Matériaux",
+      "assetCategory": "Catégorie d'Actif",
+      "assetSubcategory": "Sous-Catégorie d'Actif",
+      "inventoryType": "Type d'Inventaire",
+      "model": "Modèle",
+      "manufacturer": "Fabricant",
+      "inventoryReference": "Référence d'Inventaire"
+    }
+  },
+  "procurement": {
+    "title": "Contrat et Approvisionnement",
+    "purchaseOrders": "Bons de Commande",
+    "poRequisition": "Réquisition BC",
+    "requestQuotation": "Demande de Devis",
+    "goodsReceivedNote": "Bon de Réception",
+    "vendorContracts": "Contrat Fournisseur"
+  },
+  "facility": {
+    "title": "Installation",
+    "list": "Installation",
+    "stores": "Magasins",
+    "regions": "Régions",
+    "clusters": "Ensembles",
+    "subsystems": "Espace/ Sous-systèmes",
+    "zones": "Zones",
+    "buildings": "Bâtiments/ Système",
+    "landlords": "Propriétaires",
+    "apartmentType": "Type d'Appartement",
+    "apartments": "Appartements"
+  },
+  "reports": {
+    "title": "Rapports",
+    "scheduled": "Rapport Programmé",
+    "userFacility": "Rapport d'Installation Utilisateur",
+    "userAudit": "Rapport d'Audit Utilisateur",
+    "usage": "Rapport d'Utilisation"
+  },
+  "reference": {
+    "title": "Référence",
+    "userManagement": "Gestion des Utilisateurs",
+    "personnel": "Personnel",
+    "vendor": "Fournisseur",
+    "client": "Client",
+    "category": "Catégorie",
+    "subcategory": "Sous-Catégorie",
+    "department": "Département",
+    "bankAccount": "Compte Bancaire",
+    "unitOfMeasurement": "Unité de Mesure"
+  }
+}

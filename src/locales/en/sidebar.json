@@ -1,0 +1,79 @@
+{
+  "appName": "Alpha CMMS",
+  "dashboard": "Dashboard",
+  "calendar": {
+    "title": "CMMS PPM",
+    "ppmCalendar": "PPM Calendar",
+    "eventCalendar": "PPM Calendar",
+    "ppm": "PPM Schedule"
+  },
+  "work": {
+    "title": "Request Flow",
+    "requests": "Work Requests",
+    "orders": "Work Orders",
+    "workOrderCompletions": "Work Completion Certification",
+    "invoiceItems": "Invoice Items",
+    "paymentComments": "Work Completion Certification",
+    "paymentItems": "Invoices",
+    "paymentRequisitions": "Payment Requisitions"
+  },
+  "asset": {
+    "title": "Materials Management",
+    "warehouses": "Warehouses",
+    "assetRegister": "Asset Register",
+    "inventoryRegister": "Inventory Register",
+    "items": "Items",
+    "itemRequest": "Item Request",
+    "transferForm": "Transfer Form",
+    "movementHistory": "Movement History",
+    "materialsReference": {
+      "title": "Materials Reference",
+      "assetCategory": "Asset Category",
+      "assetSubcategory": "Asset Subcategory",
+      "inventoryType": "Inventory Type",
+      "model": "Model",
+      "manufacturer": "Manufacturer",
+      "inventoryReference": "Inventory Reference"
+    }
+  },
+  "procurement": {
+    "title": "Contract & Procurement",
+    "purchaseOrders": "Purchase orders",
+    "poRequisition": "PO Requisition",
+    "requestQuotation": "Request Quotation",
+    "goodsReceivedNote": "Goods Received Note",
+    "vendorContracts": "Vendor Contract"
+  },
+  "facility": {
+    "title": "Asset Information",
+    "list": "Facility",
+    "stores": "Stores",
+    "regions": "Region",
+    "clusters": "Facility Category",
+    "subsystems": "Asset Location",
+    "zones": "Zone",
+    "buildings": "Asset Classification",
+    "landlords": "Landlords",
+    "apartmentType": "Apartment Type",
+    "apartments": "Apartments"
+  },
+  "reports": {
+    "title": "Reports",
+    "scheduled": "Scheduled Report",
+    "userFacility": "User Facility Report",
+    "userAudit": "User Audit Report",
+    "usage": "Usage Report"
+  },
+  "reference": {
+    "title": "Reference",
+    "userManagement": "User Management",
+    "personnel": "Personnel",
+    "vendor": "Vendor",
+    "client": "Client",
+    "category": "Category",
+    "subcategory": "Sub-Category",
+    "department": "Department",
+    "bankAccount": "Bank Account",
+    "unitOfMeasurement": "Unit of Measurement"
+  }
+}

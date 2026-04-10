@@ -5,22 +5,19 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Workrequest } from '@/types/workrequest';
-import { useWorkrequestQuery, useCreateWorkrequest, useUpdateWorkrequest, useAssetsByFacilityQuery, useBuildingsByFacilityQuery, useProcurementUsersQuery } from '@/hooks/workrequest/useWorkrequestQueries';
+import { useWorkrequestQuery, useCreateWorkrequest, useUpdateWorkrequest, useAssetsByFacilityQuery, useBuildingsByFacilityQuery, useProcurementUsersQuery, useReviewersQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { useCategoriesQuery } from '@/hooks/category/useCategoryQueries';
 import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
-import { usePpmReviewersQuery } from '@/hooks/ppm/usePpmQueries';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
-import { Badge } from '@/components/ui/badge';
 
 // Form schema definition
 // const workrequestSchema = z.object({
@@ -45,29 +42,29 @@ import { Badge } from '@/components/ui/badge';
 
 const workrequestSchema = z.object({
   type: z.enum(['Work', 'Procurement']),
-  
+
   // Use .nullable() so the initial state can be null.
   // Use .refine() to ensure the user picks a valid ID (greater than 0).
   category: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select a category",
   }),
-  
+
   subcategory: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select a subcategory",
   }),
-  
+
   facility: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select a facility",
   }),
-  
+
   building: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select a building",
   }),
-  
+
   department: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select a department",
   }),
-  
+
   asset: z.number().nullable().refine((val) => val !== null && val > 0, {
     message: "Please select an asset",
   }),
@@ -77,12 +74,12 @@ const workrequestSchema = z.object({
   require_quotation: z.boolean(),
   payment_requisition: z.boolean(),
   follow_up_notes: z.string().optional(),
-  
+
   procurement_officers: z.array(z.number()).default([]),
-  
+
   // Optional relational field
   suggested_vendor: z.number().nullable().optional(),
-  
+
   vendor_description: z.string().optional(),
   reviewers: z.array(z.number()).default([])
 });
@@ -92,7 +89,7 @@ const WorkrequestForm = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
-  
+
   // Collapsible section states
   const [openSections, setOpenSections] = useState({
     basic: true,
@@ -100,7 +97,7 @@ const WorkrequestForm = () => {
     options: false,
     additional: false
   });
-  
+
   // Workrequest form setup
   const workrequestForm = useForm<WorkrequestFormValues>({
     resolver: zodResolver(workrequestSchema),
@@ -133,46 +130,46 @@ const WorkrequestForm = () => {
   const { data: categoriesData = { results: [] } } = useCategoriesQuery();
 
   // console.log (categoriesData)
-  
+
   const { data: facilitiesData = { results: [] } } = useFacilitiesQuery();
   console.log(facilitiesData)
   const { data: departmentsData = { results: [] } } = useDepartmentsQuery();
   const { data: procurementUsers = [] } = useProcurementUsersQuery();
   const { data: vendorsData = { results: [] } } = useVendorsQuery();
-  const { data: reviewers = [] } = usePpmReviewersQuery();
+  const { data: reviewers = [] } = useReviewersQuery();
 
-  
 
-  const procurement = procurementUsers.length > 0 
-  ? procurementUsers 
-  : (reviewers.length > 0 ? reviewers : []); 
 
-const review = reviewers.length > 0 
-  ? reviewers
-  : (procurementUsers.length > 0 ? procurementUsers : []);
+  const procurement = procurementUsers.length > 0
+    ? procurementUsers
+    : (reviewers.length > 0 ? reviewers : []);
+
+  const review = reviewers.length > 0
+    ? reviewers
+    : (procurementUsers.length > 0 ? procurementUsers : []);
 
   console.log(review)
   console.log(procurement)
-  
+
   // Fetch approvers (users with APPROVER role)
   const { data: approvers = [] } = useList('approvers', 'accounts/api/users/?role=APPROVER');
-  
+
   // Get subcategories from the selected category
   const selectedCategoryData = categoriesData.results.find(cat => cat.id === selectedCategory);
   const availableSubcategories = selectedCategoryData?.subcategories || [];
-  
+
   // Facility-dependent data hooks
   const { data: buildingsDataRaw } = useBuildingsByFacilityQuery(selectedFacility || undefined);
   const { data: assetsDataRaw } = useAssetsByFacilityQuery(selectedFacility || undefined);
-  
+
   // Handle both array and object with results property
   const buildingsData = buildingsDataRaw ? (Array.isArray(buildingsDataRaw) ? buildingsDataRaw : (buildingsDataRaw as any)?.results || []) : [];
   const assetsData = assetsDataRaw ? (Array.isArray(assetsDataRaw) ? assetsDataRaw : (assetsDataRaw as any)?.results || []) : [];
 
   // Fetch workrequest data for edit mode
-  const { 
-    data: workrequestData, 
-    isLoading: isLoadingWorkrequest, 
+  const {
+    data: workrequestData,
+    isLoading: isLoadingWorkrequest,
     isError: isWorkrequestError,
     error: workrequestError
   } = useWorkrequestQuery(isEditMode ? slug : undefined);
@@ -294,9 +291,9 @@ const review = reviewers.length > 0
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
             aria-label="Go back"
           >
@@ -318,12 +315,12 @@ const review = reviewers.length > 0
               onClick={() => toggleSection('basic')}
             >
               <h2 className="text-lg font-semibold text-green-800">Basic Information</h2>
-              {openSections.basic ? 
-                <ChevronUp className="h-5 w-5 text-green-600" /> : 
+              {openSections.basic ?
+                <ChevronUp className="h-5 w-5 text-green-600" /> :
                 <ChevronDown className="h-5 w-5 text-green-600" />
               }
             </button>
-            
+
             {openSections.basic && (
               <div className="p-6 space-y-6 bg-white">
                 <FormField
@@ -332,7 +329,7 @@ const review = reviewers.length > 0
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Type<span className="text-red-500 ml-1">*</span></FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
@@ -350,7 +347,7 @@ const review = reviewers.length > 0
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={workrequestForm.control}
@@ -358,7 +355,7 @@ const review = reviewers.length > 0
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Category<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
@@ -379,15 +376,15 @@ const review = reviewers.length > 0
                       </FormItem>
                     )}
                   />
-                  
-                  
+
+
                   <FormField
                     control={workrequestForm.control}
                     name="subcategory"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Subcategory<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                           disabled={!selectedCategory}
@@ -410,7 +407,7 @@ const review = reviewers.length > 0
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={workrequestForm.control}
                   name="description"
@@ -418,7 +415,7 @@ const review = reviewers.length > 0
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Description<span className="text-red-500 ml-1">*</span></FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Enter workrequest description"
                           {...field}
                           className="min-h-[120px] resize-y"
@@ -431,7 +428,7 @@ const review = reviewers.length > 0
               </div>
             )}
           </div>
-          
+
           {/* Location & Asset Details */}
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button
@@ -440,12 +437,12 @@ const review = reviewers.length > 0
               onClick={() => toggleSection('details')}
             >
               <h2 className="text-lg font-semibold text-green-800">Location & Asset Details</h2>
-              {openSections.details ? 
-                <ChevronUp className="h-5 w-5 text-green-600" /> : 
+              {openSections.details ?
+                <ChevronUp className="h-5 w-5 text-green-600" /> :
                 <ChevronDown className="h-5 w-5 text-green-600" />
               }
             </button>
-            
+
             {openSections.details && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -455,7 +452,7 @@ const review = reviewers.length > 0
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Facility<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
@@ -476,14 +473,14 @@ const review = reviewers.length > 0
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={workrequestForm.control}
                     name="building"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Building<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                           disabled={!selectedFacility}
@@ -506,7 +503,7 @@ const review = reviewers.length > 0
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={workrequestForm.control}
@@ -514,7 +511,7 @@ const review = reviewers.length > 0
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Department<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
@@ -535,14 +532,14 @@ const review = reviewers.length > 0
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={workrequestForm.control}
                     name="asset"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Asset<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                           disabled={!selectedFacility}
@@ -565,7 +562,7 @@ const review = reviewers.length > 0
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={workrequestForm.control}
                   name="procurement_officers"
@@ -576,7 +573,7 @@ const review = reviewers.length > 0
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {procurementUsers.map(user => (
                             <div key={user.id} className="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm border">
-                              <Checkbox 
+                              <Checkbox
                                 id={`user-${user.id}`}
                                 checked={field.value.includes(user.id)}
                                 onCheckedChange={(checked) => {
@@ -587,7 +584,7 @@ const review = reviewers.length > 0
                                   }
                                 }}
                               />
-                              <label 
+                              <label
                                 htmlFor={`user-${user.id}`}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                               >
@@ -605,7 +602,7 @@ const review = reviewers.length > 0
               </div>
             )}
           </div>
-                
+
           {/* Options */}
           {/* <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button
@@ -692,12 +689,12 @@ const review = reviewers.length > 0
               onClick={() => toggleSection('additional')}
             >
               <h2 className="text-lg font-semibold text-green-800">Additional Information</h2>
-              {openSections.additional ? 
-                <ChevronUp className="h-5 w-5 text-green-600" /> : 
+              {openSections.additional ?
+                <ChevronUp className="h-5 w-5 text-green-600" /> :
                 <ChevronDown className="h-5 w-5 text-green-600" />
               }
             </button>
-            
+
             {openSections.additional && (
               <div className="p-6 space-y-6 bg-white">
 
@@ -709,7 +706,7 @@ const review = reviewers.length > 0
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">Suggested Vendor</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
@@ -770,7 +767,7 @@ const review = reviewers.length > 0
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Vendor Agreement</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Enter vendor agreement"
                           {...field}
                           className="min-h-[100px] resize-y"
@@ -791,7 +788,7 @@ const review = reviewers.length > 0
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {reviewers.map(reviewer => (
                             <div key={reviewer.id} className="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm border">
-                              <Checkbox 
+                              <Checkbox
                                 id={`reviewer-${reviewer.id}`}
                                 checked={field.value.includes(reviewer.id)}
                                 onCheckedChange={(checked) => {
@@ -802,7 +799,7 @@ const review = reviewers.length > 0
                                   }
                                 }}
                               />
-                              <label 
+                              <label
                                 htmlFor={`reviewer-${reviewer.id}`}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                               >
@@ -825,7 +822,7 @@ const review = reviewers.length > 0
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Follow Up Notes</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Enter follow up notes"
                           {...field}
                           className="min-h-[100px] resize-y"
@@ -840,15 +837,15 @@ const review = reviewers.length > 0
           </div>
 
           <div className="flex justify-end gap-3 pt-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               className="px-6"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createWorkrequestMutation.isPending || updateWorkrequestMutation.isPending}
               className="px-6 bg-green-600 hover:bg-green-700"

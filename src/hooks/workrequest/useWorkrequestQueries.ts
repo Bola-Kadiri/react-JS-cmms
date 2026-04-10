@@ -16,24 +16,29 @@ import {
   fetchProcurementWorkrequests,
   fetchApprovedWorkrequests,
   WorkrequestQueryParams,
-  ApproveWorkrequestData,
-  ProcurementData,
-  ProcurementWorkrequestsResponse
+  getWorkrequestReviewers,
+  getWorkrequestApprovers,
 } from '@/services/workrequestsApi';
-import { Workrequest } from '@/types/workrequest';
 import React from 'react';
 
 // Key factory for consistent query keys
 export const workrequestKeys = {
   all: ['workrequests'] as const,
   lists: () => [...workrequestKeys.all, 'list'] as const,
-  list: (params: WorkrequestQueryParams) => [...workrequestKeys.lists(), params] as const,
+  list: (params: WorkrequestQueryParams) =>
+    [...workrequestKeys.lists(), params] as const,
   details: () => [...workrequestKeys.all, 'detail'] as const,
   detail: (slug: string) => [...workrequestKeys.details(), slug] as const,
-  assetsByFacility: (facility_id: number) => [...workrequestKeys.all, 'assets-by-facility', facility_id] as const,
-  buildingsByFacility: (facility_id: number) => [...workrequestKeys.all, 'buildings-by-facility', facility_id] as const,
-  procurementUsers: () => [...workrequestKeys.all, 'procurement-users'] as const,
-  procurementAssigned: () => [...workrequestKeys.all, 'procurement-assigned'] as const,
+  assetsByFacility: (facility_id: number) =>
+    [...workrequestKeys.all, 'assets-by-facility', facility_id] as const,
+  buildingsByFacility: (facility_id: number) =>
+    [...workrequestKeys.all, 'buildings-by-facility', facility_id] as const,
+  procurementUsers: () =>
+    [...workrequestKeys.all, 'procurement-users'] as const,
+  reviewers: () => [...workrequestKeys.all, 'reviewers'] as const,
+  approvers: () => [...workrequestKeys.all, 'approvers'] as const,
+  procurementAssigned: () =>
+    [...workrequestKeys.all, 'procurement-assigned'] as const,
   approved: () => [...workrequestKeys.all, 'approved'] as const,
 };
 
@@ -70,21 +75,23 @@ export const useWorkrequestQuery = (slug: string | undefined) => {
 // Hook for creating a workrequest
 export const useCreateWorkrequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createWorkrequest,
     onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
+      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
       toast.success('Workrequest created successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to create workrequest', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"})
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
         // icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
       });
       console.error('Create workrequest error:', error);
@@ -95,22 +102,26 @@ export const useCreateWorkrequest = () => {
 // Hook for updating a workrequest
 export const useUpdateWorkrequest = (slug: string | undefined) => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateWorkrequest,
     onSuccess: (data) => {
-    //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
+      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(slug as string) });
+      queryClient.invalidateQueries({
+        queryKey: workrequestKeys.detail(slug as string),
+      });
       toast.success('Workrequest updated successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to update workrequest', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
       });
       console.error('Update workrequest error:', error);
     },
@@ -120,21 +131,23 @@ export const useUpdateWorkrequest = (slug: string | undefined) => {
 // Hook for deleting a workrequest
 export const useDeleteWorkrequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteWorkrequest,
     onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
+      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
       toast.success('Workrequest deleted successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to delete workrequest', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
       });
       console.error('Delete workrequest error:', error);
     },
@@ -152,7 +165,9 @@ export const useAssetsByFacilityQuery = (facility_id: number | undefined) => {
 };
 
 // Hook for fetching buildings by facility
-export const useBuildingsByFacilityQuery = (facility_id: number | undefined) => {
+export const useBuildingsByFacilityQuery = (
+  facility_id: number | undefined,
+) => {
   return useQuery({
     queryKey: workrequestKeys.buildingsByFacility(facility_id as number),
     queryFn: () => getBuildingsByFacility(facility_id as number),
@@ -170,24 +185,46 @@ export const useProcurementUsersQuery = () => {
   });
 };
 
+// Hook for fetching reviewers
+export const useReviewersQuery = () => {
+  return useQuery({
+    queryKey: workrequestKeys.reviewers(),
+    queryFn: getWorkrequestReviewers,
+    staleTime: 30000,
+  });
+};
+
+// Hook for fetching approvers
+export const useApproversQuery = () => {
+  return useQuery({
+    queryKey: workrequestKeys.approvers(),
+    queryFn: getWorkrequestApprovers,
+    staleTime: 30000,
+  });
+};
+
 // Hook for approving a workrequest
 export const useApproveWorkrequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: approveWorkrequest,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(data.slug) });
+      queryClient.invalidateQueries({
+        queryKey: workrequestKeys.detail(data.slug),
+      });
       toast.success('Workrequest approved successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to approve workrequest', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
       });
       console.error('Approve workrequest error:', error);
     },
@@ -197,21 +234,25 @@ export const useApproveWorkrequest = () => {
 // Hook for rejecting a workrequest
 export const useRejectWorkrequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: rejectWorkrequest,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(data.slug) });
+      queryClient.invalidateQueries({
+        queryKey: workrequestKeys.detail(data.slug),
+      });
       toast.success('Workrequest rejected successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to reject workrequest', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
       });
       console.error('Reject workrequest error:', error);
     },
@@ -221,21 +262,25 @@ export const useRejectWorkrequest = () => {
 // Hook for adding procurement details to a workrequest
 export const useAddProcurementDetails = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: addProcurementDetails,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(data.slug) });
+      queryClient.invalidateQueries({
+        queryKey: workrequestKeys.detail(data.slug),
+      });
       toast.success('Procurement details added successfully', {
         duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+        icon: React.createElement(Check, {
+          className: 'h-4 w-4 text-green-500',
+        }),
       });
     },
     onError: (error) => {
       toast.error('Failed to add procurement details', {
         duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
       });
       console.error('Add procurement details error:', error);
     },

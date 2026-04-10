@@ -1,14 +1,12 @@
-import { Apartment } from "./apartment";
-import { Asset } from "./asset";
-import { Building } from "./building";
-import { Category } from "./category";
-import { Department } from "./department";
-import { Facility } from "./facility";
-import { Subcategory } from "./subcategory";
-import { User } from "./user";
-import { Vendor } from "./vendor";
+import { Asset } from './asset';
+import { Category } from './category';
+import { Department } from './department';
+import { Facility } from './facility';
+import { Subcategory } from './subcategory';
+import { User } from './user';
+import { Vendor } from './vendor';
 
-export interface ProcurementUser {
+export interface ShortUser {
   id: number;
   name: string;
   email: string;
@@ -29,7 +27,7 @@ export interface Workrequest {
   due_status: string;
   created_at: string;
   updated_at: string;
-  type: 'Work' | 'Procurement'; 
+  type: 'Work' | 'Procurement';
   work_request_number: string;
   slug: string;
   require_mobilization_fee: boolean;
@@ -41,7 +39,7 @@ export interface Workrequest {
   follow_up_notes: string;
   payment_requisition: boolean;
   vendor_description: string;
-  currency: 'USD' | 'EUR' | 'NGN'; 
+  currency: 'USD' | 'EUR' | 'NGN';
   cost: string;
   attach_po: string;
   category: number;

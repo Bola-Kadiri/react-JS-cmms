@@ -3,7 +3,7 @@ import { api } from './apiClient';
 import { Category } from '@/types/category';
 import { SubCat } from '@/types/category';
 
-const CATEGORIES_API_BASE = '/accounts/api/categories';
+const CATEGORIES_API_BASE = '/asset_inventory/api/asset-categories';
 
 export interface CategoriesResponse {
   count: number;
@@ -23,7 +23,7 @@ export interface CategoryQueryParams {
 export const fetchCategories = async (): Promise<CategoriesResponse> => {
   try {
     const response = await api.get(`${CATEGORIES_API_BASE}/`);
-    
+
     // Check if the response has pagination data
     if (response.data && typeof response.data === 'object') {
       // If the API returns an array directly instead of a paginated response
@@ -32,36 +32,35 @@ export const fetchCategories = async (): Promise<CategoriesResponse> => {
           count: response.data.length,
           next: null,
           previous: null,
-          results: response.data
+          results: response.data,
         };
       }
-      
+
       // If the API returns paginated data
       if (Array.isArray(response.data.results)) {
         return {
           count: response.data.count || response.data.results.length,
           next: response.data.next || null,
           previous: response.data.previous || null,
-          results: response.data.results
+          results: response.data.results,
         };
       }
     }
-    
+
     // Default fallback if the structure doesn't match expected format
     return {
       count: 0,
       next: null,
       previous: null,
-      results: []
+      results: [],
     };
-    
   } catch (error) {
     console.error('Error fetching categories:', error);
     return {
       count: 0,
       next: null,
       previous: null,
-      results: []
+      results: [],
     };
   }
 };
@@ -73,19 +72,36 @@ export const getCategory = async (id: string): Promise<Category> => {
 };
 
 // Create a new category
-export const createCategory = async (category: Omit<Category, 'id'>): Promise<Category> => {
+export const createCategory = async (
+  category: Omit<Category, 'id'>,
+): Promise<Category> => {
   const response = await api.post(CATEGORIES_API_BASE + '/', category);
   return response.data;
 };
 
 // Create a new sub category
-export const createSubCategory = async ({ id, subCat }: { id: string; subCat: Partial<SubCat> }): Promise<SubCat> => {
-  const response = await api.post(`${CATEGORIES_API_BASE}/${id}/subcategories/`, subCat);
+export const createSubCategory = async ({
+  id,
+  subCat,
+}: {
+  id: string;
+  subCat: Partial<SubCat>;
+}): Promise<SubCat> => {
+  const response = await api.post(
+    `${CATEGORIES_API_BASE}/${id}/subcategories/`,
+    subCat,
+  );
   return response.data;
 };
 
 // Update an existing category
-export const updateCategory = async ({ id, category }: { id: string; category: Partial<Category> }): Promise<Category> => {
+export const updateCategory = async ({
+  id,
+  category,
+}: {
+  id: string;
+  category: Partial<Category>;
+}): Promise<Category> => {
   const response = await api.put(`${CATEGORIES_API_BASE}/${id}/`, category);
   return response.data;
 };

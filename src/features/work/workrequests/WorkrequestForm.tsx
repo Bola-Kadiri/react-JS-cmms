@@ -11,10 +11,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Workrequest } from '@/types/workrequest';
-import { useWorkrequestQuery, useCreateWorkrequest, useUpdateWorkrequest, useAssetsByFacilityQuery, useBuildingsByFacilityQuery, useProcurementUsersQuery, useReviewersQuery } from '@/hooks/workrequest/useWorkrequestQueries';
+import { useWorkrequestQuery, useCreateWorkrequest, useUpdateWorkrequest, useAssetsByFacilityQuery, useBuildingsByFacilityQuery, useProcurementUsersQuery, useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { useCategoriesQuery } from '@/hooks/category/useCategoryQueries';
 import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
-import { useList } from '@/hooks/crud/useCrudOperations';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
@@ -152,7 +151,7 @@ const WorkrequestForm = () => {
   console.log(procurement)
 
   // Fetch approvers (users with APPROVER role)
-  const { data: approvers = [] } = useList('approvers', 'accounts/api/users/?role=APPROVER');
+  const { data: approvers = [] } = useApproversQuery();
 
   // Get subcategories from the selected category
   const selectedCategoryData = categoriesData.results.find(cat => cat.id === selectedCategory);
@@ -367,7 +366,7 @@ const WorkrequestForm = () => {
                           <SelectContent>
                             {categoriesData?.results.map(category => (
                               <SelectItem key={category.id} value={String(category.id)}>
-                                {category.code}
+                                {category.description}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -397,7 +396,7 @@ const WorkrequestForm = () => {
                           <SelectContent>
                             {availableSubcategories.map(subcat => (
                               <SelectItem key={subcat.id} value={String(subcat.id)}>
-                                {subcat.title}
+                                {subcat.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

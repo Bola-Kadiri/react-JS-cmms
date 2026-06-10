@@ -1,39 +1,57 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  AlertTriangle, 
-  Building, 
-  Wrench, 
-  Banknote, 
-  Tag, 
-  User, 
-  Users, 
-  Briefcase, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
+  AlertTriangle,
+  Building,
+  Wrench,
+  Banknote,
+  Tag,
+  User,
+  Users,
+  Briefcase,
   CheckCircle2,
+  XCircle,
   FileText,
   Download,
   Eye,
   File,
   Image as ImageIcon,
-  Paperclip
+  Paperclip,
+  ShieldCheck,
 } from 'lucide-react';
-import { useWorkorderQuery, useApproveByApprover, useApproveByReviewer } from '@/hooks/workorder/useWorkorderQueries';
+import { useWorkorderQuery, useUnlockResubmission } from '@/hooks/workorder/useWorkorderQueries';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { usePermissions } from '@/contexts/PermissionsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import WorkorderPrintView from './WorkorderPrintView';
+import { WorkorderApprovalForm, WorkorderApprovalAction } from './WorkorderApprovalForm';
+
+const PIPELINE_STEPS = [
+  { label: 'Pending', status: 'Pending' },
+  { label: 'Reviewed', status: 'Reviewed' },
+  { label: 'Approved', status: 'Approved' },
+];
+
+const REJECTED_STATUSES = ['Reviewer Rejected', 'Approver Rejected'];
 
 const WorkorderDetailView = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { userRole } = usePermissions();
-  
+  const { user } = useAuth();
+  const currentUserId = Number(user?.id);
+
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [approvalAction, setApprovalAction] = useState<WorkorderApprovalAction>('reviewer-approve');
+
   // Using our custom hook instead of direct query
   const {
     data: workorder,
@@ -42,28 +60,25 @@ const WorkorderDetailView = () => {
     error
   } = useWorkorderQuery(slug);
 
-  // Hooks for approve and review actions
-  const approveByApproverMutation = useApproveByApprover(slug);
-  const approveByReviewerMutation = useApproveByReviewer(slug);
+  const unlockResubmissionMutation = useUnlockResubmission(slug);
 
-  // Handle back button click
   const handleBack = () => {
     navigate('/dashboard/work/orders');
   };
 
-  // Handle edit button click
   const handleEdit = (slug: string) => {
     navigate(`/dashboard/work/orders/edit/${slug}`);
   };
 
-  // Handle approve button click
-  const handleApprove = () => {
-    approveByApproverMutation.mutate();
+  const openApprovalModal = (action: WorkorderApprovalAction) => {
+    setApprovalAction(action);
+    setIsApprovalModalOpen(true);
   };
 
-  // Handle review button click
-  const handleReview = () => {
-    approveByReviewerMutation.mutate();
+  const getPipelineStep = (currentStatus: string): number => {
+    const order = ['Pending', 'Reviewed', 'Approved'];
+    const idx = order.indexOf(currentStatus);
+    return idx >= 0 ? idx : 0;
   };
 
   // Get priority badge styles
@@ -145,6 +160,12 @@ const WorkorderDetailView = () => {
     );
   }
 
+  const isOwner = !!(user && workorder && workorder.requester === (user as any).id);
+  const isAdmin = ['SUPER ADMIN', 'ADMIN'].includes(userRole);
+  const isRaisePaymentRequester = workorder.type === 'RAISE-PAYMENT' && userRole === 'REQUESTER';
+  const isRejected = REJECTED_STATUSES.includes(workorder.approval_status);
+  const currentStep = getPipelineStep(workorder.approval_status);
+
   return (
     <div className="container mx-auto py-6">
       {/* Header */}
@@ -179,46 +200,54 @@ const WorkorderDetailView = () => {
             )}
           </div>
           
-          {/* Review Button - Only visible to REVIEWER role */}
-          {!workorder.is_reviewed && userRole === 'REVIEWER' && (
-            <Button 
-              onClick={handleReview}
-              disabled={approveByReviewerMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {approveByReviewerMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Reviewing...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Review
-                </>
-              )}
-            </Button>
+          {/* Reviewer action buttons — shown when not yet reviewed and user is a reviewer */}
+          {!workorder.is_reviewed && (
+            userRole === 'REVIEWER' ||
+            userRole === 'ADMIN' ||
+            userRole === 'SUPER ADMIN' ||
+            workorder.reviewers?.includes(currentUserId)
+          ) && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => openApprovalModal('reviewer-approve')}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Approve Review
+              </Button>
+              <Button
+                onClick={() => openApprovalModal('reviewer-reject')}
+                variant="destructive"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </div>
           )}
-          
-          {/* Approve Button - Only visible to APPROVER role */}
-          {!workorder.is_approved && workorder.is_reviewed && userRole === 'APPROVER' && (
-            <Button 
-              onClick={handleApprove}
-              disabled={approveByApproverMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {approveByApproverMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Approving...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Approve
-                </>
-              )}
-            </Button>
+
+          {/* Approver action buttons — shown after review and user is the approver */}
+          {workorder.is_reviewed && !workorder.is_approved && (
+            userRole === 'APPROVER' ||
+            userRole === 'ADMIN' ||
+            userRole === 'SUPER ADMIN' ||
+            workorder.approver === currentUserId
+          ) && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => openApprovalModal('approver-approve')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Approve
+              </Button>
+              <Button
+                onClick={() => openApprovalModal('approver-reject')}
+                variant="destructive"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </div>
           )}
           
           {/* Print/Download Button */}
@@ -234,6 +263,105 @@ const WorkorderDetailView = () => {
           </PermissionGuard>
         </div>
       </div>
+
+      {/* Pipeline stepper — visible to owner (requester), admin, and RAISE-PAYMENT requester */}
+      {(isOwner || isAdmin || isRaisePaymentRequester) && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            {PIPELINE_STEPS.map((step, idx) => {
+              const isActive = workorder.approval_status === step.status;
+              const isPast = !isRejected && currentStep > idx;
+              const isFullyApproved = workorder.approval_status === 'Approved';
+              return (
+                <div key={step.status} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center flex-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                      ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
+                        isActive ? 'bg-blue-600 text-white' :
+                        isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
+                        'bg-gray-200 text-gray-500'}`}>
+                      {(isFullyApproved && idx < 3) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                    </div>
+                    <span className={`text-xs mt-1 text-center font-medium
+                      ${isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {idx < PIPELINE_STEPS.length - 1 && (
+                    <div className={`h-0.5 flex-1 mx-2 ${isPast || isFullyApproved ? 'bg-green-400' : 'bg-gray-200'}`} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {isRejected && (
+            <p className="text-xs text-red-600 text-center mt-2 font-medium">
+              Pipeline paused — {workorder.approval_status}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Rejection banner */}
+      {isRejected && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-red-600" />
+              <h3 className="text-red-800 font-semibold text-base">{workorder.approval_status}</h3>
+            </div>
+            {isAdmin && (workorder as any).allow_resubmission && (
+              <span className="text-xs bg-green-100 text-green-700 border border-green-300 rounded px-2 py-1 font-medium">
+                Resubmission Unlocked
+              </span>
+            )}
+          </div>
+          {workorder.reviewer_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Reviewer reason: </span>
+              <span className="text-sm text-red-900">{workorder.reviewer_reason}</span>
+            </div>
+          )}
+          {workorder.approver_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Approver reason: </span>
+              <span className="text-sm text-red-900">{workorder.approver_reason}</span>
+            </div>
+          )}
+          {isAdmin && !(workorder as any).allow_resubmission && (
+            <div className="mt-4 pt-4 border-t border-red-200">
+              <p className="text-xs text-red-700 mb-3">
+                This work order is rejected. If the requester should be allowed to raise a new work order from the same source, unlock resubmission below.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-400 text-red-700 hover:bg-red-100"
+                disabled={unlockResubmissionMutation.isPending}
+                onClick={() => unlockResubmissionMutation.mutate()}
+              >
+                {unlockResubmissionMutation.isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                Unlock Resubmission
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Approved banner */}
+      {workorder.approval_status === 'Approved' && (
+        <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck className="h-5 w-5 text-green-700" />
+            <h3 className="text-green-800 font-semibold text-base">Work Order Fully Approved</h3>
+          </div>
+          {workorder.digital_signature && (
+            <p className="text-sm text-green-900">
+              <span className="font-medium">Signed by:</span> {workorder.digital_signature}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Tabbed Content */}
       <Tabs defaultValue="overview" className="w-full">
@@ -364,7 +492,7 @@ const WorkorderDetailView = () => {
                 {workorder.subcategory_detail && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">Subcategory</p>
-                    <p className="text-base font-medium text-gray-900">{workorder.subcategory_detail.title}</p>
+                    <p className="text-base font-medium text-gray-900">{workorder.subcategory_detail.name}</p>
                   </div>
                 )}
                 {workorder.priority && (
@@ -695,6 +823,16 @@ const WorkorderDetailView = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {workorder && (
+        <WorkorderApprovalForm
+          isOpen={isApprovalModalOpen}
+          onClose={() => setIsApprovalModalOpen(false)}
+          workorderSlug={workorder.slug}
+          workorderNumber={workorder.work_order_number}
+          action={approvalAction}
+        />
+      )}
     </div>
   );
 };

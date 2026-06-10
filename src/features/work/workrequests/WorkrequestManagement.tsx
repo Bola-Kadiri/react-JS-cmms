@@ -10,8 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useWorkrequestsQuery, useDeleteWorkrequest, useProcurementWorkrequestsQuery } from '@/hooks/workrequest/useWorkrequestQueries';
-import { Workrequest } from '@/types/workrequest';
-import { WorkrequestQueryParams, ProcurementWorkrequest } from '@/services/workrequestsApi';
+import { Workrequest, REJECTED_STATUSES } from '@/types/workrequest';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -31,6 +30,7 @@ const WorkrequestManagement = () => {
 
   // Check if user is PROCUREMENT AND STORE
   const isProcurementUser = (user?.role || '').toUpperCase() === 'PROCUREMENT AND STORE';
+  const isSuperAdmin = (user?.role || '').toUpperCase() === 'SUPER ADMIN';
 
   // Get filters from URL params
   const urlApprovalStatus = searchParams.get('approval_status');
@@ -92,7 +92,15 @@ const WorkrequestManagement = () => {
 
     // Apply URL-based filters first
     if (urlApprovalStatus) {
-      results = results.filter(workrequest => workrequest.approval_status === urlApprovalStatus);
+      if (urlApprovalStatus === 'rejected') {
+        results = results.filter(workrequest => REJECTED_STATUSES.includes(workrequest.approval_status));
+      } else if (urlApprovalStatus === 'awaiting') {
+        results = results.filter(workrequest =>
+          ['Pending Review', 'CP Approved', 'Reviewed'].includes(workrequest.approval_status)
+        );
+      } else {
+        results = results.filter(workrequest => workrequest.approval_status === urlApprovalStatus);
+      }
     }
 
     if (urlDueStatus) {
@@ -102,14 +110,11 @@ const WorkrequestManagement = () => {
     if (urlApprovalStatusPo !== null) {
       const approvalStatusPo = urlApprovalStatusPo === 'true';
       results = results.filter(workrequest => {
-        // approval_status_po=true means awaiting PO approval (reviewed but not approved)
-        // approval_status_po=false means new/awaiting review (not yet reviewed)
+        const itemPoStatus = workrequest.approval_status_po ?? false;
         if (approvalStatusPo) {
-          // Awaiting Approval: Pending status and has been reviewed
-          return workrequest.approval_status === 'Pending' && workrequest.approval_status_po === true;
+          return workrequest.approval_status === 'Pending' && itemPoStatus === true;
         } else {
-          // New-Awaiting Review: Pending status and not yet reviewed
-          return workrequest.approval_status === 'Pending' && workrequest.approval_status_po === false;
+          return workrequest.approval_status === 'Pending' && itemPoStatus === false;
         }
       });
     }
@@ -356,7 +361,6 @@ const WorkrequestManagement = () => {
             <TableHeader>
               <TableRow className="bg-green-50 border-b border-green-100">
                 <TableHead className="font-semibold text-green-800 py-4">Type</TableHead>
-                <TableHead className="font-semibold text-green-800">Cost</TableHead>
                 <TableHead className="font-semibold text-green-800">Category</TableHead>
                 <TableHead className="font-semibold text-green-800">Facility</TableHead>
                 <TableHead className="font-semibold text-green-800">Asset</TableHead>
@@ -389,11 +393,6 @@ const WorkrequestManagement = () => {
                       <Badge variant="outline" className={getTypeBadgeStyles(workrequest.type)}>
                         {workrequest.type}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div>
-                        <p className="font-medium text-gray-900">{workrequest?.cost || '-'}</p>
-                      </div>
                     </TableCell>
                     <TableCell className="font-medium">
                       <div>
@@ -442,7 +441,7 @@ const WorkrequestManagement = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </PermissionGuard>
-                        {workrequest?.approval_status === 'Pending' && (<PermissionGuard feature='work_request' permission='edit'>
+                        {!workrequest?.is_locked && (<PermissionGuard feature='work_request' permission='edit'>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -453,7 +452,7 @@ const WorkrequestManagement = () => {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </PermissionGuard>)}
-                        <PermissionGuard feature='work_request' permission='edit'>
+                        {isSuperAdmin && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -463,7 +462,7 @@ const WorkrequestManagement = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </PermissionGuard>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

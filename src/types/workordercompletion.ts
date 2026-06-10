@@ -13,7 +13,9 @@ export interface WorkOrderCompletion {
   resources_data: ResourceData[];
   created_at: string;
   updated_at: string;
-  approval_status: "Pending" | "Approved" | "Rejected";
+  approval_status: "Pending" | "Reviewed" | "Approved" | "Reviewer Rejected" | "Approver Rejected";
+  reviewer_notes: string | null;
+  approver_notes: string | null;
   start_date: string;
   due_date: string;
   owner: number;

@@ -1,288 +1,383 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  AlertTriangle, 
-  Clock, 
-  CalendarDays, 
-  Building, 
-  Home, 
-  Wrench, 
-  FileText, 
-  Banknote, 
-  Tag, 
-  User, 
-  Users, 
-  Briefcase, 
-  CheckCircle2, 
-  XCircle,
-  FileBox,
-  MapPin,
-  Settings,
-  FileCheck,
-  Package,
-  CheckCircle
-} from "lucide-react";
-import { useWorkrequestQuery, useRejectWorkrequest } from '@/hooks/workrequest/useWorkrequestQueries';
+import {
+  ArrowLeft, Edit, Loader2, AlertTriangle, Clock, CalendarDays, FileText,
+  Banknote, Tag, User, Users, Briefcase, CheckCircle2, XCircle, FileBox,
+  MapPin, Settings, FileCheck, Package, CheckCircle, RefreshCw, ShieldCheck,
+} from 'lucide-react';
+import {
+  useWorkrequestQuery,
+  useResubmitWorkrequest,
+} from '@/hooks/workrequest/useWorkrequestQueries';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
-import { ApprovalForm } from './components/ApprovalForm'
-import { ProcurementForm } from './components/ProcurementForm'
+import { ApprovalForm, ApprovalAction } from './components/ApprovalForm';
+import { ProcurementForm, CpAction } from './components/ProcurementForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import WorkrequestPrintView from './WorkrequestPrintView';
+import { REJECTED_STATUSES } from '@/types/workrequest';
+
+const PIPELINE_STEPS = [
+  { label: 'Pending Review', status: 'Pending Review' },
+  { label: 'CP Approved', status: 'CP Approved' },
+  { label: 'Reviewed', status: 'Reviewed' },
+  { label: 'Fully Approved', status: 'Fully Approved' },
+];
 
 const WorkrequestDetailView = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [approvalFormOpen, setApprovalFormOpen] = useState(false);
-  const [procurementFormOpen, setProcurementFormOpen] = useState(false);
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  
-  // Using our custom hooks
   const { user } = useAuth();
-  const isReviewer = (user?.role || '').toUpperCase() === 'REVIEWER';
-  
-  const {
-    data: workrequest,
-    isLoading,
-    isError,
-    error
-  } = useWorkrequestQuery(slug);
-  
-  const rejectMutation = useRejectWorkrequest();
 
-  // Handle back button click
-  const handleBack = () => {
-    navigate('/dashboard/work/requests');
-  };
+  const [approvalAction, setApprovalAction] = useState<ApprovalAction | null>(null);
+  const [procurementAction, setProcurementAction] = useState<CpAction | null>(null);
 
-  // Handle edit button click
-  const handleEdit = (slug: string) => {
-    navigate(`/dashboard/work/requests/edit/${slug}`);
-  };
+  const userRole = (user?.role || '').toUpperCase();
+  const isAdmin = ['SUPER ADMIN', 'ADMIN'].includes(userRole);
+  const isProcurement = userRole === 'PROCUREMENT AND STORE';
+  const isReviewer = userRole === 'REVIEWER';
+  const isApprover = userRole === 'APPROVER';
 
-  // Handle approve button click
-  const handleApprove = () => {
-    setApprovalFormOpen(true);
-  };
+  const { data: workrequest, isLoading, isError, error } = useWorkrequestQuery(slug);
+  const resubmitMutation = useResubmitWorkrequest();
 
-  // Handle procurement details button click
-  const handleProcurementDetails = () => {
-    setProcurementFormOpen(true);
-  };
+  const isOwner = !!(user && workrequest && workrequest.requester === (user as any).id);
+  const isRejected = workrequest ? REJECTED_STATUSES.includes(workrequest.approval_status) : false;
 
-  // Handle reject button click
-  const handleReject = () => {
-    setRejectDialogOpen(true);
-  };
+  const handleBack = () => navigate('/dashboard/work/requests');
+  const handleEdit = (s: string) => navigate(`/dashboard/work/requests/edit/${s}`);
+  const handleResubmit = () => { if (slug) resubmitMutation.mutate(slug); };
 
-  // Confirm rejection
-  const confirmReject = () => {
-    if (slug && rejectionReason.trim()) {
-      rejectMutation.mutate(
-        { slug, rejection_reason: rejectionReason },
-        {
-          onSuccess: () => {
-            setRejectDialogOpen(false);
-            setRejectionReason('');
-          },
-        }
-      );
-    }
-  };
-
-  // Get type badge styles
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'Work':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200 font-medium">{type}</Badge>;
-      case 'Procurement':
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800 hover:bg-purple-100 border-purple-200 font-medium">{type}</Badge>;
-      default:
-        return <Badge variant="outline" className="font-medium">{type}</Badge>;
-    }
-  };
-
-  // Get priority badge styles  
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200 font-medium">{priority}</Badge>;
-      case 'Medium':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200 font-medium">{priority}</Badge>;
-      case 'Low':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200 font-medium">{priority}</Badge>;
-      default:
-        return <Badge variant="outline" className="font-medium">{priority}</Badge>;
-    }
-  };
-
-  // Get approval status badge styles
-  const getApprovalStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Approved':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200 font-medium">{status}</Badge>;
-      case 'Pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200 font-medium">{status}</Badge>;
-      case 'Rejected':
-        return <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200 font-medium">{status}</Badge>;
-      default:
-        return <Badge variant="outline" className="font-medium">{status}</Badge>;
-    }
-  };
-
-  // Format currency with symbol
-  const formatCurrency = (cost: string, currency: string) => {
-    const symbols = {
-      'USD': '$',
-      'EUR': '€',
-      'NGN': '₦'
+  const getStatusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      'Pending Review': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'CP Approved': 'bg-blue-100 text-blue-800 border-blue-200',
+      'Reviewed': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'Fully Approved': 'bg-green-100 text-green-800 border-green-200',
+      'Rejected – Vendor Changed': 'bg-red-100 text-red-800 border-red-200',
+      'Reviewer Rejected': 'bg-red-100 text-red-800 border-red-200',
+      'Approver Rejected': 'bg-red-100 text-red-800 border-red-200',
     };
-    
-    const symbol = symbols[currency as keyof typeof symbols] || '';
-    return `${symbol}${cost}`;
+    return (
+      <Badge variant="outline" className={`${map[status] || 'bg-gray-100 text-gray-800 border-gray-200'} font-medium`}>
+        {status}
+      </Badge>
+    );
   };
 
-  // Get date formatted
+  const getTypeBadge = (type: string) => {
+    const styles: Record<string, string> = {
+      Work: 'bg-blue-100 text-blue-800 border-blue-200',
+      Procument: 'bg-purple-100 text-purple-800 border-purple-200',
+    };
+    return <Badge variant="outline" className={`${styles[type] || ''} font-medium`}>{type}</Badge>;
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const styles: Record<string, string> = {
+      High: 'bg-red-100 text-red-800 border-red-200',
+      Medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      Low: 'bg-green-100 text-green-800 border-green-200',
+    };
+    return <Badge variant="outline" className={`${styles[priority] || ''} font-medium`}>{priority}</Badge>;
+  };
+
+  const formatCurrency = (cost: string, currency: string) => {
+    const symbols: Record<string, string> = { USD: '$', EUR: '€', NGN: '₦' };
+    return `${symbols[currency] || ''}${cost}`;
+  };
+
   const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'PPP');
-    } catch (e) {
-      return 'Invalid date';
-    }
+    try { return format(new Date(dateString), 'PPP p'); } catch { return 'N/A'; }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-muted-foreground">Loading work request details...</p>
-        </div>
-      </div>
-    );
-  }
+  const getPipelineStep = (currentStatus: string): number => {
+    const order = ['Pending Review', 'CP Approved', 'Reviewed', 'Fully Approved'];
+    const idx = order.indexOf(currentStatus);
+    return idx >= 0 ? idx : 0;
+  };
 
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Error loading work request details</div>
-        <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
-        </p>
-        <Button onClick={handleBack} variant="outline">
-          Back to Work Requests
-        </Button>
+  if (isLoading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="flex flex-col items-center gap-2">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        <p className="text-sm text-muted-foreground">Loading work request...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (!workrequest) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Work request not found</div>
-        <Button onClick={handleBack} variant="outline">
-          Back to Work Requests
-        </Button>
-      </div>
-    );
-  }
+  if (isError) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-4">
+      <AlertTriangle className="h-12 w-12 text-red-500" />
+      <div className="text-red-500 text-xl">Error loading work request</div>
+      <p className="text-sm text-muted-foreground mb-4">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      <Button onClick={handleBack} variant="outline">Back to Work Requests</Button>
+    </div>
+  );
+
+  if (!workrequest) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-4">
+      <AlertTriangle className="h-12 w-12 text-red-500" />
+      <div className="text-red-500 text-xl">Work request not found</div>
+      <Button onClick={handleBack} variant="outline">Back to Work Requests</Button>
+    </div>
+  );
+
+  const currentStep = getPipelineStep(workrequest.approval_status);
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex items-center justify-between mb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleBack}
-            className="border-green-200 text-green-700 hover:bg-green-50"
-          >
+          <Button variant="outline" size="icon" onClick={handleBack} className="border-green-200 text-green-700 hover:bg-green-50">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Work Request #{workrequest.work_request_number}</h1>
-            <p className="text-gray-600 text-base mt-1">Created on {formatDate(workrequest.created_at)}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Work Request {workrequest.work_request_number}</h1>
+            <p className="text-gray-600 text-base mt-1">Created {formatDate(workrequest.created_at)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <div className="flex items-center gap-2 mb-2">
-              {getTypeBadge(workrequest.type)}
-              {getPriorityBadge(workrequest.priority)}
-              {getApprovalStatusBadge(workrequest.approval_status)}
-            </div>
+
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <div className="flex items-center gap-2">
+            {getTypeBadge(workrequest.type)}
+            {getPriorityBadge(workrequest.priority)}
+            {getStatusBadge(workrequest.approval_status)}
           </div>
-          <div className="flex items-center gap-3">
-            {/* Print/Download Button */}
-            <WorkrequestPrintView workrequest={workrequest} />
-            {workrequest?.approval_status === 'Pending' && workrequest?.cost && (<PermissionGuard feature='work_request' permission='review'>
-              <Button 
-                onClick={handleApprove}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
-              >
-                <CheckCircle className="mr-2 h-4 w-4" /> Approve Request
+
+          <WorkrequestPrintView workrequest={workrequest} />
+
+          {/* Procurement & Store actions — Pending Review */}
+          {workrequest.approval_status === 'Pending Review' && (isProcurement || isAdmin) && (
+            <>
+              <Button onClick={() => setProcurementAction('cp-approve')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Package className="mr-2 h-4 w-4" /> Approve & Generate PO
               </Button>
-            </PermissionGuard>)}
-            {workrequest?.approval_status === 'Pending' && workrequest?.cost && isReviewer && (
-              <Button 
-                onClick={handleReject}
-                variant="destructive"
-                className="px-6"
-              >
-                <XCircle className="mr-2 h-4 w-4" /> Reject Request
+              <Button onClick={() => setProcurementAction('cp-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" /> Reject — Vendor Issue
               </Button>
-            )}
-            {workrequest?.approval_status === 'Pending' && workrequest?.cost === null && (
-              <PermissionGuard feature='work_request' permission='costing'>
-              <Button 
-                onClick={handleProcurementDetails}
-                className="bg-green-600 hover:bg-green-700 text-white px-6"
-              >
-                <Package className="mr-2 h-4 w-4" /> Add Procurement Details
+            </>
+          )}
+
+          {/* Reviewer actions — CP Approved */}
+          {workrequest.approval_status === 'CP Approved' && (isReviewer || isAdmin) && (
+            <>
+              <Button onClick={() => setApprovalAction('reviewer-approve')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <CheckCircle className="mr-2 h-4 w-4" /> Approve
               </Button>
-            </PermissionGuard>
-            )}
-            <PermissionGuard feature='work_request' permission='edit'>
-              {workrequest?.approval_status === 'Pending' && (<Button onClick={() => handleEdit(workrequest.slug)} className="bg-green-600 hover:bg-green-700 text-white px-6">
-                <Edit className="mr-2 h-4 w-4" /> Edit Request
-              </Button>)}
-            </PermissionGuard>
-          </div>
+              <Button onClick={() => setApprovalAction('reviewer-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" /> Reject
+              </Button>
+            </>
+          )}
+
+          {/* Approver actions — Reviewed */}
+          {workrequest.approval_status === 'Reviewed' && (isApprover || isAdmin) && (
+            <>
+              <Button onClick={() => setApprovalAction('final-approve')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <ShieldCheck className="mr-2 h-4 w-4" /> Final Approval
+              </Button>
+              <Button onClick={() => setApprovalAction('final-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" /> Reject
+              </Button>
+            </>
+          )}
+
+          {/* Requester: edit + resubmit after any rejection */}
+          {isRejected && !workrequest.is_locked && (isOwner || isAdmin) && (
+            <>
+              <PermissionGuard feature="work_request" permission="edit">
+                <Button onClick={() => handleEdit(workrequest.slug)} className="bg-green-600 hover:bg-green-700 text-white">
+                  <Edit className="mr-2 h-4 w-4" /> Edit & Correct
+                </Button>
+              </PermissionGuard>
+              <Button
+                onClick={handleResubmit}
+                disabled={resubmitMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {resubmitMutation.isPending
+                  ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  : <RefreshCw className="mr-2 h-4 w-4" />
+                }
+                Resubmit
+              </Button>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Pipeline stepper — visible to Requester (owner) and Admin only */}
+      {(isOwner || isAdmin) && <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          {PIPELINE_STEPS.map((step, idx) => {
+            const isActive = workrequest.approval_status === step.status;
+            const isPast = !isRejected && currentStep > idx;
+            const isFullyApproved = workrequest.approval_status === 'Fully Approved';
+            return (
+              <div key={step.status} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                    ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
+                      isActive ? 'bg-blue-600 text-white' :
+                      isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
+                      'bg-gray-200 text-gray-500'}`}>
+                    {(isFullyApproved && idx < 4) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                  </div>
+                  <span className={`text-xs mt-1 text-center font-medium
+                    ${isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                    {step.label}
+                  </span>
+                </div>
+                {idx < PIPELINE_STEPS.length - 1 && (
+                  <div className={`h-0.5 flex-1 mx-2 ${isPast || isFullyApproved ? 'bg-green-400' : 'bg-gray-200'}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {isRejected && (
+          <p className="text-xs text-red-600 text-center mt-2 font-medium">
+            Pipeline paused — {workrequest.approval_status}
+          </p>
+        )}
+      </div>}
+
+      {/* Rejection banner */}
+      {isRejected && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <XCircle className="h-5 w-5 text-red-600" />
+            <h3 className="text-red-800 font-semibold text-base">{workrequest.approval_status}</h3>
+          </div>
+          {workrequest.cp_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Procurement & Store reason: </span>
+              <span className="text-sm text-red-900">{workrequest.cp_reason}</span>
+            </div>
+          )}
+          {workrequest.po_vendor_detail && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Suggested alternative vendor: </span>
+              <span className="text-sm text-red-900">{workrequest.po_vendor_detail.name}</span>
+            </div>
+          )}
+          {workrequest.reviewer_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Reviewer reason: </span>
+              <span className="text-sm text-red-900">{workrequest.reviewer_reason}</span>
+            </div>
+          )}
+          {workrequest.approver_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Approver reason: </span>
+              <span className="text-sm text-red-900">{workrequest.approver_reason}</span>
+            </div>
+          )}
+          {!workrequest.is_locked && (isOwner || isAdmin) && (
+            <p className="text-sm text-red-700 mt-3 font-medium">
+              Correct the issue above, then click "Edit & Correct" → "Resubmit" to restart the pipeline.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Fully approved banner */}
+      {workrequest.approval_status === 'Fully Approved' && (
+        <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck className="h-5 w-5 text-green-700" />
+            <h3 className="text-green-800 font-semibold text-base">Committed to Ledger — Fully Approved</h3>
+          </div>
+          {workrequest.digital_signature && (
+            <p className="text-sm text-green-900 mb-1">
+              <span className="font-medium">Signed by:</span> {workrequest.digital_signature}
+            </p>
+          )}
+          {workrequest.fully_approved_at && (
+            <p className="text-sm text-green-900">
+              <span className="font-medium">Approved at:</span> {formatDate(workrequest.fully_approved_at)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Three-way audit panel for Reviewer */}
+      {workrequest.approval_status === 'CP Approved' && (isReviewer || isAdmin) && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-5 mb-6">
+          <h3 className="text-indigo-800 font-semibold text-base mb-4 flex items-center gap-2">
+            <FileCheck className="h-5 w-5" /> Three-Way Audit Checklist
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border border-indigo-100 rounded-lg p-4">
+              <p className="text-xs font-semibold text-indigo-600 uppercase mb-2">1. Original Request</p>
+              <p className="text-sm font-medium text-gray-900">{workrequest.description || 'N/A'}</p>
+              <p className="text-xs text-gray-500 mt-1">Vendor: {workrequest.vendor_detail?.name || 'N/A'}</p>
+            </div>
+            <div className="bg-white border border-indigo-100 rounded-lg p-4">
+              <p className="text-xs font-semibold text-indigo-600 uppercase mb-2">2. Purchase Order</p>
+              {workrequest.po_number ? (
+                <>
+                  <p className="text-sm font-medium text-gray-900 font-mono">{workrequest.po_number}</p>
+                  <p className="text-xs text-gray-500 mt-1">PO Vendor: {workrequest.po_vendor_detail?.name || workrequest.vendor_detail?.name || 'N/A'}</p>
+                  {workrequest.po_document && (
+                    <a
+                      href={workrequest.po_document}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-indigo-700 underline font-medium mt-2"
+                    >
+                      <FileText className="h-3 w-3" /> View PO Document
+                    </a>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-gray-400">No PO uploaded yet</p>
+              )}
+            </div>
+            <div className="bg-white border border-indigo-100 rounded-lg p-4">
+              <p className="text-xs font-semibold text-indigo-600 uppercase mb-2">3. Vendor Invoice</p>
+              {workrequest.vendor_invoice ? (
+                <a
+                  href={workrequest.vendor_invoice}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-indigo-700 underline font-medium"
+                >
+                  View Invoice Document
+                </a>
+              ) : (
+                <p className="text-sm text-gray-400">No invoice uploaded</p>
+              )}
+              {workrequest.invoice_no && (
+                <p className="text-xs text-gray-500 mt-1">Invoice No: {workrequest.invoice_no}</p>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-indigo-600 mt-4">
+            Verify all three match before approving. If there is a discrepancy, reject with a specific reason.
+          </p>
+        </div>
+      )}
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="mb-8 bg-green-50 border-green-200">
           <TabsTrigger value="overview" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Overview</TabsTrigger>
-          <TabsTrigger value="details" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Details</TabsTrigger>
           <TabsTrigger value="location" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Location & Asset</TabsTrigger>
           <TabsTrigger value="financial" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Financial</TabsTrigger>
           <TabsTrigger value="assignments" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">People & Vendors</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
-          {/* Description Card */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <FileText className="h-5 w-5" />
-                Description
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><FileText className="h-5 w-5" />Description</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line">
@@ -291,51 +386,39 @@ const WorkrequestDetailView = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Overview Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Request Information */}
             <Card className="border-green-200 shadow-lg">
               <CardHeader className="pb-4 bg-green-50 border-b border-green-100">
-                <CardTitle className="text-lg flex items-center gap-2 text-green-800">
-                  <FileBox className="h-5 w-5" />
-                  Request Information
-                </CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2 text-green-800"><FileBox className="h-5 w-5" />Request Information</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Request Number</p>
-                  <p className="text-lg font-semibold text-gray-900">{workrequest.work_request_number}</p>
+                  <p className="text-lg font-semibold text-gray-900 font-mono">{workrequest.work_request_number}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Type</p>
-                  <div>{getTypeBadge(workrequest.type)}</div>
+                  {getTypeBadge(workrequest.type)}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Priority</p>
-                  <div>{getPriorityBadge(workrequest.priority)}</div>
+                  {getPriorityBadge(workrequest.priority)}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Approval Status</p>
-                  <div>{getApprovalStatusBadge(workrequest.approval_status)}</div>
+                  {getStatusBadge(workrequest.approval_status)}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Category Information */}
             <Card className="border-green-200 shadow-lg">
               <CardHeader className="pb-4 bg-green-50 border-b border-green-100">
-                <CardTitle className="text-lg flex items-center gap-2 text-green-800">
-                  <Tag className="h-5 w-5" />
-                  Category Information
-                </CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2 text-green-800"><Tag className="h-5 w-5" />Category</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Category</p>
-                  <p className="text-base font-medium text-gray-900">{workrequest.category_detail?.title || 'N/A'}</p>
-                  {workrequest.category_detail?.code && (
-                    <p className="text-sm text-gray-500">{workrequest.category_detail.code}</p>
-                  )}
+                  <p className="text-base font-medium text-gray-900">{workrequest.category_detail?.description || workrequest.category_detail?.name || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Subcategory</p>
@@ -348,35 +431,24 @@ const WorkrequestDetailView = () => {
               </CardContent>
             </Card>
 
-            {/* Financial Summary */}
             <Card className="border-green-200 shadow-lg">
               <CardHeader className="pb-4 bg-green-50 border-b border-green-100">
-                <CardTitle className="text-lg flex items-center gap-2 text-green-800">
-                  <Banknote className="h-5 w-5" />
-                  Financial Summary
-                </CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2 text-green-800"><Banknote className="h-5 w-5" />Financial Summary</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Cost</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(workrequest.cost, workrequest.currency)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Currency</p>
-                  <p className="text-base font-medium text-gray-900">{workrequest.currency}</p>
-                </div>
-
+                {workrequest.po_number && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">PO Number</p>
+                    <p className="text-base font-semibold text-gray-900 font-mono">{workrequest.po_number}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Timeline */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <CalendarDays className="h-5 w-5" />
-                Timeline
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><CalendarDays className="h-5 w-5" />Timeline</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-6">
@@ -385,57 +457,44 @@ const WorkrequestDetailView = () => {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     </div>
-                    <div className="w-px h-12 bg-gray-300 mt-2"></div>
+                    <div className="w-px h-12 bg-gray-300 mt-2" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Work Request Created</h3>
-                    <time className="text-sm text-gray-500">
-                      {formatDate(workrequest.created_at)}
-                    </time>
-                    <p className="mt-1 text-sm text-gray-700">{workrequest.type} work request was created</p>
+                    <h3 className="text-base font-semibold text-gray-900">Submitted</h3>
+                    <time className="text-sm text-gray-500">{formatDate(workrequest.created_at)}</time>
+                    <p className="mt-1 text-sm text-gray-700">{workrequest.type} work request submitted by requester</p>
                   </div>
                 </div>
-                
                 <div className="flex items-start">
                   <div className="flex flex-col items-center mr-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
                       <Clock className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div className="w-px h-12 bg-gray-300 mt-2"></div>
+                    <div className="w-px h-12 bg-gray-300 mt-2" />
                   </div>
                   <div>
                     <h3 className="text-base font-semibold text-gray-900">Last Updated</h3>
-                    <time className="text-sm text-gray-500">
-                      {formatDate(workrequest.updated_at)}
-                    </time>
-                    <p className="mt-1 text-sm text-gray-700">Work request was last updated</p>
+                    <time className="text-sm text-gray-500">{formatDate(workrequest.updated_at)}</time>
                   </div>
                 </div>
-                
                 <div className="flex items-start">
                   <div className="flex flex-col items-center mr-4">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full 
-                      ${workrequest.approval_status === 'Approved' ? 'bg-green-100' : 
-                      workrequest.approval_status === 'Rejected' ? 'bg-red-100' : 'bg-yellow-100'}`}>
-                      {workrequest.approval_status === 'Approved' ? 
-                        <CheckCircle2 className="h-5 w-5 text-green-600" /> : 
-                        workrequest.approval_status === 'Rejected' ? 
-                        <XCircle className="h-5 w-5 text-red-600" /> : 
-                        <Clock className="h-5 w-5 text-yellow-600" />}
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                      workrequest.approval_status === 'Fully Approved' ? 'bg-green-100' :
+                      isRejected ? 'bg-red-100' : 'bg-yellow-100'
+                    }`}>
+                      {workrequest.approval_status === 'Fully Approved'
+                        ? <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        : isRejected ? <XCircle className="h-5 w-5 text-red-600" />
+                        : <Clock className="h-5 w-5 text-yellow-600" />}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Approval Status</h3>
-                    <div className="mt-1">
-                      {getApprovalStatusBadge(workrequest.approval_status)}
-                    </div>
-                    <p className="mt-1 text-sm text-gray-700">
-                      {workrequest.approval_status === 'Approved' ? 
-                        'Work request has been approved' : 
-                        workrequest.approval_status === 'Rejected' ? 
-                        'Work request has been rejected' : 
-                        'Work request is pending approval'}
-                    </p>
+                    <h3 className="text-base font-semibold text-gray-900">Current Status</h3>
+                    <div className="mt-1">{getStatusBadge(workrequest.approval_status)}</div>
+                    {workrequest.fully_approved_at && (
+                      <p className="mt-1 text-sm text-gray-500">Approved: {formatDate(workrequest.fully_approved_at)}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -443,70 +502,11 @@ const WorkrequestDetailView = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="details" className="space-y-8">
-          {/* Request Options */}
-          <Card className="border-green-200 shadow-lg">
-            <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Settings className="h-5 w-5" />
-                Request Options
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div className="flex flex-col items-center p-4 border rounded-lg bg-gray-50">
-                  <div className={`p-3 rounded-full ${workrequest.require_mobilization_fee ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {workrequest.require_mobilization_fee ? 
-                      <CheckCircle2 className="h-6 w-6 text-green-600" /> : 
-                      <XCircle className="h-6 w-6 text-gray-400" />}
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-center">Mobilization Fee</p>
-                </div>
-                <div className="flex flex-col items-center p-4 border rounded-lg bg-gray-50">
-                  <div className={`p-3 rounded-full ${workrequest.require_quotation ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {workrequest.require_quotation ? 
-                      <CheckCircle2 className="h-6 w-6 text-green-600" /> : 
-                      <XCircle className="h-6 w-6 text-gray-400" />}
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-center">Quotation Required</p>
-                </div>
-                <div className="flex flex-col items-center p-4 border rounded-lg bg-gray-50">
-                  <div className={`p-3 rounded-full ${workrequest.payment_requisition ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {workrequest.payment_requisition ? 
-                      <CheckCircle2 className="h-6 w-6 text-green-600" /> : 
-                      <XCircle className="h-6 w-6 text-gray-400" />}
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-center">Payment Requisition</p>
-                </div>
-
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Follow-up Notes */}
-          {workrequest.follow_up_notes && (
-            <Card className="border-green-200 shadow-lg">
-              <CardHeader className="bg-green-50 border-b border-green-100">
-                <CardTitle className="flex items-center gap-2 text-green-800">
-                  <FileCheck className="h-5 w-5" />
-                  Follow-up Notes
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line">{workrequest.follow_up_notes}</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
 
         <TabsContent value="location" className="space-y-8">
-          {/* Location Information */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <MapPin className="h-5 w-5" />
-                Location Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><MapPin className="h-5 w-5" />Location Information</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -514,13 +514,11 @@ const WorkrequestDetailView = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-2">Facility</p>
                     <p className="text-lg font-semibold text-gray-900">{workrequest.facility_detail?.name || 'N/A'}</p>
-                    {workrequest.facility_detail?.code && (
-                      <p className="text-sm text-gray-500">{workrequest.facility_detail.code}</p>
-                    )}
+                    {workrequest.facility_detail?.code && <p className="text-sm text-gray-500">{workrequest.facility_detail.code}</p>}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Building</p>
-                    <p className="text-lg font-semibold text-gray-900">Building ID: {workrequest.building || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-600 mb-2">Building ID</p>
+                    <p className="text-lg font-semibold text-gray-900">{workrequest.building || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="space-y-6">
@@ -537,52 +535,21 @@ const WorkrequestDetailView = () => {
             </CardContent>
           </Card>
 
-          {/* Asset Information */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Package className="h-5 w-5" />
-                Asset Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><Package className="h-5 w-5" />Asset Information</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Asset Name</p>
-                    <p className="text-lg font-semibold text-gray-900">{workrequest.asset_detail?.asset_name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Asset Type</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.asset_type || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Condition</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.condition || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Serial Number</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.serial_number || 'N/A'}</p>
-                  </div>
+                <div className="space-y-4">
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Asset Name</p><p className="text-lg font-semibold text-gray-900">{workrequest.asset_detail?.asset_name || 'N/A'}</p></div>
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Asset Type</p><p className="text-base text-gray-900">{workrequest.asset_detail?.asset_type || 'N/A'}</p></div>
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Condition</p><p className="text-base text-gray-900">{workrequest.asset_detail?.condition || 'N/A'}</p></div>
                 </div>
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Asset Tag</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.asset_tag || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Purchase Date</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.purchase_date ? 
-                      formatDate(workrequest.asset_detail.purchase_date) : 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Purchased Amount</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.purchased_amount || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Lifespan</p>
-                    <p className="text-base text-gray-900">{workrequest.asset_detail?.lifespan || 'N/A'}</p>
-                  </div>
+                <div className="space-y-4">
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Serial Number</p><p className="text-base text-gray-900">{workrequest.asset_detail?.serial_number || 'N/A'}</p></div>
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Asset Tag</p><p className="text-base text-gray-900">{workrequest.asset_detail?.asset_tag || 'N/A'}</p></div>
+                  <div><p className="text-sm font-medium text-gray-600 mb-1">Purchase Date</p><p className="text-base text-gray-900">{workrequest.asset_detail?.purchase_date ? formatDate(workrequest.asset_detail.purchase_date) : 'N/A'}</p></div>
                 </div>
               </div>
             </CardContent>
@@ -590,47 +557,49 @@ const WorkrequestDetailView = () => {
         </TabsContent>
 
         <TabsContent value="financial" className="space-y-8">
-          {/* Financial Information */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Banknote className="h-5 w-5" />
-                Financial Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><Banknote className="h-5 w-5" />Financial Information</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Cost</p>
-                    <p className="text-3xl font-bold text-green-600">{formatCurrency(workrequest.cost, workrequest.currency)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Currency</p>
-                    <p className="text-lg font-semibold text-gray-900">{workrequest.currency}</p>
-                  </div>
-
+                <div className="space-y-4">
+                  {workrequest.invoice_no && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1">Invoice Number</p>
+                      <p className="text-base font-semibold text-gray-900">{workrequest.invoice_no}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-gray-50 rounded-lg border">
-                      <p className="text-sm font-medium text-gray-600 mb-2">Payment Requisition</p>
-                      <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${workrequest.payment_requisition ? 'bg-green-100' : 'bg-gray-100'}`}>
-                        {workrequest.payment_requisition ? 
-                          <CheckCircle2 className="h-5 w-5 text-green-600" /> : 
-                          <XCircle className="h-5 w-5 text-gray-400" />}
-                      </div>
+                <div className="space-y-4">
+                  {workrequest.po_number && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs font-semibold text-blue-700 mb-2 uppercase">Purchase Order</p>
+                      <p className="text-lg font-bold text-gray-900 font-mono">{workrequest.po_number}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Vendor: {workrequest.po_vendor_detail?.name || workrequest.vendor_detail?.name || 'N/A'}
+                      </p>
+                      {workrequest.po_document && (
+                        <a
+                          href={workrequest.po_document}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-blue-700 underline font-medium mt-2"
+                        >
+                          <FileText className="h-4 w-4" /> View PO Document
+                        </a>
+                      )}
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg border">
-                      <p className="text-sm font-medium text-gray-600 mb-2">Mobilization Fee</p>
-                      <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${workrequest.require_mobilization_fee ? 'bg-green-100' : 'bg-gray-100'}`}>
-                        {workrequest.require_mobilization_fee ? 
-                          <CheckCircle2 className="h-5 w-5 text-green-600" /> : 
-                          <XCircle className="h-5 w-5 text-gray-400" />}
-                      </div>
+                  )}
+                  {workrequest.vendor_invoice && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1">Vendor Invoice</p>
+                      <a href={workrequest.vendor_invoice} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-green-700 underline font-medium">
+                        <FileText className="h-4 w-4" /> View Invoice Document
+                      </a>
                     </div>
-
-                  </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -641,55 +610,34 @@ const WorkrequestDetailView = () => {
           {/* Vendor Information */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Briefcase className="h-5 w-5" />
-                Vendor Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><Briefcase className="h-5 w-5" />Vendor Information</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Suggested Vendor</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {workrequest.suggested_vendor_detail?.name || 'No vendor selected'}
-                    </p>
-                    {workrequest.suggested_vendor_detail?.email && (
-                      <p className="text-sm text-gray-500">{workrequest.suggested_vendor_detail.email}</p>
-                    )}
+                    <p className="text-sm font-medium text-gray-600 mb-2">Original Vendor (from Invoice)</p>
+                    <p className="text-lg font-semibold text-gray-900">{workrequest.vendor_detail?.name || 'No vendor selected'}</p>
+                    {workrequest.vendor_detail?.email && <p className="text-sm text-gray-500">{workrequest.vendor_detail.email}</p>}
                   </div>
-                  {workrequest.suggested_vendor_detail?.phone && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-2">Contact Phone</p>
-                      <p className="text-base text-gray-900">{workrequest.suggested_vendor_detail.phone}</p>
-                    </div>
-                  )}
                 </div>
-                <div className="space-y-4">
-                  {workrequest.vendor_description && (
+                {workrequest.po_vendor_detail && (
+                  <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 mb-2">Vendor Description</p>
-                      <p className="text-base text-gray-900 whitespace-pre-line">{workrequest.vendor_description}</p>
+                      <p className="text-sm font-medium text-gray-600 mb-2">PO Vendor (from Procurement)</p>
+                      <p className="text-lg font-semibold text-gray-900">{workrequest.po_vendor_detail.name}</p>
+                      {workrequest.po_vendor_detail.email && <p className="text-sm text-gray-500">{workrequest.po_vendor_detail.email}</p>}
                     </div>
-                  )}
-                  {workrequest.attach_po && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-2">Purchase Order Attachment</p>
-                      <p className="text-base text-gray-900">{workrequest.attach_po}</p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Approval & Review Information */}
+          {/* Approval Chain */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <CheckCircle className="h-5 w-5" />
-                Approval & Review Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><CheckCircle className="h-5 w-5" />Approval Chain</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -707,7 +655,6 @@ const WorkrequestDetailView = () => {
                         <div>
                           <p className="text-lg font-semibold text-gray-900">{`${workrequest.approver_detail.first_name} ${workrequest.approver_detail.last_name}`}</p>
                           <p className="text-sm text-gray-600">{workrequest.approver_detail.email}</p>
-                          <p className="text-sm text-gray-500">{workrequest.approver_detail.roles}</p>
                         </div>
                       </div>
                     ) : (
@@ -723,7 +670,7 @@ const WorkrequestDetailView = () => {
                         {workrequest.reviewers_detail.map((reviewer) => (
                           <div key={reviewer.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={reviewer.avatar} alt={`${reviewer.first_name} ${reviewer.last_name}`} />
+                              <AvatarImage src={reviewer.avatar} />
                               <AvatarFallback className="bg-green-100 text-green-700 font-semibold text-sm">
                                 {`${reviewer.first_name.charAt(0)}${reviewer.last_name.charAt(0)}`}
                               </AvatarFallback>
@@ -731,7 +678,6 @@ const WorkrequestDetailView = () => {
                             <div>
                               <p className="text-base font-semibold text-gray-900">{`${reviewer.first_name} ${reviewer.last_name}`}</p>
                               <p className="text-sm text-gray-600">{reviewer.email}</p>
-                              <p className="text-xs text-gray-500">{reviewer.roles}</p>
                             </div>
                           </div>
                         ))}
@@ -744,180 +690,86 @@ const WorkrequestDetailView = () => {
               </div>
             </CardContent>
           </Card>
-          {/* Requester Information */}
+
+          {/* Requester */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <User className="h-5 w-5" />
-                Requester Information
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><User className="h-5 w-5" />Requester</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="flex items-start gap-6">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={workrequest.requester_detail?.avatar} alt={`${workrequest.requester_detail?.first_name} ${workrequest.requester_detail?.last_name}`} />
+                  <AvatarImage src={workrequest.requester_detail?.avatar} />
                   <AvatarFallback className="bg-green-100 text-green-700 text-lg font-semibold">
-                    {`${workrequest.requester_detail?.first_name.charAt(0)}${workrequest.requester_detail?.last_name.charAt(0)}`}
+                    {`${workrequest.requester_detail?.first_name?.charAt(0) || ''}${workrequest.requester_detail?.last_name?.charAt(0) || ''}`}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
                   <p className="text-xl font-semibold text-gray-900">{`${workrequest.requester_detail?.first_name} ${workrequest.requester_detail?.last_name}`}</p>
-                  <div className="text-base text-gray-600">{workrequest.requester_detail?.roles}</div>
-                  <div className="text-base text-gray-600">{workrequest.requester_detail?.email}</div>
-                  <div className="mt-3">
-                    <Badge variant="outline" className={workrequest.requester_detail?.status === 'Active' ? 
-                      'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-800 border-gray-200'}>
-                      {workrequest.requester_detail?.status}
-                    </Badge>
-                  </div>
+                  <p className="text-base text-gray-600">{workrequest.requester_detail?.email}</p>
+                  <Badge variant="outline" className={workrequest.requester_detail?.status === 'Active'
+                    ? 'bg-green-100 text-green-800 border-green-200'
+                    : 'bg-gray-100 text-gray-800 border-gray-200'}>
+                    {workrequest.requester_detail?.status}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Assigned To */}
+          {/* Assigned Procurement */}
           <Card className="border-green-200 shadow-lg">
             <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Users className="h-5 w-5" />
-                Assigned To
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-800"><Users className="h-5 w-5" />Procurement & Store Assigned</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-6">
-                {workrequest.request_to_detail?.map((user: any) => (
-                  <div key={user.id} className="flex items-start gap-6 p-4 bg-gray-50 rounded-lg border">
-                    <Avatar className="h-14 w-14">
-                      <AvatarImage src={user.avatar} alt={`${user.first_name} ${user.last_name}`} />
+              <div className="space-y-4">
+                {workrequest.request_to_detail?.map((u: any) => (
+                  <div key={u.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={u.avatar} />
                       <AvatarFallback className="bg-green-100 text-green-700 font-semibold">
-                        {`${user.first_name.charAt(0)}${user.last_name.charAt(0)}`}
+                        {`${u.first_name.charAt(0)}${u.last_name.charAt(0)}`}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="space-y-2">
-                      <p className="text-lg font-semibold text-gray-900">{`${user.first_name} ${user.last_name}`}</p>
-                      <div className="text-base text-gray-600">{user.roles}</div>
-                      <div className="text-base text-gray-600">{user.email}</div>
-                      <div className="mt-2">
-                        <Badge variant="outline" className={user.status === 'Active' ? 
-                          'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-800 border-gray-200'}>
-                          {user.status}
-                        </Badge>
-                      </div>
+                    <div>
+                      <p className="text-base font-semibold text-gray-900">{`${u.first_name} ${u.last_name}`}</p>
+                      <p className="text-sm text-gray-600">{u.email}</p>
                     </div>
                   </div>
                 ))}
-                
                 {(!workrequest.request_to_detail || workrequest.request_to_detail.length === 0) && (
                   <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600 font-medium">No users assigned</p>
-                    <p className="text-sm text-gray-500 mt-1">This work request has not been assigned to anyone yet</p>
+                    <p className="text-gray-600 font-medium">No procurement users assigned</p>
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Department Information */}
-          <Card className="border-green-200 shadow-lg">
-            <CardHeader className="bg-green-50 border-b border-green-100">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <Briefcase className="h-5 w-5" />
-                Department Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Department Name</p>
-                    <p className="text-lg font-semibold text-gray-900">{workrequest.department_detail?.name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Department ID</p>
-                    <p className="text-base text-gray-900">{workrequest.department_detail?.id || 'N/A'}</p>
-                  </div>
-                </div>
-                {/* <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Description</p>
-                    <p className="text-base text-gray-900">{workrequest.department_detail?.description || 'N/A'}</p>
-                  </div>
-                </div> */}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Approval Form Dialog */}
-      <ApprovalForm
-        isOpen={approvalFormOpen}
-        onClose={() => setApprovalFormOpen(false)}
-        workrequestSlug={workrequest.slug}
-        workrequestNumber={workrequest.work_request_number}
-      />
+      {/* Role-specific action dialogs */}
+      {approvalAction && (
+        <ApprovalForm
+          isOpen={!!approvalAction}
+          onClose={() => setApprovalAction(null)}
+          workrequestSlug={workrequest.slug}
+          workrequestNumber={workrequest.work_request_number}
+          action={approvalAction}
+        />
+      )}
 
-      {/* Procurement Form Dialog */}
-      <ProcurementForm
-        isOpen={procurementFormOpen}
-        onClose={() => setProcurementFormOpen(false)}
-        workrequestSlug={workrequest.slug}
-        workrequestNumber={workrequest.work_request_number}
-      />
-
-      {/* Reject Dialog */}
-      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Work Request</DialogTitle>
-            <DialogDescription>
-              Please provide a reason for rejecting work request #{workrequest.work_request_number}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="rejection_reason">Rejection Reason <span className="text-red-500">*</span></Label>
-              <Textarea
-                id="rejection_reason"
-                placeholder="Enter the reason for rejection..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={4}
-                className="resize-none"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setRejectDialogOpen(false);
-                setRejectionReason('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmReject}
-              disabled={!rejectionReason.trim() || rejectMutation.isPending}
-            >
-              {rejectMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Rejecting...
-                </>
-              ) : (
-                <>
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Reject Request
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {procurementAction && (
+        <ProcurementForm
+          isOpen={!!procurementAction}
+          onClose={() => setProcurementAction(null)}
+          workrequestSlug={workrequest.slug}
+          workrequestNumber={workrequest.work_request_number}
+          action={procurementAction}
+        />
+      )}
     </div>
   );
 };

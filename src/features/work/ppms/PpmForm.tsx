@@ -12,21 +12,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, Loader2, Plus, Trash2, ChevronDown, ChevronUp, Package } from 'lucide-react';
+import { toast } from 'sonner';
 import { Ppm } from '@/types/ppm';
-import { User } from '@/types/user';
-import { Category } from '@/types/category';
-import { Subcategory } from '@/types/subcategory';
 import { Asset } from '@/types/asset';
 import { Facility } from '@/types/facility';
 import { Building } from '@/types/building';
-import { usePpmQuery, useCreatePpm, useUpdatePpm } from '@/hooks/ppm/usePpmQueries';
+import { usePpmQuery, useCreatePpm, useUpdatePpm, usePpmApproversQuery } from '@/hooks/ppm/usePpmQueries';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { useCategoriesQuery } from '@/hooks/category/useCategoryQueries';
-import { usePpmReviewersQuery } from '@/hooks/ppm/usePpmQueries';
 
-const ownerEndpoint = 'accounts/api/users/'
-const catEndpoint = 'accounts/api/categories/'
-const subcatEndpoint = 'accounts/api/subcategories/'
 const assetEndpoint = 'asset_inventory/api/assets/'
 const facilityEndpoint = 'facility/api/api/facilities/'
 const buildingEndpoint = 'facility/api/api/buildings/'
@@ -35,23 +29,22 @@ const buildingEndpoint = 'facility/api/api/buildings/'
 // Form schema definition
 const ppmSchema = z.object({
   status: z.enum(['Active', 'Inactive']),
-  description: z.string(),
-  start_date: z.string(),
-  end_date: z.string(),
+  description: z.string().min(1, 'Description is required'),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
   frequency: z.number().positive(),
   frequency_unit: z.enum(['Hours', 'Days', 'Weeks', 'Months']),
-  notify_before_due: z.number().positive(),
+  notify_before_due: z.number().positive().optional(),
   notify_unit: z.enum(['Hours', 'Days', 'Weeks', 'Months']),
-  send_reminder_every: z.number().positive(),
+  send_reminder_every: z.number().positive().optional(),
   reminder_unit: z.enum(['Hours', 'Days', 'Weeks', 'Months']),
   currency: z.enum(['NGN', 'USD', 'EUR']),
   auto_create_work_order: z.boolean(),
   create_work_order_as_approved: z.boolean(),
   activities_safety_tips: z.string(),
-  // owner: z.number().positive(),
-  category: z.number().positive(),
-  subcategory: z.number().positive(),
-  reviewer: z.number().positive(),
+  approver: z.number().positive().optional(),
+  category: z.number().positive('Category is required'),
+  subcategory: z.number().positive().optional(),
   assets: z.array(z.string()),
   facilities: z.array(z.string()),
   buildings: z.array(z.string()),
@@ -70,6 +63,7 @@ const PpmForm = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
+  const [sectionOpen, setSectionOpen] = useState(true);
   
   // Ppm form setup
   const ppmForm = useForm<PpmFormValues>({
@@ -81,18 +75,17 @@ const PpmForm = () => {
       end_date: '',
       frequency: 1,
       frequency_unit: 'Days',
-      notify_before_due: 1,
+      notify_before_due: undefined,
       notify_unit: 'Days',
-      send_reminder_every: 1,
+      send_reminder_every: undefined,
       reminder_unit: 'Days',
       currency: 'NGN',
       auto_create_work_order: false,
       create_work_order_as_approved: false,
       activities_safety_tips: '',
-      // owner: undefined as unknown as number,
+      approver: undefined as unknown as number,
       category: undefined as unknown as number,
       subcategory: undefined as unknown as number,
-      reviewer: undefined as unknown as number,
       assets: [],
       facilities: [],
       buildings: [],
@@ -100,13 +93,12 @@ const PpmForm = () => {
     }
   });
 
-  const { data: users = [] } = useList<User>('users', ownerEndpoint);
   const { data: categoriesResponse } = useCategoriesQuery();
   const categories = categoriesResponse?.results || [];
   const { data: assets = [] } = useList<Asset>('assets', assetEndpoint);
   const { data: facilities = [] } = useList<Facility>('facilities', facilityEndpoint);
   const { data: buildings = [] } = useList<Building>('buildings', buildingEndpoint);
-  const { data: reviewers = [] } = usePpmReviewersQuery();
+  const { data: approvers = [] } = usePpmApproversQuery();
 
 
   // Watch the selected category to filter subcategories
@@ -146,25 +138,22 @@ const PpmForm = () => {
       ppmForm.reset({
         status: ppmData.status,
         description: ppmData.description,
-        start_date: ppmData.start_date,
-        end_date: ppmData.end_date,
         frequency: ppmData.frequency,
         frequency_unit: ppmData.frequency_unit,
-        notify_before_due: ppmData.notify_before_due,
+        notify_before_due: ppmData.notify_before_due ?? undefined,
         notify_unit: ppmData.notify_unit,
-        send_reminder_every: ppmData.send_reminder_every,
+        send_reminder_every: ppmData.send_reminder_every ?? undefined,
         reminder_unit: ppmData.reminder_unit,
         currency: ppmData.currency,
         auto_create_work_order: ppmData.auto_create_work_order,
         create_work_order_as_approved: ppmData.create_work_order_as_approved,
         activities_safety_tips: ppmData.activities_safety_tips,
-        // owner: ppmData.owner,
+        approver: ppmData.approver ?? undefined,
         category: ppmData.category,
-        subcategory: ppmData.subcategory,
-        reviewer: ppmData.reviewer,
+        subcategory: ppmData.subcategory ?? undefined,
         assets: ppmData.assets.map(String),
         facilities: ppmData.facilities.map(String),
-        buildings: ppmData.buildings.map(String), // use buildings instead of apartments
+        buildings: (ppmData.buildings || []).map(String),
         items: ppmData.items_detail?.map(item => ({
           description: item.description,
           qty: item.qty,
@@ -176,24 +165,34 @@ const PpmForm = () => {
   }, [ppmData, isEditMode, ppmForm]);
 
   const onSubmitPpm = (data: PpmFormValues) => {
-    const payload = {
-      ...data,
+    const { start_date, end_date, buildings, items, notify_before_due, send_reminder_every, approver, ...rest } = data;
+    const payload: Record<string, any> = {
+      ...rest,
       assets: data.assets.map(Number),
       facilities: data.facilities.map(Number),
-      buildings: data.buildings.map(Number), // convert buildings to numbers
-      items: data.items // Send items as array of objects
-    }
+      buildings: data.buildings.map(Number),
+      approver: approver ?? null,
+    };
+    if (notify_before_due !== undefined) payload.notify_before_due = notify_before_due;
+    if (send_reminder_every !== undefined) payload.send_reminder_every = send_reminder_every;
     if (isEditMode && id) {
       updatePpmMutation.mutate(
-        { id, ppm: payload as any }, // Cast to bypass type checking for new items structure
+        { id, ppm: payload as any },
         { onSuccess: () => navigate('/dashboard/calendar/ppms') }
       );
     } else {
       createPpmMutation.mutate(
-        payload as any, // Cast as any since we're sending new items structure
+        payload as any,
         { onSuccess: () => navigate('/dashboard/calendar/ppms') }
       );
     }
+  };
+
+  const onInvalidPpm = (errors: Record<string, any>) => {
+    setSectionOpen(true);
+    const failingFields = Object.keys(errors).join(', ');
+    console.error('PPM form validation errors:', errors);
+    toast.error(`Please fix these fields: ${failingFields}`);
   };
 
   const handleCancel = () => {
@@ -290,10 +289,10 @@ const PpmForm = () => {
       </div>
 
       <Form {...ppmForm}>
-        <form onSubmit={ppmForm.handleSubmit(onSubmitPpm)} className="space-y-6">
+        <form onSubmit={ppmForm.handleSubmit(onSubmitPpm, onInvalidPpm)} className="space-y-6">
           <div className="space-y-4">
             {/* Ppm Details Section */}
-            <Collapsible defaultOpen={true} className="w-full">
+            <Collapsible open={sectionOpen} onOpenChange={setSectionOpen} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
                 <h2 className="text-lg font-medium">Ppm Details</h2>
               </CollapsibleTrigger>
@@ -462,11 +461,11 @@ const PpmForm = () => {
                       <FormItem>
                         <FormLabel>Notify Before Due</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Notify before due" 
-                            {...field}
-                            onChange={e => field.onChange(Number(e.target.value))}
+                          <Input
+                            type="number"
+                            placeholder="Notify before due"
+                            value={field.value ?? ''}
+                            onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -510,11 +509,11 @@ const PpmForm = () => {
                       <FormItem>
                         <FormLabel>Send Reminder Every</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Reminder frequency" 
-                            {...field}
-                            onChange={e => field.onChange(Number(e.target.value))}
+                          <Input
+                            type="number"
+                            placeholder="Reminder frequency"
+                            value={field.value ?? ''}
+                            onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -608,6 +607,35 @@ const PpmForm = () => {
                   )}
                 />
                 
+                <FormField
+                  control={ppmForm.control}
+                  name="approver"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assign Approver</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(value === 'none' ? undefined : Number(value))}
+                        value={field.value?.toString() ?? 'none'}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select approver (optional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">— No approver —</SelectItem>
+                          {(approvers as { id: number; name: string; email?: string }[]).map(user => (
+                            <SelectItem key={user.id} value={String(user.id)}>
+                              {user.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* <FormField
                     control={ppmForm.control}
@@ -658,7 +686,7 @@ const PpmForm = () => {
                           <SelectContent>
                           {categories.map(category => (
                               <SelectItem key={category.id} value={String(category.id) || "0"}>
-                                {category.code}
+                                {category.name || category.code}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -687,7 +715,7 @@ const PpmForm = () => {
                           <SelectContent>
                           {availableSubcategories.map(subcat => (
                               <SelectItem key={subcat.id} value={String(subcat.id) || "0"}>
-                                {subcat.title}
+                                {subcat.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -698,36 +726,6 @@ const PpmForm = () => {
                   />
                 </div>
                 
-                <FormField
-                  control={ppmForm.control}
-                  name="reviewer"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Reviewed By</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))}
-                        value={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select reviewer" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        {reviewers.map(user => (
-                            <SelectItem key={user.id} value={String(user.id) || "0"}>
-                              <div className="flex flex-col">
-                                <span>{user.name}</span>
-                                <span className="text-xs text-muted-foreground">{user.email || 'REVIEWER'}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 
                 <FormField
                   control={ppmForm.control}

@@ -11,6 +11,9 @@ import {
   getApproverUsers,
   approveWorkorderByApprover,
   approveWorkorderByReviewer,
+  rejectWorkorderByReviewer,
+  rejectWorkorderByApprover,
+  unlockWorkorderResubmission,
   WorkorderQueryParams
 } from '@/services/workordersApi';
 import { Workorder } from '@/types/workorder';
@@ -139,50 +142,82 @@ export const useApproverUsersQuery = () => {
   });
 };
 
-// Hook for approving workorder by approver
-export const useApproveByApprover = (slug: string | undefined) => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: () => approveWorkorderByApprover(slug as string),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
-      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
-      toast.success('Work order approved successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
-      });
-    },
-    onError: (error) => {
-      toast.error('Failed to approve work order', {
-        duration: 5000,
-        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
-      });
-      console.error('Approve workorder error:', error);
-    },
-  });
-};
-
 // Hook for approving workorder by reviewer
 export const useApproveByReviewer = (slug: string | undefined) => {
   const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: () => approveWorkorderByReviewer(slug as string),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: workorderKeys.all });
       queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
-      toast.success('Work order reviewed successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
-      });
+      toast.success('Work order reviewed successfully', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
     },
-    onError: (error) => {
-      toast.error('Failed to review work order', {
-        duration: 5000,
-        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
-      });
-      console.error('Review workorder error:', error);
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to review work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Hook for rejecting workorder by reviewer
+export const useRejectByReviewer = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reviewer_reason: string) => rejectWorkorderByReviewer({ slug: slug as string, reviewer_reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Work order rejected by reviewer', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to reject work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Hook for approving workorder by approver (requires digital signature)
+export const useApproveByApprover = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (digital_signature: string) => approveWorkorderByApprover({ slug: slug as string, digital_signature }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Work order approved successfully', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to approve work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Hook for rejecting workorder by approver
+export const useRejectByApprover = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (approver_reason: string) => rejectWorkorderByApprover({ slug: slug as string, approver_reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Work order rejected by approver', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to reject work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Hook for Admin to unlock resubmission on a rejected work order
+export const useUnlockResubmission = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => unlockWorkorderResubmission(slug as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Resubmission unlocked. A new work order can now be raised from this source.', { duration: 4000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to unlock resubmission', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
     },
   });
 };

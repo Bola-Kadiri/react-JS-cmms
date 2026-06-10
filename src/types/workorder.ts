@@ -1,17 +1,14 @@
-import { Apartment } from "./apartment";
 import { Asset } from "./asset";
 import { Building } from "./building";
-import { Category } from "./category";
-import { Department } from "./department";
+import { Category, SubCat } from "./category";
 import { Facility } from "./facility";
-import { Subcategory } from "./subcategory";
 import { User } from "./user";
 
 export type Status = 'Active' | 'Inactive';
 export type WorkOrderType = 'Unplanned' | 'Planned';
 export type Priority = 'Low' | 'Medium' | 'High';
 export type PpmType = 'Scheduled' | 'Unscheduled';
-export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected'
+export type ApprovalStatus = 'Pending' | 'Reviewed' | 'Approved' | 'Reviewer Rejected' | 'Approver Rejected' | 'Rejected'
 export type Currency = 'USD' | 'EUR' | 'NGN'
 
 export interface ResourceData {
@@ -25,7 +22,7 @@ export interface ResourceData {
 //     requester_detail: User;
 //     request_to_detail: User;
 //     category_detail: Category;
-//     subcategory_detail: Subcategory;
+//     subcategory_detail: SubCat | null;
 //     department_detail: Department;
 //     facility_detail: Facility;
 //     apartment_detail: Apartment;
@@ -80,7 +77,7 @@ export interface ResourceData {
   request_to_detail: User;
   reviewers_detail: User[];
   category_detail: Category;
-  subcategory_detail: Subcategory;
+  subcategory_detail: SubCat | null;
   facility_detail: Facility;
   building_detail: Building;
   asset_detail: Asset;
@@ -116,4 +113,15 @@ export interface ResourceData {
   asset: number;
   reviewers: number[];
   approver: number;
+  request_to: number | null;
+  invoice_no: string | null;
+  reviewer_reason: string | null;
+  approver_reason: string | null;
+  digital_signature: string | null;
+  source_work_request_detail: {
+    id: number;
+    work_request_number: string;
+    po_number: string | null;
+    po_document: string | null;
+  } | null;
 }

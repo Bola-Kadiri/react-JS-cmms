@@ -155,12 +155,16 @@ const InvoiceitemManagement = () => {
   };
 
   // Format currency amount
-  const formatAmount = (amount: string) => {
+  const formatAmount = (amount: string, currency: string) => {
     const numAmount = parseFloat(amount);
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(numAmount);
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+      }).format(numAmount);
+    } catch {
+      return `${currency || 'USD'} ${numAmount.toFixed(2)}`;
+    }
   };
 
   if (error) {
@@ -268,7 +272,7 @@ const InvoiceitemManagement = () => {
                   </TableCell>
                   <TableCell className="text-sm text-gray-900">
                     <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
-                      {formatAmount(invoiceItem.total_amount)}
+                      {formatAmount(invoiceItem.total_amount, invoiceItem.currency)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">

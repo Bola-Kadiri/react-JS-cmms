@@ -17,6 +17,7 @@ import {
   User,
   Building,
   CheckCircle,
+  CheckCircle2,
   XCircle,
   Clock,
   Loader2
@@ -31,6 +32,7 @@ import {
 import { formatDate } from '@/utils/formatters';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/contexts/PermissionsContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +51,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
+const PIPELINE_STEPS = [
+  { label: 'Pending', status: 'Pending' },
+  { label: 'Reviewed', status: 'Reviewed' },
+  { label: 'Approved', status: 'Approved' },
+];
+
+const WCC_REJECTED_STATUSES = ['Reviewer Rejected', 'Approver Rejected'];
 
 const WorkordercompletionDetailView = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,10 +80,11 @@ const WorkordercompletionDetailView = () => {
   const approveByReviewerMutation = useApproveByReviewerMutation();
   const rejectByReviewerMutation = useRejectByReviewerMutation();
 
-  // Check user role
-  const userRole = user?.role || '';
-  const isApprover = userRole.toUpperCase().includes('APPROVER');
-  const isReviewer = userRole.toUpperCase().includes('REVIEWER');
+  const { userRole } = usePermissions();
+  const isReviewer = userRole === 'REVIEWER' || userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
+  const isApprover = userRole === 'APPROVER' || userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
+  const isOwner = completion?.owner === user?.id;
+  const isRequester = userRole === 'REQUESTER';
 
   // Handle approve by approver
   const handleApproveByApprover = async () => {
@@ -282,7 +293,7 @@ const WorkordercompletionDetailView = () => {
         </div>
         <div className="flex items-center gap-2">
           {/* Reviewer buttons - only visible to reviewers */}
-          {isReviewer && completion.approval_status === 'Pending' && (
+          {(isReviewer || completion.reviewers?.includes(user?.id ?? -1)) && completion.approval_status === 'Pending' && (
             <>
               <Button
                 onClick={() => setShowReviewerConfirm(true)}
@@ -309,21 +320,21 @@ const WorkordercompletionDetailView = () => {
           )}
           
           {/* Approver buttons - only visible to approvers and only if reviewed */}
-          {isApprover && completion.approval_status === 'Pending' && completion?.is_reviewed && (
+          {(isApprover || completion.approver === user?.id) && completion.approval_status === 'Reviewed' && (
             <>
               <Button
                 onClick={() => setShowApproverConfirm(true)}
-                disabled={approveByApproverMutation.isPending || completion?.approval_status === 'Approved'}
+                disabled={approveByApproverMutation.isPending}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
               >
                 {approveByApproverMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <CheckCircle className="h-4 w-4 mr-2" />
-                {completion.approval_status === 'Approved' ? 'Approved' : 'Approve'}
+                Approve
               </Button>
               <Button
                 onClick={() => setShowApproverReject(true)}
-                disabled={rejectByApproverMutation.isPending || completion.approval_status === 'Approved'}
+                disabled={rejectByApproverMutation.isPending}
                 size="sm"
                 variant="destructive"
               >
@@ -366,6 +377,49 @@ const WorkordercompletionDetailView = () => {
           </div>
         </CardHeader>
       </Card>
+
+      {/* Pipeline stepper — visible to owner, requester */}
+      {(isOwner || isRequester) && (() => {
+        const isRejected = WCC_REJECTED_STATUSES.includes(completion.approval_status);
+        const order = ['Pending', 'Reviewed', 'Approved'];
+        const currentStep = order.indexOf(completion.approval_status) >= 0 ? order.indexOf(completion.approval_status) : 0;
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              {PIPELINE_STEPS.map((step, idx) => {
+                const isActive = completion.approval_status === step.status;
+                const isPast = !isRejected && currentStep > idx;
+                const isFullyApproved = completion.approval_status === 'Approved';
+                return (
+                  <div key={step.status} className="flex items-center flex-1">
+                    <div className="flex flex-col items-center flex-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                        ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
+                          isActive ? 'bg-blue-600 text-white' :
+                          isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
+                          'bg-gray-200 text-gray-500'}`}>
+                        {(isFullyApproved && idx < 3) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                      </div>
+                      <span className={`text-xs mt-1 text-center font-medium
+                        ${isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                        {step.label}
+                      </span>
+                    </div>
+                    {idx < PIPELINE_STEPS.length - 1 && (
+                      <div className={`h-0.5 flex-1 mx-2 ${isPast || isFullyApproved ? 'bg-green-400' : 'bg-gray-200'}`} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {isRejected && (
+              <p className="text-xs text-red-600 text-center mt-2 font-medium">
+                Pipeline paused — {completion.approval_status}
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>

@@ -50,10 +50,10 @@ const Dashboard = () => {
               {dashboardData.workspace_title}
             </h1>
             <p className="text-gray-600 mt-1">
-              Welcome back, {dashboardData.user_info.name}
+              Welcome back, {dashboardData.user_info?.name}
             </p>
             <p className="text-sm text-gray-500">
-              {dashboardData.user_info.role}
+              {dashboardData.user_info?.role}
             </p>
           </div>
           {/* <div className="text-right">
@@ -94,13 +94,12 @@ const Dashboard = () => {
 
       {/* Status Grid Section */}
       <StatusGrid
-        // statusCategories={dashboardData.status_categories}
-        summaryCards={dashboardData.summary_cards}
+        summaryCards={dashboardData.summary_cards ?? { work_request: [], work_order: [], work_completion: [], invoices: [], payment_requisition: [] }}
         activeTab={activeTab}
       />
 
       {/* Chart Section */}
-      <DashboardChart chartData={dashboardData.chart_data} />
+      <DashboardChart chartData={dashboardData.chart_data ?? { labels: [], datasets: [], current_year: new Date().getFullYear(), available_years: [] }} />
     </div>
   );
 };

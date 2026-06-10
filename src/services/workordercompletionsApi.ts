@@ -195,6 +195,17 @@ export const fetchWorkOrderCompletionsByRequester = async (requesterId: number):
   }
 };
 
+// Fetch approved WCCs eligible for invoicing
+export const fetchApprovedWorkOrderCompletions = async (): Promise<WorkOrderCompletionsResponse> => {
+  try {
+    const response = await api.get(`${WORKORDER_COMPLETIONS_API_BASE}/approved-for-invoicing/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching approved work order completions:', error);
+    throw error;
+  }
+};
+
 // Fetch work orders for raising payment
 export const fetchRaisePaymentWorkOrders = async (): Promise<RaisePaymentWorkOrdersResponse> => {
   try {

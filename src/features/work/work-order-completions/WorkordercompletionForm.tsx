@@ -16,8 +16,7 @@ import {
   useUpdateWorkOrderCompletionMutation,
   useAvailableWorkOrdersQuery
 } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
-import { usePpmReviewersQuery } from '@/hooks/ppm/usePpmQueries';
-import { useApproverUsersQuery } from '@/hooks/workorder/useWorkorderQueries';
+import { useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { toast } from '@/components/ui/use-toast';
 
 // Form schema definition matching WorkOrderData interface
@@ -44,8 +43,8 @@ const WorkordercompletionForm = () => {
   // Queries and mutations
   const { data: workOrderCompletion, isLoading: isLoadingCompletion } = useWorkOrderCompletionQuery(Number(id));
   const { data: availableWorkOrders, isLoading: isLoadingWorkOrders } = useAvailableWorkOrdersQuery();
-  const { data: reviewers, isLoading: isLoadingReviewers } = usePpmReviewersQuery();
-  const { data: approvers, isLoading: isLoadingApprovers } = useApproverUsersQuery();
+  const { data: reviewers = [], isLoading: isLoadingReviewers } = useReviewersQuery();
+  const { data: approvers = [], isLoading: isLoadingApprovers } = useApproversQuery();
   
   const createMutation = useCreateWorkOrderCompletionMutation();
   const updateMutation = useUpdateWorkOrderCompletionMutation();
@@ -256,8 +255,8 @@ const WorkordercompletionForm = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {approvers?.results && approvers.results.length > 0 ? (
-                          approvers.results.map((user) => (
+                        {approvers && approvers.length > 0 ? (
+                          approvers.map((user) => (
                             <SelectItem key={user.id} value={user.id.toString()}>
                               <div className="flex flex-col">
                                 <span className="text-sm font-medium">

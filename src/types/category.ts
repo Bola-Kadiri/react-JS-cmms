@@ -14,14 +14,11 @@ export interface Category {
   
   export interface SubCat {
     id: number;
-    title: string;
+    name: string;
     code: string;
-    work_request_approved: "create_work_order" | "close_work_request";
-    exclude_costing_limit: boolean;
-    power: boolean;
-    create_payment_requisition: boolean;
+    type?: string;
     description?: string;
-    status: "Active" | "Inactive";
+    is_active?: boolean;
   }
   
   

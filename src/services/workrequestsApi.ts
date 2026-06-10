@@ -3,9 +3,7 @@ import { Workrequest, ShortUser } from '@/types/workrequest';
 import { Asset } from '@/types/asset';
 import { Building } from '@/types/building';
 
-const WORKREQUESTS_API_BASE = '/work/api/work-requests';
-
-// --- Interfaces ---
+const BASE = '/work/api/work-requests';
 
 export interface WorkrequestsResponse {
   count: number;
@@ -25,238 +23,195 @@ export interface WorkrequestQueryParams {
   search?: string;
 }
 
-export interface ApproveWorkrequestData {
-  approval_status: 'Pending' | 'Approved' | 'Rejected';
-  notes: string;
+export interface CpApproveData {
+  po_number: string;
+  po_vendor?: number;
+  po_document?: File;
+  po_amount?: string;
 }
 
-export interface ProcurementData {
-  cost: number;
-  currency: 'USD' | 'EUR' | 'NGN';
-  attach_po?: string;
-  notes?: string;
+export interface CpRejectData {
+  po_vendor: number;
+  cp_reason: string;
 }
 
-// --- Helper Functions ---
+export interface ReviewerRejectData {
+  reviewer_reason: string;
+}
 
-/**
- * Normalizes the payload to ensure Django-compatible data.
- * Django foreign keys often reject '0' or empty strings with "Invalid pk".
- * This converts them to 'null' (None in Python).
- */
-const normalizePayload = (data: any) => {
-  const normalized = { ...data };
-  const idFields = [
-    'facility',
-    'building',
-    'department',
-    'asset',
-    'suggested_vendor',
-  ];
+export interface FinalApproveData {
+  digital_signature: string;
+}
 
-  idFields.forEach((field) => {
-    if (
-      normalized[field] === 0 ||
-      normalized[field] === '0' ||
-      normalized[field] === '' ||
-      normalized[field] === undefined
-    ) {
-      normalized[field] = null;
-    }
-  });
-  return normalized;
-};
+export interface FinalRejectData {
+  approver_reason: string;
+}
 
-// --- API Implementation ---
+// --- List & detail ---
 
 export const fetchWorkrequests = async (): Promise<WorkrequestsResponse> => {
-  try {
-    const response = await api.get(`${WORKREQUESTS_API_BASE}/`);
-
-    if (response.data && typeof response.data === 'object') {
-      if (Array.isArray(response.data)) {
-        return {
-          count: response.data.length,
-          next: null,
-          previous: null,
-          results: response.data,
-        };
-      }
-      if (Array.isArray(response.data.results)) {
-        return response.data;
-      }
+  const response = await api.get(`${BASE}/`);
+  if (response.data && typeof response.data === 'object') {
+    if (Array.isArray(response.data)) {
+      return { count: response.data.length, next: null, previous: null, results: response.data };
     }
-
-    return { count: 0, next: null, previous: null, results: [] };
-  } catch (error) {
-    console.error('Error fetching workrequests:', error);
-    return { count: 0, next: null, previous: null, results: [] };
+    if (Array.isArray(response.data.results)) {
+      return response.data;
+    }
   }
+  return { count: 0, next: null, previous: null, results: [] };
 };
 
 export const getWorkrequest = async (slug: string): Promise<Workrequest> => {
-  const response = await api.get(`${WORKREQUESTS_API_BASE}/${slug}/`);
+  const response = await api.get(`${BASE}/${slug}/`);
   return response.data;
 };
 
-/**
- * CREATE WORKREQUEST
- * Added payload normalization and detailed logging for status 400 errors.
- */
-export const createWorkrequest = async (
-  workrequest: Omit<Workrequest, 'id'>,
-): Promise<Workrequest> => {
+// --- Create (always FormData because vendor_invoice is a file) ---
+
+export const createWorkrequest = async (formData: FormData): Promise<Workrequest> => {
   try {
-    const cleanData = normalizePayload(workrequest);
-    // Ensure trailing slash is present
-    const response = await api.post(`${WORKREQUESTS_API_BASE}/`, cleanData);
+    const response = await api.post(`${BASE}/`, formData);
     return response.data;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
+    if (error.response?.status === 400) {
       console.error('SERVER VALIDATION ERROR:', error.response.data);
-    } else {
-      console.error('API Error:', error.message);
     }
     throw error;
   }
 };
 
+// --- Update (PATCH, FormData to support optional re-upload of vendor_invoice) ---
+
 export const updateWorkrequest = async ({
   slug,
-  workrequest,
+  formData,
 }: {
   slug: string;
-  workrequest: Partial<Workrequest>;
+  formData: FormData;
 }): Promise<Workrequest> => {
-  const cleanData = normalizePayload(workrequest);
-  const response = await api.put(
-    `${WORKREQUESTS_API_BASE}/${slug}/`,
-    cleanData,
-  );
+  const response = await api.patch(`${BASE}/${slug}/`, formData);
   return response.data;
 };
 
 export const deleteWorkrequest = async (slug: string): Promise<void> => {
-  await api.delete(`${WORKREQUESTS_API_BASE}/${slug}/`);
+  await api.delete(`${BASE}/${slug}/`);
 };
 
-// --- Cascading Dropdown Support ---
+// --- Cascading dropdowns ---
 
-export const getAssetsByFacility = async (
-  facility_id: number,
-): Promise<Asset[]> => {
+export const getAssetsByFacility = async (facility_id: number): Promise<Asset[]> => {
   if (!facility_id) return [];
-  const response = await api.get(
-    `${WORKREQUESTS_API_BASE}/assets-by-facility/${facility_id}/`,
-  );
-  return Array.isArray(response.data)
-    ? response.data
-    : response.data.results || [];
+  const response = await api.get(`${BASE}/assets-by-facility/${facility_id}/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
-export const getBuildingsByFacility = async (
-  facility_id: number,
-): Promise<Building[]> => {
+export const getBuildingsByFacility = async (facility_id: number): Promise<Building[]> => {
   if (!facility_id) return [];
-  const response = await api.get(
-    `${WORKREQUESTS_API_BASE}/buildings-by-facility/${facility_id}/`,
-  );
-  return Array.isArray(response.data)
-    ? response.data
-    : response.data.results || [];
+  const response = await api.get(`${BASE}/buildings-by-facility/${facility_id}/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
 export const getProcurementUsers = async (): Promise<ShortUser[]> => {
-  const response = await api.get(`${WORKREQUESTS_API_BASE}/procurement-users/`);
-  return Array.isArray(response.data)
-    ? response.data
-    : response.data.results || [];
+  const response = await api.get(`${BASE}/procurement-users/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
 export const getWorkrequestReviewers = async (): Promise<ShortUser[]> => {
-  const response = await api.get(`${WORKREQUESTS_API_BASE}/reviewers/`);
-  return Array.isArray(response.data)
-    ? response.data
-    : response.data.results || [];
+  const response = await api.get(`${BASE}/reviewers/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
 export const getWorkrequestApprovers = async (): Promise<ShortUser[]> => {
-  const response = await api.get(`${WORKREQUESTS_API_BASE}/approvers/`);
-  return Array.isArray(response.data)
-    ? response.data
-    : response.data.results || [];
+  const response = await api.get(`${BASE}/approvers/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
-// --- Approval & Status Methods ---
-
-export const approveWorkrequest = async ({
-  slug,
-  approvalData,
-}: {
-  slug: string;
-  approvalData: ApproveWorkrequestData;
-}): Promise<Workrequest> => {
-  const response = await api.post(
-    `${WORKREQUESTS_API_BASE}/${slug}/approve/`,
-    approvalData,
-  );
-  return response.data;
+export const fetchProcurementWorkrequests = async (): Promise<ProcurementWorkrequestsResponse> => {
+  const response = await api.get(`${BASE}/procurement-assigned/`);
+  const results = response.data.results || (Array.isArray(response.data) ? response.data : []);
+  return { count: results.length, results };
 };
-
-export const rejectWorkrequest = async ({
-  slug,
-  rejection_reason,
-}: {
-  slug: string;
-  rejection_reason: string;
-}): Promise<Workrequest> => {
-  const response = await api.post(`${WORKREQUESTS_API_BASE}/${slug}/reject/`, {
-    rejection_reason,
-  });
-  return response.data;
-};
-
-export const addProcurementDetails = async ({
-  slug,
-  procurementData,
-}: {
-  slug: string;
-  procurementData: ProcurementData;
-}): Promise<Workrequest> => {
-  const response = await api.post(
-    `${WORKREQUESTS_API_BASE}/${slug}/add-procurement-details/`,
-    procurementData,
-  );
-  return response.data;
-};
-
-export const fetchProcurementWorkrequests =
-  async (): Promise<ProcurementWorkrequestsResponse> => {
-    try {
-      const response = await api.get(
-        `${WORKREQUESTS_API_BASE}/procurement-assigned/`,
-      );
-      const results =
-        response.data.results ||
-        (Array.isArray(response.data) ? response.data : []);
-      return { count: results.length, results };
-    } catch (error) {
-      console.error('Error fetching procurement workrequests:', error);
-      return { count: 0, results: [] };
-    }
-  };
 
 export const fetchApprovedWorkrequests = async (): Promise<Workrequest[]> => {
-  try {
-    const response = await api.get(
-      `${WORKREQUESTS_API_BASE}/approved-work-requests/`,
-    );
-    const results =
-      response.data.results ||
-      (Array.isArray(response.data) ? response.data : []);
-    return results;
-  } catch (error) {
-    console.error('Error fetching approved work requests:', error);
-    return [];
-  }
+  const response = await api.get(`${BASE}/approved-work-requests/`);
+  return response.data.results || (Array.isArray(response.data) ? response.data : []);
+};
+
+// --- Step 2: Procurement & Store actions ---
+
+export const cpApprove = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: CpApproveData;
+}): Promise<Workrequest> => {
+  const fd = new FormData();
+  fd.append('po_number', data.po_number);
+  if (data.po_vendor) fd.append('po_vendor', String(data.po_vendor));
+  if (data.po_document) fd.append('po_document', data.po_document);
+  if (data.po_amount) fd.append('po_amount', data.po_amount);
+  const response = await api.post(`${BASE}/${slug}/cp-approve/`, fd);
+  return response.data;
+};
+
+export const cpReject = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: CpRejectData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/cp-reject/`, data);
+  return response.data;
+};
+
+// --- Step 3: Reviewer actions ---
+
+export const reviewerApprove = async (slug: string): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/reviewer-approve/`, {});
+  return response.data;
+};
+
+export const reviewerReject = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: ReviewerRejectData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/reviewer-reject/`, data);
+  return response.data;
+};
+
+// --- Step 4: Approver actions ---
+
+export const finalApprove = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: FinalApproveData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/final-approve/`, data);
+  return response.data;
+};
+
+export const finalReject = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: FinalRejectData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/final-reject/`, data);
+  return response.data;
+};
+
+// --- Resubmit after rejection ---
+
+export const resubmitWorkrequest = async (slug: string): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/resubmit/`, {});
+  return response.data;
 };

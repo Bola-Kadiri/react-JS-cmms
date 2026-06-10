@@ -14,6 +14,7 @@ import {
   fetchAvailableWorkOrders,
   fetchWorkOrderCompletionsByRequester,
   fetchRaisePaymentWorkOrders,
+  fetchApprovedWorkOrderCompletions,
   WorkOrderCompletionQueryParams,
   AvailableWorkOrdersResponse,
   WorkOrderCompletionsResponse,
@@ -32,6 +33,7 @@ export const workOrderCompletionKeys = {
   availableWorkOrders: () => [...workOrderCompletionKeys.all, 'available-work-orders'] as const,
   byRequester: (requesterId: number) => [...workOrderCompletionKeys.all, 'by-requester', requesterId] as const,
   raisePaymentWorkOrders: () => [...workOrderCompletionKeys.all, 'raise-payment-work-orders'] as const,
+  approvedForInvoicing: () => [...workOrderCompletionKeys.all, 'approved-for-invoicing'] as const,
 };
 
 // Hook for fetching work order completions list
@@ -78,6 +80,15 @@ export const useRaisePaymentWorkOrdersQuery = () => {
     queryKey: workOrderCompletionKeys.raisePaymentWorkOrders(),
     queryFn: fetchRaisePaymentWorkOrders,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Hook for fetching only Approved WCCs eligible for invoicing
+export const useApprovedWorkOrderCompletionsQuery = () => {
+  return useQuery<WorkOrderCompletionsResponse>({
+    queryKey: workOrderCompletionKeys.approvedForInvoicing(),
+    queryFn: fetchApprovedWorkOrderCompletions,
+    staleTime: 5 * 60 * 1000,
   });
 };
 

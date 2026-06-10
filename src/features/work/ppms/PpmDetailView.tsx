@@ -4,29 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Clock, 
-  Calendar, 
-  Bell, 
-  Repeat, 
+import {
+  ArrowLeft,
+  Edit,
+  Clock,
+  Calendar,
+  Bell,
+  Repeat,
   Briefcase,
   Building,
   Home,
   DollarSign,
   CircleAlert,
   Package,
-  Workflow,
   Loader2,
   CheckCircle2,
   XCircle,
   AlertCircle,
   Info,
-  Wrench,
   Clipboard,
   MessageSquareWarning,
-  Settings,
   FileText,
   Tag,
   Check,
@@ -34,7 +31,6 @@ import {
 } from 'lucide-react';
 import { usePpmQuery, useReviewPpm, useRejectPpm } from '@/hooks/ppm/usePpmQueries';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
 import { useState } from 'react';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -208,15 +204,15 @@ const PpmDetailView = () => {
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge status={ppm.status} />
-          {ppm?.review_status === 'Pending' && (
+          {ppm?.approval_status === 'Pending' && (
             <PermissionGuard feature='ppm_setting' permission='review'>
-              <Button 
+              <Button
                 onClick={() => handleReview('approve')}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Check className="mr-2 h-4 w-4" /> Approve
               </Button>
-              <Button 
+              <Button
                 onClick={() => handleReview('reject')}
                 variant="destructive"
               >
@@ -224,8 +220,8 @@ const PpmDetailView = () => {
               </Button>
             </PermissionGuard>
           )}
-          {ppm?.review_status === 'Pending' && isReviewer && (
-            <Button 
+          {ppm?.approval_status === 'Pending' && isReviewer && (
+            <Button
               onClick={handleRejectWithReason}
               variant="destructive"
             >
@@ -267,20 +263,6 @@ const PpmDetailView = () => {
                   <p>{ppm.description || 'Not provided'}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Start Date</p>
-                  <p className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {ppm.start_date ? new Date(ppm.start_date).toLocaleDateString() : 'Not set'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">End Date</p>
-                  <p className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {ppm.end_date ? new Date(ppm.end_date).toLocaleDateString() : 'Not set'}
-                  </p>
-                </div>
-                <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">Currency</p>
                   <p className="flex items-center">
                     <DollarSign className="h-4 w-4 mr-1 text-muted-foreground" />
@@ -306,49 +288,6 @@ const PpmDetailView = () => {
             </CardContent>
           </Card>
           
-          {/* Work Order Information Card */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <Workflow className="h-5 w-5 mr-2 text-primary" />
-                Work Order Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Create Work Order Now</p>
-                  <p className="flex items-center">
-                    <CheckCircle2 className={`h-4 w-4 mr-1 ${ppm.create_work_order_now ? 'text-green-500' : 'text-gray-400'}`} />
-                    {ppm.create_work_order_now ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Work Order Priority</p>
-                  <Badge 
-                    variant="outline" 
-                    className={
-                      ppm.work_order_priority === 'High' 
-                        ? 'bg-red-50 text-red-700 hover:bg-red-50'
-                        : ppm.work_order_priority === 'Medium'
-                        ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-50'
-                        : 'bg-green-50 text-green-700 hover:bg-green-50'
-                    }
-                  >
-                    {ppm.work_order_priority}
-                  </Badge>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Work Order Approved</p>
-                  <p className="flex items-center">
-                    <CheckCircle2 className={`h-4 w-4 mr-1 ${ppm.work_order_approved ? 'text-green-500' : 'text-gray-400'}`} />
-                    {ppm.work_order_approved ? 'Yes' : 'No'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
           {/* Review Information Card */}
           <Card>
             <CardHeader className="pb-2">
@@ -360,31 +299,30 @@ const PpmDetailView = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Review Status</p>
-                  <Badge 
-                    variant="outline" 
+                  <p className="text-sm font-medium text-muted-foreground">Approval Status</p>
+                  <Badge
+                    variant="outline"
                     className={
-                      ppm.review_status === 'Reviewed' 
+                      ppm.approval_status === 'Approved'
                         ? 'bg-green-50 text-green-700 hover:bg-green-50'
-                        : ppm.review_status === 'Pending'
+                        : ppm.approval_status === 'Pending'
                         ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-50'
                         : 'bg-red-50 text-red-700 hover:bg-red-50'
                     }
                   >
-                    {ppm.review_status}
+                    {ppm.approval_status || 'Pending'}
                   </Badge>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Reviewed By</p>
-                  <p>User #{ppm.reviewer}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Assigned Approver</p>
+                  <p>{ppm.approver_detail?.name || 'Not assigned'}</p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Reviewed At</p>
-                  <p className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {ppm.reviewed_at ? new Date(ppm.reviewed_at).toLocaleDateString() : 'Not reviewed'}
-                  </p>
-                </div>
+                {ppm.rejection_reason && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">Rejection Reason</p>
+                    <p className="text-red-600">{ppm.rejection_reason}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -443,20 +381,16 @@ const PpmDetailView = () => {
                     <CardContent className="pt-4">
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Title</span>
-                          <span>{ppm.category_detail?.title || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">Name</span>
+                          <span>{ppm.category_detail?.name || 'Not available'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm font-medium text-muted-foreground">Code</span>
                           <span>{ppm.category_detail?.code || 'Not available'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Status</span>
-                          <StatusBadge status={ppm.category_detail?.status || 'Unknown'} />
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Problem Type</span>
-                          <span>{ppm.category_detail?.problem_type || 'Not specified'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">Type</span>
+                          <span>{(ppm.category_detail as any)?.type || 'Not specified'}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -472,20 +406,20 @@ const PpmDetailView = () => {
                     <CardContent className="pt-4">
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Title</span>
-                          <span>{ppm.subcategory_detail?.title || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">Name</span>
+                          <span>{ppm.subcategory_detail?.name || 'Not available'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm font-medium text-muted-foreground">Code</span>
+                          <span>{ppm.subcategory_detail?.code || 'Not available'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm font-medium text-muted-foreground">Description</span>
                           <span>{ppm.subcategory_detail?.description || 'Not available'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Status</span>
-                          <StatusBadge status={ppm.subcategory_detail?.status || 'Unknown'} />
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Exclude Costing Limit</span>
-                          <span>{ppm.subcategory_detail?.exclude_costing_limit ? 'Yes' : 'No'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">Active</span>
+                          <span>{ppm.subcategory_detail?.is_active ? 'Yes' : 'No'}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -572,7 +506,7 @@ const PpmDetailView = () => {
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">Category</p>
-                            <p className="text-sm">{asset.category_detail?.title || 'Not available'}</p>
+                            <p className="text-sm">{asset.category_detail?.name || 'Not available'}</p>
                           </div>
                         </div>
                       </div>

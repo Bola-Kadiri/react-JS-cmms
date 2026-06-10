@@ -99,6 +99,18 @@ export const rejectPpm = async ({ id, rejection_reason }: { id: string; rejectio
   return response.data;
 };
 
+// Approvers list (users with role APPROVER)
+export interface ApproverUser {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+export const fetchPpmApprovers = async (): Promise<ApproverUser[]> => {
+  const response = await api.get(`${PPMS_API_BASE}/approvers/`);
+  return Array.isArray(response.data) ? response.data : [];
+};
+
 // Reviewers list (users with role REVIEWER)
 export interface ReviewerUser {
   id: number;

@@ -361,8 +361,8 @@ const Sidebar = () => {
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem> */}
-                {/* <SidebarMenuSubItem>
-                  <SidebarMenuSubButton 
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
                     isActive={isActive('/dashboard/work/payment-requisitions')}
                     asChild
                   >
@@ -371,7 +371,7 @@ const Sidebar = () => {
                       <span>{t('work.paymentRequisitions')}</span>
                     </Link>
                   </SidebarMenuSubButton>
-                </SidebarMenuSubItem> */}
+                </SidebarMenuSubItem>
               </SidebarMenuSub>
             )}
           </SidebarMenuItem>

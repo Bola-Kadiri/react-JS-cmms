@@ -89,8 +89,15 @@ export const getWorkorder = async (slug: string): Promise<Workorder> => {
 //   return response.data;
 // };
 export const createWorkorder = async (formData: FormData): Promise<Workorder> => {
-  const response = await api.post(WORKORDERS_API_BASE + '/', formData);
-  return response.data;
+  try {
+    const response = await api.post(WORKORDERS_API_BASE + '/', formData);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      console.error('WorkOrder 400 validation error:', error.response.data);
+    }
+    throw error;
+  }
 };
 
 // Update an existing workorder
@@ -146,16 +153,34 @@ export const getApproverUsers = async (): Promise<ApproverUserResponse> => {
   return response.data;
 };
 
-// Approve workorder by approver
-export const approveWorkorderByApprover = async (slug: string): Promise<Workorder> => {
-  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/approve-by-approver/`, {
-    approval_status: "Approved"
-  });
-  return response.data;
-};
+// (legacy — kept for router compat; real approval now uses approveWorkorderByApprover below)
 
 // Approve workorder by reviewer
 export const approveWorkorderByReviewer = async (slug: string): Promise<Workorder> => {
   const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/approve-by-reviewer/`);
+  return response.data;
+};
+
+// Reject workorder by reviewer
+export const rejectWorkorderByReviewer = async ({ slug, reviewer_reason }: { slug: string; reviewer_reason: string }): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/reject-by-reviewer/`, { reviewer_reason });
+  return response.data;
+};
+
+// Approve workorder by approver (requires digital signature)
+export const approveWorkorderByApprover = async ({ slug, digital_signature }: { slug: string; digital_signature: string }): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/approve-by-approver/`, { digital_signature });
+  return response.data;
+};
+
+// Reject workorder by approver
+export const rejectWorkorderByApprover = async ({ slug, approver_reason }: { slug: string; approver_reason: string }): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/reject-by-approver/`, { approver_reason });
+  return response.data;
+};
+
+// Unlock resubmission — Admin only
+export const unlockWorkorderResubmission = async (slug: string): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/unlock-resubmission/`);
   return response.data;
 };

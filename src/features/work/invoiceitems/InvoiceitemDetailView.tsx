@@ -116,12 +116,11 @@ const InvoiceitemDetailView = () => {
     }
   };
 
-  // Format currency amount
   const formatAmount = (amount: string) => {
     const numAmount = parseFloat(amount);
     return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(numAmount);
   };
 

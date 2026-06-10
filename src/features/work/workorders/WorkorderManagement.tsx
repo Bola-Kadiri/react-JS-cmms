@@ -1,47 +1,28 @@
 // src/features/work/workorders/WorkorderManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-// import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Eye, Edit, Trash2, Loader2, Search, Paperclip } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Loader2, Search } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useWorkordersQuery, useDeleteWorkorder } from '@/hooks/workorder/useWorkorderQueries';
-import { Workorder } from '@/types/workorder';
-import { WorkorderQueryParams } from '@/services/workordersApi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
-import { useAuth } from '@/contexts/AuthContext';
 
 const WorkorderManagement = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workorderToDelete, setWorkorderToDelete] = useState<string | null>(null);
-
-  const { canEdit } = useFeatureAccess('work_order')
-  const { user } = useAuth();
-
-  // Check if user is REQUESTER
-  const isRequester = (user?.role || '').toUpperCase() === 'REQUESTER';
-
-  // Get filters from URL params
-  const urlApprovalStatus = searchParams.get('approval_status');
-  const urlDueStatus = searchParams.get('due_status');
-  const urlIsReviewed = searchParams.get('is_reviewed');
 
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -60,29 +41,19 @@ const WorkorderManagement = () => {
   const filteredData = useMemo(() => {
     let results = [...(data.results || [])];
 
-    // Apply URL-based filters first
-    if (urlApprovalStatus) {
-      results = results.filter(workorder => workorder.approval_status === urlApprovalStatus);
+    // Approval status filter
+    if (statusFilter && statusFilter !== 'all') {
+      results = results.filter(workorder => workorder.approval_status === statusFilter);
     }
 
-    if (urlDueStatus) {
-      results = results.filter(workorder => workorder.due_status === urlDueStatus);
-    }
-
-    if (urlIsReviewed !== null) {
-      const isReviewed = urlIsReviewed === 'true';
-      results = results.filter(workorder => workorder.is_reviewed === isReviewed);
-    }
-
-    // Search filter - search by work order number, description, category, facility, and department
+    // Search filter
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
       results = results.filter(workorder =>
         workorder.work_order_number.toLowerCase().includes(searchLower) ||
         workorder.description?.toLowerCase().includes(searchLower) ||
-        workorder.category_detail?.title.toLowerCase().includes(searchLower) ||
-        workorder.facility_detail?.name.toLowerCase().includes(searchLower) ||
-        workorder.department_detail?.name.toLowerCase().includes(searchLower)
+        workorder.category_detail?.name.toLowerCase().includes(searchLower) ||
+        workorder.facility_detail?.name.toLowerCase().includes(searchLower)
       );
     }
 
@@ -97,7 +68,7 @@ const WorkorderManagement = () => {
     }
 
     return results;
-  }, [data.results, searchValue, typeFilter, priorityFilter, urlApprovalStatus, urlDueStatus, urlIsReviewed]);
+  }, [data.results, searchValue, typeFilter, priorityFilter, statusFilter]);
 
   // Client-side pagination
   const paginatedData = useMemo(() => {
@@ -113,7 +84,7 @@ const WorkorderManagement = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchValue, typeFilter, priorityFilter]);
+  }, [searchValue, typeFilter, priorityFilter, statusFilter]);
 
   // Event handlers
   const handleAddWorkorder = () => {
@@ -159,6 +130,11 @@ const WorkorderManagement = () => {
     setPriorityFilter(value);
   };
 
+  // Handle status filter
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+  };
+
   // Handle pagination
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -167,31 +143,6 @@ const WorkorderManagement = () => {
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setPage(1); // Reset to first page when changing page size
-  };
-
-  // Helper function to get badge variant based on status
-  const getPriorityBadgeStyles = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return "bg-red-100 text-red-800 hover:bg-red-100";
-      case 'Medium':
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
-      case 'Low':
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-    }
-  };
-
-  const getStatusBadgeStyles = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      case 'Inactive':
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-    }
   };
 
   const getTypeBadgeStyles = (type: string) => {
@@ -204,18 +155,6 @@ const WorkorderManagement = () => {
         return "bg-orange-100 text-orange-800 hover:bg-orange-100";
       default:
         return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-    }
-  };
-
-  const getApprovalStatusBadgeStyles = (status: string) => {
-    if (status === "Pending") {
-      return "bg-green-100 text-green-800 hover:bg-green-100";
-    } else if (status === "Approved") {
-      return "bg-green-100 text-green-800 hover:bg-green-100";
-    } else if (status === "Rejected") {
-      return "bg-red-100 text-red-800 hover:bg-red-100";
-    } else {
-      return "";
     }
   };
 
@@ -305,12 +244,27 @@ const WorkorderManagement = () => {
             </SelectContent>
           </Select>
 
+          <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+            <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Reviewed">Reviewed</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Reviewer Rejected">Reviewer Rejected</SelectItem>
+              <SelectItem value="Approver Rejected">Approver Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button
             variant="outline"
             onClick={() => {
               setSearchValue('');
               setTypeFilter('all');
               setPriorityFilter('all');
+              setStatusFilter('all');
             }}
             className="h-10 border-gray-300 hover:bg-gray-50"
           >
@@ -331,17 +285,16 @@ const WorkorderManagement = () => {
                 <TableHead className="font-semibold text-green-800">Facility</TableHead>
                 <TableHead className="font-semibold text-green-800">Asset</TableHead>
                 <TableHead className="font-semibold text-green-800">Cost</TableHead>
-                <TableHead className="font-semibold text-green-800">Resources</TableHead>
+                <TableHead className="font-semibold text-green-800">PO Number</TableHead>
                 <TableHead className="font-semibold text-green-800">Due Status</TableHead>
-                <TableHead className="font-semibold text-green-800">Reviewed</TableHead>
-                <TableHead className="font-semibold text-green-800">Approved</TableHead>
+                <TableHead className="font-semibold text-green-800">Status</TableHead>
                 <TableHead className="font-semibold text-green-800 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="h-24 text-center text-gray-500">
+                  <TableCell colSpan={10} className="h-24 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-2">
                       <div className="text-lg font-medium">No work orders found</div>
                       <div className="text-sm">Try adjusting your search or filter criteria</div>
@@ -363,9 +316,9 @@ const WorkorderManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{workorder.category_detail?.title || 'N/A'}</span>
-                        {workorder.subcategory_detail?.title && (
-                          <span className="text-xs text-gray-500">{workorder.subcategory_detail.title}</span>
+                        <span className="font-medium text-sm">{workorder.category_detail?.name || 'N/A'}</span>
+                        {workorder.subcategory_detail?.name && (
+                          <span className="text-xs text-gray-500">{workorder.subcategory_detail.name}</span>
                         )}
                       </div>
                     </TableCell>
@@ -392,12 +345,25 @@ const WorkorderManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Paperclip className="h-4 w-4 text-gray-500" />
-                        <span className="font-medium text-gray-700">
-                          {workorder?.resources_data?.length || 0}
-                        </span>
-                      </div>
+                      {workorder.source_work_request_detail?.po_number ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-medium text-sm text-gray-800">
+                            {workorder.source_work_request_detail.po_number}
+                          </span>
+                          {workorder.source_work_request_detail.po_document && (
+                            <a
+                              href={workorder.source_work_request_detail.po_document}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-green-600 underline"
+                            >
+                              View PO
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">N/A</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {/* <Badge variant="outline" className={getPriorityBadgeStyles(workorder.priority)}>
@@ -408,23 +374,17 @@ const WorkorderManagement = () => {
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={workorder.is_reviewed
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                        className={
+                          workorder.approval_status === 'Approved'
+                            ? "bg-green-100 text-green-800 border-green-200"
+                            : workorder.approval_status === 'Reviewed'
+                            ? "bg-blue-100 text-blue-800 border-blue-200"
+                            : workorder.approval_status === 'Reviewer Rejected' || workorder.approval_status === 'Approver Rejected'
+                            ? "bg-red-100 text-red-800 border-red-200"
+                            : "bg-yellow-100 text-yellow-800 border-yellow-200"
                         }
                       >
-                        {workorder.is_reviewed ? 'Yes' : 'No'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={workorder.is_approved
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                        }
-                      >
-                        {workorder.is_approved ? 'Yes' : 'No'}
+                        {workorder.approval_status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

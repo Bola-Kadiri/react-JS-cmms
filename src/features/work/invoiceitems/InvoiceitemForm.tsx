@@ -16,9 +16,8 @@ import {
   useUpdateInvoiceItemMutation,
   useInvoiceItemQuery
 } from '@/hooks/invoiceitem/useInvoiceitemQueries';
-import { useRaisePaymentWorkOrdersQuery, useWorkOrderCompletionsByRequesterQuery } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
-import { usePpmReviewersQuery } from '@/hooks/ppm/usePpmQueries';
-import { useApproverUsersQuery } from '@/hooks/workorder/useWorkorderQueries';
+import { useApprovedWorkOrderCompletionsQuery } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
+import { useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -26,8 +25,7 @@ import { toast } from '@/components/ui/use-toast';
 // Form schema
 const invoiceItemSchema = z.object({
   facility: z.number().min(1, 'Please select a facility'),
-  work_order: z.number().min(0),
-  work_completion: z.number().min(0),
+  work_completion: z.number().min(1, 'Please select an approved Work Completion Certificate'),
   invoice_date: z.string().min(1, 'Invoice date is required'),
   due_date: z.string().min(1, 'Due date is required'),
   subtotal: z.string().min(1, 'Subtotal is required'),
@@ -45,13 +43,7 @@ const invoiceItemSchema = z.object({
     description: z.string().min(1, 'Description is required'),
   })).min(1, 'Please add at least one item'),
   attachments: z.array(z.any()).default([]),
-}).refine(
-  (data) => data.work_order > 0 || data.work_completion > 0,
-  {
-    message: 'Please select either a work order or a work completion',
-    path: ['work_order'],
-  }
-);
+});
 
 type InvoiceItemFormData = z.infer<typeof invoiceItemSchema>;
 
@@ -74,26 +66,18 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
   const { data: invoiceItem, isLoading: isLoadingInvoiceItem } = useInvoiceItemQuery(
     isEditMode && id ? id : ''
   );
-  const { data: raisePaymentWorkOrders, isLoading: isLoadingWorkOrders } = useRaisePaymentWorkOrdersQuery();
-  const { data: reviewers, isLoading: isLoadingReviewers } = usePpmReviewersQuery();
-  const { data: approvers, isLoading: isLoadingApprovers } = useApproverUsersQuery();
+  const { data: reviewers = [], isLoading: isLoadingReviewers } = useReviewersQuery();
+  const { data: approvers = [], isLoading: isLoadingApprovers } = useApproversQuery();
   const { data: facilities, isLoading: isLoadingFacilities } = useFacilitiesQuery();
-  
-  // Get requester ID from authenticated user
-  const requesterId = user?.id ? (typeof user.id === 'number' ? user.id : parseInt(user.id)) : 0;
-  
-  const { data: workCompletions, isLoading: isLoadingWorkCompletions } = useWorkOrderCompletionsByRequesterQuery(
-    requesterId
-  );
+  const { data: approvedWCCs, isLoading: isLoadingWCCs } = useApprovedWorkOrderCompletionsQuery();
 
-  const isLoading = isLoadingInvoiceItem || isLoadingWorkOrders || isLoadingReviewers || isLoadingApprovers || isLoadingFacilities || isLoadingWorkCompletions;
+  const isLoading = isLoadingInvoiceItem || isLoadingReviewers || isLoadingApprovers || isLoadingFacilities || isLoadingWCCs;
 
   // Form setup
   const form = useForm<InvoiceItemFormData>({
     resolver: zodResolver(invoiceItemSchema),
     defaultValues: {
       facility: 0,
-      work_order: 0,
       work_completion: 0,
       invoice_date: '',
       due_date: '',
@@ -115,13 +99,10 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
     name: 'items',
   });
 
-  // Watch work_order and work_completion for mutual exclusivity
-  const watchWorkOrder = form.watch('work_order');
-  const watchWorkCompletion = form.watch('work_completion');
-
   // Watch items amounts for auto-calculation
   const watchItems = form.watch('items');
   const watchTaxAmount = form.watch('tax_amount');
+  const watchCurrency = form.watch('currency');
 
   // Auto-calculate subtotal and total
   useEffect(() => {
@@ -143,7 +124,6 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
     if (isEditMode && invoiceItem) {
       form.reset({
         facility: invoiceItem.facility || 0,
-        work_order: invoiceItem.work_order || 0,
         work_completion: invoiceItem.work_completion || 0,
         invoice_date: invoiceItem.invoice_date || '',
         due_date: invoiceItem.due_date || '',
@@ -225,6 +205,7 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
     try {
       const payload: any = {
         facility: data.facility,
+        work_completion: data.work_completion,
         invoice_date: data.invoice_date,
         due_date: data.due_date,
         subtotal: parseFloat(data.subtotal),
@@ -240,13 +221,6 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
           description: item.description,
         })),
       };
-
-      // Conditionally add work_order or work_completion
-      if (data.work_order > 0) {
-        payload.work_order = data.work_order;
-      } else if (data.work_completion > 0) {
-        payload.work_completion = data.work_completion;
-      }
 
       // Convert to FormData for file upload support
       const formData = new FormData();
@@ -358,74 +332,30 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                   )}
                 />
 
-                {/* Work Order */}
-                <FormField
-                  control={form.control}
-                  name="work_order"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Work Order <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
-                        value={field.value?.toString()}
-                        disabled={watchWorkCompletion > 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Select work order" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {raisePaymentWorkOrders?.results && raisePaymentWorkOrders.results.length > 0 ? (
-                            raisePaymentWorkOrders.results.map((workOrder) => (
-                              <SelectItem key={workOrder.id} value={workOrder.id.toString()}>
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-medium">WO-{workOrder.work_order_number}</span>
-                                  {workOrder.title && (
-                                    <span className="text-xs text-gray-500">{workOrder.title}</span>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-work-orders" disabled>
-                              No work orders available
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Work Completion */}
+                {/* Work Completion Certificate (Approved only) */}
                 <FormField
                   control={form.control}
                   name="work_completion"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Work Completion <span className="text-red-500">*</span>
+                        Work Completion Certificate <span className="text-red-500">*</span>
                       </FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
-                        value={field.value?.toString()}
-                        disabled={watchWorkOrder > 0}
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value > 0 ? field.value.toString() : ''}
                       >
                         <FormControl>
                           <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Select work completion" />
+                            <SelectValue placeholder="Select an approved WCC" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {workCompletions?.results && workCompletions.results.length > 0 ? (
-                            workCompletions.results.map((completion) => (
+                          {approvedWCCs?.results && approvedWCCs.results.length > 0 ? (
+                            approvedWCCs.results.map((completion) => (
                               <SelectItem key={completion.id} value={completion.id.toString()}>
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-medium">WOC-{completion.id}</span>
+                                  <span className="text-sm font-medium">WCC-{completion.id}</span>
                                   <span className="text-xs text-gray-500">
                                     WO-{completion.work_order_detail?.work_order_number || completion.work_order}
                                   </span>
@@ -433,8 +363,8 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="no-completions" disabled>
-                              No work completions available
+                            <SelectItem value="no-wcc" disabled>
+                              No approved WCCs available
                             </SelectItem>
                           )}
                         </SelectContent>
@@ -523,13 +453,18 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                         Tax Amount <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          placeholder="Enter tax amount"
-                          className="focus:ring-green-500 focus:border-green-500"
-                        />
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                            {watchCurrency || 'USD'}
+                          </span>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            className="rounded-l-none focus:ring-green-500 focus:border-green-500"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -546,13 +481,18 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                         Subtotal <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          readOnly
-                          className="bg-gray-50 cursor-not-allowed"
-                        />
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-100 text-gray-500 text-sm">
+                            {watchCurrency || 'USD'}
+                          </span>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            readOnly
+                            className="rounded-l-none bg-gray-50 cursor-not-allowed"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -569,13 +509,18 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                         Total Amount <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          readOnly
-                          className="bg-gray-50 cursor-not-allowed font-semibold"
-                        />
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-100 text-gray-500 text-sm font-semibold">
+                            {watchCurrency || 'USD'}
+                          </span>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            readOnly
+                            className="rounded-l-none bg-gray-50 cursor-not-allowed font-semibold"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -598,8 +543,8 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                          {approvers?.results && approvers.results.length > 0 ? (
-                            approvers.results.map((user) => (
+                          {approvers && approvers.length > 0 ? (
+                            approvers.map((user) => (
                               <SelectItem key={user.id} value={user.id.toString()}>
                               <div className="flex flex-col">
                                   <span className="text-sm font-medium">{user.name}</span>

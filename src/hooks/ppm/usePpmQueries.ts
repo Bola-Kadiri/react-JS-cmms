@@ -12,6 +12,7 @@ import {
   rejectPpm,
   PpmQueryParams,
   fetchPpmReviewers,
+  fetchPpmApprovers,
   fetchPendingPpmsForReviewer,
   fetchReviewedPpms,
   fetchApprovedPpms
@@ -64,13 +65,18 @@ export const useCreatePpm = () => {
         icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
       });
     },
-    onError: (error) => {
-      toast.error('Failed to create ppm', {
-        duration: 5000,
-        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"})
-        // icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
+    onError: (error: any) => {
+      const detail = error?.response?.data;
+      const message = typeof detail === 'string'
+        ? detail
+        : detail
+          ? Object.entries(detail).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')
+          : error?.message || 'Unknown error';
+      toast.error(`Failed to create PPM: ${message}`, {
+        duration: 8000,
+        icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
       });
-      console.error('Create ppm error:', error);
+      console.error('Create ppm error:', error?.response?.data || error);
     },
   });
 };
@@ -169,6 +175,16 @@ export const useRejectPpm = () => {
       });
       console.error('Reject ppm error:', error);
     },
+  });
+};
+
+// Hook for fetching approvers (users with role APPROVER)
+export const usePpmApproversQuery = () => {
+  return useQuery({
+    queryKey: [...ppmKeys.all, 'approvers'],
+    queryFn: fetchPpmApprovers,
+    staleTime: 30000,
+    placeholderData: [],
   });
 };
 

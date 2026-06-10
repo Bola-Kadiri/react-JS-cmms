@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { dashboardKeys } from '@/hooks/dashboard/useDashboardQueries';
 import { toast } from 'sonner';
 import { Check, X } from 'lucide-react';
+import React from 'react';
 import {
   fetchWorkrequests,
   getWorkrequest,
@@ -10,289 +12,244 @@ import {
   getAssetsByFacility,
   getBuildingsByFacility,
   getProcurementUsers,
-  approveWorkrequest,
-  rejectWorkrequest,
-  addProcurementDetails,
-  fetchProcurementWorkrequests,
-  fetchApprovedWorkrequests,
-  WorkrequestQueryParams,
   getWorkrequestReviewers,
   getWorkrequestApprovers,
+  fetchProcurementWorkrequests,
+  fetchApprovedWorkrequests,
+  cpApprove,
+  cpReject,
+  reviewerApprove,
+  reviewerReject,
+  finalApprove,
+  finalReject,
+  resubmitWorkrequest,
+  WorkrequestQueryParams,
 } from '@/services/workrequestsApi';
-import React from 'react';
 
-// Key factory for consistent query keys
+const ok = React.createElement(Check, { className: 'h-4 w-4 text-green-500' });
+const err = React.createElement(X, { className: 'h-4 w-4 text-red-500' });
+
 export const workrequestKeys = {
   all: ['workrequests'] as const,
   lists: () => [...workrequestKeys.all, 'list'] as const,
-  list: (params: WorkrequestQueryParams) =>
-    [...workrequestKeys.lists(), params] as const,
+  list: (params: WorkrequestQueryParams) => [...workrequestKeys.lists(), params] as const,
   details: () => [...workrequestKeys.all, 'detail'] as const,
   detail: (slug: string) => [...workrequestKeys.details(), slug] as const,
-  assetsByFacility: (facility_id: number) =>
-    [...workrequestKeys.all, 'assets-by-facility', facility_id] as const,
-  buildingsByFacility: (facility_id: number) =>
-    [...workrequestKeys.all, 'buildings-by-facility', facility_id] as const,
-  procurementUsers: () =>
-    [...workrequestKeys.all, 'procurement-users'] as const,
+  assetsByFacility: (facility_id: number) => [...workrequestKeys.all, 'assets-by-facility', facility_id] as const,
+  buildingsByFacility: (facility_id: number) => [...workrequestKeys.all, 'buildings-by-facility', facility_id] as const,
+  procurementUsers: () => [...workrequestKeys.all, 'procurement-users'] as const,
   reviewers: () => [...workrequestKeys.all, 'reviewers'] as const,
   approvers: () => [...workrequestKeys.all, 'approvers'] as const,
-  procurementAssigned: () =>
-    [...workrequestKeys.all, 'procurement-assigned'] as const,
+  procurementAssigned: () => [...workrequestKeys.all, 'procurement-assigned'] as const,
   approved: () => [...workrequestKeys.all, 'approved'] as const,
 };
 
-// Hook for fetching workrequests list
-export const useWorkrequestsQuery = () => {
-  return useQuery({
+export const useWorkrequestsQuery = () =>
+  useQuery({
     queryKey: workrequestKeys.all,
     queryFn: fetchWorkrequests,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    placeholderData: { count: 0, next: null, previous: null, results: [] }, // Provide fallback data
+    staleTime: 30000,
+    placeholderData: { count: 0, next: null, previous: null, results: [] },
   });
-};
 
-// Hook for fetching procurement assigned workrequests
-export const useProcurementWorkrequestsQuery = () => {
-  return useQuery({
+export const useProcurementWorkrequestsQuery = () =>
+  useQuery({
     queryKey: workrequestKeys.procurementAssigned(),
     queryFn: fetchProcurementWorkrequests,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    placeholderData: { count: 0, results: [] }, // Provide fallback data
+    staleTime: 30000,
+    placeholderData: { count: 0, results: [] },
   });
-};
 
-// Hook for fetching a single workrequest
-export const useWorkrequestQuery = (slug: string | undefined) => {
-  return useQuery({
+export const useWorkrequestQuery = (slug: string | undefined) =>
+  useQuery({
     queryKey: workrequestKeys.detail(slug as string),
     queryFn: () => getWorkrequest(slug as string),
     enabled: !!slug,
     staleTime: 30000,
   });
-};
 
-// Hook for creating a workrequest
 export const useCreateWorkrequest = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: createWorkrequest,
     onSuccess: () => {
-      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      toast.success('Workrequest created successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      toast.success('Work request created successfully', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to create workrequest', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-        // icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
-      });
-      console.error('Create workrequest error:', error);
+    onError: () => {
+      toast.error('Failed to create work request', { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for updating a workrequest
 export const useUpdateWorkrequest = (slug: string | undefined) => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: updateWorkrequest,
-    onSuccess: (data) => {
-      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: workrequestKeys.detail(slug as string),
-      });
-      toast.success('Workrequest updated successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(slug as string) });
+      toast.success('Work request updated successfully', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to update workrequest', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-      });
-      console.error('Update workrequest error:', error);
+    onError: () => {
+      toast.error('Failed to update work request', { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for deleting a workrequest
 export const useDeleteWorkrequest = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: deleteWorkrequest,
     onSuccess: () => {
-      //   queryClient.invalidateQueries({ queryKey: workrequestKeys.lists() });
       queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      toast.success('Workrequest deleted successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      toast.success('Work request deleted successfully', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to delete workrequest', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-      });
-      console.error('Delete workrequest error:', error);
+    onError: () => {
+      toast.error('Failed to delete work request', { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for fetching assets by facility
-export const useAssetsByFacilityQuery = (facility_id: number | undefined) => {
-  return useQuery({
+export const useAssetsByFacilityQuery = (facility_id: number | undefined) =>
+  useQuery({
     queryKey: workrequestKeys.assetsByFacility(facility_id as number),
     queryFn: () => getAssetsByFacility(facility_id as number),
     enabled: !!facility_id,
     staleTime: 30000,
   });
-};
 
-// Hook for fetching buildings by facility
-export const useBuildingsByFacilityQuery = (
-  facility_id: number | undefined,
-) => {
-  return useQuery({
+export const useBuildingsByFacilityQuery = (facility_id: number | undefined) =>
+  useQuery({
     queryKey: workrequestKeys.buildingsByFacility(facility_id as number),
     queryFn: () => getBuildingsByFacility(facility_id as number),
     enabled: !!facility_id,
     staleTime: 30000,
   });
+
+export const useProcurementUsersQuery = () =>
+  useQuery({ queryKey: workrequestKeys.procurementUsers(), queryFn: getProcurementUsers, staleTime: 30000 });
+
+export const useReviewersQuery = () =>
+  useQuery({ queryKey: workrequestKeys.reviewers(), queryFn: getWorkrequestReviewers, staleTime: 30000 });
+
+export const useApproversQuery = () =>
+  useQuery({ queryKey: workrequestKeys.approvers(), queryFn: getWorkrequestApprovers, staleTime: 30000 });
+
+export const useApprovedWorkrequestsQuery = () =>
+  useQuery({ queryKey: workrequestKeys.approved(), queryFn: fetchApprovedWorkrequests, staleTime: 30000, placeholderData: [] });
+
+// --- Workflow action mutations ---
+
+const invalidateAll = (queryClient: ReturnType<typeof useQueryClient>, slug: string) => {
+  queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
+  queryClient.invalidateQueries({ queryKey: workrequestKeys.detail(slug) });
+  queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
 };
 
-// Hook for fetching procurement users
-export const useProcurementUsersQuery = () => {
-  return useQuery({
-    queryKey: workrequestKeys.procurementUsers(),
-    queryFn: getProcurementUsers,
-    staleTime: 30000,
-  });
-};
-
-// Hook for fetching reviewers
-export const useReviewersQuery = () => {
-  return useQuery({
-    queryKey: workrequestKeys.reviewers(),
-    queryFn: getWorkrequestReviewers,
-    staleTime: 30000,
-  });
-};
-
-// Hook for fetching approvers
-export const useApproversQuery = () => {
-  return useQuery({
-    queryKey: workrequestKeys.approvers(),
-    queryFn: getWorkrequestApprovers,
-    staleTime: 30000,
-  });
-};
-
-// Hook for approving a workrequest
-export const useApproveWorkrequest = () => {
+export const useCpApprove = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: approveWorkrequest,
+    mutationFn: cpApprove,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: workrequestKeys.detail(data.slug),
-      });
-      toast.success('Workrequest approved successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      invalidateAll(queryClient, data.slug);
+      toast.success('PO generated — status updated to CP Approved', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to approve workrequest', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-      });
-      console.error('Approve workrequest error:', error);
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to approve';
+      toast.error(msg, { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for rejecting a workrequest
-export const useRejectWorkrequest = () => {
+export const useCpReject = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: rejectWorkrequest,
+    mutationFn: cpReject,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: workrequestKeys.detail(data.slug),
-      });
-      toast.success('Workrequest rejected successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      invalidateAll(queryClient, data.slug);
+      toast.success('Rejected — Requester notified to correct vendor', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to reject workrequest', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-      });
-      console.error('Reject workrequest error:', error);
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to reject';
+      toast.error(msg, { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for adding procurement details to a workrequest
-export const useAddProcurementDetails = () => {
+export const useReviewerApprove = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: addProcurementDetails,
+    mutationFn: reviewerApprove,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: workrequestKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: workrequestKeys.detail(data.slug),
-      });
-      toast.success('Procurement details added successfully', {
-        duration: 3000,
-        icon: React.createElement(Check, {
-          className: 'h-4 w-4 text-green-500',
-        }),
-      });
+      invalidateAll(queryClient, data.slug);
+      toast.success('Three-way audit passed — status updated to Reviewed', { duration: 3000, icon: ok });
     },
-    onError: (error) => {
-      toast.error('Failed to add procurement details', {
-        duration: 5000,
-        icon: React.createElement(X, { className: 'h-4 w-4 text-red-500' }),
-      });
-      console.error('Add procurement details error:', error);
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to approve';
+      toast.error(msg, { duration: 5000, icon: err });
     },
   });
 };
 
-// Hook for fetching approved work requests for work order creation
-export const useApprovedWorkrequestsQuery = () => {
-  return useQuery({
-    queryKey: workrequestKeys.approved(),
-    queryFn: fetchApprovedWorkrequests,
-    staleTime: 30000,
-    placeholderData: [],
+export const useReviewerReject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: reviewerReject,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Rejected — Requester notified to correct discrepancy', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to reject';
+      toast.error(msg, { duration: 5000, icon: err });
+    },
+  });
+};
+
+export const useFinalApprove = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: finalApprove,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Fully Approved — committed to ledger', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to approve';
+      toast.error(msg, { duration: 5000, icon: err });
+    },
+  });
+};
+
+export const useFinalReject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: finalReject,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Rejected — sent to remediation queue', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to reject';
+      toast.error(msg, { duration: 5000, icon: err });
+    },
+  });
+};
+
+export const useResubmitWorkrequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: resubmitWorkrequest,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Resubmitted — pipeline restarted from Procurement review', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to resubmit';
+      toast.error(msg, { duration: 5000, icon: err });
+    },
   });
 };

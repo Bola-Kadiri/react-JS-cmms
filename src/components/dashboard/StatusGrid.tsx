@@ -76,7 +76,7 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
     let key = tabKey;
     if (activeTab === 'WORK REQUEST') key = 'work_request';
     else if (activeTab === 'WORK ORDER') key = 'work_order';
-    else if (activeTab === 'WORK COMPLETION CERTIFICATE') key = 'work_completion';
+    else if (activeTab === 'WORK COMPLETION' || activeTab === 'WORK COMPLETION CERTIFICATE') key = 'work_completion';
     else if (activeTab === 'INVOICES') key = 'invoices';
     else if (activeTab === 'PAYMENT REQUISITION') key = 'payment_requisition';
     
@@ -96,6 +96,7 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
       case 'WORK ORDER':
         basePath = '/dashboard/work/orders';
         break;
+      case 'WORK COMPLETION':
       case 'WORK COMPLETION CERTIFICATE':
         basePath = '/dashboard/work/work-order-completions';
         break;
@@ -110,23 +111,30 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
     }
 
     // Determine filter based on label
-    if (label.includes('New-Awaiting Review')) {
-      if(tab === 'WORK REQUEST') {
-        filterParam = '?approval_status=Pending&approval_status_po=false';
+    if (label.includes('New-Awaiting Work Request')) {
+      if (tab === 'WORK REQUEST') {
+        filterParam = '?approval_status=awaiting';
       } else {
         filterParam = '?approval_status=Pending&is_reviewed=false';
       }
-    } else if (label.includes('Awaiting Approval')) {
-      // Special case for Work Requests
+    } else if (label.includes('Awaiting Approval') || label.includes('CP Approved') || label.includes('Reviewed')) {
       if (tab === 'WORK REQUEST') {
-        filterParam = '?approval_status=Pending&approval_status_po=true';
+        filterParam = `?approval_status=${encodeURIComponent(label)}`;
       } else {
         filterParam = '?approval_status=Pending&is_reviewed=true';
       }
     } else if (label.includes('Approved')) {
-      filterParam = '?approval_status=Approved';
+      if (tab === 'WORK REQUEST') {
+        filterParam = '?approval_status=Fully Approved';
+      } else {
+        filterParam = '?approval_status=Approved';
+      }
     } else if (label.includes('Rejected')) {
-      filterParam = '?approval_status=Rejected';
+      if (tab === 'WORK REQUEST') {
+        filterParam = '?approval_status=rejected';
+      } else {
+        filterParam = '?approval_status=Rejected';
+      }
     } else if (label.includes('Overdue')) {
       filterParam = '?due_status=Overdue';
     } else if (label.includes('Completed')) {

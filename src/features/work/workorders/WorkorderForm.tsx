@@ -266,6 +266,9 @@ const WorkorderForm = () => {
         delete formDataToSend.request_to;
       }
 
+      const FK_FIELDS = new Set(['subcategory', 'category', 'facility', 'building', 'department', 'asset', 'approver', 'source_work_request', 'source_ppm', 'request_to']);
+      FK_FIELDS.forEach(key => { if (formDataToSend[key] === 0) delete formDataToSend[key]; });
+
       const buildFd = (obj: any) => {
         const fd = new FormData();
         Object.entries(obj).forEach(([key, value]) => {

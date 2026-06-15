@@ -193,23 +193,23 @@ const AssetManagement = () => {
   const filterConfig = [
     {
       key: 'status',
-      label: 'Condition',
+      label: t('filter.condition'),
       options: [
-        { value: 'Used', label: 'Used' },
-        { value: 'Brand New', label: 'Brand New' }
+        { value: 'Used', label: t('filter.conditionOptions.used') },
+        { value: 'Brand New', label: t('filter.conditionOptions.brandNew') }
       ]
     },
     {
       key: 'type',
-      label: 'Asset Type',
+      label: t('filter.assetType'),
       options: [
-        { value: 'Asset', label: 'Asset' },
-        { value: 'Consumable', label: 'Consumable' }
+        { value: 'Asset', label: t('types.asset') },
+        { value: 'Consumable', label: t('types.consumable') }
       ]
     },
     {
       key: 'category',
-      label: 'Asset Category',
+      label: t('filter.category'),
       options: assetCategories.map(category => ({
         value: category.id.toString(),
         label: category.name
@@ -217,7 +217,7 @@ const AssetManagement = () => {
     },
     {
       key: 'subcategory',
-      label: 'Asset Subcategory',
+      label: t('filter.subcategory'),
       options: assetSubcategories.map(subcategory => ({
         value: subcategory.id.toString(),
         label: subcategory.name
@@ -231,7 +231,7 @@ const AssetManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading assets...</p>
+          <p className="text-sm text-muted-foreground">{t('messages.loading')}</p>
         </div>
       </div>
     );
@@ -241,9 +241,9 @@ const AssetManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading assets</div>
+        <div className="text-red-500 text-xl">{t('messages.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('actions.tryAgain')}
         </Button>
       </div>
     );
@@ -252,12 +252,12 @@ const AssetManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Asset Management</h1>
+        <h1 className="text-3xl font-bold">{t('management')}</h1>
        {/* To this: */}
 <PermissionGuard feature='asset_register' permission='view'>
   <Button onClick={handleAddAsset}>
     <Plus className="mr-2 h-4 w-4" />
-    Add Asset
+    {t('actions.addAsset')}
   </Button>
 </PermissionGuard>
       </div>
@@ -268,7 +268,7 @@ const AssetManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search by asset name..."
+          placeholder={t('placeholders.searchAssets')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -279,22 +279,22 @@ const AssetManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Asset Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Facility</TableHead>
-                <TableHead className="font-medium text-gray-600">Asset Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Category</TableHead>
-                <TableHead className="font-medium text-gray-600">Subcategory</TableHead>
-                <TableHead className="font-medium text-gray-600">Condition</TableHead>
-                <TableHead className="font-medium text-gray-600">Purchased Amount</TableHead>
-                <TableHead className="font-medium text-gray-600">Purchase Date</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.assetName')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.facility')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.assetType')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('fields.category')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('fields.subcategory')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.condition')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.purchasedAmount')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('columns.purchaseDate')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    No assets found
+                    {t('noItems')}
                   </TableCell>
                 </TableRow>
               ) : (

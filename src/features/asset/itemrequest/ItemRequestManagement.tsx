@@ -13,11 +13,13 @@ import { Pagination } from '@/components/Pagination';
 import { useItemRequestsQuery, useDeleteItemRequest } from '@/hooks/itemrequest/useItemRequestQueries';
 import { useStoresQuery } from '@/hooks/store/useStoreQueries';
 import { useFormatters } from '@/utils/formatters';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'name' | 'type' | 'request_from_detail' | 'requested_by_detail' | 'required_date';
 type SortDirection = 'asc' | 'desc';
 
 const ItemRequestManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { formatDate } = useFormatters();
@@ -203,9 +205,9 @@ const ItemRequestManagement = () => {
 
   // Get type badge styling
   const getTypeBadge = (type: string) => {
-    return type === 'for_use' 
-      ? <Badge className="bg-green-100 text-green-800 hover:bg-green-100">For Use</Badge>
-      : <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">For Store</Badge>;
+    return type === 'for_use'
+      ? <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{t('itemRequest.typeOptions.for_use')}</Badge>
+      : <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{t('itemRequest.typeOptions.for_store')}</Badge>;
   };
 
   // Loading state
@@ -214,7 +216,7 @@ const ItemRequestManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-muted-foreground">Loading item requests...</p>
+          <p className="text-sm text-muted-foreground">{t('itemRequest.loading')}</p>
         </div>
       </div>
     );
@@ -224,9 +226,9 @@ const ItemRequestManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-lg font-medium">Error loading item requests</div>
+        <div className="text-red-500 text-lg font-medium">{t('itemRequest.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -237,14 +239,14 @@ const ItemRequestManagement = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Item Requests</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('itemRequest.management')}</h2>
           <p className="text-muted-foreground">
-            Manage item requests and track their status
+            {t('itemRequest.managementDesc')}
           </p>
         </div>
         <Button onClick={handleAddItemRequest} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
           <Plus className="h-4 w-4" />
-          Add Item Request
+          {t('itemRequest.addButton')}
         </Button>
       </div>
 
@@ -253,39 +255,39 @@ const ItemRequestManagement = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Filter className="h-5 w-5 text-green-600" />
-            Filters & Search
+            {t('itemRequest.filters.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <SearchFilter
-                placeholder="Search by name, description, store, or requester..."
+                placeholder={t('itemRequest.searchPlaceholder')}
                 initialSearchValue={searchValue}
                 onSearch={handleSearch}
               />
             </div>
-            
+
             <div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filter by type" />
+                  <SelectValue placeholder={t('itemRequest.filters.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="for_use">For Use</SelectItem>
-                  <SelectItem value="for_store">For Store</SelectItem>
+                  <SelectItem value="all">{t('itemRequest.filters.allTypes')}</SelectItem>
+                  <SelectItem value="for_use">{t('itemRequest.typeOptions.for_use')}</SelectItem>
+                  <SelectItem value="for_store">{t('itemRequest.typeOptions.for_store')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Select value={storeFilter} onValueChange={setStoreFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filter by store" />
+                  <SelectValue placeholder={t('itemRequest.filters.filterByStore')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Stores</SelectItem>
+                  <SelectItem value="all">{t('itemRequest.filters.allStores')}</SelectItem>
                   {storesData?.results?.map((store) => (
                     <SelectItem key={store.id} value={String(store.id)}>
                       {store.name}
@@ -303,61 +305,61 @@ const ItemRequestManagement = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('name')}
               >
                 <div className="flex items-center gap-2">
-                  Name
+                  {t('itemRequest.columns.name')}
                   {renderSortIcon('name')}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('type')}
               >
                 <div className="flex items-center gap-2">
-                  Type
+                  {t('itemRequest.columns.type')}
                   {renderSortIcon('type')}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('request_from_detail')}
               >
                 <div className="flex items-center gap-2">
-                  Request From
+                  {t('itemRequest.columns.requestFrom')}
                   {renderSortIcon('request_from_detail')}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('requested_by_detail')}
               >
                 <div className="flex items-center gap-2">
-                  Requested By
+                  {t('itemRequest.columns.requestedBy')}
                   {renderSortIcon('requested_by_detail')}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('required_date')}
               >
                 <div className="flex items-center gap-2">
-                  Required Date
+                  {t('itemRequest.columns.requiredDate')}
                   {renderSortIcon('required_date')}
                 </div>
               </TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t('itemRequest.columns.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8">
-                  {searchValue || typeFilter !== 'all' || storeFilter !== 'all' 
-                    ? 'No item requests found matching your criteria.' 
-                    : 'No item requests available.'}
+                  {searchValue || typeFilter !== 'all' || storeFilter !== 'all'
+                    ? t('itemRequest.noItemsFiltered')
+                    : t('itemRequest.noItems')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -375,23 +377,23 @@ const ItemRequestManagement = () => {
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {itemRequest.request_from_detail?.name || `Store ID: ${itemRequest.request_from}`}
+                        {itemRequest.request_from_detail?.name || t('itemRequest.storeIdFallback', { id: itemRequest.request_from })}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {itemRequest.request_from_detail?.location || 'No location'}
+                        {itemRequest.request_from_detail?.location || t('itemRequest.noLocation')}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {itemRequest.requested_by_detail 
+                        {itemRequest.requested_by_detail
                           ? `${itemRequest.requested_by_detail.first_name} ${itemRequest.requested_by_detail.last_name}`
-                          : `User ID: ${itemRequest.requested_by}`
+                          : t('itemRequest.userIdFallback', { id: itemRequest.requested_by })
                         }
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {itemRequest.requested_by_detail?.roles || 'N/A'}
+                        {itemRequest.requested_by_detail?.roles || t('common:na')}
                       </div>
                     </div>
                   </TableCell>
@@ -449,13 +451,13 @@ const ItemRequestManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('itemRequest.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the item request and remove it from our servers.
+              {t('itemRequest.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('itemRequest.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteItemRequest}
               className="bg-red-600 hover:bg-red-700"
@@ -464,10 +466,10 @@ const ItemRequestManagement = () => {
               {deleteItemRequestMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('itemRequest.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('itemRequest.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

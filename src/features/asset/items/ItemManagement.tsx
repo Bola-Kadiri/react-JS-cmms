@@ -13,8 +13,10 @@ import { Pagination } from '@/components/Pagination';
 import { useItemsQuery, useDeleteItem } from '@/hooks/item/useItemQueries';
 import { Item } from '@/types/item';
 import { ItemQueryParams } from '@/services/itemsApi';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ItemManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -118,7 +120,7 @@ const ItemManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading items...</p>
+          <p className="text-sm text-muted-foreground">{t('item.loading')}</p>
         </div>
       </div>
     );
@@ -128,9 +130,9 @@ const ItemManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading items</div>
+        <div className="text-red-500 text-xl">{t('item.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -139,17 +141,17 @@ const ItemManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Item Management</h1>
+        <h1 className="text-2xl font-bold">{t('item.management')}</h1>
         <Button onClick={handleAddItem}>
-          <Plus className="mr-2 h-4 w-4" /> Add Item
+          <Plus className="mr-2 h-4 w-4" /> {t('item.add')}
         </Button>
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6">
-        <SearchFilter 
+        <SearchFilter
           onSearch={handleSearch}
-          placeholder="Search items..."
+          placeholder={t('item.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -160,16 +162,16 @@ const ItemManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Description</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('item.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('item.columns.description')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('item.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No items found.
+                    {t('item.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -232,14 +234,14 @@ const ItemManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the item.
+              {t('item.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteItem}
               disabled={deleteItemMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -247,10 +249,10 @@ const ItemManagement = () => {
               {deleteItemMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

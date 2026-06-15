@@ -10,6 +10,7 @@ import { useInventoryTypesQuery, useDeleteInventoryType } from '@/hooks/inventor
 import { useDebounce } from '@/hooks/useDebounce';
 import { InventoryType } from '@/types/inventorytype';
 import { toast } from 'sonner';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // Type definitions for sorting
 type SortField = 'code' | 'type' | 'unit_of_measurement';
@@ -20,6 +21,7 @@ interface InventoryTypeManagementProps {
 }
 
 const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ className }) => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('type');
@@ -70,7 +72,7 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
           bValue = b.type;
       }
 
-      return sortDirection === 'asc' 
+      return sortDirection === 'asc'
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
     });
@@ -136,8 +138,8 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading inventory types</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <p className="text-red-500 mb-2">{t('inventoryType.error')}</p>
+          <Button onClick={() => window.location.reload()}>{t('common:actions.tryAgain')}</Button>
         </div>
       </div>
     );
@@ -146,16 +148,16 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Inventory Types</h1>
+        <h1 className="text-2xl font-bold">{t('inventoryType.management')}</h1>
         <Button onClick={handleCreate} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Add Inventory Type
+          {t('inventoryType.addButton')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Inventory Types List</CardTitle>
+          <CardTitle>{t('inventoryType.listTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Search Controls */}
@@ -163,7 +165,7 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by code or type..."
+                placeholder={t('inventoryType.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -176,34 +178,34 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('code')}
                   >
                     <div className="flex items-center gap-2">
-                      Code
+                      {t('inventoryType.columns.code')}
                       {getSortIcon('code')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('type')}
                   >
                     <div className="flex items-center gap-2">
-                      Type
+                      {t('inventoryType.columns.type')}
                       {getSortIcon('type')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('unit_of_measurement')}
                   >
                     <div className="flex items-center gap-2">
-                      Unit of Measurement
+                      {t('inventoryType.columns.unitOfMeasurement')}
                       {getSortIcon('unit_of_measurement')}
                     </div>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">{t('inventoryType.columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -211,9 +213,9 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8">
                       <div className="text-gray-500">
-                        {debouncedSearchTerm 
-                          ? 'No inventory types found matching your criteria.'
-                          : 'No inventory types found.'}
+                        {debouncedSearchTerm
+                          ? t('inventoryType.noItemsFiltered')
+                          : t('inventoryType.noItems')}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -251,18 +253,18 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete the inventory type "{item.type}".
+                                  {t('inventoryType.delete.description', { name: item.type })}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(item.id.toString())}
                                   className="bg-red-500 hover:bg-red-600"
                                 >
-                                  Delete
+                                  {t('inventoryType.delete.confirm')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -276,7 +278,7 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
             </Table>
           </div>
 
-          {/* Pagination */}
+          {/* Pagination — left as-is (Pagination component handles these strings) */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-gray-500">
@@ -309,4 +311,4 @@ const InventoryTypeManagement: React.FC<InventoryTypeManagementProps> = ({ class
   );
 };
 
-export default InventoryTypeManagement; 
+export default InventoryTypeManagement;

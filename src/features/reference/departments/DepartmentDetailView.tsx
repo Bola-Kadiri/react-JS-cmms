@@ -1,21 +1,23 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  AlertTriangle, 
-  Building, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
+  AlertTriangle,
+  Building,
   Users
 } from 'lucide-react';
 import { useDepartmentQuery } from '@/hooks/department/useDepartmentQueries';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const DepartmentDetailView = () => {
+  const { t } = useTypedTranslation('accounts');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Using our custom hook instead of direct query
   const {
     data: department,
@@ -39,7 +41,7 @@ const DepartmentDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading department details...</p>
+          <p className="text-sm text-muted-foreground">{t('department.detail.loading')}</p>
         </div>
       </div>
     );
@@ -49,12 +51,12 @@ const DepartmentDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Error loading department details</div>
+        <div className="text-red-500 text-xl">{t('department.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('department.detail.unknownError')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Departments
+          {t('department.detail.backToList')}
         </Button>
       </div>
     );
@@ -64,9 +66,9 @@ const DepartmentDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Department not found</div>
+        <div className="text-red-500 text-xl">{t('department.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Departments
+          {t('department.detail.backToList')}
         </Button>
       </div>
     );
@@ -86,12 +88,12 @@ const DepartmentDetailView = () => {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{department.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Department ID: {department.id}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('department.detail.idLabel', { id: department.id })}</p>
           </div>
         </div>
         <PermissionGuard feature='reference' permission='edit'>
           <Button onClick={handleEdit} className="rounded-full shadow-sm">
-            <Edit className="mr-2 h-4 w-4" /> Edit Department
+            <Edit className="mr-2 h-4 w-4" /> {t('department.detail.editDepartment')}
           </Button>
         </PermissionGuard>
       </div>
@@ -108,29 +110,29 @@ const DepartmentDetailView = () => {
                 <div>
                   <h2 className="text-white text-2xl font-bold">{department.name}</h2>
                   <p className="text-green-100 mt-1 flex items-center gap-2">
-                    <Building className="h-4 w-4" /> Department
+                    <Building className="h-4 w-4" /> {t('department.detail.label')}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <CardContent className="pt-8 pb-6 px-6">
             <div className="space-y-8">
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
                   <Building className="h-5 w-5 text-primary" />
-                  Department Information
+                  {t('department.detail.cardTitle')}
                 </h3>
-                
+
                 <div className="bg-gray-50 rounded-xl p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">Department Name</p>
+                      <p className="text-sm text-gray-500 mb-2">{t('department.detail.fields.name')}</p>
                       <p className="text-lg font-semibold text-gray-900">{department.name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">Department ID</p>
+                      <p className="text-sm text-gray-500 mb-2">{t('department.detail.fields.id')}</p>
                       <p className="text-lg font-semibold text-gray-900">{department.id}</p>
                     </div>
                   </div>

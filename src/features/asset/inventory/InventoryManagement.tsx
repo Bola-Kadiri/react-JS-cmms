@@ -18,8 +18,10 @@ import { useModels } from '@/hooks/model/useModelQueries';
 import { Inventory } from '@/types/inventory';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const InventoryManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -199,21 +201,31 @@ const InventoryManagement = () => {
     setPage(1); // Reset to first page when changing page size
   };
 
+  const getTranslatedStatus = (status: string) => {
+    const map: Record<string, string> = {
+      'Available': t('inventoryForm.filterLabels.available'),
+      'Low Stock': t('inventoryForm.filterLabels.lowStock'),
+      'Out of Stock': t('inventoryForm.filterLabels.outOfStock'),
+      'Discontinued': t('inventoryForm.filterLabels.discontinued'),
+    };
+    return map[status] ?? status;
+  };
+
   // Define filter configuration
   const filterConfig = [
     {
       key: 'status',
-      label: 'Status',
+      label: t('inventoryForm.filter.status'),
       options: [
-        { value: 'Available', label: 'Available' },
-        { value: 'Low Stock', label: 'Low Stock' },
-        { value: 'Out of Stock', label: 'Out of Stock' },
-        { value: 'Discontinued', label: 'Discontinued' }
+        { value: 'Available', label: t('inventoryForm.filterLabels.available') },
+        { value: 'Low Stock', label: t('inventoryForm.filterLabels.lowStock') },
+        { value: 'Out of Stock', label: t('inventoryForm.filterLabels.outOfStock') },
+        { value: 'Discontinued', label: t('inventoryForm.filterLabels.discontinued') }
       ]
     },
     {
       key: 'category',
-      label: 'Asset Category',
+      label: t('inventoryForm.filter.category'),
       options: assetCategories.map(category => ({
         value: category.id.toString(),
         label: category.name
@@ -221,7 +233,7 @@ const InventoryManagement = () => {
     },
     {
       key: 'vendor',
-      label: 'Vendor',
+      label: t('inventoryForm.filter.vendor'),
       options: vendors.map(vendor => ({
         value: vendor.id.toString(),
         label: vendor.name
@@ -235,7 +247,7 @@ const InventoryManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading inventories...</p>
+          <p className="text-sm text-muted-foreground">{t('inventoryForm.loading')}</p>
         </div>
       </div>
     );
@@ -245,9 +257,9 @@ const InventoryManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading inventories</div>
+        <div className="text-red-500 text-xl">{t('inventoryForm.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -256,21 +268,21 @@ const InventoryManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Inventory Management</h1>
+        <h1 className="text-3xl font-bold">{t('inventoryForm.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddInventory}>
-          <Plus className="mr-2 h-4 w-4" /> Add Inventory
+          <Plus className="mr-2 h-4 w-4" /> {t('inventoryForm.add')}
         </Button>
         )}
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6">
-        <SearchFilter 
+        <SearchFilter
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search by serial number, model, part number, tag..."
+          placeholder={t('inventoryForm.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -281,23 +293,23 @@ const InventoryManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Category</TableHead>
-                <TableHead className="font-medium text-gray-600">Subcategory</TableHead>
-                <TableHead className="font-medium text-gray-600">Vendor</TableHead>
-                <TableHead className="font-medium text-gray-600">Model</TableHead>
-                <TableHead className="font-medium text-gray-600">Unit Price</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.type')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.category')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.subcategory')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.vendor')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.model')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.unitPrice')}</TableHead>
                 {/* <TableHead className="font-medium text-gray-600">Purchase Date</TableHead>
                 <TableHead className="font-medium text-gray-600">Manufacture Date</TableHead> */}
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('inventoryForm.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('inventoryForm.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    No inventories found.
+                    {t('inventoryForm.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -306,7 +318,7 @@ const InventoryManagement = () => {
                     <TableCell className="font-medium">{getTypeName(inventory.type)}</TableCell>
                     <TableCell className="text-sm">{getCategoryName(inventory.category)}</TableCell>
                     <TableCell className="text-sm">
-                      {inventory.subcategory_detail?.name || `Subcategory ${inventory.subcategory}`}
+                      {inventory.subcategory_detail?.name || t('inventoryForm.subcategoryFallback', { id: inventory.subcategory })}
                     </TableCell>
                     <TableCell className="text-sm">{getVendorName(inventory.vendor)}</TableCell>
                     <TableCell className="font-medium">{getModelName(inventory.model)}</TableCell>
@@ -323,7 +335,7 @@ const InventoryManagement = () => {
                           ? 'bg-gray-100 text-gray-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {inventory.status}
+                        {getTranslatedStatus(inventory.status)}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -386,14 +398,14 @@ const InventoryManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the inventory item.
+              {t('inventoryForm.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteInventory}
               disabled={deleteInventoryMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -401,10 +413,10 @@ const InventoryManagement = () => {
               {deleteInventoryMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -46,8 +46,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const InvoiceitemManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -171,13 +173,13 @@ const InvoiceitemManagement = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 mb-2">Failed to load invoice items</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            variant="outline" 
+          <p className="text-red-600 mb-2">{t('invoiceItem.error')}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
             size="sm"
           >
-            Try Again
+            {t('common:actions.tryAgain')}
           </Button>
         </div>
       </div>
@@ -189,9 +191,9 @@ const InvoiceitemManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Invoice Items</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t('invoiceItem.management')}</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Manage and track work order invoice items
+            {t('invoiceItem.subtitle')}
           </p>
         </div>
         {canEdit && (
@@ -200,7 +202,7 @@ const InvoiceitemManagement = () => {
             className="bg-green-600 hover:bg-green-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Invoice Item
+            {t('invoiceItem.add')}
           </Button>
         )}
       </div>
@@ -212,7 +214,7 @@ const InvoiceitemManagement = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search invoice items..."
+                placeholder={t('invoiceItem.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10 pr-10"
@@ -339,13 +341,13 @@ const InvoiceitemManagement = () => {
                 <TableCell colSpan={8} className="h-32 text-center text-gray-500">
                   {debouncedSearchQuery ? (
                     <div>
-                      <p>No invoice items match your search criteria</p>
+                      <p>{t('common:table.noResults')}</p>
                       <p className="text-sm mt-1">
-                        Try adjusting your search terms
+                        {t('common:table.adjustSearch')}
                       </p>
                     </div>
                   ) : (
-                    "No invoice items found"
+                    t('invoiceItem.noItems')
                   )}
                 </TableCell>
               </TableRow>
@@ -395,9 +397,9 @@ const InvoiceitemManagement = () => {
       <AlertDialog open={!!deleteItem} onOpenChange={(open) => !open && setDeleteItem(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Invoice Item</AlertDialogTitle>
+            <AlertDialogTitle>{t('invoiceItem.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete invoice item "{deleteItem?.invoice_number}"? This action cannot be undone.
+              {t('invoiceItem.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

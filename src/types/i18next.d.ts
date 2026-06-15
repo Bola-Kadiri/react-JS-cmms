@@ -9,6 +9,10 @@ import assets from '../locales/en/assets.json';
 import tables from '../locales/en/tables.json';
 import form from '../locales/en/form.json';
 import sidebar from '../locales/en/sidebar.json';
+import work from '../locales/en/work.json';
+import procurement from '../locales/en/procurement.json';
+import facility from '../locales/en/facility.json';
+import accounts from '../locales/en/accounts.json';
 
 // Extend the i18next module declarations
 declare module 'i18next' {
@@ -22,6 +26,10 @@ declare module 'i18next' {
       tables: typeof tables;
       form: typeof form;
       sidebar: typeof sidebar;
+      work: typeof work;
+      procurement: typeof procurement;
+      facility: typeof facility;
+      accounts: typeof accounts;
     };
   }
 }

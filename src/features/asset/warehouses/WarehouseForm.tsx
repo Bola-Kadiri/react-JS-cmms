@@ -15,25 +15,27 @@ import { Warehouse } from '@/types/warehouse';
 import { useWarehouseQuery, useCreateWarehouse, useUpdateWarehouse } from '@/hooks/warehouse/useWarehouseQueries';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { Checkbox } from '@/components/ui/checkbox';
-
-// Form schema definition matching the Warehouse interface
-const warehouseSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().min(1, 'Description is required'),
-  address: z.string().min(1, 'Address is required'),
-  capacity: z.string().min(1, 'Capacity is required'),
-  facility: z.number().min(1, 'Facility is required'),
-  is_active: z.boolean()    
-});
-
-type WarehouseFormValues = z.infer<typeof warehouseSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WarehouseForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Schema inside component so t() is in scope for validation messages
+  const warehouseSchema = z.object({
+    code: z.string().min(1, t('warehouse.form.validation.codeRequired')),
+    name: z.string().min(1, t('warehouse.form.validation.nameRequired')),
+    description: z.string().min(1, t('warehouse.form.validation.descriptionRequired')),
+    address: z.string().min(1, t('warehouse.form.validation.addressRequired')),
+    capacity: z.string().min(1, t('warehouse.form.validation.capacityRequired')),
+    facility: z.number().min(1, t('warehouse.form.validation.facilityRequired')),
+    is_active: z.boolean()
+  });
+
+  type WarehouseFormValues = z.infer<typeof warehouseSchema>;
+
   // Warehouse form setup
   const warehouseForm = useForm<WarehouseFormValues>({
     resolver: zodResolver(warehouseSchema),
@@ -53,9 +55,9 @@ const WarehouseForm = () => {
   const facilities = facilitiesResponse?.results || [];
 
   // Fetch warehouse data for edit mode using our custom hook
-  const { 
-    data: warehouseData, 
-    isLoading: isLoadingWarehouse, 
+  const {
+    data: warehouseData,
+    isLoading: isLoadingWarehouse,
     isError: isWarehouseError,
     error: warehouseError
   } = useWarehouseQuery(isEditMode ? id : undefined);
@@ -67,7 +69,6 @@ const WarehouseForm = () => {
   // Handle warehouse data loading
   useEffect(() => {
     if (warehouseData && isEditMode) {
-      // Reset the form with warehouse data
       warehouseForm.reset({
         code: warehouseData.code,
         name: warehouseData.name,
@@ -103,7 +104,7 @@ const WarehouseForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading warehouse details...</p>
+          <p className="text-sm text-muted-foreground">{t('warehouse.form.loading')}</p>
         </div>
       </div>
     );
@@ -112,12 +113,12 @@ const WarehouseForm = () => {
   if (isEditMode && isWarehouseError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading warehouse details</div>
+        <div className="text-red-500 text-xl">{t('warehouse.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {warehouseError instanceof Error ? warehouseError.message : 'An unknown error occurred'}
+          {warehouseError instanceof Error ? warehouseError.message : t('warehouse.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Warehouses
+          {t('warehouse.form.backToList')}
         </Button>
       </div>
     );
@@ -127,15 +128,16 @@ const WarehouseForm = () => {
     <div className="container mx-auto py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
+            aria-label={t('common:actions.back')}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit Warehouse' : 'Create New Warehouse'}
+            {isEditMode ? t('warehouse.form.editTitle') : t('warehouse.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -146,9 +148,9 @@ const WarehouseForm = () => {
             {/* Warehouse Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <h2 className="text-xl font-semibold text-gray-800">Warehouse Information</h2>
+                <h2 className="text-xl font-semibold text-gray-800">{t('warehouse.form.sections.warehouseInfo')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
@@ -156,9 +158,9 @@ const WarehouseForm = () => {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Code *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.code')} *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter warehouse code" {...field} />
+                          <Input placeholder={t('warehouse.form.placeholders.code')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -170,9 +172,9 @@ const WarehouseForm = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Name *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.name')} *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter warehouse name" {...field} />
+                          <Input placeholder={t('warehouse.form.placeholders.name')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -186,10 +188,10 @@ const WarehouseForm = () => {
                     name="capacity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Capacity *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.capacity')} *</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter warehouse capacity" 
+                          <Input
+                            placeholder={t('warehouse.form.placeholders.capacity')}
                             {...field}
                           />
                         </FormControl>
@@ -203,11 +205,11 @@ const WarehouseForm = () => {
                     name="facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Facility *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.facility')} *</FormLabel>
                         <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select facility" />
+                              <SelectValue placeholder={t('warehouse.form.placeholders.selectFacility')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -235,7 +237,7 @@ const WarehouseForm = () => {
                             ref={field.ref}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium text-gray-700">Is Active</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.isActive')}</FormLabel>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -247,9 +249,9 @@ const WarehouseForm = () => {
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Address *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.address')} *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter warehouse address" {...field} />
+                        <Input placeholder={t('warehouse.form.placeholders.address')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -261,10 +263,10 @@ const WarehouseForm = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Description *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('warehouse.form.fields.description')} *</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter warehouse description"
+                        <Textarea
+                          placeholder={t('warehouse.form.placeholders.description')}
                           {...field}
                           className="min-h-[100px]"
                         />
@@ -276,19 +278,19 @@ const WarehouseForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-6 border-t border-gray-200">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               className="px-8"
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createWarehouseMutation.isPending || updateWarehouseMutation.isPending}
               className="px-8"
@@ -296,7 +298,7 @@ const WarehouseForm = () => {
               {(createWarehouseMutation.isPending || updateWarehouseMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Warehouse' : 'Create Warehouse'}
+              {isEditMode ? t('warehouse.form.update') : t('warehouse.form.create')}
             </Button>
           </div>
         </form>

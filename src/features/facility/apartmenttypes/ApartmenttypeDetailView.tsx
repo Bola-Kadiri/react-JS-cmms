@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit, Loader2, Tag, Info, CheckCircle, XCircle } from 'lucide-react';
 import { useApartmenttypeQuery } from '@/hooks/apartmenttype/useApartmenttypeQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ApartmenttypeDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
@@ -33,7 +35,7 @@ const ApartmenttypeDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartmenttype details...</p>
+          <p className="text-sm text-muted-foreground">{t('apartmentType.detail.loading')}</p>
         </div>
       </div>
     );
@@ -42,12 +44,12 @@ const ApartmenttypeDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartmenttype details</div>
+        <div className="text-red-500 text-xl">{t('apartmentType.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('apartmentType.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Apartmenttypes
+          {t('apartmentType.detail.backButton')}
         </Button>
       </div>
     );
@@ -56,9 +58,9 @@ const ApartmenttypeDetailView = () => {
   if (!apartmenttype) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Apartmenttype not found</div>
+        <div className="text-red-500 text-xl">{t('apartmentType.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Apartmenttypes
+          {t('apartmentType.detail.backButton')}
         </Button>
       </div>
     );
@@ -88,23 +90,23 @@ const ApartmenttypeDetailView = () => {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">Apartmenttype Details</h1>
+          <h1 className="text-2xl font-bold">{t('apartmentType.detail.title')}</h1>
         </div>
-        <Button 
-          onClick={handleEdit} 
+        <Button
+          onClick={handleEdit}
           className="rounded-md shadow-sm hover:shadow-md transition-all"
         >
-          <Edit className="mr-2 h-4 w-4" /> Edit Apartmenttype
+          <Edit className="mr-2 h-4 w-4" /> {t('apartmentType.detail.editButton')}
         </Button>
       </div>
-      
+
       <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 border-b pb-8">
           <div className="flex flex-col space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-500">ID: {apartmenttype.id}</span>
+                <span className="text-sm font-medium text-gray-500">{t('apartmentType.detail.idLabel')} {apartmenttype.id}</span>
               </div>
               <Badge className={`${getBadgeVariant(apartmenttype.status)} px-3 py-1 rounded-full text-xs font-medium`}>
                 {apartmenttype.status}
@@ -112,12 +114,12 @@ const ApartmenttypeDetailView = () => {
             </div>
             <CardTitle className="text-3xl font-bold text-gray-800">{apartmenttype.name}</CardTitle>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-500">Slug:</span>
+              <span className="text-sm font-medium text-gray-500">{t('apartmentType.detail.slugLabel')}</span>
               <code className="bg-gray-100 px-2 py-1 rounded text-sm">{apartmenttype.slug}</code>
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-8">
           <div className="flex items-center justify-center p-8">
             {apartmenttype.status === 'Active' ? (
@@ -127,10 +129,10 @@ const ApartmenttypeDetailView = () => {
                 </div>
                 <div>
                   <p className="text-lg font-medium text-gray-800">
-                    This apartmenttype is currently <span className="font-bold text-green-600">Active</span>
+                    {t('apartmentType.detail.activeTitle')} <span className="font-bold text-green-600">{t('apartmentType.detail.activeStatus')}</span>
                   </p>
                   <p className="text-gray-500 mt-2">
-                    Active apartmenttypes are available for use in the system
+                    {t('apartmentType.detail.activeDescription')}
                   </p>
                 </div>
               </div>
@@ -141,29 +143,29 @@ const ApartmenttypeDetailView = () => {
                 </div>
                 <div>
                   <p className="text-lg font-medium text-gray-800">
-                    This apartmenttype is currently <span className="font-bold text-red-600">Inactive</span>
+                    {t('apartmentType.detail.activeTitle')} <span className="font-bold text-red-600">{t('apartmentType.detail.inactiveStatus')}</span>
                   </p>
                   <p className="text-gray-500 mt-2">
-                    Inactive apartmenttypes are not available for use in the system
+                    {t('apartmentType.detail.inactiveDescription')}
                   </p>
                 </div>
               </div>
             )}
           </div>
         </CardContent>
-        
+
         <CardFooter className="bg-gray-50 p-6 border-t">
           <div className="w-full flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4 text-gray-400" />
-              <p className="text-sm text-gray-500">Last updated: {new Date().toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500">{t('apartmentType.detail.lastUpdated')} {new Date().toLocaleDateString()}</p>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleBack} 
+            <Button
+              variant="outline"
+              onClick={handleBack}
               className="rounded-md shadow-sm hover:shadow transition-all"
             >
-              Back to Apartmenttypes
+              {t('apartmentType.detail.backButton')}
             </Button>
           </div>
         </CardFooter>

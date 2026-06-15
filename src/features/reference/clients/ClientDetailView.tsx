@@ -9,8 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Client, Contact } from '@/types/client'; 
+import { Client, Contact } from '@/types/client';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // API function to get a client
 const getClient = async (slug: string): Promise<Client> => {
@@ -19,18 +20,19 @@ const getClient = async (slug: string): Promise<Client> => {
 };
 
 const ClientDetailView = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  
+
   // State for all contacts (combining contacts array and contacts_data)
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
-  
+
   // Using TanStack Query v5 syntax
-  const { 
-    data: client, 
-    isLoading, 
+  const {
+    data: client,
+    isLoading,
     isError,
-    error 
+    error
   } = useQuery({
     queryKey: ['client', slug],
     queryFn: () => getClient(slug as string),
@@ -45,22 +47,22 @@ const ClientDetailView = () => {
       // Since contacts_data is now Contact[], we can simply merge and deduplicate
       const contactsFromMain = client.contacts || [];
       const contactsFromData = client.contacts_data || [];
-      
+
       // Combine both arrays
       const combinedContacts = [...contactsFromMain];
-      
+
       // Add contacts from contacts_data that aren't already in contacts
       for (const contactData of contactsFromData) {
-        const alreadyExists = combinedContacts.some(contact => 
-          (contact.id && contactData.id && contact.id === contactData.id) || 
+        const alreadyExists = combinedContacts.some(contact =>
+          (contact.id && contactData.id && contact.id === contactData.id) ||
           (contact.email && contactData.email && contact.email === contactData.email)
         );
-        
+
         if (!alreadyExists) {
           combinedContacts.push(contactData);
         }
       }
-      
+
       setAllContacts(combinedContacts);
     }
   }, [client]);
@@ -80,7 +82,7 @@ const ClientDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading client details...</p>
+          <p className="text-sm text-muted-foreground">{t('client.detail.loading')}</p>
         </div>
       </div>
     );
@@ -89,12 +91,12 @@ const ClientDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading client details</div>
+        <div className="text-red-500 text-xl">{t('client.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('client.detail.unknownError')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Clients
+          {t('client.detail.backToList')}
         </Button>
       </div>
     );
@@ -103,9 +105,9 @@ const ClientDetailView = () => {
   if (!client) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Client not found</div>
+        <div className="text-red-500 text-xl">{t('client.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Clients
+          {t('client.detail.backToList')}
         </Button>
       </div>
     );
@@ -115,19 +117,19 @@ const ClientDetailView = () => {
     <div className="container mx-auto py-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">Client Details</h1>
+          <h1 className="text-2xl font-bold">{t('client.detail.title')}</h1>
         </div>
         <PermissionGuard feature='reference' permission='edit'>
-        <Button onClick={handleEdit}>
-          <Edit className="mr-2 h-4 w-4" /> Edit Client
-        </Button>
+          <Button onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" /> {t('client.detail.editClient')}
+          </Button>
         </PermissionGuard>
       </div>
 
@@ -135,28 +137,28 @@ const ClientDetailView = () => {
         {/* Client Info Card */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Client Information</CardTitle>
+            <CardTitle>{t('client.detail.clientInfo')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Code</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.code')}</p>
                   <p className="text-lg font-medium">{client.code}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Name</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.name')}</p>
                   <p className="text-lg">{client.name}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.type')}</p>
                   <p className="text-lg">{client.type}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.status')}</p>
                   <span className={`px-3 py-1 rounded-full text-xs ${
-                    client.status === 'Active' 
-                      ? 'bg-green-500 text-white' 
+                    client.status === 'Active'
+                      ? 'bg-green-500 text-white'
                       : 'bg-red-500 text-white'
                   }`}>
                     {client.status}
@@ -165,23 +167,23 @@ const ClientDetailView = () => {
               </div>
               <div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.email')}</p>
                   <p className="text-lg">{client.email}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                  <p className="text-lg">{client.phone || 'Not provided'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.phone')}</p>
+                  <p className="text-lg">{client.phone || t('client.detail.notProvided')}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Group</p>
-                  <p className="text-lg">{client.group || 'Not assigned'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.group')}</p>
+                  <p className="text-lg">{client.group || t('client.detail.notAssigned')}</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-4">
-              <p className="text-sm font-medium text-muted-foreground">Address</p>
-              <p className="text-lg whitespace-pre-line">{client.address || 'No address provided'}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('client.detail.fields.address')}</p>
+              <p className="text-lg whitespace-pre-line">{client.address || t('client.detail.noAddress')}</p>
             </div>
           </CardContent>
         </Card>
@@ -189,20 +191,20 @@ const ClientDetailView = () => {
         {/* Quick Stats Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
+            <CardTitle>{t('client.detail.quickStats')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Client ID</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('client.detail.stats.clientId')}</p>
                 <p className="text-lg font-medium">{client.id}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Contacts</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('client.detail.stats.totalContacts')}</p>
                 <p className="text-lg font-medium">{allContacts.length}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Contacts</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('client.detail.stats.activeContacts')}</p>
                 <p className="text-lg font-medium">
                   {allContacts.filter(contact => contact.status === 'Active').length}
                 </p>
@@ -214,24 +216,24 @@ const ClientDetailView = () => {
 
       {/* Contacts Section */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Contacts</h2>
+        <h2 className="text-xl font-bold mb-4">{t('client.detail.contactsTitle')}</h2>
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[180px]">First Name</TableHead>
-                  <TableHead className="w-[180px]">Last Name</TableHead>
-                  <TableHead className="w-[200px]">Email</TableHead>
-                  <TableHead className="w-[150px]">Phone</TableHead>
-                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="w-[180px]">{t('client.detail.contactColumns.firstName')}</TableHead>
+                  <TableHead className="w-[180px]">{t('client.detail.contactColumns.lastName')}</TableHead>
+                  <TableHead className="w-[200px]">{t('client.detail.contactColumns.email')}</TableHead>
+                  <TableHead className="w-[150px]">{t('client.detail.contactColumns.phone')}</TableHead>
+                  <TableHead className="w-[100px]">{t('client.detail.contactColumns.status')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {allContacts.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-16 text-center text-muted-foreground">
-                      No contacts available for this client
+                      {t('client.detail.noContacts')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -243,8 +245,8 @@ const ClientDetailView = () => {
                       <TableCell>{contact.phone}</TableCell>
                       <TableCell>
                         <span className={`px-3 py-1 rounded-full text-xs ${
-                          contact.status === 'Active' 
-                            ? 'bg-green-500 text-white' 
+                          contact.status === 'Active'
+                            ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
                         }`}>
                           {contact.status}

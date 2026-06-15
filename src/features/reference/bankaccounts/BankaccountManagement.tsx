@@ -17,13 +17,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const BankaccountManagement = () => {
+  const { t } = useTypedTranslation('accounts');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bankaccountToDelete, setBankaccountToDelete] = useState<string | null>(null);
-  
+
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -31,13 +33,13 @@ const BankaccountManagement = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const {canEdit} = useFeatureAccess('reference')
-  
+
   // Fetch all bankaccounts - we'll filter client-side
-  const { 
-    data = { count: 0, results: [] }, 
-    isFetching, 
-    isError, 
-    refetch 
+  const {
+    data = { count: 0, results: [] },
+    isFetching,
+    isError,
+    refetch
   } = useBankaccountsQuery();
 
   // Delete bankaccount mutation using our custom hook
@@ -46,36 +48,36 @@ const BankaccountManagement = () => {
   // Client-side filtering logic
   const filteredData = useMemo(() => {
     let results = [...(data.results || [])];
-    
+
     // Search filter - search by bank, account_name, or account_number
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(bankaccount => 
+      results = results.filter(bankaccount =>
         bankaccount.bank.toLowerCase().includes(searchLower) ||
         bankaccount.account_name.toLowerCase().includes(searchLower) ||
         bankaccount.account_number.toLowerCase().includes(searchLower)
       );
     }
-    
+
     // Status filter
     if (statusFilter && statusFilter !== 'all') {
       results = results.filter(bankaccount => bankaccount.status === statusFilter);
     }
-    
+
     return results;
   }, [data.results, searchValue, statusFilter]);
-  
+
   // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, pageSize]);
-  
+
   // Calculate total pages
   const totalBankaccounts = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalBankaccounts / pageSize));
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
@@ -150,7 +152,7 @@ const BankaccountManagement = () => {
       'NGN': '₦',
       'GBP': '£'
     };
-    
+
     return symbols[currency as keyof typeof symbols] || '';
   };
 
@@ -160,7 +162,7 @@ const BankaccountManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading bank accounts...</p>
+          <p className="text-sm text-muted-foreground">{t('bankAccount.loading')}</p>
         </div>
       </div>
     );
@@ -170,9 +172,9 @@ const BankaccountManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading bank accounts</div>
+        <div className="text-red-500 text-xl">{t('bankAccount.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -183,9 +185,9 @@ const BankaccountManagement = () => {
       {/* <Helmet>
         <title>Bank Account Management</title>
       </Helmet> */}
-      
+
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Bank Account Management</h1>
+        <h1 className="text-2xl font-bold">{t('bankAccount.management')}</h1>
         {/* {canEdit && (
           <Button onClick={handleAddBankaccount} className="bg-green-600 hover:bg-green-700">
           <Plus className="mr-2 h-4 w-4" /> Add Bank Account
@@ -194,7 +196,7 @@ const BankaccountManagement = () => {
         <PermissionGuard feature='reference' permission='view'>
           <Button onClick={handleAddBankaccount}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Bank Account
+            {t('bankAccount.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -203,21 +205,21 @@ const BankaccountManagement = () => {
       <div className="mb-6">
         <div className="flex flex-row gap-4">
           <div className="flex-grow">
-            <SearchFilter 
+            <SearchFilter
               onSearch={handleSearch}
-              placeholder="Search by bank, account name, or account number..."
+              placeholder={t('bankAccount.searchPlaceholder')}
               initialSearchValue={searchValue}
             />
           </div>
           <div className="w-64">
             <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('bankAccount.filters.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="all">{t('bankAccount.filters.allStatuses')}</SelectItem>
+                <SelectItem value="Active">{t('bankAccount.status.active')}</SelectItem>
+                <SelectItem value="Inactive">{t('bankAccount.status.inactive')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -230,19 +232,19 @@ const BankaccountManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Bank</TableHead>
-                <TableHead className="font-medium text-gray-600">Account Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Account Number</TableHead>
-                <TableHead className="font-medium text-gray-600">Currency</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('bankAccount.columns.bank')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('bankAccount.columns.accountName')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('bankAccount.columns.accountNumber')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('bankAccount.columns.currency')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('bankAccount.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('bankAccount.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No bank accounts found.
+                    {t('bankAccount.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -262,9 +264,9 @@ const BankaccountManagement = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end">
                         <PermissionGuard feature='reference' permission='view'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleViewBankaccount(String(bankaccount.slug))}
                           className="h-8 w-8"
                         >
@@ -272,9 +274,9 @@ const BankaccountManagement = () => {
                         </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleEditBankaccount(String(bankaccount.slug))}
                           className="h-8 w-8"
                         >
@@ -282,9 +284,9 @@ const BankaccountManagement = () => {
                         </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeleteBankaccount(String(bankaccount.slug))}
                           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
@@ -298,7 +300,7 @@ const BankaccountManagement = () => {
               )}
             </TableBody>
           </Table>
-          
+
           {/* Pagination */}
           {totalBankaccounts > 0 && (
             <div className="p-4 border-t">
@@ -319,14 +321,14 @@ const BankaccountManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the bank account.
+              {t('bankAccount.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteBankaccount}
               disabled={deleteBankaccountMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -334,10 +336,10 @@ const BankaccountManagement = () => {
               {deleteBankaccountMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -12,8 +12,10 @@ import { usePPMItemsQuery, useDeletePPMItem } from '@/hooks/ppmitem/usePpmitemQu
 import { PPMItem } from '@/types/ppmitem';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PpmitemManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -139,7 +141,7 @@ const PpmitemManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading PPM items...</p>
+          <p className="text-sm text-muted-foreground">{t('ppmItem.loading')}</p>
         </div>
       </div>
     );
@@ -149,9 +151,9 @@ const PpmitemManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading PPM items</div>
+        <div className="text-red-500 text-xl">{t('ppmItem.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -160,10 +162,10 @@ const PpmitemManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">PPM Items Management</h1>
+        <h1 className="text-2xl font-bold">{t('ppmItem.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddPPMItem} className="bg-green-600 hover:bg-green-700">
-            <Plus className="mr-2 h-4 w-4" /> Add PPM Item
+            <Plus className="mr-2 h-4 w-4" /> {t('ppmItem.add')}
           </Button>
         )}
       </div>
@@ -175,7 +177,7 @@ const PpmitemManagement = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search by description, unit, or unit price..."
+                placeholder={t('ppmItem.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
@@ -186,11 +188,11 @@ const PpmitemManagement = () => {
         
         <div className="flex justify-end">
           <Button 
-            variant="outline" 
+            variant="outline"
             onClick={() => setSearchValue('')}
             className="h-10 border-gray-300 hover:bg-gray-50"
           >
-            Clear Filters
+            {t('common:actions.clearFilters')}
           </Button>
         </div>
       </div>
@@ -215,8 +217,8 @@ const PpmitemManagement = () => {
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="text-lg font-medium">No PPM items found</div>
-                      <div className="text-sm">Try adjusting your search criteria</div>
+                      <div className="text-lg font-medium">{t('ppmItem.noItems')}</div>
+                      <div className="text-sm">{t('ppmItem.noItemsHint')}</div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -323,9 +325,9 @@ const PpmitemManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the PPM item.
+              {t('ppmItem.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -338,10 +340,10 @@ const PpmitemManagement = () => {
               {deletePPMItemMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

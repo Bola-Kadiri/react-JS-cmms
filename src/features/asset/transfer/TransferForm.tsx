@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, Loader2, Calendar, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Loader2, CalendarIcon } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -23,29 +23,30 @@ import { useStoresQuery } from '@/hooks/store/useStoreQueries';
 import { useAssetCategoriesQuery } from '@/hooks/assetcategory/useAssetCategoryQueries';
 import { useAssetSubcategoriesQuery } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
 import { useUsersQuery } from '@/hooks/user/useUserQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const endpoint1 = 'asset_inventory/api/items/';
 
-// Form schema definition matching the new interface
-const transferSchema = z.object({
-  type: z.enum(['transfer', 'return']).default('transfer'),
-  request_from: z.number().min(1, 'Please select a store'),
-  required_date: z.string().min(1, 'Please select a required date'),
-  requested_by: z.number().min(1, 'Requested by is required'),
-  transfer_to: z.number().min(1, 'Please select a transfer destination'),
-  category: z.number().min(1, 'Please select a category'),
-  subcategory: z.number().min(1, 'Please select a subcategory'),
-  items: z.array(z.number()).min(1, 'Please select at least one item'),
-  confirmation_required_from: z.array(z.number()).min(1, 'Please select at least one user for confirmation'),
-});
-
-type TransferFormValues = z.infer<typeof transferSchema>;
-
 const TransferForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEditMode = !!id;
+
+  const transferSchema = z.object({
+    type: z.enum(['transfer', 'return']).default('transfer'),
+    request_from: z.number().min(1, t('transfer.form.validation.requestFromRequired')),
+    required_date: z.string().min(1, t('transfer.form.validation.requiredDateRequired')),
+    requested_by: z.number().min(1, t('transfer.form.validation.requestedByRequired')),
+    transfer_to: z.number().min(1, t('transfer.form.validation.transferToRequired')),
+    category: z.number().min(1, t('transfer.form.validation.categoryRequired')),
+    subcategory: z.number().min(1, t('transfer.form.validation.subcategoryRequired')),
+    items: z.array(z.number()).min(1, t('transfer.form.validation.itemsRequired')),
+    confirmation_required_from: z.array(z.number()).min(1, t('transfer.form.validation.confirmationRequired')),
+  });
+
+  type TransferFormValues = z.infer<typeof transferSchema>;
 
   // Transfer form setup
   const transferForm = useForm<TransferFormValues>({
@@ -83,15 +84,14 @@ const TransferForm = () => {
     sub => sub.asset_category === watchedCategory
   );
 
-  // Fetch transfer data for edit mode using our custom hook
-  const { 
-    data: transferData, 
-    isLoading: isLoadingTransfer, 
+  // Fetch transfer data for edit mode
+  const {
+    data: transferData,
+    isLoading: isLoadingTransfer,
     isError: isTransferError,
     error: transferError
   } = useTransferQuery(isEditMode ? id : undefined);
 
-  // Use our custom mutation hooks
   const createTransferMutation = useCreateTransfer();
   const updateTransferMutation = useUpdateTransfer(id);
 
@@ -112,7 +112,6 @@ const TransferForm = () => {
   // Handle transfer data loading
   useEffect(() => {
     if (transferData && isEditMode) {
-      // Reset the form with transfer data
       transferForm.reset({
         type: transferData.type,
         request_from: transferData.request_from,
@@ -151,7 +150,7 @@ const TransferForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading transfer details...</p>
+          <p className="text-sm text-muted-foreground">{t('transfer.form.loading')}</p>
         </div>
       </div>
     );
@@ -160,12 +159,12 @@ const TransferForm = () => {
   if (isEditMode && isTransferError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading transfer details</div>
+        <div className="text-red-500 text-xl">{t('transfer.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {transferError instanceof Error ? transferError.message : 'An unknown error occurred'}
+          {transferError instanceof Error ? transferError.message : t('transfer.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Transfers
+          {t('transfer.form.backToList')}
         </Button>
       </div>
     );
@@ -175,15 +174,15 @@ const TransferForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Transfer' : 'Create New Transfer'}
+            {isEditMode ? t('transfer.form.editTitle') : t('transfer.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -194,18 +193,18 @@ const TransferForm = () => {
             {/* Transfer Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Transfer Details</h2>
+                <h2 className="text-lg font-medium">{t('transfer.form.sections.transferDetails')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  
+
                   <FormField
                     control={transferForm.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Transfer Type</FormLabel>
+                        <FormLabel>{t('transfer.form.fields.type')}</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -213,12 +212,12 @@ const TransferForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={t('transfer.form.placeholders.selectType')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="transfer">Transfer</SelectItem>
-                            <SelectItem value="return">Return</SelectItem>
+                            <SelectItem value="transfer">{t('transfer.form.typeOptions.transfer')}</SelectItem>
+                            <SelectItem value="return">{t('transfer.form.typeOptions.return')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -231,14 +230,14 @@ const TransferForm = () => {
                     name="request_from"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Request From (Store)</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('transfer.form.fields.requestFrom')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select source store" />
+                              <SelectValue placeholder={t('transfer.form.placeholders.selectSourceStore')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -259,14 +258,14 @@ const TransferForm = () => {
                     name="transfer_to"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Transfer To (Store)</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('transfer.form.fields.transferTo')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select destination store" />
+                              <SelectValue placeholder={t('transfer.form.placeholders.selectDestinationStore')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -284,16 +283,16 @@ const TransferForm = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  
+
                   <FormField
                     control={transferForm.control}
                     name="requested_by"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Requested By</FormLabel>
+                        <FormLabel>{t('transfer.form.fields.requestedBy')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            value={user ? (user.name || user.email) : 'Current User'}
+                          <Input
+                            value={user ? (user.name || user.email) : t('transfer.form.placeholders.currentUser')}
                             disabled
                             className="bg-gray-50"
                           />
@@ -308,7 +307,7 @@ const TransferForm = () => {
                     name="required_date"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Required Date</FormLabel>
+                        <FormLabel>{t('transfer.form.fields.requiredDate')}</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -322,7 +321,7 @@ const TransferForm = () => {
                                 {field.value ? (
                                   format(new Date(field.value), "PPP")
                                 ) : (
-                                  <span>Pick a date</span>
+                                  <span>{t('transfer.form.placeholders.pickDate')}</span>
                                 )}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
@@ -350,14 +349,14 @@ const TransferForm = () => {
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asset Category</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('transfer.form.fields.category')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
+                              <SelectValue placeholder={t('transfer.form.placeholders.selectCategory')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -380,18 +379,18 @@ const TransferForm = () => {
                     name="subcategory"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asset Subcategory</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('transfer.form.fields.subcategory')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                           disabled={!watchedCategory}
                         >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={
-                                !watchedCategory 
-                                  ? "Please select a category first" 
-                                  : "Select subcategory"
+                                !watchedCategory
+                                  ? t('transfer.form.placeholders.selectCategoryFirst')
+                                  : t('transfer.form.placeholders.selectSubcategory')
                               } />
                             </SelectTrigger>
                           </FormControl>
@@ -414,7 +413,7 @@ const TransferForm = () => {
                   name="items"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Items to Transfer</FormLabel>
+                      <FormLabel>{t('transfer.form.fields.items')}</FormLabel>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-60 overflow-y-auto border rounded p-2">
                         {items.map((item) => {
                           const itemId = Number(item.id);
@@ -454,7 +453,7 @@ const TransferForm = () => {
                   name="confirmation_required_from"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Confirmation Required From</FormLabel>
+                      <FormLabel>{t('transfer.form.fields.confirmationFrom')}</FormLabel>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto border rounded p-2">
                         {users.map((user) => {
                           const userId = Number(user.id);
@@ -494,25 +493,25 @@ const TransferForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('transfer.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createTransferMutation.isPending || updateTransferMutation.isPending}
             >
               {(createTransferMutation.isPending || updateTransferMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('transfer.form.update') : t('transfer.form.save')}
             </Button>
           </div>
         </form>

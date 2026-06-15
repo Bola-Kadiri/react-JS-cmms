@@ -25,37 +25,40 @@ import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
-
-const workrequestSchema = z.object({
-  type: z.enum(['Work', 'Procument']),
-  category: z.number().nullable().optional(),
-  subcategory: z.number().nullable().optional(),
-  facility: z.number().nullable().refine((val) => val !== null && val > 0, {
-    message: 'Please select a facility',
-  }),
-  building: z.number().nullable().optional(),
-  department: z.number().nullable().optional(),
-  asset: z.number().nullable().optional(),
-  description: z.string().min(1, 'Description is required'),
-  require_mobilization_fee: z.boolean(),
-  require_quotation: z.boolean(),
-  payment_requisition: z.boolean(),
-  follow_up_notes: z.string().optional(),
-  invoice_no: z.string().optional(),
-  vendor: z.number().nullable().optional(),
-  request_to: z.array(z.number()).min(1, 'Select at least one Procurement & Store handler'),
-  reviewers: z.array(z.number()).min(1, 'Select at least one Reviewer'),
-  approver: z.number().nullable().refine((val) => val !== null && val > 0, {
-    message: 'Please select an Approver',
-  }),
-  priority: z.enum(['Low', 'Medium', 'High']),
-  cost: z.coerce.number().min(0).optional().default(0),
-  currency: z.enum(['USD', 'EUR', 'NGN']),
-});
-
-type WorkrequestFormValues = z.infer<typeof workrequestSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WorkrequestForm = () => {
+  const { t } = useTypedTranslation('work');
+
+  const workrequestSchema = z.object({
+    type: z.enum(['Work', 'Procument']),
+    category: z.number().nullable().optional(),
+    subcategory: z.number().nullable().optional(),
+    facility: z.number().nullable().refine((val) => val !== null && val > 0, {
+      message: t('workRequest.form.validation.facilityRequired'),
+    }),
+    building: z.number().nullable().optional(),
+    department: z.number().nullable().optional(),
+    asset: z.number().nullable().optional(),
+    description: z.string().min(1, t('workRequest.form.validation.descriptionRequired')),
+    require_mobilization_fee: z.boolean(),
+    require_quotation: z.boolean(),
+    payment_requisition: z.boolean(),
+    follow_up_notes: z.string().optional(),
+    invoice_no: z.string().optional(),
+    vendor: z.number().nullable().optional(),
+    request_to: z.array(z.number()).min(1, t('workRequest.form.validation.procurementRequired')),
+    reviewers: z.array(z.number()).min(1, t('workRequest.form.validation.reviewerRequired')),
+    approver: z.number().nullable().refine((val) => val !== null && val > 0, {
+      message: t('workRequest.form.validation.approverRequired'),
+    }),
+    priority: z.enum(['Low', 'Medium', 'High']),
+    cost: z.coerce.number().min(0).optional().default(0),
+    currency: z.enum(['USD', 'EUR', 'NGN']),
+  });
+
+  type WorkrequestFormValues = z.infer<typeof workrequestSchema>;
+
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
@@ -210,7 +213,7 @@ const WorkrequestForm = () => {
 
   const onSubmit = (data: WorkrequestFormValues) => {
     if (!isEditMode && !vendorInvoiceFile) {
-      toast({ title: 'Error', description: 'Vendor invoice is required.', variant: 'destructive' });
+      toast({ title: t('workRequest.form.toast.errorTitle'), description: t('workRequest.form.toast.invoiceRequired'), variant: 'destructive' });
       return;
     }
 
@@ -221,8 +224,8 @@ const WorkrequestForm = () => {
         error?.response?.data?.detail ||
         error?.response?.data?.error ||
         Object.values(error?.response?.data || {}).flat().join(' ') ||
-        'There was a problem submitting the form.';
-      toast({ title: 'Error', description: String(message), variant: 'destructive' });
+        t('workRequest.form.toast.submitError');
+      toast({ title: t('workRequest.form.toast.errorTitle'), description: String(message), variant: 'destructive' });
     };
 
     if (isEditMode && slug) {
@@ -245,7 +248,7 @@ const WorkrequestForm = () => {
       <div className="container mx-auto py-8 flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading work request...</p>
+          <p className="text-sm text-muted-foreground">{t('workRequest.form.loadingRequest')}</p>
         </div>
       </div>
     );
@@ -254,11 +257,11 @@ const WorkrequestForm = () => {
   if (isEditMode && isError) {
     return (
       <div className="container mx-auto py-8 flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading work request</div>
+        <div className="text-red-500 text-xl">{t('workRequest.form.errorLoading')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('workRequest.form.errorFallback')}
         </p>
-        <Button onClick={handleCancel} variant="outline">Back to Work Requests</Button>
+        <Button onClick={handleCancel} variant="outline">{t('workRequest.form.backToRequests')}</Button>
       </div>
     );
   }
@@ -267,13 +270,12 @@ const WorkrequestForm = () => {
     return (
       <div className="container mx-auto py-8 flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-amber-500" />
-        <div className="text-amber-700 text-xl font-semibold">Request is locked</div>
+        <div className="text-amber-700 text-xl font-semibold">{t('workRequest.form.requestLocked')}</div>
         <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-          This work request is currently in the approval pipeline and cannot be edited.
-          It will become editable only after it is rejected back to you.
+          {t('workRequest.form.lockedDescription')}
         </p>
         <Button onClick={() => navigate(`/dashboard/work/requests/${slug}`)} variant="outline">
-          View Request
+          {t('workRequest.form.viewRequest')}
         </Button>
       </div>
     );
@@ -287,7 +289,7 @@ const WorkrequestForm = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isEditMode ? 'Edit Work Request' : 'Create New Work Request'}
+            {isEditMode ? t('workRequest.form.editTitle') : t('workRequest.form.createNewTitle')}
           </h1>
         </div>
       </div>
@@ -298,19 +300,19 @@ const WorkrequestForm = () => {
           {/* Basic Information */}
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('basic')}>
-              <h2 className="text-lg font-semibold text-green-800">Basic Information</h2>
+              <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionBasic')}</h2>
               {openSections.basic ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
             </button>
             {openSections.basic && (
               <div className="p-6 space-y-6 bg-white">
                 <FormField control={form.control} name="type" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Type<span className="text-red-500 ml-1">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.type')}<span className="text-red-500 ml-1">*</span></FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectType')} /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="Work">Work</SelectItem>
-                        <SelectItem value="Procument">Procurement</SelectItem>
+                        <SelectItem value="Work">{t('workRequest.types.work')}</SelectItem>
+                        <SelectItem value="Procument">{t('workRequest.types.procurement')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -320,9 +322,9 @@ const WorkrequestForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Category</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.category')}</FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                        <FormControl><SelectTrigger className="h-10 text-black"><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10 text-black"><SelectValue placeholder={t('workRequest.form.selectCategory')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {categoriesData.results.map((c) => (
                             <SelectItem key={c.id} value={String(c.id)}>{c.description}</SelectItem>
@@ -335,9 +337,9 @@ const WorkrequestForm = () => {
 
                   <FormField control={form.control} name="subcategory" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Subcategory</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.subcategory')}</FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? 'Select category first' : 'Select subcategory'} /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workRequest.form.selectCategoryFirst') : t('workRequest.form.selectSubcategory')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {availableSubcategories.map((s) => (
                             <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
@@ -351,9 +353,9 @@ const WorkrequestForm = () => {
 
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Description<span className="text-red-500 ml-1">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.description')}<span className="text-red-500 ml-1">*</span></FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter work request description" {...field} className="min-h-[120px] resize-y" />
+                      <Textarea placeholder={t('workRequest.form.descriptionPlaceholder')} {...field} className="min-h-[120px] resize-y" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -362,13 +364,13 @@ const WorkrequestForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <FormField control={form.control} name="priority" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Priority<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.priority')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectPriority')} /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value="Low">Low</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="High">High</SelectItem>
+                          <SelectItem value="Low">{t('workRequest.form.priorityOptions.low')}</SelectItem>
+                          <SelectItem value="Medium">{t('workRequest.form.priorityOptions.medium')}</SelectItem>
+                          <SelectItem value="High">{t('workRequest.form.priorityOptions.high')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -383,7 +385,7 @@ const WorkrequestForm = () => {
           {/* Location & Asset Details */}
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('details')}>
-              <h2 className="text-lg font-semibold text-green-800">Location & Asset Details</h2>
+              <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionLocation')}</h2>
               {openSections.details ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
             </button>
             {openSections.details && (
@@ -391,9 +393,9 @@ const WorkrequestForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="facility" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Facility<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.facility')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select facility" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectFacility')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {facilitiesData.results.map((f) => (
                             <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
@@ -406,9 +408,9 @@ const WorkrequestForm = () => {
 
                   <FormField control={form.control} name="building" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Building</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.building')}</FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select building'} /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workRequest.form.selectFacilityFirst') : t('workRequest.form.selectBuilding')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {buildingsData.map((b: any) => (
                             <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
@@ -423,9 +425,9 @@ const WorkrequestForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="department" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Department</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.department')}</FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select department" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectDepartment')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {departmentsData.results.map((d) => (
                             <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
@@ -438,9 +440,9 @@ const WorkrequestForm = () => {
 
                   <FormField control={form.control} name="asset" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.asset')}</FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select asset'} /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workRequest.form.selectFacilityFirst') : t('workRequest.form.selectAsset')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {assetsData.map((a: any) => (
                             <SelectItem key={a.id} value={String(a.id)}>{a.asset_name}</SelectItem>
@@ -458,15 +460,14 @@ const WorkrequestForm = () => {
           {/* Invoice & Vendor */}
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('invoice')}>
-              <h2 className="text-lg font-semibold text-green-800">Invoice & Vendor</h2>
+              <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionInvoice')}</h2>
               {openSections.invoice ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
             </button>
             {openSections.invoice && (
               <div className="p-6 space-y-6 bg-white">
-                {/* Vendor invoice file upload */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2">
-                    Vendor Invoice{!isEditMode && <span className="text-red-500 ml-1">*</span>}
+                    {t('workRequest.form.vendorInvoice')}{!isEditMode && <span className="text-red-500 ml-1">*</span>}
                   </label>
                   <Input
                     ref={vendorInvoiceRef}
@@ -477,20 +478,20 @@ const WorkrequestForm = () => {
                   />
                   {isEditMode && workrequestData?.vendor_invoice && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Current: <a href={workrequestData.vendor_invoice} target="_blank" rel="noopener noreferrer" className="text-green-600 underline">View uploaded invoice</a>. Upload a new file to replace it.
+                      Current: <a href={workrequestData.vendor_invoice} target="_blank" rel="noopener noreferrer" className="text-green-600 underline">{t('workRequest.form.viewUploadedInvoice')}</a>. {t('workRequest.form.replaceInvoice')}
                     </p>
                   )}
                   {!isEditMode && !vendorInvoiceFile && (
-                    <p className="text-xs text-gray-500 mt-1">Upload the vendor invoice PDF or image</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('workRequest.form.uploadInvoiceHint')}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="vendor" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Vendor on Invoice<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.vendorOnInvoice')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select vendor" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectVendor')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           {vendorsData.results.map((v: any) => (
                             <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
@@ -503,9 +504,9 @@ const WorkrequestForm = () => {
 
                   <FormField control={form.control} name="invoice_no" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Invoice Number</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.invoiceNumber')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. INV-2026-001" {...field} className="h-10" />
+                        <Input placeholder={t('workRequest.form.invoicePlaceholder')} {...field} className="h-10" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -518,24 +519,24 @@ const WorkrequestForm = () => {
           {/* Approval Chain */}
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('approval')}>
-              <h2 className="text-lg font-semibold text-green-800">Approval Chain</h2>
+              <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionApproval')}</h2>
               {openSections.approval ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
             </button>
             {openSections.approval && (
               <div className="p-6 space-y-6 bg-white">
                 <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  Select in order: Procurement & Store first → Reviewer → Approver. All three are required.
+                  {t('workRequest.form.approvalChainInfo')}
                 </p>
 
                 {/* Step 1: Procurement & Store */}
                 <FormField control={form.control} name="request_to" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Step 1 — Procurement & Store<span className="text-red-500 ml-1">*</span>
+                      {t('workRequest.form.step1Label')}<span className="text-red-500 ml-1">*</span>
                     </FormLabel>
                     <div className="border rounded-lg p-4 bg-gray-50">
                       {procurementUsers.length === 0 ? (
-                        <p className="text-sm text-gray-500">No Procurement & Store users available</p>
+                        <p className="text-sm text-gray-500">{t('workRequest.form.noProcurementUsers')}</p>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {procurementUsers.map((user) => (
@@ -564,13 +565,13 @@ const WorkrequestForm = () => {
                 <FormField control={form.control} name="reviewers" render={({ field }) => (
                   <FormItem>
                     <FormLabel className={`text-sm font-medium ${selectedRequestTo.length === 0 ? 'text-gray-400' : 'text-gray-700'}`}>
-                      Step 2 — Reviewer{selectedRequestTo.length > 0 && <span className="text-red-500 ml-1">*</span>}
+                      {t('workRequest.form.step2Label')}{selectedRequestTo.length > 0 && <span className="text-red-500 ml-1">*</span>}
                     </FormLabel>
                     <div className={`border rounded-lg p-4 ${selectedRequestTo.length === 0 ? 'bg-gray-100 opacity-50' : 'bg-gray-50'}`}>
                       {selectedRequestTo.length === 0 ? (
-                        <p className="text-sm text-gray-400">Select Procurement & Store first</p>
+                        <p className="text-sm text-gray-400">{t('workRequest.form.selectProcurementFirst')}</p>
                       ) : reviewers.length === 0 ? (
-                        <p className="text-sm text-gray-500">No reviewers available</p>
+                        <p className="text-sm text-gray-500">{t('workRequest.form.noReviewers')}</p>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {reviewers.map((reviewer) => (
@@ -600,7 +601,7 @@ const WorkrequestForm = () => {
                 <FormField control={form.control} name="approver" render={({ field }) => (
                   <FormItem>
                     <FormLabel className={`text-sm font-medium ${selectedReviewers.length === 0 ? 'text-gray-400' : 'text-gray-700'}`}>
-                      Step 3 — Approver{selectedReviewers.length > 0 && <span className="text-red-500 ml-1">*</span>}
+                      {t('workRequest.form.step3Label')}{selectedReviewers.length > 0 && <span className="text-red-500 ml-1">*</span>}
                     </FormLabel>
                     <Select
                       onValueChange={(v) => field.onChange(Number(v))}
@@ -609,7 +610,7 @@ const WorkrequestForm = () => {
                     >
                       <FormControl>
                         <SelectTrigger className="h-10">
-                          <SelectValue placeholder={selectedReviewers.length === 0 ? 'Select Reviewer first' : 'Select approver'} />
+                          <SelectValue placeholder={selectedReviewers.length === 0 ? t('workRequest.form.selectReviewerFirst') : t('workRequest.form.selectApprover')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -629,7 +630,7 @@ const WorkrequestForm = () => {
 
 
           <div className="flex justify-end gap-3 pt-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <Button type="button" variant="outline" onClick={handleCancel} className="px-6">Cancel</Button>
+            <Button type="button" variant="outline" onClick={handleCancel} className="px-6">{t('workRequest.form.cancel')}</Button>
             <Button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
@@ -638,7 +639,7 @@ const WorkrequestForm = () => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Save Changes' : 'Submit Work Request'}
+              {isEditMode ? t('workRequest.form.saveChanges') : t('workRequest.form.submitRequest')}
             </Button>
           </div>
         </form>

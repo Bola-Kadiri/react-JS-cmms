@@ -16,31 +16,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Edit, Loader2, Hash, Tag, FileText, CheckCircle, XCircle, Settings, Zap, DollarSign, Plus } from 'lucide-react';
 import { useCategoryQuery, useCreateSubCategory } from '@/hooks/category/useCategoryQueries';
 import { PermissionGuard } from '@/components/PermissionGuard';
-
-// Subcategory form schema
-const subcategorySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  code: z.string().min(1, 'Code is required'),
-  work_request_approved: z.enum(['create_work_order', 'close_work_request']),
-  exclude_costing_limit: z.boolean().default(false),
-  power: z.boolean().default(false),
-  create_payment_requisition: z.boolean().default(false),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
-});
-
-type SubcategoryFormValues = z.infer<typeof subcategorySchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const CategoryDetailView = () => {
+  const { t } = useTypedTranslation('accounts');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
+  // Subcategory form schema — defined inside component so validation messages use t()
+  const subcategorySchema = z.object({
+    title: z.string().min(1, t('category.detail.subcategoryForm.validation.titleRequired')),
+    code: z.string().min(1, t('category.detail.subcategoryForm.validation.codeRequired')),
+    work_request_approved: z.enum(['create_work_order', 'close_work_request']),
+    exclude_costing_limit: z.boolean().default(false),
+    power: z.boolean().default(false),
+    create_payment_requisition: z.boolean().default(false),
+    status: z.enum(['Active', 'Inactive']).default('Active'),
+  });
+
+  type SubcategoryFormValues = z.infer<typeof subcategorySchema>;
+
   // Using our custom hook instead of direct query
-  const { 
-    data: category, 
-    isLoading, 
+  const {
+    data: category,
+    isLoading,
     isError,
-    error 
+    error
   } = useCategoryQuery(id);
 
   // Subcategory creation hook
@@ -50,7 +52,7 @@ const CategoryDetailView = () => {
   const subcategoryForm = useForm<SubcategoryFormValues>({
     resolver: zodResolver(subcategorySchema),
     defaultValues: {
-      title: '',  
+      title: '',
       code: '',
       work_request_approved: 'create_work_order',
       exclude_costing_limit: false,
@@ -90,7 +92,7 @@ const CategoryDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading category details...</p>
+          <p className="text-sm text-muted-foreground">{t('category.detail.loading')}</p>
         </div>
       </div>
     );
@@ -99,12 +101,12 @@ const CategoryDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading category details</div>
+        <div className="text-red-500 text-xl">{t('category.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('category.detail.unknownError')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Categories
+          {t('category.detail.backToList')}
         </Button>
       </div>
     );
@@ -113,9 +115,9 @@ const CategoryDetailView = () => {
   if (!category) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Category not found</div>
+        <div className="text-red-500 text-xl">{t('category.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Categories
+          {t('category.detail.backToList')}
         </Button>
       </div>
     );
@@ -126,19 +128,19 @@ const CategoryDetailView = () => {
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleBack}
               className="shadow-md hover:shadow-lg transition-shadow"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-3xl font-bold text-gray-800">Category Details</h1>
+            <h1 className="text-3xl font-bold text-gray-800">{t('category.detail.title')}</h1>
           </div>
           <PermissionGuard feature='reference' permission='edit'>
             <Button onClick={handleEdit} className="shadow-md hover:shadow-lg transition-shadow">
-              <Edit className="mr-2 h-4 w-4" /> Edit Category
+              <Edit className="mr-2 h-4 w-4" /> {t('category.detail.editCategory')}
             </Button>
           </PermissionGuard>
         </div>
@@ -151,168 +153,168 @@ const CategoryDetailView = () => {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Tag className="h-6 w-6 text-primary" />
                 </div>
-                Category Management
+                {t('category.detail.cardTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <Tabs defaultValue="details" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="details">Category Details</TabsTrigger>
+                  <TabsTrigger value="details">{t('category.detail.tabs.details')}</TabsTrigger>
                   <TabsTrigger value="subcategories">
-                    Subcategories ({category?.subcategories?.length || 0})
+                    {t('category.detail.tabs.subcategories')} ({category?.subcategories?.length || 0})
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="details" className="mt-6">
-              {/* Basic Information Section */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-gray-600" />
-                  Basic Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-blue-100">
-                      <Hash className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Code</p>
-                      <p className="text-lg font-semibold text-gray-800">{category.code}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-green-100">
-                      <Tag className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Title</p>
-                      <p className="text-lg font-semibold text-gray-800">{category.title}</p>
+                  {/* Basic Information Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-gray-600" />
+                      {t('category.detail.sections.basicInfo')}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-blue-100">
+                          <Hash className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.code')}</p>
+                          <p className="text-lg font-semibold text-gray-800">{category.code}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-green-100">
+                          <Tag className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.title')}</p>
+                          <p className="text-lg font-semibold text-gray-800">{category.title}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-purple-100">
+                          {category.status === 'Active' ? (
+                            <CheckCircle className="h-5 w-5 text-purple-600" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-purple-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.status')}</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            category.status === 'Active'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {category.status}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-purple-100">
-                      {category.status === 'Active' ? (
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-purple-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        category.status === 'Active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  {/* Work Request Configuration */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-gray-600" />
+                      {t('category.detail.sections.workRequestConfig')}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-orange-100">
+                          <Settings className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.problemType')}</p>
+                          <p className="text-lg font-semibold text-gray-800">{category.problem_type || t('category.notSpecified')}</p>
+                        </div>
+                      </div>
 
-              {/* Work Request Configuration */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-gray-600" />
-                  Work Request Configuration
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-orange-100">
-                      <Settings className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Problem Type</p>
-                      <p className="text-lg font-semibold text-gray-800">{category.problem_type || 'Not specified'}</p>
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-indigo-100">
+                          <CheckCircle className="h-5 w-5 text-indigo-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.workRequestApproved')}</p>
+                          <p className="text-lg font-semibold text-gray-800">{category.work_request_approved || t('category.notSpecified')}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-indigo-100">
-                      <CheckCircle className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Work Request Approved</p>
-                      <p className="text-lg font-semibold text-gray-800">{category.work_request_approved || 'Not specified'}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  {/* System Permissions */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-gray-600" />
+                      {t('category.detail.sections.systemPermissions')}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-red-100">
+                          <DollarSign className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.excludeCostingLimit')}</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            category.exclude_costing_limit
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {category.exclude_costing_limit ? t('category.yes') : t('category.no')}
+                          </span>
+                        </div>
+                      </div>
 
-              {/* System Permissions */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-gray-600" />
-                  System Permissions
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-red-100">
-                      <DollarSign className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Exclude Costing Limit</p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        category.exclude_costing_limit 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.exclude_costing_limit ? 'Yes' : 'No'}
-                      </span>
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-yellow-100">
+                          <Zap className="h-5 w-5 text-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.power')}</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            category.power
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {category.power ? t('category.enabled') : t('category.disabled')}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-teal-100">
+                          <DollarSign className="h-5 w-5 text-teal-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-1">{t('category.detail.fields.createPaymentRequisition')}</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            category.create_payment_requisition
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {category.create_payment_requisition ? t('category.allowed') : t('category.notAllowed')}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-yellow-100">
-                      <Zap className="h-5 w-5 text-yellow-600" />
-                    </div>
+                  {/* Description Section */}
+                  {category.description && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Power</p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        category.power 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.power ? 'Enabled' : 'Disabled'}
-                      </span>
+                      <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-gray-600" />
+                        {t('category.detail.sections.description')}
+                      </h3>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {category.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-teal-100">
-                      <DollarSign className="h-5 w-5 text-teal-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Create Payment Requisition</p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        category.create_payment_requisition 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.create_payment_requisition ? 'Allowed' : 'Not Allowed'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description Section */}
-              {category.description && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-gray-600" />
-                    Description
-                  </h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {category.description}
-                    </p>
-                  </div>
-                </div>
-              )}
+                  )}
                 </TabsContent>
 
                 <TabsContent value="subcategories" className="mt-6">
@@ -321,10 +323,10 @@ const CategoryDetailView = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
                         <Settings className="h-5 w-5 text-gray-600" />
-                        Subcategories
+                        {t('category.detail.subcategories.title')}
                       </h3>
                       <span className="text-sm text-gray-500">
-                        {category?.subcategories?.length || 0} subcategories found
+                        {t('category.detail.subcategories.found', { count: category?.subcategories?.length || 0 })}
                       </span>
                     </div>
 
@@ -334,11 +336,11 @@ const CategoryDetailView = () => {
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-gray-50">
-                              <TableHead className="font-medium text-gray-600">ID</TableHead>
-                              <TableHead className="font-medium text-gray-600">Title</TableHead>
-                              <TableHead className="font-medium text-gray-600">Description</TableHead>
-                              <TableHead className="font-medium text-gray-600">Exclude Costing Limit</TableHead>
-                              <TableHead className="font-medium text-gray-600">Status</TableHead>
+                              <TableHead className="font-medium text-gray-600">{t('category.detail.subcategories.columns.id')}</TableHead>
+                              <TableHead className="font-medium text-gray-600">{t('category.detail.subcategories.columns.title')}</TableHead>
+                              <TableHead className="font-medium text-gray-600">{t('category.detail.subcategories.columns.description')}</TableHead>
+                              <TableHead className="font-medium text-gray-600">{t('category.detail.subcategories.columns.excludeCostingLimit')}</TableHead>
+                              <TableHead className="font-medium text-gray-600">{t('category.detail.subcategories.columns.status')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -348,10 +350,10 @@ const CategoryDetailView = () => {
                                   {subcategory.id}
                                 </TableCell>
                                 <TableCell className="font-medium">
-                                  {subcategory.title || 'No Title'}
+                                  {subcategory.title || t('category.detail.subcategories.noTitle')}
                                 </TableCell>
                                 <TableCell className="text-gray-600">
-                                  {subcategory.description || 'No Description'}
+                                  {subcategory.description || t('category.detail.subcategories.noDescription')}
                                 </TableCell>
                                 <TableCell>
                                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -359,7 +361,7 @@ const CategoryDetailView = () => {
                                       ? 'bg-green-100 text-green-800'
                                       : 'bg-red-100 text-red-800'
                                   }`}>
-                                    {subcategory.exclude_costing_limit ? 'Yes' : 'No'}
+                                    {subcategory.exclude_costing_limit ? t('category.yes') : t('category.no')}
                                   </span>
                                 </TableCell>
                                 <TableCell>
@@ -381,9 +383,9 @@ const CategoryDetailView = () => {
                         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100">
                           <Settings className="h-6 w-6 text-gray-400" />
                         </div>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No subcategories</h3>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('category.detail.subcategories.empty')}</h3>
                         <p className="mt-1 text-sm text-gray-500">
-                          This category doesn't have any subcategories yet.
+                          {t('category.detail.subcategories.emptyDesc')}
                         </p>
                       </div>
                     )}
@@ -397,34 +399,21 @@ const CategoryDetailView = () => {
           <div className="space-y-6">
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg">{t('category.detail.quickActions.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="space-y-3">
-                  {/* <PermissionGuard feature='reference' permission='edit'>
-                    <Button 
-                      onClick={handleEdit} 
-                      className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Category
-                    </Button>
-                  </PermissionGuard> */}
-                  
                   <PermissionGuard feature='reference' permission='edit'>
                     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                       <DialogTrigger asChild>
-                        <Button 
-                          // variant="secondary" 
-                          className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
-                        >
+                        <Button className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow">
                           <Plus className="h-4 w-4" />
-                          Add Subcategory
+                          {t('category.detail.quickActions.addSubcategory')}
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                          <DialogTitle>Create New Subcategory</DialogTitle>
+                          <DialogTitle>{t('category.detail.subcategoryForm.title')}</DialogTitle>
                         </DialogHeader>
                         <Form {...subcategoryForm}>
                           <form onSubmit={subcategoryForm.handleSubmit(onSubmitSubcategory)} className="space-y-6">
@@ -435,9 +424,9 @@ const CategoryDetailView = () => {
                                 name="title"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Title</FormLabel>
+                                    <FormLabel>{t('category.detail.subcategoryForm.fields.title')}</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="Subcategory title" {...field} />
+                                      <Input placeholder={t('category.detail.subcategoryForm.placeholders.title')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -449,9 +438,9 @@ const CategoryDetailView = () => {
                                 name="code"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Code</FormLabel>
+                                    <FormLabel>{t('category.detail.subcategoryForm.fields.code')}</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="Subcategory code" {...field} />
+                                      <Input placeholder={t('category.detail.subcategoryForm.placeholders.code')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -466,16 +455,16 @@ const CategoryDetailView = () => {
                                 name="work_request_approved"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Work Request Approved</FormLabel>
+                                    <FormLabel>{t('category.detail.subcategoryForm.fields.workRequestApproved')}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                       <FormControl>
                                         <SelectTrigger>
-                                          <SelectValue placeholder="Select approval type" />
+                                          <SelectValue placeholder={t('category.detail.subcategoryForm.placeholders.selectApprovalType')} />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="create_work_order">Create Work Order</SelectItem>
-                                        <SelectItem value="close_work_request">Close Work Request</SelectItem>
+                                        <SelectItem value="create_work_order">{t('category.workRequestOptions.createWorkOrder')}</SelectItem>
+                                        <SelectItem value="close_work_request">{t('category.workRequestOptions.closeWorkRequest')}</SelectItem>
                                       </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -488,16 +477,16 @@ const CategoryDetailView = () => {
                                 name="status"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Status</FormLabel>
+                                    <FormLabel>{t('category.detail.subcategoryForm.fields.status')}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                       <FormControl>
                                         <SelectTrigger>
-                                          <SelectValue placeholder="Select status" />
+                                          <SelectValue placeholder={t('category.detail.subcategoryForm.placeholders.selectStatus')} />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="Active">Active</SelectItem>
-                                        <SelectItem value="Inactive">Inactive</SelectItem>
+                                        <SelectItem value="Active">{t('category.status.active')}</SelectItem>
+                                        <SelectItem value="Inactive">{t('category.status.inactive')}</SelectItem>
                                       </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -509,7 +498,7 @@ const CategoryDetailView = () => {
                             {/* Permissions Section */}
                             <div className="space-y-4">
                               <div className="text-sm font-medium text-gray-700 border-b pb-2">
-                                System Permissions
+                                {t('category.detail.subcategoryForm.sections.permissions')}
                               </div>
                               <div className="grid grid-cols-1 gap-3">
                                 <FormField
@@ -518,9 +507,9 @@ const CategoryDetailView = () => {
                                   render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                                       <div className="space-y-0.5">
-                                        <FormLabel className="text-sm font-medium">Exclude Costing Limit</FormLabel>
+                                        <FormLabel className="text-sm font-medium">{t('category.detail.subcategoryForm.switches.excludeCostingLimit')}</FormLabel>
                                         <div className="text-xs text-muted-foreground">
-                                          Enable to exclude costing limits for this subcategory
+                                          {t('category.detail.subcategoryForm.switches.excludeCostingLimitDesc')}
                                         </div>
                                       </div>
                                       <FormControl>
@@ -539,9 +528,9 @@ const CategoryDetailView = () => {
                                   render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                                       <div className="space-y-0.5">
-                                        <FormLabel className="text-sm font-medium">Power</FormLabel>
+                                        <FormLabel className="text-sm font-medium">{t('category.detail.subcategoryForm.switches.power')}</FormLabel>
                                         <div className="text-xs text-muted-foreground">
-                                          Enable power functionality for this subcategory
+                                          {t('category.detail.subcategoryForm.switches.powerDesc')}
                                         </div>
                                       </div>
                                       <FormControl>
@@ -560,9 +549,9 @@ const CategoryDetailView = () => {
                                   render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                                       <div className="space-y-0.5">
-                                        <FormLabel className="text-sm font-medium">Create Payment Requisition</FormLabel>
+                                        <FormLabel className="text-sm font-medium">{t('category.detail.subcategoryForm.switches.createPaymentRequisition')}</FormLabel>
                                         <div className="text-xs text-muted-foreground">
-                                          Allow creation of payment requisitions
+                                          {t('category.detail.subcategoryForm.switches.createPaymentRequisitionDesc')}
                                         </div>
                                       </div>
                                       <FormControl>
@@ -583,7 +572,7 @@ const CategoryDetailView = () => {
                                 variant="outline"
                                 onClick={() => setIsModalOpen(false)}
                               >
-                                Cancel
+                                {t('common:actions.cancel')}
                               </Button>
                               <Button
                                 type="submit"
@@ -592,7 +581,7 @@ const CategoryDetailView = () => {
                                 {createSubcategoryMutation.isPending && (
                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Create Subcategory
+                                {t('category.detail.subcategoryForm.submit')}
                               </Button>
                             </div>
                           </form>
@@ -601,13 +590,13 @@ const CategoryDetailView = () => {
                     </Dialog>
                   </PermissionGuard>
 
-                  <Button 
-                    onClick={handleBack} 
-                    variant="outline" 
+                  <Button
+                    onClick={handleBack}
+                    variant="outline"
                     className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Categories
+                    {t('category.detail.backToList')}
                   </Button>
                 </div>
               </CardContent>
@@ -616,38 +605,38 @@ const CategoryDetailView = () => {
             {/* Category Status Summary */}
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
-                <CardTitle className="text-lg">Category Status</CardTitle>
+                <CardTitle className="text-lg">{t('category.detail.statusSidebar.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Active Status</span>
+                    <span className="text-sm text-gray-600">{t('category.detail.statusSidebar.activeStatus')}</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      category.status === 'Active' 
-                        ? 'bg-green-100 text-green-800' 
+                      category.status === 'Active'
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {category.status}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Power Enabled</span>
+                    <span className="text-sm text-gray-600">{t('category.detail.statusSidebar.powerEnabled')}</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      category.power 
-                        ? 'bg-green-100 text-green-800' 
+                      category.power
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {category.power ? 'Yes' : 'No'}
+                      {category.power ? t('category.yes') : t('category.no')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Payment Creation</span>
+                    <span className="text-sm text-gray-600">{t('category.detail.statusSidebar.paymentCreation')}</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      category.create_payment_requisition 
-                        ? 'bg-green-100 text-green-800' 
+                      category.create_payment_requisition
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {category.create_payment_requisition ? 'Allowed' : 'Blocked'}
+                      {category.create_payment_requisition ? t('category.allowed') : t('category.blocked')}
                     </span>
                   </div>
                 </div>

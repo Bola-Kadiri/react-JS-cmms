@@ -10,24 +10,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { AssetCategory } from '@/types/assetcategory';
 import { useAssetCategoryQuery, useCreateAssetCategory, useUpdateAssetCategory } from '@/hooks/assetcategory/useAssetCategoryQueries';
-
-// Form schema definition matching the AssetCategory interface
-const assetCategorySchema = z.object({
-  type: z.string().min(1, 'Type is required'),
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  salvage_value_percent: z.string().min(1, 'Salvage value percent is required'),
-  useful_life_year: z.number().min(1, 'Useful life year must be at least 1'),
-  description: z.string().min(1, 'Description is required'),
-});
-
-type AssetCategoryFormValues = z.infer<typeof assetCategorySchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const AssetCategoryForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Form schema definition matching the AssetCategory interface
+  const assetCategorySchema = z.object({
+    type: z.string().min(1, 'Type is required'),
+    code: z.string().min(1, 'Code is required'),
+    name: z.string().min(1, 'Name is required'),
+    salvage_value_percent: z.string().min(1, 'Salvage value percent is required'),
+    useful_life_year: z.number().min(1, 'Useful life year must be at least 1'),
+    description: z.string().min(1, 'Description is required'),
+  });
+
+  type AssetCategoryFormValues = z.infer<typeof assetCategorySchema>;
+
   // Asset category form setup
   const assetCategoryForm = useForm<AssetCategoryFormValues>({
     resolver: zodResolver(assetCategorySchema),
@@ -42,9 +44,9 @@ const AssetCategoryForm = () => {
   });
 
   // Fetch asset category data for edit mode using our custom hook
-  const { 
-    data: assetCategoryData, 
-    isLoading: isLoadingAssetCategory, 
+  const {
+    data: assetCategoryData,
+    isLoading: isLoadingAssetCategory,
     isError: isAssetCategoryError,
     error: assetCategoryError
   } = useAssetCategoryQuery(isEditMode ? id : undefined);
@@ -91,7 +93,7 @@ const AssetCategoryForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading asset category details...</p>
+          <p className="text-sm text-muted-foreground">{t('assetCategory.form.loading')}</p>
         </div>
       </div>
     );
@@ -100,12 +102,12 @@ const AssetCategoryForm = () => {
   if (isEditMode && isAssetCategoryError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading asset category details</div>
+        <div className="text-red-500 text-xl">{t('assetCategory.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {assetCategoryError instanceof Error ? assetCategoryError.message : 'An unknown error occurred'}
+          {assetCategoryError instanceof Error ? assetCategoryError.message : t('assetCategory.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Asset Categories
+          {t('assetCategory.form.backToList')}
         </Button>
       </div>
     );
@@ -115,19 +117,19 @@ const AssetCategoryForm = () => {
     <div className="container mx-auto py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {isEditMode ? 'Edit Asset Category' : 'Create Asset Category'}
+              {isEditMode ? t('assetCategory.form.editTitle') : t('assetCategory.form.createTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isEditMode ? 'Update asset category information' : 'Fill in the details to create a new asset category'}
+              {isEditMode ? t('assetCategory.form.editSubtitle') : t('assetCategory.form.createSubtitle')}
             </p>
           </div>
         </div>
@@ -144,11 +146,11 @@ const AssetCategoryForm = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type *</FormLabel>
+                      <FormLabel>{t('assetCategory.form.fields.type')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter asset category type" 
-                          {...field} 
+                        <Input
+                          placeholder={t('assetCategory.form.placeholders.type')}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -162,11 +164,11 @@ const AssetCategoryForm = () => {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Code *</FormLabel>
+                      <FormLabel>{t('assetCategory.form.fields.code')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter asset category code" 
-                          {...field} 
+                        <Input
+                          placeholder={t('assetCategory.form.placeholders.code')}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -180,11 +182,11 @@ const AssetCategoryForm = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name *</FormLabel>
+                      <FormLabel>{t('assetCategory.form.fields.name')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter asset category name" 
-                          {...field} 
+                        <Input
+                          placeholder={t('assetCategory.form.placeholders.name')}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -198,11 +200,11 @@ const AssetCategoryForm = () => {
                   name="salvage_value_percent"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Salvage Value Percent *</FormLabel>
+                      <FormLabel>{t('assetCategory.form.fields.salvageValuePercent')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter salvage value percentage" 
-                          {...field} 
+                        <Input
+                          placeholder={t('assetCategory.form.placeholders.salvageValuePercent')}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -216,11 +218,11 @@ const AssetCategoryForm = () => {
                   name="useful_life_year"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Useful Life Year *</FormLabel>
+                      <FormLabel>{t('assetCategory.form.fields.usefulLifeYear')}</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="number"
-                          placeholder="Enter useful life in years" 
+                          placeholder={t('assetCategory.form.placeholders.usefulLifeYear')}
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
@@ -237,12 +239,12 @@ const AssetCategoryForm = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description *</FormLabel>
+                    <FormLabel>{t('assetCategory.form.fields.description')}</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter asset category description"
+                      <Textarea
+                        placeholder={t('assetCategory.form.placeholders.description')}
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -257,19 +259,19 @@ const AssetCategoryForm = () => {
                   variant="outline"
                   onClick={handleCancel}
                 >
-                  Cancel
+                  {t('assetCategory.form.cancel')}
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   disabled={createAssetCategoryMutation.isPending || updateAssetCategoryMutation.isPending}
                 >
                   {(createAssetCategoryMutation.isPending || updateAssetCategoryMutation.isPending) ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? 'Updating...' : 'Creating...'}
+                      {isEditMode ? t('assetCategory.form.updating') : t('assetCategory.form.creating')}
                     </>
                   ) : (
-                    isEditMode ? 'Update Asset Category' : 'Create Asset Category'
+                    isEditMode ? t('assetCategory.form.update') : t('assetCategory.form.create')
                   )}
                 </Button>
               </div>
@@ -281,4 +283,4 @@ const AssetCategoryForm = () => {
   );
 };
 
-export default AssetCategoryForm; 
+export default AssetCategoryForm;

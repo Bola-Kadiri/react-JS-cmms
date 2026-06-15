@@ -8,7 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Asset } from '@/types/asset';
@@ -21,8 +20,8 @@ import { Zone } from '@/types/zone';
 import { Building } from '@/types/building';
 import { Subsystem } from '@/types/subsystem';
 import { User } from '@/types/user';
-import { AssetCategory } from '@/types/assetcategory';
 import { AssetSubcategory } from '@/types/assetsubcategory';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // API endpoints
 const endpoint2 = 'facility/api/api/facilities/';
@@ -31,41 +30,42 @@ const endpoint4 = 'facility/api/api/buildings/';
 const endpoint5 = 'facility/api/api/subsystems/';
 const endpoint6 = 'accounts/api/users/';
 
-// Form schema definition matching the Asset interface
-const assetSchema = z.object({
-  asset_name: z.string().min(1, 'Asset name is required'),
-  asset_type: z.enum(['Asset', 'Consumable']).default('Asset'),
-  condition: z.enum(['Used', 'Brand New']).default('Brand New'),
-  purchase_date: z.string().min(1, 'Purchase date is required'),
-  purchased_amount: z.string().min(1, 'Purchased amount is required'),
-  serial_number: z.string().optional(),
-  asset_tag: z.string().min(1, 'Asset tag is required'),
-  lifespan: z.string().optional(),
-  oem_warranty: z.string().optional(),
-  owner: z.number().min(1, 'Owner is required'),
-  facility: z.number().min(1, 'Facility is required'),
-  zone: z.number().min(1, 'Zone is required'),
-  building: z.number().min(1, 'Building is required'),
-  subsystem: z.number().min(1, 'Subsystem is required'),
-  category: z.number().min(1, 'Category is required'),
-  subcategory: z.number().min(1, 'Subcategory is required'),
-});
-
-type AssetFormValues = z.infer<typeof assetSchema>;
-
 const AssetForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Schema defined inside component so validation messages are translated
+  const assetSchema = z.object({
+    asset_name: z.string().min(1, t('form.validation.assetNameRequired')),
+    asset_type: z.enum(['Asset', 'Consumable']).default('Asset'),
+    condition: z.enum(['Used', 'Brand New']).default('Brand New'),
+    purchase_date: z.string().min(1, t('form.validation.purchaseDateRequired')),
+    purchased_amount: z.string().min(1, t('form.validation.purchasedAmountRequired')),
+    serial_number: z.string().optional(),
+    asset_tag: z.string().min(1, t('form.validation.assetTagRequired')),
+    lifespan: z.string().optional(),
+    oem_warranty: z.string().optional(),
+    owner: z.number().min(1, t('form.validation.ownerRequired')),
+    facility: z.number().min(1, t('form.validation.facilityRequired')),
+    zone: z.number().min(1, t('form.validation.zoneRequired')),
+    building: z.number().min(1, t('form.validation.buildingRequired')),
+    subsystem: z.number().min(1, t('form.validation.subsystemRequired')),
+    category: z.number().min(1, t('form.validation.categoryRequired')),
+    subcategory: z.number().min(1, t('form.validation.subcategoryRequired')),
+  });
+
+  type AssetFormValues = z.infer<typeof assetSchema>;
+
   // State for filtered subcategories
   const [filteredSubcategories, setFilteredSubcategories] = useState<AssetSubcategory[]>([]);
-  
+
   // State for filtered facility hierarchy
   const [filteredZones, setFilteredZones] = useState<Zone[]>([]);
   const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([]);
   const [filteredSubsystems, setFilteredSubsystems] = useState<Subsystem[]>([]);
-  
+
   // Asset form setup
   const assetForm = useForm<AssetFormValues>({
     resolver: zodResolver(assetSchema),
@@ -100,11 +100,11 @@ const AssetForm = () => {
 
   const assetCategories = assetCategoriesResponse?.results || [];
   const assetSubcategories = assetSubcategoriesResponse?.results || [];
-  
+
   // Fetch asset data for edit mode using our custom hook
-  const { 
-    data: assetData, 
-    isLoading: isLoadingAsset, 
+  const {
+    data: assetData,
+    isLoading: isLoadingAsset,
     isError: isAssetError,
     error: assetError
   } = useAssetQuery(isEditMode ? id : undefined);
@@ -122,10 +122,8 @@ const AssetForm = () => {
   // Update subcategories when category changes
   useEffect(() => {
     if (selectedCategory && assetSubcategories.length > 0) {
-      // Filter subcategories by the selected asset category
       const filtered = assetSubcategories.filter(sub => sub.asset_category === selectedCategory);
       setFilteredSubcategories(filtered);
-      // Reset subcategory selection when category changes
       assetForm.setValue('subcategory', 0);
     } else {
       setFilteredSubcategories([]);
@@ -135,10 +133,8 @@ const AssetForm = () => {
   // Update zones when facility changes
   useEffect(() => {
     if (selectedFacility && zones.length > 0) {
-      // Filter zones by the selected facility
       const filtered = zones.filter(zone => zone.facility === selectedFacility);
       setFilteredZones(filtered);
-      // Reset zone, building, and subsystem selections when facility changes
       assetForm.setValue('zone', 0);
       assetForm.setValue('building', 0);
       assetForm.setValue('subsystem', 0);
@@ -150,10 +146,8 @@ const AssetForm = () => {
   // Update buildings when zone changes
   useEffect(() => {
     if (selectedZone && buildings.length > 0) {
-      // Filter buildings by the selected zone
       const filtered = buildings.filter(building => building.zone === selectedZone);
       setFilteredBuildings(filtered);
-      // Reset building and subsystem selections when zone changes
       assetForm.setValue('building', 0);
       assetForm.setValue('subsystem', 0);
     } else {
@@ -164,10 +158,8 @@ const AssetForm = () => {
   // Update subsystems when building changes
   useEffect(() => {
     if (selectedBuilding && subsystems.length > 0) {
-      // Filter subsystems by the selected building
       const filtered = subsystems.filter(subsystem => subsystem.building === selectedBuilding);
       setFilteredSubsystems(filtered);
-      // Reset subsystem selection when building changes
       assetForm.setValue('subsystem', 0);
     } else {
       setFilteredSubsystems([]);
@@ -177,7 +169,6 @@ const AssetForm = () => {
   // Handle asset data loading
   useEffect(() => {
     if (assetData && isEditMode) {
-      // Reset the form with asset data
       assetForm.reset({
         asset_name: assetData.asset_name,
         asset_type: assetData.asset_type,
@@ -222,7 +213,7 @@ const AssetForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading asset details...</p>
+          <p className="text-sm text-muted-foreground">{t('messages.loadingDetails')}</p>
         </div>
       </div>
     );
@@ -231,12 +222,12 @@ const AssetForm = () => {
   if (isEditMode && isAssetError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading asset details</div>
+        <div className="text-red-500 text-xl">{t('form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {assetError instanceof Error ? assetError.message : 'An unknown error occurred'}
+          {assetError instanceof Error ? assetError.message : t('form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Assets
+          {t('form.backToAssets')}
         </Button>
       </div>
     );
@@ -246,15 +237,15 @@ const AssetForm = () => {
     <div className="container mx-auto py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit Asset' : 'Create New Asset'}
+            {isEditMode ? t('title.edit') : t('title.create')}
           </h1>
         </div>
       </div>
@@ -264,9 +255,9 @@ const AssetForm = () => {
           {/* Location Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Location Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('form.sections.location')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormField
@@ -274,11 +265,11 @@ const AssetForm = () => {
                   name="facility"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Facility *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.facility')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select facility" />
+                            <SelectValue placeholder={t('form.placeholders.selectFacility')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -299,18 +290,18 @@ const AssetForm = () => {
                   name="zone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Zone *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.zone')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                         disabled={filteredZones.length === 0}
                       >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
-                              filteredZones.length === 0 
-                                ? "Select a facility first" 
-                                : "Select zone"
+                              filteredZones.length === 0
+                                ? t('form.placeholders.selectFacilityFirst')
+                                : t('form.placeholders.selectZone')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -332,18 +323,18 @@ const AssetForm = () => {
                   name="building"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Building *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.building')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                         disabled={filteredBuildings.length === 0}
                       >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
-                              filteredBuildings.length === 0 
-                                ? "Select a zone first" 
-                                : "Select building"
+                              filteredBuildings.length === 0
+                                ? t('form.placeholders.selectBuildingFirst')
+                                : t('form.placeholders.selectBuilding')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -365,18 +356,18 @@ const AssetForm = () => {
                   name="subsystem"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Subsystem *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.subsystem')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                         disabled={filteredSubsystems.length === 0}
                       >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
-                              filteredSubsystems.length === 0 
-                                ? "Select a building first" 
-                                : "Select subsystem"
+                              filteredSubsystems.length === 0
+                                ? t('form.placeholders.selectSubsystemFirst')
+                                : t('form.placeholders.selectSubsystem')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -393,24 +384,22 @@ const AssetForm = () => {
                   )}
                 />
               </div>
-              
-              {/* Hierarchy Information Display */}
+
+              {/* Hierarchy warning messages */}
               <div className="space-y-3">
                 {filteredZones.length === 0 && selectedFacility > 0 && (
                   <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
-                    No zones available for the selected facility.
+                    {t('form.warnings.noZones')}
                   </div>
                 )}
-                
                 {filteredBuildings.length === 0 && selectedZone > 0 && (
                   <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
-                    No buildings available for the selected zone.
+                    {t('form.warnings.noBuildings')}
                   </div>
                 )}
-                
                 {filteredSubsystems.length === 0 && selectedBuilding > 0 && (
                   <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
-                    No subsystems available for the selected building.
+                    {t('form.warnings.noSubsystems')}
                   </div>
                 )}
               </div>
@@ -420,9 +409,9 @@ const AssetForm = () => {
           {/* Category Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Category Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('form.sections.category')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
@@ -430,11 +419,11 @@ const AssetForm = () => {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Category *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.assetCategory')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select asset category" />
+                            <SelectValue placeholder={t('placeholders.selectCategory')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -455,18 +444,18 @@ const AssetForm = () => {
                   name="subcategory"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Subcategory *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.assetSubcategory')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                         disabled={filteredSubcategories.length === 0}
                       >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
-                              filteredSubcategories.length === 0 
-                                ? "Select an asset category first" 
-                                : "Select asset subcategory"
+                              filteredSubcategories.length === 0
+                                ? t('form.placeholders.selectAssetCategoryFirst')
+                                : t('placeholders.selectSubcategory')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -483,10 +472,10 @@ const AssetForm = () => {
                   )}
                 />
               </div>
-              
+
               {filteredSubcategories.length === 0 && selectedCategory > 0 && (
                 <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
-                  No asset subcategories available for the selected category.
+                  {t('form.warnings.noSubcategories')}
                 </div>
               )}
             </CollapsibleContent>
@@ -495,9 +484,9 @@ const AssetForm = () => {
           {/* Basic Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('form.sections.basic')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
@@ -505,9 +494,9 @@ const AssetForm = () => {
                   name="asset_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Name *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.assetName')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter asset name" {...field} />
+                        <Input placeholder={t('form.placeholders.assetName')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -519,16 +508,16 @@ const AssetForm = () => {
                   name="asset_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Type *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.assetType')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select asset type" />
+                            <SelectValue placeholder={t('placeholders.selectType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Asset">Asset</SelectItem>
-                          <SelectItem value="Consumable">Consumable</SelectItem>
+                          <SelectItem value="Asset">{t('types.asset')}</SelectItem>
+                          <SelectItem value="Consumable">{t('types.consumable')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -541,16 +530,16 @@ const AssetForm = () => {
                   name="condition"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Condition *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.condition')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select condition" />
+                            <SelectValue placeholder={t('form.placeholders.selectCondition')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Used">Used</SelectItem>
-                          <SelectItem value="Brand New">Brand New</SelectItem>
+                          <SelectItem value="Used">{t('filter.conditionOptions.used')}</SelectItem>
+                          <SelectItem value="Brand New">{t('filter.conditionOptions.brandNew')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -565,9 +554,9 @@ const AssetForm = () => {
                   name="asset_tag"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Tag *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.assetTag')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter asset tag" {...field} />
+                        <Input placeholder={t('placeholders.assetTag')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -579,9 +568,9 @@ const AssetForm = () => {
                   name="serial_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Serial Number</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.serialNumber')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter serial number" {...field} />
+                        <Input placeholder={t('placeholders.serialNumber')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -593,11 +582,11 @@ const AssetForm = () => {
                   name="owner"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Register By *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.registerBy')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select registrar" />
+                            <SelectValue placeholder={t('form.placeholders.selectRegistrar')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -622,9 +611,9 @@ const AssetForm = () => {
           {/* Procurement Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Procurement Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('form.sections.procurement')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
@@ -632,7 +621,7 @@ const AssetForm = () => {
                   name="purchase_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Purchase Date *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.purchaseDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -646,9 +635,9 @@ const AssetForm = () => {
                   name="purchased_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Purchased Amount *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.purchasedAmount')}</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" placeholder="Enter amount" {...field} />
+                        <Input type="number" step="0.01" placeholder={t('placeholders.amount')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -660,9 +649,9 @@ const AssetForm = () => {
                   name="lifespan"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Lifespan</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.lifespan')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter lifespan" {...field} />
+                        <Input placeholder={t('form.placeholders.enterLifespan')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -676,9 +665,9 @@ const AssetForm = () => {
                   name="oem_warranty"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">OEM Warranty</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('form.fields.oemWarranty')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter OEM warranty details" {...field} />
+                        <Input placeholder={t('form.placeholders.enterOemWarranty')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -687,19 +676,19 @@ const AssetForm = () => {
               </div>
             </CollapsibleContent>
           </Collapsible>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-6 border-t border-gray-200">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               className="px-8"
             >
-              Cancel
+              {t('form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createAssetMutation.isPending || updateAssetMutation.isPending}
               className="px-8"
@@ -707,7 +696,7 @@ const AssetForm = () => {
               {(createAssetMutation.isPending || updateAssetMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Asset' : 'Create Asset'}
+              {isEditMode ? t('form.updateAsset') : t('form.createAsset')}
             </Button>
           </div>
         </form>

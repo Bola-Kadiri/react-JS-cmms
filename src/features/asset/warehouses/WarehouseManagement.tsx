@@ -15,8 +15,10 @@ import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { Warehouse } from '@/types/warehouse';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WarehouseManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -152,7 +154,7 @@ const WarehouseManagement = () => {
   const filterConfig = [
     {
       key: 'facility',
-      label: 'Facility',
+      label: t('warehouse.filter.facility'),
       options: facilities.map(facility => ({
         value: facility.id.toString(),
         label: facility.name
@@ -160,10 +162,10 @@ const WarehouseManagement = () => {
     },
     {
       key: 'is_active',
-      label: 'Status',
+      label: t('warehouse.filter.status'),
       options: [
-        { value: 'true', label: 'Active' },
-        { value: 'false', label: 'Inactive' }
+        { value: 'true', label: t('warehouse.status.active') },
+        { value: 'false', label: t('warehouse.status.inactive') }
       ]
     }
   ];
@@ -174,7 +176,7 @@ const WarehouseManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading warehouses...</p>
+          <p className="text-sm text-muted-foreground">{t('warehouse.loading')}</p>
         </div>
       </div>
     );
@@ -184,9 +186,9 @@ const WarehouseManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading warehouses</div>
+        <div className="text-red-500 text-xl">{t('warehouse.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -195,21 +197,21 @@ const WarehouseManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Warehouse Management</h1>
+        <h1 className="text-3xl font-bold">{t('warehouse.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddWarehouse}>
-            <Plus className="mr-2 h-4 w-4" /> Add Warehouse
+            <Plus className="mr-2 h-4 w-4" /> {t('warehouse.add')}
           </Button>
         )}
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6">
-        <SearchFilter 
+        <SearchFilter
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search by code or name..."
+          placeholder={t('warehouse.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -220,19 +222,19 @@ const WarehouseManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Code</TableHead>
-                <TableHead className="font-medium text-gray-600">Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Capacity</TableHead>
-                <TableHead className="font-medium text-gray-600">Facility</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('warehouse.columns.code')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('warehouse.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('warehouse.columns.capacity')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('warehouse.columns.facility')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('warehouse.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('warehouse.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No warehouses found.
+                    {t('warehouse.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -252,7 +254,7 @@ const WarehouseManagement = () => {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {warehouse.is_active ? 'Active' : 'Inactive'}
+                        {warehouse.is_active ? t('warehouse.badge.active') : t('warehouse.badge.inactive')}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -315,14 +317,14 @@ const WarehouseManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the warehouse.
+              {t('warehouse.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteWarehouse}
               disabled={deleteWarehouseMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -330,10 +332,10 @@ const WarehouseManagement = () => {
               {deleteWarehouseMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('warehouse.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('warehouse.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

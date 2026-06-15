@@ -15,24 +15,26 @@ import { Region } from '@/types/region';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { User } from '@/types/user';
 import { useClusterQuery, useCreateCluster, useUpdateCluster } from '@/hooks/cluster/useClusterQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const userEndpoint = 'accounts/api/users/';
 const regionsEndpoint = 'facility/api/api/regions/';
 
-// Form schema definition
-const clusterSchema = z.object({
-  region: z.number().min(1, 'Region is required'),
-  name: z.string().min(1, 'Name is required'),
-  select_manager: z.number().min(1, 'Manager is required'),
-});
-
-type ClusterFormValues = z.infer<typeof clusterSchema>;
-
 const ClusterForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Schema defined inside component so validation messages are translated
+  const clusterSchema = z.object({
+    region: z.number().min(1, t('cluster.form.validation.regionRequired')),
+    name: z.string().min(1, t('cluster.form.validation.nameRequired')),
+    select_manager: z.number().min(1, t('cluster.form.validation.managerRequired')),
+  });
+
+  type ClusterFormValues = z.infer<typeof clusterSchema>;
+
   // Cluster form setup
   const clusterForm = useForm<ClusterFormValues>({
     resolver: zodResolver(clusterSchema),
@@ -45,14 +47,14 @@ const ClusterForm = () => {
 
   // Fetch all users
   const { data: users = [] } = useList<User>('users', userEndpoint);
-  
+
   // Fetch all regions
   const { data: regions = [] } = useList<Region>('regions', regionsEndpoint);
 
   // Fetch cluster data for edit mode using our custom hook
-  const { 
-    data: clusterData, 
-    isLoading: isLoadingCluster, 
+  const {
+    data: clusterData,
+    isLoading: isLoadingCluster,
     isError: isClusterError,
     error: clusterError
   } = useClusterQuery(isEditMode ? id : undefined);
@@ -64,7 +66,6 @@ const ClusterForm = () => {
   // Handle cluster data loading
   useEffect(() => {
     if (clusterData && isEditMode) {
-      // Reset the form with cluster data
       clusterForm.reset({
         region: clusterData.region,
         name: clusterData.name,
@@ -96,7 +97,7 @@ const ClusterForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading cluster details...</p>
+          <p className="text-sm text-muted-foreground">{t('cluster.form.loading')}</p>
         </div>
       </div>
     );
@@ -105,12 +106,12 @@ const ClusterForm = () => {
   if (isEditMode && isClusterError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading cluster details</div>
+        <div className="text-red-500 text-xl">{t('cluster.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
           {clusterError instanceof Error ? clusterError.message : 'An unknown error occurred'}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Clusters
+          {t('cluster.form.backToClusters')}
         </Button>
       </div>
     );
@@ -120,15 +121,15 @@ const ClusterForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Cluster' : 'Create New Cluster'}
+            {isEditMode ? t('cluster.form.editTitle') : t('cluster.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -139,12 +140,12 @@ const ClusterForm = () => {
             {/* Cluster Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-200 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Cluster Details</h2>
+                <h2 className="text-lg font-medium">{t('cluster.form.sectionTitle')}</h2>
                 <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                  Toggle
+                  {t('cluster.form.toggle')}
                 </Button>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
@@ -152,14 +153,14 @@ const ClusterForm = () => {
                     name="region"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Region</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('cluster.form.region')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Region" />
+                              <SelectValue placeholder={t('cluster.form.regionPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -174,15 +175,15 @@ const ClusterForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={clusterForm.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('cluster.form.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Cluster name" {...field} />
+                          <Input placeholder={t('cluster.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -194,14 +195,14 @@ const ClusterForm = () => {
                     name="select_manager"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Manager</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('cluster.form.manager')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Manager" />
+                              <SelectValue placeholder={t('cluster.form.managerPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -220,25 +221,25 @@ const ClusterForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('cluster.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createClusterMutation.isPending || updateClusterMutation.isPending}
             >
               {(createClusterMutation.isPending || updateClusterMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('cluster.form.update') : t('cluster.form.save')}
             </Button>
           </div>
         </form>

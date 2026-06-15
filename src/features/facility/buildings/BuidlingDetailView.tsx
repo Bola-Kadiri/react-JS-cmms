@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit, Loader2, Building2, Hash, Settings2, MapPin } from 'lucide-react';
 import { useBuildingQuery } from '@/hooks/building/useBuildingQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const BuildingDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Using our custom hook instead of direct query
-  const { 
-    data: building, 
-    isLoading, 
+  const {
+    data: building,
+    isLoading,
     isError,
-    error 
+    error
   } = useBuildingQuery(id);
 
   // Handle back button click
@@ -32,7 +34,7 @@ const BuildingDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading building details...</p>
+          <p className="text-sm text-muted-foreground">{t('building.detail.loading')}</p>
         </div>
       </div>
     );
@@ -41,12 +43,12 @@ const BuildingDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading building details</div>
+        <div className="text-red-500 text-xl">{t('building.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('building.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Buildings
+          {t('building.detail.backButton')}
         </Button>
       </div>
     );
@@ -55,9 +57,9 @@ const BuildingDetailView = () => {
   if (!building) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Building not found</div>
+        <div className="text-red-500 text-xl">{t('building.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Buildings
+          {t('building.detail.backButton')}
         </Button>
       </div>
     );
@@ -68,18 +70,18 @@ const BuildingDetailView = () => {
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleBack}
               className="shadow-md hover:shadow-lg transition-shadow"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-3xl font-bold text-gray-800">Building Details</h1>
+            <h1 className="text-3xl font-bold text-gray-800">{t('building.detail.title')}</h1>
           </div>
           <Button onClick={handleEdit} className="shadow-md hover:shadow-lg transition-shadow">
-            <Edit className="mr-2 h-4 w-4" /> Edit Building
+            <Edit className="mr-2 h-4 w-4" /> {t('building.detail.editButton')}
           </Button>
         </div>
 
@@ -91,7 +93,7 @@ const BuildingDetailView = () => {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
-                Building Information
+                {t('building.detail.buildingInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -102,17 +104,17 @@ const BuildingDetailView = () => {
                       <Hash className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Code</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('building.detail.code')}</p>
                       <p className="text-lg font-semibold text-gray-800">{building.code}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-green-100">
                       <Building2 className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Name</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('building.detail.name')}</p>
                       <p className="text-lg font-semibold text-gray-800">{building.name}</p>
                     </div>
                   </div>
@@ -122,12 +124,12 @@ const BuildingDetailView = () => {
                       <MapPin className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Facility</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('building.detail.facility')}</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {building.facility_detail?.name || 'Unknown Facility'}
+                        {building.facility_detail?.name || t('building.detail.unknownFacility')}
                       </p>
                       {building.facility_detail?.code && (
-                        <p className="text-sm text-gray-500">Code: {building.facility_detail.code}</p>
+                        <p className="text-sm text-gray-500">{t('building.detail.facilityCode')} {building.facility_detail.code}</p>
                       )}
                     </div>
                   </div>
@@ -139,12 +141,12 @@ const BuildingDetailView = () => {
                       <Settings2 className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Zone</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('building.detail.zone')}</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {building.zone_detail?.name || 'Unknown Zone'}
+                        {building.zone_detail?.name || t('building.detail.unknownZone')}
                       </p>
                       {building.zone_detail?.code && (
-                        <p className="text-sm text-gray-500">Code: {building.zone_detail.code}</p>
+                        <p className="text-sm text-gray-500">{t('building.detail.zoneCode')} {building.zone_detail.code}</p>
                       )}
                     </div>
                   </div>
@@ -154,10 +156,10 @@ const BuildingDetailView = () => {
                       <Settings2 className="h-5 w-5 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('building.detail.status')}</p>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        building.status === 'Active' 
-                          ? 'bg-green-100 text-green-800' 
+                        building.status === 'Active'
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
                         {building.status}
@@ -173,24 +175,24 @@ const BuildingDetailView = () => {
           <div className="space-y-6">
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg">{t('building.detail.quickActions')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="space-y-3">
-                  <Button 
-                    onClick={handleEdit} 
+                  <Button
+                    onClick={handleEdit}
                     className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <Edit className="h-4 w-4" />
-                    Edit Building
+                    {t('building.detail.editButton')}
                   </Button>
-                  <Button 
-                    onClick={handleBack} 
-                    variant="outline" 
+                  <Button
+                    onClick={handleBack}
+                    variant="outline"
                     className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Buildings
+                    {t('building.detail.backButton')}
                   </Button>
                 </div>
               </CardContent>

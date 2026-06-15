@@ -40,14 +40,14 @@
   "placeholders": {
     "selectType": "Select type",
     "assetModel": "Asset model",
-    "selectCategory": "Select Category",
-    "selectSubcategory": "Select Subcategory",
+    "selectCategory": "Select asset category",
+    "selectSubcategory": "Select asset subcategory",
     "partNumber": "Part number",
-    "assetTag": "Asset tag",
-    "serialNumber": "Serial number",
+    "assetTag": "Enter asset tag",
+    "serialNumber": "Enter serial number",
     "quantity": "Quantity",
     "unitPrice": "Unit price",
-    "amount": "Amount",
+    "amount": "Enter amount",
     "reorderLevel": "Reorder level",
     "minStockLevel": "Minimum stock level",
     "maxStockLevel": "Maximum stock level",
@@ -55,7 +55,7 @@
     "flags": "Flags",
     "selectStatus": "Select status",
     "ownerID": "Owner ID",
-    "searchAssets": "Search assets..."
+    "searchAssets": "Search by asset name..."
   },
   "messages": {
     "loading": "Loading assets...",
@@ -78,5 +78,1503 @@
     "viewDetails": "View Details",
     "tryAgain": "Try Again",
     "backToList": "Back to List"
+  },
+  "noItems": "No assets found",
+  "filter": {
+    "condition": "Condition",
+    "assetType": "Asset Type",
+    "category": "Asset Category",
+    "subcategory": "Asset Subcategory",
+    "conditionOptions": {
+      "used": "Used",
+      "brandNew": "Brand New"
+    }
+  },
+  "columns": {
+    "assetName": "Asset Name",
+    "facility": "Facility",
+    "assetType": "Asset Type",
+    "condition": "Condition",
+    "purchasedAmount": "Purchased Amount",
+    "purchaseDate": "Purchase Date",
+    "actions": "Actions"
+  },
+  "form": {
+    "sections": {
+      "location": "Location Information",
+      "category": "Category Information",
+      "basic": "Basic Information",
+      "procurement": "Procurement Information"
+    },
+    "fields": {
+      "assetName": "Asset Name *",
+      "assetType": "Asset Type *",
+      "condition": "Condition *",
+      "assetTag": "Asset Tag *",
+      "serialNumber": "Serial Number",
+      "registerBy": "Register By *",
+      "facility": "Facility *",
+      "zone": "Zone *",
+      "building": "Building *",
+      "subsystem": "Subsystem *",
+      "assetCategory": "Asset Category *",
+      "assetSubcategory": "Asset Subcategory *",
+      "purchaseDate": "Purchase Date *",
+      "purchasedAmount": "Purchased Amount *",
+      "lifespan": "Lifespan",
+      "oemWarranty": "OEM Warranty"
+    },
+    "placeholders": {
+      "assetName": "Enter asset name",
+      "selectFacility": "Select facility",
+      "selectFacilityFirst": "Select a facility first",
+      "selectZone": "Select zone",
+      "selectZoneFirst": "Select a facility first",
+      "selectBuilding": "Select building",
+      "selectBuildingFirst": "Select a zone first",
+      "selectSubsystem": "Select subsystem",
+      "selectSubsystemFirst": "Select a building first",
+      "selectCondition": "Select condition",
+      "selectRegistrar": "Select registrar",
+      "enterLifespan": "Enter lifespan",
+      "enterOemWarranty": "Enter OEM warranty details",
+      "selectAssetCategoryFirst": "Select an asset category first"
+    },
+    "warnings": {
+      "noZones": "No zones available for the selected facility.",
+      "noBuildings": "No buildings available for the selected zone.",
+      "noSubsystems": "No subsystems available for the selected building.",
+      "noSubcategories": "No asset subcategories available for the selected category."
+    },
+    "validation": {
+      "assetNameRequired": "Asset name is required",
+      "purchaseDateRequired": "Purchase date is required",
+      "purchasedAmountRequired": "Purchased amount is required",
+      "assetTagRequired": "Asset tag is required",
+      "ownerRequired": "Owner is required",
+      "facilityRequired": "Facility is required",
+      "zoneRequired": "Zone is required",
+      "buildingRequired": "Building is required",
+      "subsystemRequired": "Subsystem is required",
+      "categoryRequired": "Category is required",
+      "subcategoryRequired": "Subcategory is required"
+    },
+    "cancel": "Cancel",
+    "createAsset": "Create Asset",
+    "updateAsset": "Update Asset",
+    "error": "Error loading asset details",
+    "errorFallback": "An unknown error occurred",
+    "backToAssets": "Back to Assets"
+  },
+  "detail": {
+    "backToAssets": "Back to Assets",
+    "tabs": {
+      "details": "Asset Details",
+      "location": "Location",
+      "category": "Category"
+    },
+    "basicInfo": "Basic Information",
+    "assetName": "Asset Name",
+    "assetType": "Asset Type",
+    "condition": "Condition",
+    "assetTag": "Asset Tag",
+    "serialNumber": "Serial Number",
+    "notProvided": "Not provided",
+    "ownerLabel": "Owner",
+    "ownerId": "Owner ID: {{id}}",
+    "purchaseDate": "Purchase Date",
+    "purchasedAmount": "Purchased Amount",
+    "financial": "Financial Summary",
+    "purchaseValue": "Purchase Value",
+    "purchasedOn": "Purchased on {{date}}",
+    "lifespan": "Lifespan",
+    "oemWarranty": "OEM Warranty",
+    "notSpecified": "Not specified",
+    "locationTitle": "Location Hierarchy",
+    "locationDescription": "Asset location within the facility structure",
+    "facilityLabel": "Facility",
+    "zoneLabel": "Zone",
+    "buildingLabel": "Building",
+    "subsystemLabel": "Subsystem",
+    "locationPath": "Location Path",
+    "idLabel": "ID: {{id}}",
+    "locationPathValue": "Facility {{facility}} → Zone {{zone}} → Building {{building}} → Subsystem {{subsystem}}",
+    "categoryTitle": "Asset Category Information",
+    "categoryLabel": "Category",
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
+    "categoryNotAvailable": "Category information not available",
+    "categoryIdLabel": "Category ID: {{id}}",
+    "subcategoryTitle": "Asset Subcategory Information",
+    "subcategoryLabel": "Subcategory",
+    "parentCategoryLabel": "Parent Category",
+    "subcategoryNotAvailable": "Subcategory information not available",
+    "subcategoryIdLabel": "Subcategory ID: {{id}}",
+    "relatedSubcategoriesTitle": "Related Asset Subcategories",
+    "relatedSubcategoriesDesc": "Other subcategories under the \"{{category}}\" category",
+    "currentBadge": "Current",
+    "error": "Error loading asset details",
+    "errorFallback": "An unknown error occurred"
+  },
+  "assetCategory": {
+    "management": "Asset Category Management",
+    "addButton": "Add Asset Category",
+    "searchPlaceholder": "Search by name or code...",
+    "columns": {
+      "type": "Type",
+      "code": "Code",
+      "name": "Name",
+      "salvageValue": "Salvage Value %",
+      "usefulLife": "Useful Life (Years)",
+      "actions": "Actions"
+    },
+    "noItems": "No asset categories found.",
+    "loading": "Loading asset categories...",
+    "error": "Error loading asset categories",
+    "tryAgain": "Try Again",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the asset category.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create Asset Category",
+      "editTitle": "Edit Asset Category",
+      "createSubtitle": "Fill in the details to create a new asset category",
+      "editSubtitle": "Update asset category information",
+      "fields": {
+        "type": "Type *",
+        "code": "Code *",
+        "name": "Name *",
+        "salvageValuePercent": "Salvage Value Percent *",
+        "usefulLifeYear": "Useful Life Year *",
+        "description": "Description *"
+      },
+      "placeholders": {
+        "type": "Enter asset category type",
+        "code": "Enter asset category code",
+        "name": "Enter asset category name",
+        "salvageValuePercent": "Enter salvage value percentage",
+        "usefulLifeYear": "Enter useful life in years",
+        "description": "Enter asset category description"
+      },
+      "loading": "Loading asset category details...",
+      "error": "Error loading asset category details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Asset Categories",
+      "cancel": "Cancel",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "update": "Update Asset Category",
+      "create": "Create Asset Category"
+    },
+    "detail": {
+      "notFound": "Asset category not found",
+      "loading": "Loading asset category details...",
+      "error": "Error loading asset category details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Asset Categories",
+      "editButton": "Edit Asset Category",
+      "cards": {
+        "basicInfo": "Basic Information",
+        "financialLifecycle": "Financial & Lifecycle",
+        "description": "Description"
+      },
+      "fields": {
+        "type": "Type",
+        "code": "Code",
+        "name": "Name",
+        "salvageValuePercent": "Salvage Value Percentage",
+        "usefulLife": "Useful Life"
+      },
+      "summaryStats": {
+        "yearsUsefulLife": "Years Useful Life",
+        "salvageValue": "Salvage Value",
+        "categoryType": "Category Type"
+      }
+    }
+  },
+  "assetSubcategory": {
+    "management": "Asset Subcategories",
+    "addButton": "Add Asset Subcategory",
+    "listTitle": "Asset Subcategories List",
+    "searchPlaceholder": "Search by name or code...",
+    "filterPlaceholder": "Filter by status",
+    "statusOptions": {
+      "all": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "assetCategory": "Asset Category",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "badge": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "noItemsFiltered": "No asset subcategories found matching your criteria.",
+    "noItems": "No asset subcategories found.",
+    "loading": "Loading...",
+    "error": "Error loading asset subcategories",
+    "retry": "Retry",
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} results",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} of {{pages}}"
+    },
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the asset subcategory \"{{name}}\".",
+      "confirm": "Delete"
+    },
+    "form": {
+      "createTitle": "Create Asset Subcategory",
+      "editTitle": "Edit Asset Subcategory",
+      "loading": "Loading...",
+      "backToList": "Back to Asset Subcategories",
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "type": "Type",
+        "assetCategory": "Asset Category",
+        "description": "Description",
+        "activeStatus": "Active Status",
+        "activeStatusDesc": "Enable or disable this asset subcategory"
+      },
+      "placeholders": {
+        "code": "Enter code",
+        "name": "Enter name",
+        "type": "Enter type",
+        "selectAssetCategory": "Select asset category",
+        "description": "Enter description"
+      },
+      "cancel": "Cancel",
+      "update": "Update Asset Subcategory",
+      "create": "Create Asset Subcategory",
+      "updating": "Updating...",
+      "creating": "Creating..."
+    },
+    "detail": {
+      "loading": "Loading...",
+      "error": "Error loading asset subcategory details",
+      "backToList": "Back to Asset Subcategories",
+      "backToListShort": "Back to List",
+      "editButton": "Edit",
+      "subtitle": "Asset Subcategory Details",
+      "badge": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "cards": {
+        "basicInfo": "Basic Information",
+        "assetCategory": "Asset Category",
+        "description": "Description",
+        "summary": "Summary"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "type": "Type",
+        "status": "Status",
+        "categoryName": "Category Name",
+        "categoryCode": "Category Code",
+        "categoryType": "Category Type",
+        "salvageValuePercent": "Salvage Value %",
+        "usefulLife": "Useful Life",
+        "subcategoryCode": "Subcategory Code",
+        "assetCategory": "Asset Category"
+      },
+      "noDescription": "No description provided.",
+      "noCategoryInfo": "No asset category information available",
+      "years": "years",
+      "na": "N/A"
+    }
+  },
+  "inventoryType": {
+    "management": "Inventory Types",
+    "addButton": "Add Inventory Type",
+    "listTitle": "Inventory Types List",
+    "searchPlaceholder": "Search by code or type...",
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "unitOfMeasurement": "Unit of Measurement",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "No inventory types found matching your criteria.",
+    "noItems": "No inventory types found.",
+    "error": "Error loading inventory types",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the inventory type \"{{name}}\".",
+      "confirm": "Delete"
+    },
+    "form": {
+      "editTitle": "Edit Inventory Type",
+      "createTitle": "Create Inventory Type",
+      "loading": "Loading...",
+      "backToList": "Back to Inventory Types",
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "unitOfMeasurement": "Unit of Measurement"
+      },
+      "placeholders": {
+        "code": "Enter code",
+        "type": "Enter type",
+        "unitOfMeasurement": "Enter unit of measurement"
+      },
+      "cancel": "Cancel",
+      "update": "Update Inventory Type",
+      "create": "Create Inventory Type"
+    },
+    "detail": {
+      "loading": "Loading...",
+      "error": "Error loading inventory type details",
+      "backToList": "Back to Inventory Types",
+      "backToListShort": "Back to List",
+      "editButton": "Edit",
+      "subtitle": "Inventory Type Details",
+      "cards": {
+        "basicInfo": "Basic Information",
+        "summary": "Summary",
+        "details": "Details"
+      },
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "unitOfMeasurement": "Unit of Measurement",
+        "id": "ID",
+        "measurementUnit": "Measurement Unit"
+      }
+    }
+  },
+  "inventoryRef": {
+    "management": "Inventory References",
+    "managementDesc": "Manage inventory reference entries",
+    "listTitle": "Inventory Reference List",
+    "searchPlaceholder": "Search inventory references...",
+    "addButton": "Add New",
+    "loading": "Loading inventory references...",
+    "error": "Error loading inventory references",
+    "tryAgain": "Try Again",
+    "columns": {
+      "id": "ID",
+      "inventoryType": "Inventory Type",
+      "category": "Category",
+      "subcategory": "Subcategory",
+      "model": "Model",
+      "manufacturer": "Manufacturer",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "No inventory references match your search.",
+    "noItems": "No inventory references found.",
+    "rowActions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the inventory reference.",
+      "confirm": "Delete"
+    },
+    "form": {
+      "createTitle": "Create New Inventory Reference",
+      "editTitle": "Edit Inventory Reference",
+      "createSubtitle": "Create a new inventory reference entry",
+      "editSubtitle": "Update the inventory reference information",
+      "loading": "Loading...",
+      "backToList": "Back to Inventory References",
+      "cardTitle": "Inventory Reference Details",
+      "cardDesc": "Enter the details for the inventory reference",
+      "fields": {
+        "inventoryType": "Inventory Type *",
+        "category": "Category *",
+        "subcategory": "Subcategory *",
+        "modelReference": "Model Reference *",
+        "manufacturer": "Manufacturer *"
+      },
+      "placeholders": {
+        "selectInventoryType": "Select inventory type",
+        "selectCategory": "Select category",
+        "selectSubcategory": "Select subcategory",
+        "selectModelReference": "Select model reference",
+        "selectManufacturer": "Select manufacturer"
+      },
+      "saving": "Saving...",
+      "create": "Create Inventory Reference",
+      "update": "Update Inventory Reference",
+      "cancel": "Cancel"
+    },
+    "detail": {
+      "loading": "Loading inventory reference...",
+      "error": "Error loading inventory reference",
+      "tryAgain": "Try Again",
+      "backToList": "Back to Inventory References",
+      "heading": "Inventory Reference #{{id}}",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "delete": {
+        "description": "This action cannot be undone. This will permanently delete the inventory reference.",
+        "confirm": "Delete"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "details": "Details"
+      },
+      "overviewCards": {
+        "inventoryType": "Inventory Type",
+        "category": "Category",
+        "subcategory": "Subcategory"
+      },
+      "referenceInfo": {
+        "title": "Reference Information",
+        "desc": "Basic inventory reference details",
+        "modelReference": "Model Reference",
+        "manufacturer": "Manufacturer"
+      },
+      "detailedInfo": {
+        "title": "Detailed Information",
+        "desc": "Complete inventory reference details",
+        "refDetails": "Reference Details",
+        "id": "ID",
+        "inventoryType": "Inventory Type",
+        "modelReference": "Model Reference",
+        "manufacturer": "Manufacturer",
+        "categoryInfo": "Category Information",
+        "category": "Category",
+        "subcategory": "Subcategory"
+      }
+    }
+  },
+  "inventoryForm": {
+    "loading": "Loading inventory details...",
+    "error": "Error loading inventory details",
+    "errorFallback": "An unknown error occurred",
+    "backToList": "Back to Inventories",
+    "createTitle": "Create New Inventory",
+    "editTitle": "Edit Inventory",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "categoryVendor": "Category & Vendor Information",
+      "financialQuantity": "Financial & Quantity Information",
+      "dateInfo": "Date Information",
+      "financial": "Financial & Quantity Information",
+      "dates": "Date Information"
+    },
+    "fields": {
+      "type": "Type",
+      "model": "Model",
+      "partNumber": "Part Number",
+      "tag": "Tag",
+      "serialNumber": "Serial Number",
+      "purchaseNumber": "Purchase Number",
+      "status": "Status",
+      "assetCategory": "Asset Category",
+      "assetSubcategory": "Asset Subcategory",
+      "vendor": "Vendor",
+      "facility": "Facility",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "totalValue": "Total Value",
+      "logValue": "Log Value",
+      "reorderLevel": "Reorder Level",
+      "minimumStock": "Minimum Stock",
+      "maximumStock": "Maximum Stock",
+      "purchaseDate": "Purchase Date",
+      "manufactureDate": "Manufacture Date",
+      "expiryDate": "Expiry Date",
+      "warrantyEndDate": "Warranty End Date",
+      "flags": "Flags",
+      "partNo": "Part Number"
+    },
+    "placeholders": {
+      "selectInventoryType": "Select inventory type",
+      "selectModel": "Select model",
+      "selectStatus": "Select status",
+      "selectAssetCategory": "Select asset category",
+      "selectAssetCategoryFirst": "Select an asset category first",
+      "selectAssetSubcategory": "Select asset subcategory",
+      "noSubcategoriesAvailable": "No asset subcategories available for the selected category.",
+      "selectVendor": "Select vendor",
+      "selectFacility": "Select facility",
+      "selectType": "Select inventory type",
+      "partNo": "Enter part number",
+      "tag": "Enter tag",
+      "serialNumber": "Enter serial number",
+      "purchaseNumber": "Enter purchase number",
+      "selectCategory": "Select asset category",
+      "selectCategoryFirst": "Select an asset category first",
+      "selectSubcategory": "Select asset subcategory",
+      "quantity": "Enter quantity",
+      "unitPrice": "Enter unit price",
+      "autoCalculated": "Auto-calculated",
+      "logValue": "Enter log value",
+      "reorderLevel": "Enter reorder level",
+      "minimumStock": "Enter minimum stock",
+      "maximumStock": "Enter maximum stock",
+      "flags": "Enter flags or notes"
+    },
+    "statusOptions": {
+      "available": "Available",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock",
+      "discontinued": "Discontinued"
+    },
+    "cancel": "Cancel",
+    "update": "Update Inventory",
+    "create": "Create Inventory",
+    "updating": "Updating...",
+    "creating": "Creating...",
+    "management": "Inventory Register",
+    "add": "Add Inventory",
+    "searchPlaceholder": "Search inventories...",
+    "columns": {
+      "type": "Type",
+      "category": "Category",
+      "subcategory": "Subcategory",
+      "vendor": "Vendor",
+      "model": "Model",
+      "unitPrice": "Unit Price",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "noItems": "No inventories found.",
+    "delete": {
+      "message": "This action cannot be undone. This will permanently delete the inventory."
+    },
+    "filter": {
+      "status": "Status",
+      "category": "Asset Category",
+      "vendor": "Vendor"
+    },
+    "filterLabels": {
+      "available": "Available",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock",
+      "discontinued": "Discontinued"
+    },
+    "subcategoryFallback": "Subcategory {{id}}",
+    "validation": {
+      "typeRequired": "Type is required",
+      "categoryRequired": "Asset category is required",
+      "subcategoryRequired": "Asset subcategory is required",
+      "modelRequired": "Model is required",
+      "partNoRequired": "Part number is required",
+      "tagRequired": "Tag is required",
+      "serialNumberRequired": "Serial number is required",
+      "quantityMin": "Quantity must be at least 1",
+      "unitPriceRequired": "Unit price is required",
+      "vendorRequired": "Vendor is required",
+      "purchaseNumberRequired": "Purchase number is required",
+      "purchaseDateRequired": "Purchase date is required",
+      "facilityRequired": "Facility is required",
+      "reorderLevelMin": "Reorder level must be 0 or greater",
+      "minimumStockMin": "Minimum stock must be 0 or greater",
+      "maxStockMin": "Maximum stock must be 0 or greater"
+    },
+    "noSubcategoriesWarning": "No asset subcategories available for the selected category.",
+    "errorLoading": "Error loading inventory details",
+    "unknownError": "An unknown error occurred"
+  },
+  "inventoryDetail": {
+    "loading": "Loading inventory details...",
+    "error": "Error loading inventory details",
+    "errorFallback": "An unknown error occurred",
+    "notFound": "Inventory not found",
+    "backToList": "Back to Inventories",
+    "editButton": "Edit Inventory",
+    "tabs": {
+      "details": "Item Details",
+      "inventory": "Stock & Levels",
+      "financial": "Financial",
+      "category": "Category",
+      "vendor": "Vendor",
+      "facility": "Facility"
+    },
+    "cards": {
+      "itemInfo": "Item Information",
+      "importantDates": "Important Dates",
+      "currentStockLevel": "Current Stock Level",
+      "stockThresholds": "Stock Thresholds",
+      "financialInfo": "Financial Information",
+      "assetCategory": "Asset Category",
+      "assetSubcategory": "Asset Subcategory",
+      "vendorInfo": "Vendor Information",
+      "facilityInfo": "Facility Information"
+    },
+    "fields": {
+      "type": "Type",
+      "model": "Model",
+      "partNumber": "Part Number",
+      "tag": "Tag",
+      "serialNumber": "Serial Number",
+      "purchaseNumber": "Purchase Number",
+      "logValue": "Log Value",
+      "status": "Status",
+      "flags": "Flags",
+      "notSpecified": "Not specified",
+      "expired": "Expired",
+      "purchaseDate": "Purchase Date",
+      "manufactureDate": "Manufacture Date",
+      "expiryDate": "Expiry Date",
+      "warrantyEndDate": "Warranty End Date",
+      "created": "Created",
+      "lastUpdated": "Last Updated"
+    },
+    "stock": {
+      "currentQuantity": "Current Quantity",
+      "minimumStock": "Minimum Stock",
+      "reorderLevel": "Reorder Level",
+      "maximumStock": "Maximum Stock",
+      "criticalMessage": "Critical stock level - immediate restocking required",
+      "level": "Level",
+      "levels": {
+        "critical": "Critical",
+        "low": "Low",
+        "overstock": "Overstock",
+        "normal": "Normal"
+      },
+      "levelLabel": "{{level}} Level",
+      "managementTitle": "Stock Management:",
+      "managementText": "Reorder when quantity reaches {{reorder}} units. Maintain between {{min}} and {{max}} units."
+    },
+    "financial": {
+      "unitPrice": "Unit Price",
+      "currentQuantity": "Current Quantity",
+      "totalValue": "Total Value",
+      "valueCalculation": "Value Calculation",
+      "valueFormula": "{{unitPrice}} × {{quantity}} units = {{totalValue}}"
+    },
+    "category": {
+      "type": "Type",
+      "usefulLife": "Useful Life",
+      "years": "years",
+      "notAvailable": "Category information not available",
+      "subcategory": "Subcategory",
+      "subcategoryStatus": "Status",
+      "parentCategory": "Parent Category",
+      "subcategoryNotAvailable": "Subcategory information not available",
+      "category": "Category",
+      "categoryId": "Category ID: {{id}}",
+      "subcategoryId": "Subcategory ID: {{id}}",
+      "activeStatus": "Active",
+      "inactiveStatus": "Inactive"
+    },
+    "vendor": {
+      "vendor": "Vendor",
+      "status": "Status",
+      "bankInfo": "Bank Information",
+      "accountName": "Account Name",
+      "bankName": "Bank Name",
+      "accountNumber": "Account Number",
+      "currency": "Currency",
+      "notAvailable": "Vendor information not available",
+      "vendorId": "Vendor ID: {{id}}"
+    },
+    "facility": {
+      "facility": "Facility",
+      "location": "Location",
+      "clusterInfo": "Cluster Information",
+      "manager": "Manager",
+      "locationNotSpecified": "Location not specified",
+      "notAvailable": "Facility information not available",
+      "regionId": "Region ID: {{id}}",
+      "managerId": "Manager ID: {{id}}",
+      "facilityId": "Facility ID: {{id}}"
+    },
+    "subtitle": "S/N: {{serialNumber}} • Tag: {{tag}}"
+  },
+  "manufacturer": {
+    "management": "Manufacturers",
+    "addButton": "Add Manufacturer",
+    "searchTitle": "Search Manufacturers",
+    "searchPlaceholder": "Search manufacturers by name...",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "loading": "Loading manufacturers...",
+    "noItems": "No manufacturers found",
+    "badge": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "delete": {
+      "description": "This will permanently delete \"{{name}}\".",
+      "confirm": "Delete"
+    },
+    "form": {
+      "createTitle": "Create New Manufacturer",
+      "editTitle": "Edit Manufacturer",
+      "createDesc": "Enter the manufacturer details below.",
+      "editDesc": "Update the manufacturer information below.",
+      "fields": {
+        "name": "Name",
+        "active": "Active"
+      },
+      "placeholders": {
+        "name": "Enter manufacturer name"
+      },
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "create": "Create",
+      "update": "Update"
+    },
+    "detail": {
+      "loading": "Loading manufacturer details...",
+      "notFound": "Manufacturer Not Found",
+      "notFoundDesc": "The manufacturer you're looking for doesn't exist or has been deleted.",
+      "backToList": "Back to Manufacturers",
+      "backButton": "Back",
+      "subtitle": "Manufacturer Details",
+      "editButton": "Edit",
+      "activeDesc": "This manufacturer is currently active and available for use.",
+      "inactiveDesc": "This manufacturer is inactive and not available for use.",
+      "cards": {
+        "basicInfo": "Basic Information",
+        "statusInfo": "Status Information",
+        "actions": "Actions"
+      },
+      "fields": {
+        "id": "ID",
+        "name": "Name",
+        "status": "Status"
+      },
+      "actions": {
+        "edit": "Edit Manufacturer",
+        "backToList": "Back to List"
+      }
+    }
+  },
+  "model": {
+    "management": "Models",
+    "addButton": "Add Model",
+    "searchTitle": "Search & Filter Models",
+    "searchPlaceholder": "Search by code or name...",
+    "filterBySubcategory": "Filter by subcategory",
+    "filterByManufacturer": "Filter by manufacturer",
+    "allSubcategories": "All Subcategories",
+    "allManufacturers": "All Manufacturers",
+    "clearFilters": "Clear Filters",
+    "columns": {
+      "id": "ID",
+      "code": "Code",
+      "name": "Name",
+      "subcategory": "Subcategory",
+      "manufacturer": "Manufacturer",
+      "actions": "Actions"
+    },
+    "loading": "Loading models...",
+    "noItems": "No models found",
+    "delete": {
+      "description": "This will permanently delete model \"{{name}}\".",
+      "confirm": "Delete"
+    },
+    "form": {
+      "createTitle": "Create New Model",
+      "editTitle": "Edit Model",
+      "createDesc": "Enter the model details below.",
+      "editDesc": "Update the model information below.",
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "subcategory": "Asset Subcategory",
+        "manufacturer": "Manufacturer"
+      },
+      "placeholders": {
+        "code": "Enter model code",
+        "name": "Enter model name",
+        "selectSubcategory": "Select subcategory",
+        "selectManufacturer": "Select manufacturer"
+      },
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "create": "Create",
+      "update": "Update"
+    },
+    "detail": {
+      "loading": "Loading model details...",
+      "notFound": "Model Not Found",
+      "notFoundDesc": "The model you're looking for doesn't exist or has been deleted.",
+      "backToList": "Back to Models",
+      "backButton": "Back",
+      "subtitle": "Model Details",
+      "editButton": "Edit",
+      "cards": {
+        "basicInfo": "Basic Information",
+        "relatedInfo": "Related Information",
+        "actionsCard": "Actions"
+      },
+      "fields": {
+        "id": "ID",
+        "code": "Code",
+        "name": "Name",
+        "subcategory": "Subcategory",
+        "manufacturer": "Manufacturer",
+        "assetSubcategory": "Asset Subcategory"
+      },
+      "actions": {
+        "edit": "Edit Model",
+        "backToList": "Back to List"
+      }
+    }
+  },
+  "store": {
+    "management": "Store Management",
+    "addButton": "Add Store",
+    "searchPlaceholder": "Search by name or code...",
+    "facilityFilter": "All Facilities",
+    "warehouseFilter": "All Warehouses",
+    "statusOptions": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "capacity": "Capacity",
+      "facility": "Facility",
+      "warehouse": "Warehouse",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "loading": "Loading stores...",
+    "error": "Error loading stores",
+    "noItems": "No stores found.",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the store.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Store",
+      "editTitle": "Edit Store",
+      "loading": "Loading store details...",
+      "error": "Error loading store details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Stores",
+      "cancel": "Cancel",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "storeDetails": "Store Details"
+      },
+      "fields": {
+        "facility": "Facility",
+        "warehouse": "Warehouse",
+        "name": "Name",
+        "code": "Code",
+        "capacity": "Capacity",
+        "location": "Location",
+        "status": "Status"
+      },
+      "placeholders": {
+        "selectFacility": "Select facility",
+        "loadingFacilities": "Loading facilities...",
+        "noFacilities": "No facilities available",
+        "selectWarehouse": "Select warehouse",
+        "loadingWarehouses": "Loading warehouses...",
+        "noWarehouses": "No warehouses available",
+        "storeName": "Store name",
+        "storeCode": "Store code (e.g. JXF-20)",
+        "capacity": "Enter capacity",
+        "location": "Store location",
+        "selectStatus": "Select status"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "validation": {
+        "facilityRequired": "Facility is required",
+        "warehouseRequired": "Warehouse is required",
+        "nameRequired": "Name is required",
+        "codeRequired": "Code is required",
+        "capacityPositive": "Capacity must be a positive number",
+        "locationRequired": "Location is required",
+        "statusRequired": "Status is required"
+      }
+    },
+    "detail": {
+      "title": "Store Details",
+      "editButton": "Edit Store",
+      "backToList": "Back to Stores",
+      "loading": "Loading store details...",
+      "error": "Error loading store details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Store not found",
+      "tabs": {
+        "overview": "Overview",
+        "facility": "Facility",
+        "warehouse": "Warehouse",
+        "history": "History"
+      },
+      "overview": {
+        "storeId": "Store ID",
+        "code": "Code",
+        "location": "Location",
+        "capacity": "Capacity",
+        "status": "Status",
+        "notSpecified": "Not specified"
+      },
+      "facilityTab": {
+        "title": "Facility Information",
+        "facilityName": "Facility Name",
+        "facilityCode": "Facility Code",
+        "addressGps": "Address/GPS",
+        "type": "Type",
+        "cluster": "Cluster",
+        "noDetails": "No facility details available"
+      },
+      "warehouseTab": {
+        "title": "Warehouse Information",
+        "warehouseName": "Warehouse Name",
+        "warehouseCode": "Warehouse Code",
+        "warehouseCapacity": "Warehouse Capacity",
+        "address": "Address",
+        "description": "Description",
+        "noDetails": "No warehouse details available"
+      },
+      "history": {
+        "title": "Timeline",
+        "created": "Created",
+        "lastUpdated": "Last Updated"
+      },
+      "storeId": "Store ID: {{id}}"
+    },
+    "facilityLabel": "Facility",
+    "warehouseLabel": "Warehouse",
+    "statusLabel": "Status",
+    "filterAll": "All"
+  },
+  "transfer": {
+    "management": "Transfer Management",
+    "addButton": "Add Transfer",
+    "searchPlaceholder": "Search transfers...",
+    "filterType": "Type",
+    "filterOptions": {
+      "transfer": "Transfer",
+      "return": "Return"
+    },
+    "loading": "Loading transfers...",
+    "error": "Error loading transfers",
+    "tryAgain": "Try Again",
+    "columns": {
+      "type": "Type",
+      "requestFrom": "Request From",
+      "requestedBy": "Requested By",
+      "transferTo": "Transfer To",
+      "requiredDate": "Required Date",
+      "actions": "Actions"
+    },
+    "noItems": "No transfers found.",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the transfer.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "title": "Are you sure?",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create New Transfer",
+      "editTitle": "Edit Transfer",
+      "loading": "Loading transfer details...",
+      "error": "Error loading transfer details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Transfers",
+      "cancel": "Cancel",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "transferDetails": "Transfer Details"
+      },
+      "fields": {
+        "type": "Transfer Type",
+        "requestFrom": "Request From (Store)",
+        "transferTo": "Transfer To (Store)",
+        "requestedBy": "Requested By",
+        "requiredDate": "Required Date",
+        "category": "Asset Category",
+        "subcategory": "Asset Subcategory",
+        "items": "Items to Transfer",
+        "confirmationFrom": "Confirmation Required From"
+      },
+      "placeholders": {
+        "selectType": "Select type",
+        "selectSourceStore": "Select source store",
+        "selectDestinationStore": "Select destination store",
+        "pickDate": "Pick a date",
+        "selectCategory": "Select category",
+        "selectCategoryFirst": "Please select a category first",
+        "selectSubcategory": "Select subcategory",
+        "currentUser": "Current User"
+      },
+      "typeOptions": {
+        "transfer": "Transfer",
+        "return": "Return"
+      },
+      "validation": {
+        "requestFromRequired": "Please select a store",
+        "requiredDateRequired": "Please select a required date",
+        "requestedByRequired": "Requested by is required",
+        "transferToRequired": "Please select a transfer destination",
+        "categoryRequired": "Please select a category",
+        "subcategoryRequired": "Please select a subcategory",
+        "itemsRequired": "Please select at least one item",
+        "confirmationRequired": "Please select at least one user for confirmation"
+      }
+    },
+    "detail": {
+      "loading": "Loading transfer details...",
+      "error": "Error loading transfer details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Transfer not found",
+      "backToList": "Back to Transfers",
+      "editButton": "Edit Transfer",
+      "tabs": {
+        "overview": "Overview",
+        "items": "Items",
+        "approvals": "Approvals",
+        "category": "Category"
+      },
+      "flow": {
+        "title": "Transfer Flow",
+        "from": "From",
+        "to": "To"
+      },
+      "requestInfo": {
+        "title": "Request Information",
+        "requestedBy": "Requested By",
+        "requiredDate": "Required Date"
+      },
+      "timestamps": {
+        "title": "Timestamps",
+        "createdAt": "Created At",
+        "lastUpdated": "Last Updated"
+      },
+      "itemsTab": {
+        "title": "Items to Transfer",
+        "noItems": "No items selected for this transfer"
+      },
+      "approvalsTab": {
+        "title": "Confirmation Required From",
+        "noConfirmations": "No confirmations required for this transfer"
+      },
+      "category": {
+        "categoryTitle": "Asset Category",
+        "subcategoryTitle": "Asset Subcategory",
+        "fields": {
+          "category": "Category",
+          "type": "Type",
+          "usefulLife": "Useful Life",
+          "years": "years",
+          "na": "N/A",
+          "subcategory": "Subcategory",
+          "subcategoryStatus": "Subcategory Status",
+          "subcategoryType": "Subcategory Type"
+        }
+      }
+    },
+    "notSet": "N/A",
+    "typeOptions": {
+      "transfer": "Transfer",
+      "return": "Return"
+    }
+  },
+  "warehouse": {
+    "management": "Warehouse Management",
+    "addButton": "Add Warehouse",
+    "searchPlaceholder": "Search by code or name...",
+    "filterFacility": "Facility",
+    "filterStatus": "Status",
+    "statusOptions": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "loading": "Loading warehouses...",
+    "error": "Error loading warehouses",
+    "tryAgain": "Try Again",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "capacity": "Capacity",
+      "facility": "Facility",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "badge": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "noItems": "No warehouses found.",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the warehouse.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Warehouse",
+      "editTitle": "Edit Warehouse",
+      "loading": "Loading warehouse details...",
+      "error": "Error loading warehouse details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Warehouses",
+      "cancel": "Cancel",
+      "update": "Update Warehouse",
+      "create": "Create Warehouse",
+      "sections": {
+        "warehouseInfo": "Warehouse Information"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "capacity": "Capacity",
+        "facility": "Facility",
+        "isActive": "Is Active",
+        "address": "Address",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Enter warehouse code",
+        "name": "Enter warehouse name",
+        "capacity": "Enter warehouse capacity",
+        "selectFacility": "Select facility",
+        "address": "Enter warehouse address",
+        "description": "Enter warehouse description"
+      },
+      "validation": {
+        "codeRequired": "Code is required",
+        "nameRequired": "Name is required",
+        "descriptionRequired": "Description is required",
+        "addressRequired": "Address is required",
+        "capacityRequired": "Capacity is required",
+        "facilityRequired": "Facility is required"
+      }
+    },
+    "detail": {
+      "loading": "Loading warehouse details...",
+      "error": "Error loading warehouse details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Warehouse not found",
+      "requestedNotFound": "The requested warehouse could not be found.",
+      "backToList": "Back to Warehouses",
+      "editButton": "Edit Warehouse",
+      "noDescription": "No description provided",
+      "cards": {
+        "warehouseInfo": "Warehouse Information",
+        "facilityInfo": "Facility Information",
+        "warehouseSummary": "Warehouse Summary"
+      },
+      "cardDescs": {
+        "warehouseInfo": "Core details and specifications for this warehouse",
+        "facilityInfo": "Associated facility details"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "capacity": "Capacity",
+        "address": "Address",
+        "status": "Status",
+        "warehouseId": "Warehouse ID",
+        "facilityName": "Facility Name",
+        "facilityCode": "Facility Code",
+        "type": "Type",
+        "location": "Location",
+        "cluster": "Cluster",
+        "manager": "Manager"
+      },
+      "badge": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "facilityNotAvailable": "Facility information not available",
+      "summary": {
+        "totalCapacity": "Total Capacity",
+        "capacityUnits": "units",
+        "status": "Status",
+        "statusActive": "Ready for use",
+        "statusInactive": "Not operational",
+        "facility": "Facility",
+        "facilityDesc": "Parent facility",
+        "warehouseId": "Warehouse ID",
+        "warehouseIdDesc": "System identifier",
+        "statusOperational": "Operational"
+      },
+      "codeAndId": "{{code}} • ID: {{id}}",
+      "regionId": "Region ID: {{region}}",
+      "managerId": "ID: {{id}}",
+      "locationNotSpecified": "Location not specified",
+      "facilityIdLabel": "Facility ID: {{id}}"
+    },
+    "add": "Add Warehouse",
+    "filter": {
+      "facility": "Facility",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "item": {
+    "management": "Item Management",
+    "addButton": "Add Item",
+    "searchPlaceholder": "Search items...",
+    "loading": "Loading items...",
+    "error": "Error loading items",
+    "tryAgain": "Try Again",
+    "columns": {
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "noItems": "No items found.",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the item.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "message": "This action cannot be undone. This will permanently delete the item."
+    },
+    "form": {
+      "createTitle": "Create New Item",
+      "editTitle": "Edit Item",
+      "loading": "Loading item details...",
+      "error": "Error loading item details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Items",
+      "cancel": "Cancel",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "itemDetails": "Item Details"
+      },
+      "fields": {
+        "name": "Name",
+        "description": "Description"
+      },
+      "placeholders": {
+        "name": "Item name",
+        "description": "Enter item description"
+      },
+      "validation": {
+        "nameRequired": "Name is required"
+      }
+    },
+    "detail": {
+      "title": "Item Details",
+      "editButton": "Edit Item",
+      "backToList": "Back to Items",
+      "loading": "Loading item details...",
+      "error": "Error loading item details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Item not found",
+      "cards": {
+        "itemInfo": "Item Information"
+      },
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "notProvided": "Not provided"
+      }
+    },
+    "add": "Add Item"
+  },
+  "itemRequest": {
+    "management": "Item Requests",
+    "managementDesc": "Manage item requests and track their status",
+    "addButton": "Add Item Request",
+    "searchPlaceholder": "Search by name, description, store, or requester...",
+    "loading": "Loading item requests...",
+    "error": "Error loading item requests",
+    "tryAgain": "Try Again",
+    "filters": {
+      "title": "Filters & Search",
+      "filterByType": "Filter by type",
+      "filterByStore": "Filter by store",
+      "allTypes": "All Types",
+      "allStores": "All Stores"
+    },
+    "typeOptions": {
+      "for_use": "For Use",
+      "for_store": "For Store"
+    },
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "requestFrom": "Request From",
+      "requestedBy": "Requested By",
+      "requiredDate": "Required Date",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "No item requests found matching your criteria.",
+    "noItems": "No item requests available.",
+    "delete": {
+      "description": "This action cannot be undone. This will permanently delete the item request and remove it from our servers.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "title": "Are you sure?",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create Item Request",
+      "editTitle": "Edit Item Request",
+      "createSubtitle": "Fill in the details to create a new item request",
+      "editSubtitle": "Update item request information",
+      "loading": "Loading item request details...",
+      "error": "Error loading item request details",
+      "errorFallback": "An unknown error occurred",
+      "backToList": "Back to Item Requests",
+      "cancel": "Cancel",
+      "update": "Update Request",
+      "create": "Create Request",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "sections": {
+        "basicInfo": "Basic Information",
+        "comments": "Additional Comments",
+        "items": "Requested Items"
+      },
+      "fields": {
+        "name": "Name",
+        "requestFrom": "Request From",
+        "requestedBy": "Requested By",
+        "requiredDate": "Required Date",
+        "department": "Department",
+        "type": "Type",
+        "facility": "Facility",
+        "building": "Building",
+        "approvedBy": "Approved By",
+        "description": "Description",
+        "comment": "Comment",
+        "item": "Item",
+        "quantity": "Quantity",
+        "category": "Category",
+        "subcategory": "Subcategory",
+        "model": "Model",
+        "itemDescription": "Item Description",
+        "itemLabel": "Item {{index}}"
+      },
+      "placeholders": {
+        "selectStore": "Select store",
+        "loadingStores": "Loading stores...",
+        "loadingDepartments": "Loading departments...",
+        "selectDepartment": "Select department",
+        "selectType": "Select type",
+        "selectFacility": "Select facility",
+        "loadingFacilities": "Loading facilities...",
+        "selectBuilding": "Select building",
+        "loadingBuildings": "Loading buildings...",
+        "selectApprover": "Select approver",
+        "loadingUsers": "Loading users...",
+        "selectItem": "Select item",
+        "loadingItems": "Loading items...",
+        "selectCategory": "Select category",
+        "loadingCategories": "Loading categories...",
+        "selectSubcategory": "Select subcategory",
+        "loadingSubcategories": "Loading subcategories...",
+        "selectModel": "Select model",
+        "loadingModels": "Loading models...",
+        "requestName": "Enter request name",
+        "requestDescription": "Enter request description",
+        "additionalComments": "Enter additional comments or special instructions",
+        "itemDescription": "Describe the specific item requirements"
+      },
+      "typeOptions": {
+        "for_use": "For Use",
+        "for_store": "For Store"
+      },
+      "addItemButton": "Add Item",
+      "validation": {
+        "nameRequired": "Name is required",
+        "requestFromRequired": "Request from is required",
+        "requestedByRequired": "Requested by is required",
+        "requiredDateRequired": "Required date is required",
+        "typeRequired": "Type is required",
+        "approvedByRequired": "Approved by is required",
+        "descriptionRequired": "Description is required",
+        "commentRequired": "Comment is required",
+        "itemsRequired": "At least one item is required",
+        "itemRequired": "Item is required",
+        "quantityMin": "Quantity must be at least 1",
+        "categoryRequired": "Category is required",
+        "subcategoryRequired": "Subcategory is required",
+        "modelRequired": "Model is required"
+      }
+    },
+    "detail": {
+      "loading": "Loading item request details...",
+      "error": "Error loading item request details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Item request not found",
+      "backToList": "Back to Item Requests",
+      "editButton": "Edit Request",
+      "tabs": {
+        "overview": "Overview",
+        "people": "People & Location",
+        "items": "Items",
+        "comments": "Details & Comments"
+      },
+      "overview": {
+        "basicInfo": "Basic Information",
+        "quickStats": "Quick Stats",
+        "requestSummary": "Request Summary",
+        "fields": {
+          "requestName": "Request Name",
+          "requestType": "Request Type",
+          "requiredDate": "Required Date",
+          "requestFrom": "Request From",
+          "requestId": "Request ID",
+          "totalItems": "Total Items",
+          "totalQuantity": "Total Quantity"
+        },
+        "store": "Store:",
+        "department": "Department:",
+        "requester": "Requester:",
+        "approver": "Approver:"
+      },
+      "people": {
+        "title": "People Involved",
+        "requestedBy": "Requested By",
+        "approvedBy": "Approved By",
+        "location": "Location Details",
+        "department": "Department",
+        "facility": "Facility",
+        "building": "Building"
+      },
+      "itemsTab": {
+        "itemLabel": "Item {{index}}",
+        "fields": {
+          "itemId": "Item ID",
+          "category": "Category",
+          "subcategory": "Subcategory",
+          "model": "Model",
+          "description": "Description"
+        },
+        "noItems": "No items specified for this request."
+      },
+      "comments": {
+        "descriptionTitle": "Description",
+        "commentsTitle": "Comments"
+      }
+    },
+    "storeIdFallback": "Store ID: {{id}}",
+    "userIdFallback": "User ID: {{id}}",
+    "noLocation": "No location"
+  },
+  "movement": {
+    "title": "Movement History",
+    "placeholder": "Movement history content will go here"
   }
 }

@@ -11,19 +11,21 @@ import { ArrowLeft, Loader2, Building } from 'lucide-react';
 import { Department } from '@/types/department';
 import { useDepartmentQuery, useCreateDepartment, useUpdateDepartment } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
-
-// Form schema definition matching Department interface
-const departmentSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-});
-
-type DepartmentFormValues = z.infer<typeof departmentSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const DepartmentForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Form schema — defined inside component so validation messages use t()
+  const departmentSchema = z.object({
+    name: z.string().min(1, t('department.form.validation.nameRequired')),
+  });
+
+  type DepartmentFormValues = z.infer<typeof departmentSchema>;
+
   // Department form setup
   const departmentForm = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
@@ -33,9 +35,9 @@ const DepartmentForm = () => {
   });
 
   // Fetch department data for edit mode using our custom hook
-  const { 
-    data: departmentData, 
-    isLoading: isLoadingDepartment, 
+  const {
+    data: departmentData,
+    isLoading: isLoadingDepartment,
     isError: isDepartmentError,
     error: departmentError
   } = useDepartmentQuery(isEditMode ? id : undefined);
@@ -70,8 +72,8 @@ const DepartmentForm = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem submitting the form",
+        title: t('department.form.toast.errorTitle'),
+        description: t('department.form.toast.submitError'),
         variant: "destructive",
       });
     }
@@ -87,7 +89,7 @@ const DepartmentForm = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading department details...</p>
+            <p className="text-sm text-muted-foreground">{t('department.form.loading')}</p>
           </div>
         </div>
       </div>
@@ -98,12 +100,12 @@ const DepartmentForm = () => {
     return (
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading department details</div>
+          <div className="text-red-500 text-xl">{t('department.form.error')}</div>
           <p className="text-sm text-muted-foreground mb-4">
-            {departmentError instanceof Error ? departmentError.message : 'An unknown error occurred'}
+            {departmentError instanceof Error ? departmentError.message : t('department.form.unknownError')}
           </p>
           <Button onClick={handleCancel} variant="outline">
-            Back to Departments
+            {t('department.form.backToList')}
           </Button>
         </div>
       </div>
@@ -114,16 +116,16 @@ const DepartmentForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
-            aria-label="Go back"
+            aria-label={t('common:actions.back')}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Department' : 'Create New Department'}
+            {isEditMode ? t('department.form.editTitle') : t('department.form.createPageTitle')}
           </h1>
         </div>
       </div>
@@ -134,9 +136,9 @@ const DepartmentForm = () => {
           <div className="rounded-md border overflow-hidden shadow-sm">
             <div className="bg-green-50 p-4 flex items-center gap-2 border-b border-green-100">
               <Building className="h-5 w-5 text-green-600" />
-              <h2 className="text-lg font-medium text-gray-800">Department Information</h2>
+              <h2 className="text-lg font-medium text-gray-800">{t('department.form.sections.info')}</h2>
             </div>
-            
+
             <div className="p-8 space-y-8 bg-white">
               <div className="max-w-md">
                 <FormField
@@ -144,12 +146,12 @@ const DepartmentForm = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base">Department Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-base">{t('department.form.fields.name')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Building className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                          <Input 
-                            placeholder="Enter department name"
+                          <Input
+                            placeholder={t('department.form.placeholders.name')}
                             className="pl-10 h-11"
                             {...field}
                           />
@@ -164,15 +166,15 @@ const DepartmentForm = () => {
           </div>
 
           <div className="flex justify-end gap-4 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               className="px-6 h-11"
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createDepartmentMutation.isPending || updateDepartmentMutation.isPending}
               className="bg-green-600 hover:bg-green-700 px-6 h-11"
@@ -180,7 +182,7 @@ const DepartmentForm = () => {
               {(createDepartmentMutation.isPending || updateDepartmentMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Department' : 'Create Department'}
+              {isEditMode ? t('department.form.update') : t('department.form.create')}
             </Button>
           </div>
         </form>

@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import { useDashboardQuery } from "@/hooks/dashboard/useDashboardQueries";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // Icon mapping for different data types
 const getIconForLabel = (label: string, section: string) => {
@@ -147,6 +148,7 @@ const DashboardCardSkeleton = () => (
 );
 
 const WorkContent = () => {
+  const { t } = useTypedTranslation('dashboard');
   const { data, isLoading } = useDashboardQuery();
 
   if (isLoading) {
@@ -154,7 +156,7 @@ const WorkContent = () => {
       <div className="space-y-6">
         <div className="grid gap-6">
           <div>
-            <h2 className="text-lg font-semibold mb-4">ESCALATED TO ME:</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('headers.escalated')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(3)].map((_, i) => (
                 <DashboardCardSkeleton key={i} />
@@ -163,7 +165,7 @@ const WorkContent = () => {
           </div>
           
           <div>
-            <h2 className="text-lg font-semibold mb-4">PPM DUE:</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('headers.ppmDue')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(3)].map((_, i) => (
                 <DashboardCardSkeleton key={i} />
@@ -174,9 +176,9 @@ const WorkContent = () => {
 
         <Tabs defaultValue="workRequest" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="workRequest">WORK REQUEST</TabsTrigger>
-            <TabsTrigger value="workOrder">WORK ORDER</TabsTrigger>
-            <TabsTrigger value="paymentRequisition">PAYMENT REQUISITION</TabsTrigger>
+            <TabsTrigger value="workRequest">{t('tabs.workRequest')}</TabsTrigger>
+            <TabsTrigger value="workOrder">{t('tabs.workOrder')}</TabsTrigger>
+            <TabsTrigger value="paymentRequisition">{t('tabs.paymentRequisition')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="workRequest" className="space-y-4">

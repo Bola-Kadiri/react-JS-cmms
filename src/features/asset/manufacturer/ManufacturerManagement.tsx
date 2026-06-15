@@ -24,6 +24,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { useManufacturers, useDeleteManufacturer } from '@/hooks/manufacturer/useManufacturerQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Manufacturer } from '@/types/manufacturer';
 import { 
@@ -36,6 +37,7 @@ import {
 } from 'lucide-react';
 
 export const ManufacturerManagement: React.FC = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [manufacturerToDelete, setManufacturerToDelete] = useState<Manufacturer | null>(null);
@@ -74,7 +76,7 @@ export const ManufacturerManagement: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-500">Error loading manufacturers. Please try again.</p>
+        <p className="text-red-500">{t('manufacturer.error')}</p>
       </div>
     );
   }
@@ -83,24 +85,24 @@ export const ManufacturerManagement: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Manufacturers</h1>
+        <h1 className="text-2xl font-bold">{t('manufacturer.title')}</h1>
         <Button onClick={() => navigate('/dashboard/asset/inventory-reference/manufacturers/create')}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Manufacturer
+          {t('manufacturer.add')}
         </Button>
       </div>
 
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Search Manufacturers</CardTitle>
+          <CardTitle>{t('manufacturer.searchTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search manufacturers by name..."
+                placeholder={t('manufacturer.searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10"
@@ -116,10 +118,10 @@ export const ManufacturerManagement: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('manufacturer.columns.id')}</TableHead>
+                <TableHead>{t('manufacturer.columns.name')}</TableHead>
+                <TableHead>{t('manufacturer.columns.status')}</TableHead>
+                <TableHead className="text-right">{t('manufacturer.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -127,13 +129,13 @@ export const ManufacturerManagement: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-                    <p className="mt-2 text-sm text-gray-500">Loading manufacturers...</p>
+                    <p className="mt-2 text-sm text-gray-500">{t('manufacturer.loading')}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredManufacturers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8">
-                    <p className="text-gray-500">No manufacturers found</p>
+                    <p className="text-gray-500">{t('manufacturer.noItems')}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -143,7 +145,7 @@ export const ManufacturerManagement: React.FC = () => {
                     <TableCell className="font-medium">{manufacturer.name}</TableCell>
                     <TableCell>
                       <Badge variant={manufacturer.is_active ? "default" : "secondary"}>
-                        {manufacturer.is_active ? 'Active' : 'Inactive'}
+                        {manufacturer.is_active ? t('manufacturer.status.active') : t('manufacturer.status.inactive')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
@@ -173,19 +175,18 @@ export const ManufacturerManagement: React.FC = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the
-                              manufacturer "{manufacturer.name}" and remove all associated data.
+                              {t('manufacturer.delete.description', { name: manufacturer.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(manufacturer)}
                               className="bg-red-500 hover:bg-red-600"
                             >
-                              Delete
+                              {t('common:actions.delete')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -204,7 +205,7 @@ export const ManufacturerManagement: React.FC = () => {
         <Card>
           <CardContent className="py-4">
             <p className="text-sm text-gray-500">
-              Showing {filteredManufacturers.length} of {response.count} manufacturers
+              {t('manufacturer.showing', { filtered: filteredManufacturers.length, total: response.count })}
             </p>
           </CardContent>
         </Card>

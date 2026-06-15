@@ -15,11 +15,13 @@ import { useList } from '@/hooks/crud/useCrudOperations';
 import { Zone } from '@/types/zone';
 import { ZoneQueryParams } from '@/services/zonesApi';
 import { Facility } from '@/types/facility';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'code' | 'name' | 'facility';
 type SortDirection = 'asc' | 'desc';
 
 const ZoneManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -71,9 +73,9 @@ const ZoneManagement = () => {
 
   // Helper function to get facility name
   const getFacilityName = (facilityId?: number) => {
-    if (!facilityId) return 'None';
+    if (!facilityId) return t('zone.none');
     const facility = facilities.find(f => f.id === facilityId);
-    return facility ? facility.name : 'Unknown Facility';
+    return facility ? facility.name : t('zone.unknownFacility');
   };
 
   // Client-side filtering and sorting logic
@@ -210,7 +212,7 @@ const ZoneManagement = () => {
   const filterConfig = [
     {
       key: 'facility',
-      label: 'Facility',
+      label: t('zone.filter.facility'),
       options: facilityOptions
     }
   ];
@@ -229,7 +231,7 @@ const ZoneManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading zones...</p>
+          <p className="text-sm text-muted-foreground">{t('zone.loading')}</p>
         </div>
       </div>
     );
@@ -239,9 +241,9 @@ const ZoneManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading zones</div>
+        <div className="text-red-500 text-xl">{t('zone.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -250,9 +252,9 @@ const ZoneManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Zone Management</h1>
+        <h1 className="text-2xl font-bold">{t('zone.management')}</h1>
         <Button onClick={handleAddZone}>
-          <Plus className="mr-2 h-4 w-4" /> Add Zone
+          <Plus className="mr-2 h-4 w-4" /> {t('zone.add')}
         </Button>
       </div>
 
@@ -262,7 +264,7 @@ const ZoneManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search zones..."
+          placeholder={t('zone.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -279,7 +281,7 @@ const ZoneManagement = () => {
                     onClick={() => handleSort('code')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Code {renderSortIcon('code')}
+                    {t('zone.columns.code')} {renderSortIcon('code')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -288,7 +290,7 @@ const ZoneManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('zone.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -297,17 +299,17 @@ const ZoneManagement = () => {
                     onClick={() => handleSort('facility')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Facility {renderSortIcon('facility')}
+                    {t('zone.columns.facility')} {renderSortIcon('facility')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('zone.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    No zones found.
+                    {t('zone.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -370,14 +372,14 @@ const ZoneManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('zone.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the zone.
+              {t('zone.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('zone.delete.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteZone}
               disabled={deleteZoneMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -385,10 +387,10 @@ const ZoneManagement = () => {
               {deleteZoneMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('zone.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('zone.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -24,6 +24,7 @@ import { useUserQuery, useCreateUser, useUpdateUser } from '@/hooks/user/useUser
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { toast } from '@/components/ui/use-toast';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ownerEndpoint = 'accounts/api/users/';
 const catEndpoint = 'accounts/api/categories/';
@@ -34,57 +35,58 @@ const facilityEndpoint = 'facility/api/api/facilities/';
 const buildingEndpoint = 'facility/api/api/buildings/';
 const warehouseEndpoint = 'asset_inventory/api/warehouses/';
 
-// Form schema definition
-const userSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  roles: z.enum([
-    'SUPER ADMIN', 
-    'ADMIN', 
-    'REQUESTER', 
-    'REVIEWER', 
-    'APPROVAL', 
-    'PROCUREMENT AND STORE'
-  ]),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(1, "Phone number is required"),
-  designation: z.string(),
-  date_of_birth: z.string(),
-  gender: z.enum(['Male', 'Female', 'Other']),
-  nationality: z.string(),
-  passport_number: z.string(),
-  address: z.string(),
-  status: z.enum(['Active', 'Inactive']),
-  team_lead: z.boolean(),
-  generate_reports: z.boolean(),
-  approval_limit: z.string(),
-  is_verified: z.boolean(),
-  is_blocked: z.boolean(),
-  is_active: z.boolean(),
-  access_to_all_facilities: z.boolean(),
-  facility: z.array(z.number()),
-  access_to_all_flats: z.boolean(),
-  flats: z.array(z.number()),
-  // access_to_all_apartments: z.boolean(),
-  // apartments: z.array(z.number()),
-  access_to_all_categories: z.boolean(),
-  categories: z.array(z.number()),
-  access_to_all_warehouses: z.boolean(),
-  warehouse: z.array(z.number()),
-  access_to_all_departments: z.boolean(),
-  departments: z.array(z.number()),
-  access_to_all_clients: z.boolean(),
-  clients: z.array(z.number()),
-  supervisor: z.number().optional(),
-});
-
-type UserFormValues = z.infer<typeof userSchema>;
-
 const UserForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
-  
+
+  // Schema defined inside component so validation messages can use t()
+  const userSchema = z.object({
+    first_name: z.string().min(1, t('user.form.validation.firstNameRequired')),
+    last_name: z.string().min(1, t('user.form.validation.lastNameRequired')),
+    roles: z.enum([
+      'SUPER ADMIN',
+      'ADMIN',
+      'REQUESTER',
+      'REVIEWER',
+      'APPROVAL',
+      'PROCUREMENT AND STORE'
+    ]),
+    email: z.string().email(t('user.form.validation.invalidEmail')),
+    phone: z.string().min(1, t('user.form.validation.phoneRequired')),
+    designation: z.string(),
+    date_of_birth: z.string(),
+    gender: z.enum(['Male', 'Female', 'Other']),
+    nationality: z.string(),
+    passport_number: z.string(),
+    address: z.string(),
+    status: z.enum(['Active', 'Inactive']),
+    team_lead: z.boolean(),
+    generate_reports: z.boolean(),
+    approval_limit: z.string(),
+    is_verified: z.boolean(),
+    is_blocked: z.boolean(),
+    is_active: z.boolean(),
+    access_to_all_facilities: z.boolean(),
+    facility: z.array(z.number()),
+    access_to_all_flats: z.boolean(),
+    flats: z.array(z.number()),
+    // access_to_all_apartments: z.boolean(),
+    // apartments: z.array(z.number()),
+    access_to_all_categories: z.boolean(),
+    categories: z.array(z.number()),
+    access_to_all_warehouses: z.boolean(),
+    warehouse: z.array(z.number()),
+    access_to_all_departments: z.boolean(),
+    departments: z.array(z.number()),
+    access_to_all_clients: z.boolean(),
+    clients: z.array(z.number()),
+    supervisor: z.number().optional(),
+  });
+
+  type UserFormValues = z.infer<typeof userSchema>;
+
   // Collapsible section states
   const [openSections, setOpenSections] = useState({
     personal: true,
@@ -93,7 +95,7 @@ const UserForm = () => {
     options: false,
     accesses: false
   });
-  
+
   // User form setup
   const userForm = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
@@ -147,9 +149,9 @@ const UserForm = () => {
   const {hasNoAccess} = useFeatureAccess('reference')
 
   // Fetch user data for edit mode using our custom hook
-  const { 
-    data: userData, 
-    isLoading: isLoadingUser, 
+  const {
+    data: userData,
+    isLoading: isLoadingUser,
     isError: isUserError,
     error: userError
   } = useUserQuery(isEditMode ? slug : undefined);
@@ -169,7 +171,6 @@ const UserForm = () => {
   // Handle user data loading
   useEffect(() => {
     if (userData && isEditMode) {
-      // Reset the form with user data
       userForm.reset({
         first_name: userData.first_name,
         last_name: userData.last_name,
@@ -224,8 +225,8 @@ const UserForm = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem submitting the form",
+        title: t('user.form.toast.errorTitle'),
+        description: t('user.form.toast.submitError'),
         variant: "destructive",
       });
     }
@@ -241,7 +242,7 @@ const UserForm = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading user details...</p>
+            <p className="text-sm text-muted-foreground">{t('user.form.loading')}</p>
           </div>
         </div>
       </div>
@@ -252,20 +253,18 @@ const UserForm = () => {
     return (
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading user details</div>
+          <div className="text-red-500 text-xl">{t('user.form.error')}</div>
           <p className="text-sm text-muted-foreground mb-4">
-            {userError instanceof Error ? userError.message : 'An unknown error occurred'}
+            {userError instanceof Error ? userError.message : t('user.form.unknownError')}
           </p>
           <Button onClick={handleCancel} variant="outline">
-            Back to Users
+            {t('user.form.backToList')}
           </Button>
         </div>
       </div>
     );
   }
 
-  
-        
   if(hasNoAccess){
     return <Navigate to="/unauthorized" replace />;
   }
@@ -274,16 +273,16 @@ const UserForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
             aria-label="Go back"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit User' : 'Create New User'}
+            {isEditMode ? t('user.form.editTitle') : t('user.form.createPageTitle')}
           </h1>
         </div>
       </div>
@@ -297,13 +296,13 @@ const UserForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('personal')}
             >
-              <h2 className="text-lg font-medium">Personal Information</h2>
-              {openSections.personal ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('user.form.sections.personal')}</h2>
+              {openSections.personal ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.personal && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -312,10 +311,10 @@ const UserForm = () => {
                     name="first_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>First Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('user.form.firstName')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter first name"
+                          <Input
+                            placeholder={t('user.form.placeholders.firstName')}
                             {...field}
                           />
                         </FormControl>
@@ -323,16 +322,16 @@ const UserForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="last_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('user.form.lastName')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter last name"
+                          <Input
+                            placeholder={t('user.form.placeholders.lastName')}
                             {...field}
                           />
                         </FormControl>
@@ -341,18 +340,18 @@ const UserForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={userForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('user.form.email')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="email"
-                            placeholder="Enter email address"
+                            placeholder={t('user.form.placeholders.email')}
                             {...field}
                           />
                         </FormControl>
@@ -360,16 +359,16 @@ const UserForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('user.form.phone')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter phone number"
+                          <Input
+                            placeholder={t('user.form.placeholders.phone')}
                             {...field}
                           />
                         </FormControl>
@@ -378,17 +377,17 @@ const UserForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={userForm.control}
                     name="designation"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Designation</FormLabel>
+                        <FormLabel>{t('user.form.fields.designation')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter designation"
+                          <Input
+                            placeholder={t('user.form.placeholders.designation')}
                             {...field}
                           />
                         </FormControl>
@@ -396,20 +395,20 @@ const UserForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="supervisor"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Supervisor</FormLabel>
-                        <Select 
+                        <FormLabel>{t('user.form.fields.supervisor')}</FormLabel>
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select supervisor" />
+                              <SelectValue placeholder={t('user.form.fields.selectSupervisor')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -428,7 +427,7 @@ const UserForm = () => {
               </div>
             )}
           </div>
-          
+
           {/* Second Collapsible: Additional Information */}
           <div className="rounded-md border overflow-hidden">
             <button
@@ -436,13 +435,13 @@ const UserForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('additional')}
             >
-              <h2 className="text-lg font-medium">Additional Information</h2>
-              {openSections.additional ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('user.form.sections.additional')}</h2>
+              {openSections.additional ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.additional && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -451,9 +450,9 @@ const UserForm = () => {
                     name="date_of_birth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
+                        <FormLabel>{t('user.form.fields.dateOfBirth')}</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="date"
                             {...field}
                           />
@@ -462,26 +461,26 @@ const UserForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="gender"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gender</FormLabel>
-                        <Select 
+                        <FormLabel>{t('user.form.gender')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select gender" />
+                              <SelectValue placeholder={t('user.form.fields.selectGender')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value="Male">{t('user.form.fields.male')}</SelectItem>
+                            <SelectItem value="Female">{t('user.form.fields.female')}</SelectItem>
+                            <SelectItem value="Other">{t('user.form.fields.other')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -489,17 +488,17 @@ const UserForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={userForm.control}
                     name="nationality"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nationality</FormLabel>
+                        <FormLabel>{t('user.form.fields.nationality')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter nationality"
+                          <Input
+                            placeholder={t('user.form.placeholders.nationality')}
                             {...field}
                           />
                         </FormControl>
@@ -507,16 +506,16 @@ const UserForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="passport_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Passport Number</FormLabel>
+                        <FormLabel>{t('user.form.fields.passportNumber')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter passport number"
+                          <Input
+                            placeholder={t('user.form.placeholders.passportNumber')}
                             {...field}
                           />
                         </FormControl>
@@ -525,16 +524,16 @@ const UserForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={userForm.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>{t('user.form.fields.address')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter address"
+                        <Textarea
+                          placeholder={t('user.form.placeholders.address')}
                           {...field}
                           className="min-h-[100px] resize-y"
                         />
@@ -546,7 +545,7 @@ const UserForm = () => {
               </div>
             )}
           </div>
-          
+
           {/* Third Collapsible: Roles & Status */}
           <div className="rounded-md border overflow-hidden">
             <button
@@ -554,13 +553,13 @@ const UserForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('roles')}
             >
-              <h2 className="text-lg font-medium">Role & Status</h2>
-              {openSections.roles ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('user.form.sections.roles')}</h2>
+              {openSections.roles ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.roles && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -569,14 +568,14 @@ const UserForm = () => {
                     name="roles"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Role<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <FormLabel>{t('user.form.role')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
+                              <SelectValue placeholder={t('user.form.fields.selectRole')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -586,34 +585,31 @@ const UserForm = () => {
                             <SelectItem value="REVIEWER">REVIEWER</SelectItem>
                             <SelectItem value="APPROVAL">APPROVAL</SelectItem>
                             <SelectItem value="PROCUREMENT AND STORE">PROCUREMENT AND STORE</SelectItem>
-                            {/* <SelectItem value="Facility Account">Facility Account</SelectItem>
-                            <SelectItem value="Facility Store">Facility Store</SelectItem>
-                            <SelectItem value="Facility View">Facility View</SelectItem> */}
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
+                        <FormLabel>{t('user.form.status')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className={`${field.value === 'Active' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('user.form.fields.selectStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('user.status.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('user.status.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -624,7 +620,7 @@ const UserForm = () => {
               </div>
             )}
           </div>
-          
+
           {/* Fourth Collapsible: Options */}
           <div className="rounded-md border overflow-hidden">
             <button
@@ -632,13 +628,13 @@ const UserForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('options')}
             >
-              <h2 className="text-lg font-medium">Options</h2>
-              {openSections.options ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('user.form.sections.options')}</h2>
+              {openSections.options ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.options && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -654,13 +650,13 @@ const UserForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1">
-                          <FormLabel className="font-medium leading-none">Team Lead</FormLabel>
-                          <p className="text-sm text-muted-foreground">Mark if user is a team lead</p>
+                          <FormLabel className="font-medium leading-none">{t('user.form.checkboxes.teamLead')}</FormLabel>
+                          <p className="text-sm text-muted-foreground">{t('user.form.checkboxes.teamLeadDesc')}</p>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="generate_reports"
@@ -673,14 +669,14 @@ const UserForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1">
-                          <FormLabel className="font-medium leading-none">Generate Reports</FormLabel>
-                          <p className="text-sm text-muted-foreground">User can generate reports</p>
+                          <FormLabel className="font-medium leading-none">{t('user.form.checkboxes.generateReports')}</FormLabel>
+                          <p className="text-sm text-muted-foreground">{t('user.form.checkboxes.generateReportsDesc')}</p>
                         </div>
                       </FormItem>
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <FormField
                     control={userForm.control}
@@ -694,13 +690,13 @@ const UserForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1">
-                          <FormLabel className="font-medium leading-none">Verified</FormLabel>
-                          <p className="text-sm text-muted-foreground">User is verified</p>
+                          <FormLabel className="font-medium leading-none">{t('user.form.checkboxes.verified')}</FormLabel>
+                          <p className="text-sm text-muted-foreground">{t('user.form.checkboxes.verifiedDesc')}</p>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="is_blocked"
@@ -713,13 +709,13 @@ const UserForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1">
-                          <FormLabel className="font-medium leading-none">Blocked</FormLabel>
-                          <p className="text-sm text-muted-foreground">User is blocked</p>
+                          <FormLabel className="font-medium leading-none">{t('user.form.checkboxes.blocked')}</FormLabel>
+                          <p className="text-sm text-muted-foreground">{t('user.form.checkboxes.blockedDesc')}</p>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={userForm.control}
                     name="is_active"
@@ -732,24 +728,24 @@ const UserForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1">
-                          <FormLabel className="font-medium leading-none">Active</FormLabel>
-                          <p className="text-sm text-muted-foreground">User is active</p>
+                          <FormLabel className="font-medium leading-none">{t('user.form.checkboxes.active')}</FormLabel>
+                          <p className="text-sm text-muted-foreground">{t('user.form.checkboxes.activeDesc')}</p>
                         </div>
                       </FormItem>
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={userForm.control}
                   name="approval_limit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Approval Limit</FormLabel>
+                      <FormLabel>{t('user.form.fields.approvalLimit')}</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="number"
-                          placeholder="Enter approval limit amount"
+                          placeholder={t('user.form.placeholders.approvalLimit')}
                           {...field}
                         />
                       </FormControl>
@@ -760,7 +756,7 @@ const UserForm = () => {
               </div>
             )}
           </div>
-          
+
           {/* Fifth Collapsible: Access Permissions */}
           <div className="rounded-md border overflow-hidden">
             <button
@@ -768,18 +764,18 @@ const UserForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('accesses')}
             >
-              <h2 className="text-lg font-medium">Access Permissions</h2>
-              {openSections.accesses ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('user.form.sections.accesses')}</h2>
+              {openSections.accesses ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.accesses && (
               <div className="p-6 space-y-8 bg-white">
                 {/* Facilities Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Facility Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.facilitySection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -793,25 +789,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Facilities</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all facilities</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allFacilities')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allFacilitiesDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_facilities') && (
                       <FormField
                         control={userForm.control}
                         name="facility"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Facilities</FormLabel>
+                            <FormLabel>{t('user.form.access.selectFacilities')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {facilities.map(facility => (
                                   <div key={facility.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`facility-${facility.id}`}
                                       checked={field.value.includes(Number(facility.id))}
                                       onCheckedChange={(checked) => {
@@ -822,7 +818,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`facility-${facility.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -842,7 +838,7 @@ const UserForm = () => {
 
                 {/* Flats Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Area / Building Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.flatSection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -856,25 +852,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Area / Building</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all Area / Building</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allFlats')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allFlatsDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_flats') && (
                       <FormField
                         control={userForm.control}
                         name="flats"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Area / Building</FormLabel>
+                            <FormLabel>{t('user.form.access.selectFlats')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {buildings.map(building => (
                                   <div key={building.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`flat-${building.id}`}
                                       checked={field.value.includes(building.id)}
                                       onCheckedChange={(checked) => {
@@ -885,7 +881,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`flat-${building.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -903,72 +899,9 @@ const UserForm = () => {
                   </div>
                 </div>
 
-                {/* Apartments Access */}
-                {/* <div>
-                  <h3 className="text-md font-medium mb-3">Apartments Access</h3>
-                  <div className="space-y-6">
-                    <FormField
-                      control={userForm.control}
-                      name="access_to_all_apartments"
-                      render={({ field }) => (
-                        <FormItem className="flex items-start space-x-3 space-y-0 border p-4 rounded-md">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Apartments</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all apartments</p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {!userForm.watch('access_to_all_apartments') && (
-                      <FormField
-                        control={userForm.control}
-                        name="apartments"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Select Apartments</FormLabel>
-                            <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {apartments.map(apartment => (
-                                  <div key={apartment.id} className="flex items-start space-x-2">
-                                    <Checkbox 
-                                      id={`apartment-${apartment.id}`}
-                                      checked={field.value.includes(Number(apartment.id))}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          field.onChange([...field.value, apartment.id]);
-                                        } else {
-                                          field.onChange(field.value.filter(id => id !== Number(apartment.id)));
-                                        }
-                                      }}
-                                    />
-                                    <label 
-                                      htmlFor={`apartment-${apartment.id}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                    >
-                                      {apartment.type}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  </div>
-                </div> */}
-                
                 {/* Categories Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Categories Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.categoriesSection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -982,25 +915,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Categories</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all categories</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allCategories')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allCategoriesDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_categories') && (
                       <FormField
                         control={userForm.control}
                         name="categories"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Categories</FormLabel>
+                            <FormLabel>{t('user.form.access.selectCategories')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {categories.map(category => (
                                   <div key={category.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`category-${category.id}`}
                                       checked={field.value.includes(category.id)}
                                       onCheckedChange={(checked) => {
@@ -1011,7 +944,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`category-${category.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -1028,10 +961,10 @@ const UserForm = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Warehouses Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Warehouses Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.warehousesSection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -1045,25 +978,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Warehouses</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all warehouses</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allWarehouses')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allWarehousesDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_warehouses') && (
                       <FormField
                         control={userForm.control}
                         name="warehouse"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Warehouses</FormLabel>
+                            <FormLabel>{t('user.form.access.selectWarehouses')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {warehouses.map(warehouse => (
                                   <div key={warehouse.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`warehouse-${warehouse.id}`}
                                       checked={field.value.includes(warehouse.id)}
                                       onCheckedChange={(checked) => {
@@ -1074,7 +1007,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`warehouse-${warehouse.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -1091,10 +1024,10 @@ const UserForm = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Departments Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Departments Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.departmentsSection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -1108,25 +1041,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Departments</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all departments</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allDepartments')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allDepartmentsDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_departments') && (
                       <FormField
                         control={userForm.control}
                         name="departments"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Departments</FormLabel>
+                            <FormLabel>{t('user.form.access.selectDepartments')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {departments.map(department => (
                                   <div key={department.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`department-${department.id}`}
                                       checked={field.value.includes(Number(department.id))}
                                       onCheckedChange={(checked) => {
@@ -1137,7 +1070,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`department-${department.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -1154,10 +1087,10 @@ const UserForm = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Clients Access */}
                 <div>
-                  <h3 className="text-md font-medium mb-3">Clients Access</h3>
+                  <h3 className="text-md font-medium mb-3">{t('user.form.access.clientsSection')}</h3>
                   <div className="space-y-6">
                     <FormField
                       control={userForm.control}
@@ -1171,25 +1104,25 @@ const UserForm = () => {
                             />
                           </FormControl>
                           <div className="space-y-1">
-                            <FormLabel className="font-medium leading-none">Access to All Clients</FormLabel>
-                            <p className="text-sm text-muted-foreground">Grant access to all clients</p>
+                            <FormLabel className="font-medium leading-none">{t('user.form.access.allClients')}</FormLabel>
+                            <p className="text-sm text-muted-foreground">{t('user.form.access.allClientsDesc')}</p>
                           </div>
                         </FormItem>
                       )}
                     />
-                    
+
                     {!userForm.watch('access_to_all_clients') && (
                       <FormField
                         control={userForm.control}
                         name="clients"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Clients</FormLabel>
+                            <FormLabel>{t('user.form.access.selectClients')}</FormLabel>
                             <div className="border rounded-md p-4 space-y-4 max-h-60 overflow-y-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {clients.map(client => (
                                   <div key={client.id} className="flex items-start space-x-2">
-                                    <Checkbox 
+                                    <Checkbox
                                       id={`client-${client.id}`}
                                       checked={field.value.includes(client.id)}
                                       onCheckedChange={(checked) => {
@@ -1200,7 +1133,7 @@ const UserForm = () => {
                                         }
                                       }}
                                     />
-                                    <label 
+                                    <label
                                       htmlFor={`client-${client.id}`}
                                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                     >
@@ -1222,21 +1155,21 @@ const UserForm = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createUserMutation.isPending || updateUserMutation.isPending}
             >
               {(createUserMutation.isPending || updateUserMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update User' : 'Create User'}
+              {isEditMode ? t('user.form.update') : t('user.form.create')}
             </Button>
           </div>
         </form>

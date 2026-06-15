@@ -12,21 +12,21 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Apartmenttype } from '@/types/apartmenttype';
 import { useApartmenttypeQuery, useCreateApartmenttype, useUpdateApartmenttype } from '@/hooks/apartmenttype/useApartmenttypeQueries';
-
-
-// Form schema definition
-const apartmenttypeSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  status: z.enum(['Active', 'Inactive'], {
-    required_error: 'Status is required',
-  }),
-});
-
-type ApartmenttypeFormValues = z.infer<typeof apartmenttypeSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ApartmenttypeForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+
+  // Form schema definition (inside component so t() is in scope)
+  const apartmenttypeSchema = z.object({
+    name: z.string().min(1, t('apartmentType.form.validation.nameRequired')),
+    status: z.enum(['Active', 'Inactive'], {
+      required_error: t('apartmentType.form.validation.statusRequired'),
+    }),
+  });
+  type ApartmenttypeFormValues = z.infer<typeof apartmenttypeSchema>;
   const isEditMode = !!slug;
   
   // Apartmenttype form setup
@@ -84,7 +84,7 @@ const ApartmenttypeForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartmenttype details...</p>
+          <p className="text-sm text-muted-foreground">{t('apartmentType.form.loading')}</p>
         </div>
       </div>
     );
@@ -93,12 +93,12 @@ const ApartmenttypeForm = () => {
   if (isEditMode && isApartmenttypeError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartmenttype details</div>
+        <div className="text-red-500 text-xl">{t('apartmentType.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {apartmenttypeError instanceof Error ? apartmenttypeError.message : 'An unknown error occurred'}
+          {apartmenttypeError instanceof Error ? apartmenttypeError.message : t('apartmentType.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Apartmenttypes
+          {t('apartmentType.form.backToApartmentTypes')}
         </Button>
       </div>
     );
@@ -108,15 +108,15 @@ const ApartmenttypeForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Apartmenttype' : 'Create New Apartmenttype'}
+            {isEditMode ? t('apartmentType.form.editTitle') : t('apartmentType.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -127,9 +127,9 @@ const ApartmenttypeForm = () => {
             {/* Apartmenttype Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Apartmenttype Details</h2>
+                <h2 className="text-lg font-medium">{t('apartmentType.form.sectionTitle')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid gap-4">
                   <FormField
@@ -137,33 +137,33 @@ const ApartmenttypeForm = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('apartmentType.form.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Apartmenttype name" {...field} />
+                          <Input placeholder={t('apartmentType.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmenttypeForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
+                        <FormLabel>{t('apartmentType.form.status')}</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('apartmentType.form.statusPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('apartmentType.form.statusOptions.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('apartmentType.form.statusOptions.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -174,25 +174,25 @@ const ApartmenttypeForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createApartmenttypeMutation.isPending || updateApartmenttypeMutation.isPending}
             >
               {(createApartmenttypeMutation.isPending || updateApartmenttypeMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('common:actions.update') : t('common:actions.save')}
             </Button>
           </div>
         </form>

@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit, Loader2, Hash, Building2, Settings2 } from 'lucide-react';
 import { useZoneQuery } from '@/hooks/zone/useZoneQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ZoneDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Using our custom hook instead of direct query
-  const { 
-    data: zone, 
-    isLoading, 
+  const {
+    data: zone,
+    isLoading,
     isError,
-    error 
+    error
   } = useZoneQuery(id);
 
   // Handle back button click
@@ -32,7 +34,7 @@ const ZoneDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading zone details...</p>
+          <p className="text-sm text-muted-foreground">{t('zone.detail.loading')}</p>
         </div>
       </div>
     );
@@ -41,12 +43,12 @@ const ZoneDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading zone details</div>
+        <div className="text-red-500 text-xl">{t('zone.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('zone.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Zones
+          {t('zone.detail.backButton')}
         </Button>
       </div>
     );
@@ -55,9 +57,9 @@ const ZoneDetailView = () => {
   if (!zone) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Zone not found</div>
+        <div className="text-red-500 text-xl">{t('zone.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Zones
+          {t('zone.detail.backButton')}
         </Button>
       </div>
     );
@@ -68,18 +70,18 @@ const ZoneDetailView = () => {
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleBack}
               className="shadow-md hover:shadow-lg transition-shadow"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-3xl font-bold text-gray-800">Zone Details</h1>
+            <h1 className="text-3xl font-bold text-gray-800">{t('zone.detail.title')}</h1>
           </div>
           <Button onClick={handleEdit} className="shadow-md hover:shadow-lg transition-shadow">
-            <Edit className="mr-2 h-4 w-4" /> Edit Zone
+            <Edit className="mr-2 h-4 w-4" /> {t('zone.detail.editButton')}
           </Button>
         </div>
 
@@ -91,7 +93,7 @@ const ZoneDetailView = () => {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Settings2 className="h-6 w-6 text-primary" />
                 </div>
-                Zone Information
+                {t('zone.detail.zoneInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -102,17 +104,17 @@ const ZoneDetailView = () => {
                       <Hash className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Code</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('zone.detail.code')}</p>
                       <p className="text-lg font-semibold text-gray-800">{zone.code}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-green-100">
                       <Settings2 className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Name</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('zone.detail.name')}</p>
                       <p className="text-lg font-semibold text-gray-800">{zone.name}</p>
                     </div>
                   </div>
@@ -124,9 +126,9 @@ const ZoneDetailView = () => {
                       <Building2 className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Associated Facility</p>
+                      <p className="text-sm font-medium text-gray-500 mb-1">{t('zone.detail.associatedFacility')}</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {zone.facility_detail?.name || 'None'}
+                        {zone.facility_detail?.name || t('zone.detail.none')}
                       </p>
                     </div>
                   </div>
@@ -139,24 +141,24 @@ const ZoneDetailView = () => {
           <div className="space-y-6">
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg">{t('zone.detail.quickActions')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="space-y-3">
-                  <Button 
-                    onClick={handleEdit} 
+                  <Button
+                    onClick={handleEdit}
                     className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <Edit className="h-4 w-4" />
-                    Edit Zone
+                    {t('zone.detail.editButton')}
                   </Button>
-                  <Button 
-                    onClick={handleBack} 
-                    variant="outline" 
+                  <Button
+                    onClick={handleBack}
+                    variant="outline"
                     className="w-full justify-start gap-3 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Zones
+                    {t('zone.detail.backButton')}
                   </Button>
                 </div>
               </CardContent>

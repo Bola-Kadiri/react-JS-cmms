@@ -36,6 +36,9 @@
   "tabs": {
     "workRequest": "WORK REQUEST",
     "workOrder": "WORK ORDER",
+    "workCompletion": "WORK COMPLETION",
+    "invoices": "INVOICES",
+    "paymentRequisition": "PAYMENT REQUISITION",
     "stockLevel": "STOCK LEVELS",
     "transactions": "TRANSACTIONS",
     "purchaseRequests": "PURCHASE REQUESTS",
@@ -100,7 +103,8 @@
       "inReview": "In Review",
       "approved": "Approved",
       "rejected": "Rejected",
-      "convertingToPO": "Converting to PO"
+      "convertingToPO": "Converting to PO",
+      "itemsOn": "Items on"
     },
     "subtitle": {
       "items": "Items",
@@ -140,5 +144,41 @@
     "critical": "Critical: Stock below minimum level! Order immediately.",
     "warning": "Warning: Stock below reorder point. Consider reordering soon.",
     "healthy": "Status: Stock levels are healthy."
+  },
+  "loading": "Loading dashboard...",
+  "error": "Error loading dashboard",
+  "noData": "No dashboard data available",
+  "welcomeBack": "Welcome back,",
+  "chart": {
+    "monthlyTrends": "Monthly Trends",
+    "noData": "No chart data available",
+    "datasetLabels": {
+      "workRequests": "Work Requests",
+      "workOrders": "Work Orders"
+    }
+  },
+  "statusGrid": {
+    "noData": "No status data available for",
+    "overview": "Status Overview"
+  },
+  "summaryCards": {
+    "noData": "No summary data available for"
+  },
+  "statusLabels": {
+    "newAwaiting": "New-Awaiting Work Request",
+    "newAwaitingReview": "New-Awaiting Review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "overdue": "Overdue",
+    "awaitingApproval": "Awaiting Approval",
+    "cpApproved": "CP Approved",
+    "reviewed": "Reviewed",
+    "completed": "Completed",
+    "requestedPayment": "Requested Payment",
+    "awaitingProcessing": "Awaiting Processing",
+    "processedPayment": "Processed Payment",
+    "open": "Open",
+    "pending": "Pending",
+    "partPaid": "Part Paid"
   }
 }

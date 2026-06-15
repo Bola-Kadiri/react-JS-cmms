@@ -5,19 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useManufacturer } from '@/hooks/manufacturer/useManufacturerQueries';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
   Building2,
-  Calendar,
   AlertTriangle
 } from 'lucide-react';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 export const ManufacturerDetailView: React.FC = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
   const { data: manufacturer, isLoading, error } = useManufacturer(id || '');
 
   if (isLoading) {
@@ -25,7 +26,7 @@ export const ManufacturerDetailView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">Loading manufacturer details...</p>
+          <p className="text-gray-500">{t('manufacturer.detail.loading')}</p>
         </div>
       </div>
     );
@@ -36,13 +37,13 @@ export const ManufacturerDetailView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Manufacturer Not Found</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('manufacturer.detail.notFound')}</h2>
           <p className="text-gray-500 mb-4">
-            The manufacturer you're looking for doesn't exist or has been deleted.
+            {t('manufacturer.detail.notFoundDesc')}
           </p>
           <Button onClick={() => navigate('/dashboard/asset/inventory-reference/manufacturers')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Manufacturers
+            {t('manufacturer.detail.backToList')}
           </Button>
         </div>
       </div>
@@ -59,25 +60,25 @@ export const ManufacturerDetailView: React.FC = () => {
             onClick={() => navigate('/dashboard/asset/inventory-reference/manufacturers')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t('manufacturer.detail.backButton')}
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center">
               <Building2 className="h-6 w-6 mr-2" />
               {manufacturer.name}
             </h1>
-            <p className="text-gray-500">Manufacturer Details</p>
+            <p className="text-gray-500">{t('manufacturer.detail.subtitle')}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant={manufacturer.is_active ? "default" : "secondary"}>
-            {manufacturer.is_active ? 'Active' : 'Inactive'}
+            {manufacturer.is_active ? t('manufacturer.badge.active') : t('manufacturer.badge.inactive')}
           </Badge>
           <Button
             onClick={() => navigate(`/dashboard/asset/inventory-reference/manufacturers/${manufacturer.id}/edit`)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            Edit
+            {t('manufacturer.detail.editButton')}
           </Button>
         </div>
       </div>
@@ -87,27 +88,27 @@ export const ManufacturerDetailView: React.FC = () => {
         {/* Basic Information */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t('manufacturer.detail.cards.basicInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">ID</label>
+                <label className="text-sm font-medium text-gray-500">{t('manufacturer.detail.fields.id')}</label>
                 <p className="text-lg font-semibold">{manufacturer.id}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Name</label>
+                <label className="text-sm font-medium text-gray-500">{t('manufacturer.detail.fields.name')}</label>
                 <p className="text-lg font-semibold">{manufacturer.name}</p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div>
-              <label className="text-sm font-medium text-gray-500">Status</label>
+              <label className="text-sm font-medium text-gray-500">{t('manufacturer.detail.fields.status')}</label>
               <div className="mt-1">
                 <Badge variant={manufacturer.is_active ? "default" : "secondary"}>
-                  {manufacturer.is_active ? 'Active' : 'Inactive'}
+                  {manufacturer.is_active ? t('manufacturer.badge.active') : t('manufacturer.badge.inactive')}
                 </Badge>
               </div>
             </div>
@@ -117,7 +118,7 @@ export const ManufacturerDetailView: React.FC = () => {
         {/* Status Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Status Information</CardTitle>
+            <CardTitle>{t('manufacturer.detail.cards.statusInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -126,12 +127,12 @@ export const ManufacturerDetailView: React.FC = () => {
               }`} />
               <div>
                 <p className="font-medium">
-                  {manufacturer.is_active ? 'Active' : 'Inactive'}
+                  {manufacturer.is_active ? t('manufacturer.badge.active') : t('manufacturer.badge.inactive')}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {manufacturer.is_active 
-                    ? 'This manufacturer is currently active and available for use.'
-                    : 'This manufacturer is inactive and not available for use.'
+                  {manufacturer.is_active
+                    ? t('manufacturer.detail.activeDesc')
+                    : t('manufacturer.detail.inactiveDesc')
                   }
                 </p>
               </div>
@@ -143,7 +144,7 @@ export const ManufacturerDetailView: React.FC = () => {
       {/* Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Actions</CardTitle>
+          <CardTitle>{t('manufacturer.detail.cards.actions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex space-x-2">
@@ -151,18 +152,18 @@ export const ManufacturerDetailView: React.FC = () => {
               onClick={() => navigate(`/dashboard/asset/inventory-reference/manufacturers/${manufacturer.id}/edit`)}
             >
               <Edit className="h-4 w-4 mr-2" />
-              Edit Manufacturer
+              {t('manufacturer.detail.actions.edit')}
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/dashboard/asset/inventory-reference/manufacturers')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to List
+              {t('manufacturer.detail.actions.backToList')}
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-}; 
+};

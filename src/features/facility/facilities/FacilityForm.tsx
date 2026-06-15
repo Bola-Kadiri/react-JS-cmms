@@ -16,27 +16,29 @@ import { Cluster } from '@/types/cluster';
 import { User } from '@/types/user';
 import { useFacilityQuery, useCreateFacility, useUpdateFacility } from '@/hooks/facility/useFacilityQueries';
 import { useList } from '@/hooks/crud/useCrudOperations';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const clusterEndpoint = 'facility/api/api/clusters/';
 const userEndpoint = 'accounts/api/users/';
 
-// Form schema definition
-const facilitySchema = z.object({
-  cluster: z.number().min(1, 'Cluster is required'),
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  address_gps: z.string().min(1, 'Address GPS is required'),
-  type: z.string().min(1, 'Type is required'),
-  manager: z.number().min(1, 'Manager is required'),
-});
-
-type FacilityFormValues = z.infer<typeof facilitySchema>;
-
 const FacilityForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
   const isEditMode = !!code;
-  
+
+  // Schema defined inside component so validation messages are translated
+  const facilitySchema = z.object({
+    cluster: z.number().min(1, t('facility.form.validation.clusterRequired')),
+    code: z.string().min(1, t('facility.form.validation.codeRequired')),
+    name: z.string().min(1, t('facility.form.validation.nameRequired')),
+    address_gps: z.string().min(1, t('facility.form.validation.addressRequired')),
+    type: z.string().min(1, t('facility.form.validation.typeRequired')),
+    manager: z.number().min(1, t('facility.form.validation.managerRequired')),
+  });
+
+  type FacilityFormValues = z.infer<typeof facilitySchema>;
+
   // Facility form setup
   const facilityForm = useForm<FacilityFormValues>({
     resolver: zodResolver(facilitySchema),
@@ -54,9 +56,9 @@ const FacilityForm = () => {
   const { data: users = [] } = useList<User>('users', userEndpoint);
 
   // Fetch facility data for edit mode using our custom hook
-  const { 
-    data: facilityData, 
-    isLoading: isLoadingFacility, 
+  const {
+    data: facilityData,
+    isLoading: isLoadingFacility,
     isError: isFacilityError,
     error: facilityError
   } = useFacilityQuery(isEditMode ? code : undefined);
@@ -68,7 +70,6 @@ const FacilityForm = () => {
   // Handle facility data loading
   useEffect(() => {
     if (facilityData && isEditMode) {
-      // Reset the form with facility data
       facilityForm.reset({
         cluster: facilityData.cluster,
         code: facilityData.code,
@@ -103,7 +104,7 @@ const FacilityForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading facility details...</p>
+          <p className="text-sm text-muted-foreground">{t('facility.form.loading')}</p>
         </div>
       </div>
     );
@@ -112,12 +113,12 @@ const FacilityForm = () => {
   if (isEditMode && isFacilityError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading facility details</div>
+        <div className="text-red-500 text-xl">{t('facility.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
           {facilityError instanceof Error ? facilityError.message : 'An unknown error occurred'}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Facilities
+          {t('facility.form.backToFacilities')}
         </Button>
       </div>
     );
@@ -127,15 +128,15 @@ const FacilityForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Facility' : 'Create New Facility'}
+            {isEditMode ? t('facility.form.editTitle') : t('facility.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -146,9 +147,9 @@ const FacilityForm = () => {
             {/* Facility Information Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Facility Information</h2>
+                <h2 className="text-lg font-medium">{t('facility.form.sectionTitle')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
@@ -156,9 +157,9 @@ const FacilityForm = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('facility.form.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Facility name" {...field} />
+                          <Input placeholder={t('facility.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -170,9 +171,9 @@ const FacilityForm = () => {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Code</FormLabel>
+                        <FormLabel>{t('facility.form.code')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Facility code (e.g. FAC-001)" {...field} />
+                          <Input placeholder={t('facility.form.codePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,22 +185,22 @@ const FacilityForm = () => {
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel>{t('facility.form.type')}</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select facility type" />
+                              <SelectValue placeholder={t('facility.form.typePlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Residentials">Residentials</SelectItem>
-                            <SelectItem value="Commercial">Commercial</SelectItem>
-                            <SelectItem value="Office">Office</SelectItem>
-                            <SelectItem value="Mall">Mall</SelectItem>
-                            <SelectItem value="Warehouse">Warehouse</SelectItem>
+                            <SelectItem value="Residentials">{t('facility.form.typeOptions.residentials')}</SelectItem>
+                            <SelectItem value="Commercial">{t('facility.form.typeOptions.commercial')}</SelectItem>
+                            <SelectItem value="Office">{t('facility.form.typeOptions.office')}</SelectItem>
+                            <SelectItem value="Mall">{t('facility.form.typeOptions.mall')}</SelectItem>
+                            <SelectItem value="Warehouse">{t('facility.form.typeOptions.warehouse')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -212,14 +213,14 @@ const FacilityForm = () => {
                     name="cluster"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cluster</FormLabel>
+                        <FormLabel>{t('facility.form.cluster')}</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select cluster" />
+                              <SelectValue placeholder={t('facility.form.clusterPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -240,14 +241,14 @@ const FacilityForm = () => {
                     name="manager"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Manager</FormLabel>
+                        <FormLabel>{t('facility.form.manager')}</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select manager" />
+                              <SelectValue placeholder={t('facility.form.managerPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -270,16 +271,16 @@ const FacilityForm = () => {
                     name="address_gps"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Address GPS</FormLabel>
+                        <FormLabel>{t('facility.form.addressGps')}</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Enter the detailed address of the facility including GPS coordinates if available"
+                          <Textarea
+                            placeholder={t('facility.form.addressGpsPlaceholder')}
                             {...field}
                             className="min-h-[100px]"
                           />
                         </FormControl>
                         <FormDescription>
-                          Provide the complete physical address and GPS coordinates of the facility
+                          {t('facility.form.addressGpsDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -289,25 +290,25 @@ const FacilityForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('facility.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createFacilityMutation.isPending || updateFacilityMutation.isPending}
             >
               {(createFacilityMutation.isPending || updateFacilityMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('facility.form.update') : t('facility.form.save')}
             </Button>
           </div>
         </form>

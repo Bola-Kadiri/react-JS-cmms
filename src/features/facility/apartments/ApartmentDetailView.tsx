@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import { useApartmentQuery } from '@/hooks/apartment/useApartmentQueries';
 import { format } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ApartmentDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
@@ -97,7 +99,7 @@ const ApartmentDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartment details...</p>
+          <p className="text-sm text-muted-foreground">{t('apartment.detail.loading')}</p>
         </div>
       </div>
     );
@@ -106,12 +108,12 @@ const ApartmentDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartment details</div>
+        <div className="text-red-500 text-xl">{t('apartment.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('apartment.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Apartments
+          {t('apartment.detail.backButton')}
         </Button>
       </div>
     );
@@ -120,9 +122,9 @@ const ApartmentDetailView = () => {
   if (!apartment) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Apartment not found</div>
+        <div className="text-red-500 text-xl">{t('apartment.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Apartments
+          {t('apartment.detail.backButton')}
         </Button>
       </div>
     );
@@ -143,7 +145,7 @@ const ApartmentDetailView = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Home className="h-6 w-6 text-primary" />
-              Apartment {apartment.no}
+              {t('apartment.detail.title')} {apartment.no}
             </h1>
             <p className="text-muted-foreground">{apartment.type}</p>
           </div>
@@ -151,18 +153,18 @@ const ApartmentDetailView = () => {
         <div className="flex items-center gap-2">
           {getStatusBadge(apartment.status)}
           <Button onClick={handleEdit} className="flex items-center gap-2">
-            <Edit className="h-4 w-4" /> Edit
+            <Edit className="h-4 w-4" /> {t('apartment.detail.editButton')}
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Information Card */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Info className="h-5 w-5 text-primary" />
-              Overview
+              {t('apartment.detail.overview')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -170,29 +172,29 @@ const ApartmentDetailView = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Building2 className="h-4 w-4" />
-                  Building
+                  {t('apartment.detail.building')}
                 </div>
                 <p className="text-lg font-medium">
                   {apartment.building_detail?.name || `Building #${apartment.building}`}
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <KeyRound className="h-4 w-4" />
-                  Ownership Type
+                  {t('apartment.detail.ownershipType')}
                 </div>
                 <div>{getOwnershipBadge(apartment.ownership_type)}</div>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <User className="h-4 w-4" />
-                  Landlord
+                  {t('apartment.detail.landlord')}
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-medium">
@@ -205,44 +207,44 @@ const ApartmentDetailView = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <SquareStack className="h-4 w-4" />
-                  Size
+                  {t('apartment.detail.size')}
                 </div>
-                <p className="text-lg font-medium">{apartment.no_of_sqm} sqm</p>
+                <p className="text-lg font-medium">{apartment.no_of_sqm} {t('apartment.detail.sizeSuffix')}</p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                Address
+                {t('apartment.detail.address')}
               </div>
               <p className="text-lg">{apartment.address}</p>
             </div>
-            
+
             <Separator />
-            
+
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                Service/Power Charge Start Date
+                {t('apartment.detail.servicePowerChargeStartDate')}
               </div>
               <p className="text-lg">{formatDate(apartment.service_power_charge_start_date)}</p>
             </div>
-            
+
             <Separator />
-            
+
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Info className="h-4 w-4" />
-                Description
+                {t('apartment.detail.description')}
               </div>
-              <p className="text-base">{apartment.description || 'No description provided'}</p>
+              <p className="text-base">{apartment.description || t('apartment.detail.noDescription')}</p>
             </div>
           </CardContent>
         </Card>
@@ -252,26 +254,26 @@ const ApartmentDetailView = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarRange className="h-5 w-5 text-primary" />
-              Status Information
+              {t('apartment.detail.statusInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <BooleanIndicator value={apartment.bookable} label="Bookable" />
-              <BooleanIndicator value={apartment.common_area} label="Common Area" />
-              <BooleanIndicator value={apartment.available_for_lease} label="Available for Lease" />
-              <BooleanIndicator value={apartment.remit_lease_payment} label="Remit Lease Payment" />
+              <BooleanIndicator value={apartment.bookable} label={t('apartment.detail.bookable')} />
+              <BooleanIndicator value={apartment.common_area} label={t('apartment.detail.commonArea')} />
+              <BooleanIndicator value={apartment.available_for_lease} label={t('apartment.detail.availableForLease')} />
+              <BooleanIndicator value={apartment.remit_lease_payment} label={t('apartment.detail.remitLeasePayment')} />
             </div>
-            
+
             <Separator />
-            
+
             <div className="pt-2">
               <div className="rounded-md bg-gray-50 p-4">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-gray-500" />
                   <div>
-                    <p className="font-medium">Building Code</p>
-                    <p className="text-sm text-muted-foreground">{apartment.building_detail?.code || 'N/A'}</p>
+                    <p className="font-medium">{t('apartment.detail.buildingCode')}</p>
+                    <p className="text-sm text-muted-foreground">{apartment.building_detail?.code || t('common:na')}</p>
                   </div>
                 </div>
               </div>

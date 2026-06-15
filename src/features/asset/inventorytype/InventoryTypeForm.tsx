@@ -10,29 +10,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useInventoryTypeQuery, useCreateInventoryType, useUpdateInventoryType } from '@/hooks/inventorytype/useInventoryTypeQueries';
 import { Loader2, ArrowLeft } from 'lucide-react';
-
-// Form schema following the exact requirements
-const formSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  type: z.string().min(1, 'Type is required'),
-  unit_of_measurement: z.string().min(1, 'Unit of measurement is required'),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface InventoryTypeFormProps {
   isEditMode?: boolean;
 }
 
 const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = false }) => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
+  // Form schema following the exact requirements
+  const formSchema = z.object({
+    code: z.string().min(1, 'Code is required'),
+    type: z.string().min(1, 'Type is required'),
+    unit_of_measurement: z.string().min(1, 'Unit of measurement is required'),
+  });
+
+  type FormData = z.infer<typeof formSchema>;
+
   const { data: inventoryType, isLoading: isLoadingInventoryType } = useInventoryTypeQuery(isEditMode ? id : undefined);
-  
+
   const createMutation = useCreateInventoryType();
   const updateMutation = useUpdateInventoryType(id);
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,14 +93,14 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Inventory Types
+          {t('inventoryType.form.backToList')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>
-            {isEditMode ? 'Edit Inventory Type' : 'Create Inventory Type'}
+            {isEditMode ? t('inventoryType.form.editTitle') : t('inventoryType.form.createTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -110,9 +112,9 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Code</FormLabel>
+                      <FormLabel>{t('inventoryType.form.fields.code')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter code" />
+                        <Input {...field} placeholder={t('inventoryType.form.placeholders.code')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -124,9 +126,9 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel>{t('inventoryType.form.fields.type')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter type" />
+                        <Input {...field} placeholder={t('inventoryType.form.placeholders.type')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -138,9 +140,9 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
                   name="unit_of_measurement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit of Measurement</FormLabel>
+                      <FormLabel>{t('inventoryType.form.fields.unitOfMeasurement')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter unit of measurement" />
+                        <Input {...field} placeholder={t('inventoryType.form.placeholders.unitOfMeasurement')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -151,10 +153,10 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
               <div className="flex gap-4">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isEditMode ? 'Update' : 'Create'} Inventory Type
+                  {isEditMode ? t('inventoryType.form.update') : t('inventoryType.form.create')}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleBack}>
-                  Cancel
+                  {t('inventoryType.form.cancel')}
                 </Button>
               </div>
             </form>
@@ -165,4 +167,4 @@ const InventoryTypeForm: React.FC<InventoryTypeFormProps> = ({ isEditMode = fals
   );
 };
 
-export default InventoryTypeForm; 
+export default InventoryTypeForm;

@@ -14,33 +14,35 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useAssetSubcategoryQuery, useCreateAssetSubcategory, useUpdateAssetSubcategory } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
 import { useAssetCategoriesQuery } from '@/hooks/assetcategory/useAssetCategoryQueries';
 import { Loader2, ArrowLeft } from 'lucide-react';
-
-// Form schema following the exact requirements
-const formSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  type: z.string().min(1, 'Type is required'),
-  description: z.string().min(1, 'Description is required'),
-  asset_category: z.number().min(1, 'Asset category is required'),
-  is_active: z.boolean().default(true),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface AssetSubcategoryFormProps {
   isEditMode?: boolean;
 }
 
 const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode = false }) => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
+  // Form schema following the exact requirements
+  const formSchema = z.object({
+    code: z.string().min(1, 'Code is required'),
+    name: z.string().min(1, 'Name is required'),
+    type: z.string().min(1, 'Type is required'),
+    description: z.string().min(1, 'Description is required'),
+    asset_category: z.number().min(1, 'Asset category is required'),
+    is_active: z.boolean().default(true),
+  });
+
+  type FormData = z.infer<typeof formSchema>;
+
   const { data: assetSubcategory, isLoading: isLoadingAssetSubcategory } = useAssetSubcategoryQuery(isEditMode ? id : undefined);
   const { data: assetCategoriesData, isLoading: isLoadingAssetCategories } = useAssetCategoriesQuery();
-  
+
   const createMutation = useCreateAssetSubcategory();
   const updateMutation = useUpdateAssetSubcategory(id);
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,14 +107,14 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Asset Subcategories
+          {t('assetSubcategory.form.backToList')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>
-            {isEditMode ? 'Edit Asset Subcategory' : 'Create Asset Subcategory'}
+            {isEditMode ? t('assetSubcategory.form.editTitle') : t('assetSubcategory.form.createTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -124,9 +126,9 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Code</FormLabel>
+                      <FormLabel>{t('assetSubcategory.form.fields.code')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter code" />
+                        <Input {...field} placeholder={t('assetSubcategory.form.placeholders.code')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -138,9 +140,9 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t('assetSubcategory.form.fields.name')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter name" />
+                        <Input {...field} placeholder={t('assetSubcategory.form.placeholders.name')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -152,9 +154,9 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel>{t('assetSubcategory.form.fields.type')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter type" />
+                        <Input {...field} placeholder={t('assetSubcategory.form.placeholders.type')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -166,14 +168,14 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                   name="asset_category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Asset Category</FormLabel>
+                      <FormLabel>{t('assetSubcategory.form.fields.assetCategory')}</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(parseInt(value))}
                         value={field.value ? field.value.toString() : ''}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select asset category" />
+                            <SelectValue placeholder={t('assetSubcategory.form.placeholders.selectAssetCategory')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -195,9 +197,9 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t('assetSubcategory.form.fields.description')}</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Enter description" rows={4} />
+                      <Textarea {...field} placeholder={t('assetSubcategory.form.placeholders.description')} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -211,10 +213,10 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">
-                        Active Status
+                        {t('assetSubcategory.form.fields.activeStatus')}
                       </FormLabel>
                       <FormDescription>
-                        Enable or disable this asset subcategory
+                        {t('assetSubcategory.form.fields.activeStatusDesc')}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -230,10 +232,10 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
               <div className="flex gap-4">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isEditMode ? 'Update' : 'Create'} Asset Subcategory
+                  {isEditMode ? t('assetSubcategory.form.update') : t('assetSubcategory.form.create')}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleBack}>
-                  Cancel
+                  {t('assetSubcategory.form.cancel')}
                 </Button>
               </div>
             </form>
@@ -244,4 +246,4 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({ isEditMode 
   );
 };
 
-export default AssetSubcategoryForm; 
+export default AssetSubcategoryForm;

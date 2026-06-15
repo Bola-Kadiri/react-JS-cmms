@@ -15,8 +15,10 @@ import { useLandlordsQuery, useDeleteLandlord } from '@/hooks/landlord/useLandlo
 import { Landlord } from '@/types/landlord';
 import { LandlordQueryParams } from '@/services/landlordsApi';
 // import { Facility } from '@/pages/facility/facilities/FacilityManagementPage';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const LandlordManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -150,7 +152,7 @@ const LandlordManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading landlords...</p>
+          <p className="text-sm text-muted-foreground">{t('landlord.loading')}</p>
         </div>
       </div>
     );
@@ -160,9 +162,9 @@ const LandlordManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading landlords</div>
+        <div className="text-red-500 text-xl">{t('landlord.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -171,9 +173,9 @@ const LandlordManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Landlord Management</h1>
+        <h1 className="text-2xl font-bold">{t('landlord.management')}</h1>
         <Button onClick={handleAddLandlord}>
-          <Plus className="mr-2 h-4 w-4" /> Add Landlord
+          <Plus className="mr-2 h-4 w-4" /> {t('landlord.add')}
         </Button>
       </div>
 
@@ -183,7 +185,7 @@ const LandlordManagement = () => {
           onSearch={handleSearch}
           filters={filterConfig}
           onFilter={handleFilter}
-          placeholder="Search landlords..."
+          placeholder={t('landlord.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -194,18 +196,18 @@ const LandlordManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Email</TableHead>
-                <TableHead className="font-medium text-gray-600">Phone</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('landlord.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('landlord.columns.email')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('landlord.columns.phone')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('landlord.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('landlord.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No landlords found.
+                    {t('landlord.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -278,14 +280,14 @@ const LandlordManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('landlord.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the landlord.
+              {t('landlord.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteLandlord}
               disabled={deleteLandlordMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -293,10 +295,10 @@ const LandlordManagement = () => {
               {deleteLandlordMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('landlord.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('landlord.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

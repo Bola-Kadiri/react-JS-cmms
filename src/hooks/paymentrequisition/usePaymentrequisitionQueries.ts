@@ -95,7 +95,7 @@ export const useUpdatePaymentrequisition = (id: string | undefined) => {
 // Hook for deleting a paymentrequisition
 export const useDeletePaymentrequisition = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deletePaymentrequisition,
     onSuccess: () => {
@@ -112,6 +112,31 @@ export const useDeletePaymentrequisition = () => {
         icon: React.createElement(X, {className: "h-4 w-4 text-red-500"}),
       });
       console.error('Delete paymentrequisition error:', error);
+    },
+  });
+};
+
+// Hook for approving a paymentrequisition
+export const useApprovePaymentrequisition = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      updatePaymentrequisition({ id, paymentrequisition: { approval_status: 'approve' } as Partial<Paymentrequisition> }),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.all });
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id) });
+      toast.success('Payment requisition approved successfully', {
+        duration: 3000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error) => {
+      toast.error('Failed to approve payment requisition', {
+        duration: 5000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
+      console.error('Approve paymentrequisition error:', error);
     },
   });
 };

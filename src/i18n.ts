@@ -12,6 +12,10 @@ import enAssets from './locales/en/assets.json';
 import enTables from './locales/en/tables.json';
 import enForm from './locales/en/form.json';
 import enSidebar from './locales/en/sidebar.json';
+import enWork from './locales/en/work.json';
+import enProcurement from './locales/en/procurement.json';
+import enFacility from './locales/en/facility.json';
+import enAccounts from './locales/en/accounts.json';
 
 import frCommon from './locales/fr/common.json';
 import frAuth from './locales/fr/auth.json';
@@ -20,6 +24,10 @@ import frAssets from './locales/fr/assets.json';
 import frTables from './locales/fr/tables.json';
 import frForm from './locales/fr/form.json';
 import frSidebar from './locales/fr/sidebar.json';
+import frWork from './locales/fr/work.json';
+import frProcurement from './locales/fr/procurement.json';
+import frFacility from './locales/fr/facility.json';
+import frAccounts from './locales/fr/accounts.json';
 
 // Resources object with all translations
 const resources = {
@@ -30,7 +38,11 @@ const resources = {
     assets: enAssets,
     tables: enTables,
     form: enForm,
-    sidebar: enSidebar
+    sidebar: enSidebar,
+    work: enWork,
+    procurement: enProcurement,
+    facility: enFacility,
+    accounts: enAccounts,
   },
   fr: {
     common: frCommon,
@@ -39,7 +51,11 @@ const resources = {
     assets: frAssets,
     tables: frTables,
     form: frForm,
-    sidebar: frSidebar
+    sidebar: frSidebar,
+    work: frWork,
+    procurement: frProcurement,
+    facility: frFacility,
+    accounts: frAccounts,
   },
 };
 

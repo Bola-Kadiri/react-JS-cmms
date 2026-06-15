@@ -1,6 +1,7 @@
 import { SummaryCards as SummaryCardsType } from '@/types/dashboard';
 import { getIconByName, getSolidColorClass } from '@/utils/dashboardIcons';
 import DashboardCard from './DashboardCard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface SummaryCardsProps {
   summaryCards: SummaryCardsType;
@@ -8,6 +9,7 @@ interface SummaryCardsProps {
 }
 
 const SummaryCards = ({ summaryCards, activeTab }: SummaryCardsProps) => {
+  const { t } = useTypedTranslation('dashboard');
   // Determine which cards to show based on active tab
   const getCardsToDisplay = () => {
     switch (activeTab.toLowerCase().replace(' ', '_')) {
@@ -26,7 +28,7 @@ const SummaryCards = ({ summaryCards, activeTab }: SummaryCardsProps) => {
   if (cardsToDisplay.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No summary data available for {activeTab}
+        {t('summaryCards.noData')} {activeTab}
       </div>
     );
   }

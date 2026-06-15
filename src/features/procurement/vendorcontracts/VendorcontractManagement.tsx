@@ -15,8 +15,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const VendorcontractManagement = () => {
+  const { t } = useTypedTranslation('procurement');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -184,7 +186,7 @@ const VendorcontractManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-          <p className="text-sm text-gray-600">Loading vendor contracts...</p>
+          <p className="text-sm text-gray-600">{t('vendorContract.loading')}</p>
         </div>
       </div>
     );
@@ -194,9 +196,9 @@ const VendorcontractManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading vendor contracts</div>
+        <div className="text-red-500 text-xl">{t('vendorContract.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -206,8 +208,8 @@ const VendorcontractManagement = () => {
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vendor Contract Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and track vendor contracts</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('vendorContract.management')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('vendorContract.description')}</p>
         </div>
         <PermissionGuard feature='vendor_contract' permission='edit'>
           <Button 
@@ -225,16 +227,16 @@ const VendorcontractManagement = () => {
           <div className="flex-1">
             <SearchFilter 
               onSearch={handleSearch}
-              placeholder="Search by contract title, vendor, or reviewer..."
+              placeholder={t('vendorContract.searchPlaceholder')}
             />
           </div>
           <div className="w-full md:w-64">
             <Select value={contractTypeFilter} onValueChange={handleContractTypeFilterChange}>
               <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder={t('common:filter.filterByType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">{t('common:filter.allTypes')}</SelectItem>
                 <SelectItem value="Service">Service</SelectItem>
                 <SelectItem value="Purchase">Purchase</SelectItem>
                 <SelectItem value="Lease">Lease</SelectItem>
@@ -266,7 +268,7 @@ const VendorcontractManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                    No vendor contracts found
+                    {t('vendorContract.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -376,9 +378,9 @@ const VendorcontractManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the vendor contract.
+              {t('vendorContract.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

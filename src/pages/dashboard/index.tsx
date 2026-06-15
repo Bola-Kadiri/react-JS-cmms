@@ -5,8 +5,10 @@ import NavigationTabs from '@/components/dashboard/NavigationTabs';
 import DashboardChart from '@/components/dashboard/DashboardChart';
 import StatusGrid from '@/components/dashboard/StatusGrid';
 import { Loader2 } from 'lucide-react';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const Dashboard = () => {
+  const { t } = useTypedTranslation('dashboard');
   const { data: dashboardData, isLoading, isError, error } = useDashboardQuery();
   const [activeTab, setActiveTab] = useState('WORK REQUEST');
 
@@ -15,7 +17,7 @@ const Dashboard = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+          <p className="text-sm text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -24,7 +26,7 @@ const Dashboard = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading dashboard</div>
+        <div className="text-red-500 text-xl">{t('error')}</div>
         <p className="text-sm text-muted-foreground">
           {error instanceof Error ? error.message : 'An unknown error occurred'}
         </p>
@@ -35,7 +37,7 @@ const Dashboard = () => {
   if (!dashboardData) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-muted-foreground">No dashboard data available</p>
+        <p className="text-muted-foreground">{t('noData')}</p>
       </div>
     );
   }
@@ -50,7 +52,7 @@ const Dashboard = () => {
               {dashboardData.workspace_title}
             </h1>
             <p className="text-gray-600 mt-1">
-              Welcome back, {dashboardData.user_info?.name}
+              {t('welcomeBack')} {dashboardData.user_info?.name}
             </p>
             <p className="text-sm text-gray-500">
               {dashboardData.user_info?.role}
@@ -82,6 +84,13 @@ const Dashboard = () => {
           "INVOICES",
           "PAYMENT REQUISITION"
         ]}
+        tabLabels={[
+          t('tabs.workRequest'),
+          t('tabs.workOrder'),
+          t('tabs.workCompletion'),
+          t('tabs.invoices'),
+          t('tabs.paymentRequisition'),
+        ]}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
@@ -96,6 +105,13 @@ const Dashboard = () => {
       <StatusGrid
         summaryCards={dashboardData.summary_cards ?? { work_request: [], work_order: [], work_completion: [], invoices: [], payment_requisition: [] }}
         activeTab={activeTab}
+        activeTabLabel={({
+          'WORK REQUEST': t('tabs.workRequest'),
+          'WORK ORDER': t('tabs.workOrder'),
+          'WORK COMPLETION': t('tabs.workCompletion'),
+          'INVOICES': t('tabs.invoices'),
+          'PAYMENT REQUISITION': t('tabs.paymentRequisition'),
+        } as Record<string, string>)[activeTab]}
       />
 
       {/* Chart Section */}

@@ -12,9 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const WorkorderManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workorderToDelete, setWorkorderToDelete] = useState<string | null>(null);
 
@@ -37,9 +41,25 @@ const WorkorderManagement = () => {
   // Delete workorder mutation using our custom hook
   const deleteWorkorderMutation = useDeleteWorkorder();
 
+  // Isolate records to the current user's assignments
+  const userIsolatedResults = useMemo(() => {
+    if (!user) return data.results || [];
+    const roleUpper = (user.role || '').toUpperCase();
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return data.results || [];
+    const userId = Number(user.id);
+    return (data.results || []).filter(wo => {
+      switch (roleUpper) {
+        case 'REQUESTER': return wo.requester === userId;
+        case 'REVIEWER': return wo.reviewers?.includes(userId);
+        case 'APPROVER': return wo.approver === userId;
+        default: return true;
+      }
+    });
+  }, [data.results, user]);
+
   // Client-side filtering logic
   const filteredData = useMemo(() => {
-    let results = [...(data.results || [])];
+    let results = [...userIsolatedResults];
 
     // Approval status filter
     if (statusFilter && statusFilter !== 'all') {
@@ -68,7 +88,7 @@ const WorkorderManagement = () => {
     }
 
     return results;
-  }, [data.results, searchValue, typeFilter, priorityFilter, statusFilter]);
+  }, [userIsolatedResults, searchValue, typeFilter, priorityFilter, statusFilter]);
 
   // Client-side pagination
   const paginatedData = useMemo(() => {
@@ -164,7 +184,7 @@ const WorkorderManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading workorders...</p>
+          <p className="text-sm text-muted-foreground">{t('workOrder.loading')}</p>
         </div>
       </div>
     );
@@ -174,9 +194,9 @@ const WorkorderManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading workorders</div>
+        <div className="text-red-500 text-xl">{t('workOrder.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -189,7 +209,7 @@ const WorkorderManagement = () => {
       </Helmet> */}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Workorder Management</h1>
+        <h1 className="text-2xl font-bold">{t('workOrder.management')}</h1>
         {/* {(canEdit || isRequester) && (
           <Button onClick={handleAddWorkorder} className="bg-green-600 hover:bg-green-700">
           <Plus className="mr-2 h-4 w-4" /> Add Workorder
@@ -198,7 +218,7 @@ const WorkorderManagement = () => {
         <PermissionGuard feature='work_order' permission='view'>
           <Button onClick={handleAddWorkorder} className="bg-green-600 hover:bg-green-700">
             <Plus className="mr-2 h-4 w-4" />
-            Add Workorder
+            {t('workOrder.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -210,7 +230,7 @@ const WorkorderManagement = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search by work order number, description, category, facility, or department..."
+                placeholder={t('workOrder.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
@@ -222,39 +242,39 @@ const WorkorderManagement = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
             <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-              <SelectValue placeholder="Filter by type" />
+              <SelectValue placeholder={t('common:filter.filterByType')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="FROM-PPM">From PPM</SelectItem>
-              <SelectItem value="FROM-WORK-REQUEST">From Work Request</SelectItem>
-              <SelectItem value="RAISE-PAYMENT">Raise Payment</SelectItem>
+              <SelectItem value="all">{t('common:filter.allTypes')}</SelectItem>
+              <SelectItem value="FROM-PPM">{t('workOrder.types.fromPpm')}</SelectItem>
+              <SelectItem value="FROM-WORK-REQUEST">{t('workOrder.types.fromWorkRequest')}</SelectItem>
+              <SelectItem value="RAISE-PAYMENT">{t('workOrder.types.raisePayment')}</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={priorityFilter} onValueChange={handlePriorityFilterChange}>
             <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-              <SelectValue placeholder="Filter by priority" />
+              <SelectValue placeholder={t('common:filter.filterByPriority')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="High">High</SelectItem>
-              <SelectItem value="Medium">Medium</SelectItem>
-              <SelectItem value="Low">Low</SelectItem>
+              <SelectItem value="all">{t('common:filter.allPriorities')}</SelectItem>
+              <SelectItem value="High">{t('workOrder.priority.high')}</SelectItem>
+              <SelectItem value="Medium">{t('workOrder.priority.medium')}</SelectItem>
+              <SelectItem value="Low">{t('workOrder.priority.low')}</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('common:filter.filterByStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Reviewed">Reviewed</SelectItem>
-              <SelectItem value="Approved">Approved</SelectItem>
-              <SelectItem value="Reviewer Rejected">Reviewer Rejected</SelectItem>
-              <SelectItem value="Approver Rejected">Approver Rejected</SelectItem>
+              <SelectItem value="all">{t('common:filter.allStatuses')}</SelectItem>
+              <SelectItem value="Pending">{t('workOrder.status.pending')}</SelectItem>
+              <SelectItem value="Reviewed">{t('workOrder.status.reviewed')}</SelectItem>
+              <SelectItem value="Approved">{t('workOrder.status.approved')}</SelectItem>
+              <SelectItem value="Reviewer Rejected">{t('workOrder.status.reviewerRejected')}</SelectItem>
+              <SelectItem value="Approver Rejected">{t('workOrder.status.approverRejected')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -268,7 +288,7 @@ const WorkorderManagement = () => {
             }}
             className="h-10 border-gray-300 hover:bg-gray-50"
           >
-            Clear Filters
+            {t('common:actions.clearFilters')}
           </Button>
         </div>
       </div>
@@ -279,16 +299,16 @@ const WorkorderManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-green-50 border-green-100">
-                <TableHead className="font-semibold text-green-800">Work Order #</TableHead>
-                <TableHead className="font-semibold text-green-800">Type</TableHead>
-                <TableHead className="font-semibold text-green-800">Category</TableHead>
-                <TableHead className="font-semibold text-green-800">Facility</TableHead>
-                <TableHead className="font-semibold text-green-800">Asset</TableHead>
-                <TableHead className="font-semibold text-green-800">Cost</TableHead>
-                <TableHead className="font-semibold text-green-800">PO Number</TableHead>
-                <TableHead className="font-semibold text-green-800">Due Status</TableHead>
-                <TableHead className="font-semibold text-green-800">Status</TableHead>
-                <TableHead className="font-semibold text-green-800 text-right">Actions</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.number')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.type')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.category')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.facility')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.asset')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.cost')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.poNumber')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.dueStatus')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workOrder.columns.status')}</TableHead>
+                <TableHead className="font-semibold text-green-800 text-right">{t('workOrder.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -296,8 +316,8 @@ const WorkorderManagement = () => {
                 <TableRow>
                   <TableCell colSpan={10} className="h-24 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="text-lg font-medium">No work orders found</div>
-                      <div className="text-sm">Try adjusting your search or filter criteria</div>
+                      <div className="text-lg font-medium">{t('workOrder.noItems')}</div>
+                      <div className="text-sm">{t('workOrder.noItemsHint')}</div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -309,14 +329,14 @@ const WorkorderManagement = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getTypeBadgeStyles(workorder.type)}>
-                        {workorder.type === 'FROM-PPM' ? 'From PPM' :
-                          workorder.type === 'FROM-WORK-REQUEST' ? 'From Work Request' :
-                            workorder.type === 'RAISE-PAYMENT' ? 'Raise Payment' : workorder.type}
+                        {workorder.type === 'FROM-PPM' ? t('workOrder.types.fromPpm') :
+                          workorder.type === 'FROM-WORK-REQUEST' ? t('workOrder.types.fromWorkRequest') :
+                            workorder.type === 'RAISE-PAYMENT' ? t('workOrder.types.raisePayment') : workorder.type}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{workorder.category_detail?.name || 'N/A'}</span>
+                        <span className="font-medium text-sm">{workorder.category_detail?.name || t('workOrder.na')}</span>
                         {workorder.subcategory_detail?.name && (
                           <span className="text-xs text-gray-500">{workorder.subcategory_detail.name}</span>
                         )}
@@ -324,15 +344,15 @@ const WorkorderManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{workorder.facility_detail?.name || 'N/A'}</span>
+                        <span className="font-medium text-sm">{workorder.facility_detail?.name || t('workOrder.na')}</span>
                         {workorder.facility_detail?.code && (
-                          <span className="text-xs text-gray-500">Code: {workorder.facility_detail.code}</span>
+                          <span className="text-xs text-gray-500">{t('workOrder.facilityCode', { code: workorder.facility_detail.code })}</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{workorder.asset_detail?.asset_name || 'N/A'}</span>
+                        <span className="font-medium text-sm">{workorder.asset_detail?.asset_name || t('workOrder.na')}</span>
                         {workorder.asset_detail?.asset_type && (
                           <span className="text-xs text-gray-500">{workorder.asset_detail.asset_type}</span>
                         )}
@@ -357,12 +377,12 @@ const WorkorderManagement = () => {
                               rel="noopener noreferrer"
                               className="text-xs text-green-600 underline"
                             >
-                              View PO
+                              {t('workOrder.viewPo')}
                             </a>
                           )}
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400">N/A</span>
+                        <span className="text-sm text-gray-400">{t('workOrder.na')}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -447,13 +467,13 @@ const WorkorderManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the workorder.
+              {t('workOrder.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('workOrder.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteWorkorder}
               disabled={deleteWorkorderMutation.isPending}
@@ -462,10 +482,10 @@ const WorkorderManagement = () => {
               {deleteWorkorderMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('workOrder.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

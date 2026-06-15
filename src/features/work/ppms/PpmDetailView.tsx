@@ -36,18 +36,20 @@ import { PermissionGuard } from '@/components/PermissionGuard';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PpmDetailView = () => {
+  const { t } = useTypedTranslation('work');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject'>('approve');
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  
+
   const { user } = useAuth();
   const isReviewer = (user?.role || '').toUpperCase() === 'REVIEWER';
-  
+
   const {
     data: ppm,
     isLoading,
@@ -106,8 +108,8 @@ const PpmDetailView = () => {
   const StatusBadge = ({ status }: { status: string }) => {
     let color = "";
     let icon = null;
-    
-    switch(status) {
+
+    switch (status) {
       case "Active":
         color = "bg-green-100 text-green-800";
         icon = <CheckCircle2 className="h-3 w-3 mr-1" />;
@@ -136,7 +138,7 @@ const PpmDetailView = () => {
         color = "bg-green-100 text-green-800";
         icon = <Info className="h-3 w-3 mr-1" />;
     }
-    
+
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
         {icon}
@@ -151,7 +153,7 @@ const PpmDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading PPM details...</p>
+          <p className="text-sm text-muted-foreground">{t('ppm.detail.loading')}</p>
         </div>
       </div>
     );
@@ -161,12 +163,12 @@ const PpmDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading PPM details</div>
+        <div className="text-red-500 text-xl">{t('ppm.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('ppm.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to PPMs
+          {t('ppm.detail.backToPpms')}
         </Button>
       </div>
     );
@@ -176,9 +178,9 @@ const PpmDetailView = () => {
   if (!ppm) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">PPM not found</div>
+        <div className="text-red-500 text-xl">{t('ppm.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to PPMs
+          {t('ppm.detail.backToPpms')}
         </Button>
       </div>
     );
@@ -196,9 +198,9 @@ const PpmDetailView = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">PPM Details</h1>
+            <h1 className="text-2xl font-bold">{t('ppm.detail.pageTitle')}</h1>
             <p className="text-sm text-muted-foreground">
-              ID: {ppm.id} • Created: {new Date(ppm.created_at).toLocaleDateString()}
+              {t('ppm.detail.idCreated', { id: ppm.id, date: new Date(ppm.created_at).toLocaleDateString() })}
             </p>
           </div>
         </div>
@@ -210,13 +212,13 @@ const PpmDetailView = () => {
                 onClick={() => handleReview('approve')}
                 className="bg-green-600 hover:bg-green-700"
               >
-                <Check className="mr-2 h-4 w-4" /> Approve
+                <Check className="mr-2 h-4 w-4" /> {t('ppm.detail.approve')}
               </Button>
               <Button
                 onClick={() => handleReview('reject')}
                 variant="destructive"
               >
-                <X className="mr-2 h-4 w-4" /> Reject
+                <X className="mr-2 h-4 w-4" /> {t('ppm.detail.reject')}
               </Button>
             </PermissionGuard>
           )}
@@ -225,25 +227,25 @@ const PpmDetailView = () => {
               onClick={handleRejectWithReason}
               variant="destructive"
             >
-              <X className="mr-2 h-4 w-4" /> Reject with Reason
+              <X className="mr-2 h-4 w-4" /> {t('ppm.detail.rejectWithReason')}
             </Button>
           )}
           <PermissionGuard feature='ppm_setting' permission='edit'>
-          <Button onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" /> Edit PPM
+            <Button onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" /> {t('ppm.detail.editPpm')}
             </Button>
           </PermissionGuard>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="assets">Assets ({ppm?.assets?.length || 0})</TabsTrigger>
-          <TabsTrigger value="facilities">Facilities ({ppm?.facilities?.length || 0})</TabsTrigger>
-          <TabsTrigger value="apartments">Buildings ({ppm?.buildings?.length || 0})</TabsTrigger>
-          <TabsTrigger value="payments">PPM Items ({ppm?.items_detail?.length || 0})</TabsTrigger>
+          <TabsTrigger value="overview">{t('ppm.detail.tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="assets">{t('ppm.detail.tabs.assets', { count: ppm?.assets?.length || 0 })}</TabsTrigger>
+          <TabsTrigger value="facilities">{t('ppm.detail.tabs.facilities', { count: ppm?.facilities?.length || 0 })}</TabsTrigger>
+          <TabsTrigger value="apartments">{t('ppm.detail.tabs.buildings', { count: ppm?.buildings?.length || 0 })}</TabsTrigger>
+          <TabsTrigger value="payments">{t('ppm.detail.tabs.ppmItems', { count: ppm?.items_detail?.length || 0 })}</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -253,53 +255,46 @@ const PpmDetailView = () => {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <Clipboard className="h-5 w-5 mr-2 text-primary" />
-                Basic Information
+                {t('ppm.detail.basicInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Description</p>
-                  <p>{ppm.description || 'Not provided'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.description')}</p>
+                  <p>{ppm.description || t('ppm.notProvided')}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Currency</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.currency')}</p>
                   <p className="flex items-center">
                     <DollarSign className="h-4 w-4 mr-1 text-muted-foreground" />
                     {ppm.currency}
                   </p>
                 </div>
-                {/* <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                  <p className="flex items-center font-medium text-lg">
-                    <DollarSign className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {ppm.currency} {ppm.total_amount || '0.00'}
-                  </p>
-                </div> */}
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Auto Create Work Order</p>
-                  <p>{ppm.auto_create_work_order ? 'Yes' : 'No'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.autoCreateWorkOrder')}</p>
+                  <p>{ppm.auto_create_work_order ? t('ppm.yes') : t('ppm.no')}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Create Work Order As Approved</p>
-                  <p>{ppm.create_work_order_as_approved ? 'Yes' : 'No'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.createWorkOrderAsApproved')}</p>
+                  <p>{ppm.create_work_order_as_approved ? t('ppm.yes') : t('ppm.no')}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Review Information Card */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <FileText className="h-5 w-5 mr-2 text-primary" />
-                Review Information
+                {t('ppm.detail.reviewInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Approval Status</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.approvalStatus')}</p>
                   <Badge
                     variant="outline"
                     className={
@@ -314,60 +309,60 @@ const PpmDetailView = () => {
                   </Badge>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Assigned Approver</p>
-                  <p>{ppm.approver_detail?.name || 'Not assigned'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.assignedApprover')}</p>
+                  <p>{ppm.approver_detail?.name || t('ppm.notAssigned')}</p>
                 </div>
                 {ppm.rejection_reason && (
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Rejection Reason</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.rejectionReason')}</p>
                     <p className="text-red-600">{ppm.rejection_reason}</p>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Schedule Info Card */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <Calendar className="h-5 w-5 mr-2 text-primary" />
-                Schedule Information
+                {t('ppm.detail.scheduleInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Frequency</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.frequency')}</p>
                   <p className="flex items-center">
                     <Repeat className="h-4 w-4 mr-1 text-muted-foreground" />
                     {ppm.frequency} {ppm.frequency_unit}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Notification Before Due</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.notifyBeforeDue')}</p>
                   <p className="flex items-center">
                     <Bell className="h-4 w-4 mr-1 text-muted-foreground" />
                     {ppm.notify_before_due} {ppm.notify_unit}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Reminder Frequency</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('ppm.detail.reminderFrequency')}</p>
                   <p className="flex items-center">
                     <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                    Every {ppm.send_reminder_every} {ppm.reminder_unit}
+                    {t('ppm.detail.every', { count: ppm.send_reminder_every, unit: ppm.reminder_unit })}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Category Info Card */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <Tag className="h-5 w-5 mr-2 text-primary" />
-                Category Information
+                {t('ppm.detail.categoryInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -375,51 +370,51 @@ const PpmDetailView = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-2 flex items-center">
                     <Briefcase className="h-4 w-4 mr-1 text-muted-foreground" />
-                    Category
+                    {t('ppm.detail.categoryLabel')}
                   </h3>
                   <Card className="bg-slate-50">
                     <CardContent className="pt-4">
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Name</span>
-                          <span>{ppm.category_detail?.name || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.nameLabel')}</span>
+                          <span>{ppm.category_detail?.name || t('ppm.notAvailable')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Code</span>
-                          <span>{ppm.category_detail?.code || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.codeLabel')}</span>
+                          <span>{ppm.category_detail?.code || t('ppm.notAvailable')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Type</span>
-                          <span>{(ppm.category_detail as any)?.type || 'Not specified'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.typeLabel')}</span>
+                          <span>{(ppm.category_detail as any)?.type || t('ppm.notSpecified')}</span>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <div>
                   <h3 className="text-lg font-medium mb-2 flex items-center">
                     <MessageSquareWarning className="h-4 w-4 mr-1 text-muted-foreground" />
-                    Subcategory
+                    {t('ppm.detail.subcategoryLabel')}
                   </h3>
                   <Card className="bg-slate-50">
                     <CardContent className="pt-4">
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Name</span>
-                          <span>{ppm.subcategory_detail?.name || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.nameLabel')}</span>
+                          <span>{ppm.subcategory_detail?.name || t('ppm.notAvailable')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Code</span>
-                          <span>{ppm.subcategory_detail?.code || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.codeLabel')}</span>
+                          <span>{ppm.subcategory_detail?.code || t('ppm.notAvailable')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Description</span>
-                          <span>{ppm.subcategory_detail?.description || 'Not available'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.descriptionLabel')}</span>
+                          <span>{ppm.subcategory_detail?.description || t('ppm.notAvailable')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">Active</span>
-                          <span>{ppm.subcategory_detail?.is_active ? 'Yes' : 'No'}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('ppm.detail.activeLabel')}</span>
+                          <span>{ppm.subcategory_detail?.is_active ? t('ppm.yes') : t('ppm.no')}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -428,32 +423,32 @@ const PpmDetailView = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Safety Information */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <CircleAlert className="h-5 w-5 mr-2 text-primary" />
-                Safety Information
+                {t('ppm.detail.safetyInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                <p className="text-sm">{ppm.activities_safety_tips || 'No safety tips provided'}</p>
+                <p className="text-sm">{ppm.activities_safety_tips || t('ppm.detail.noSafetyTips')}</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Assets Tab */}
         <TabsContent value="assets" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Package className="h-5 w-5 mr-2 text-primary" />
-                Assets ({ppm?.assets?.length || 0})
+                {t('ppm.detail.assetsTitle', { count: ppm?.assets?.length || 0 })}
               </CardTitle>
-              <CardDescription>Assets linked to this PPM</CardDescription>
+              <CardDescription>{t('ppm.detail.assetsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4">
@@ -463,50 +458,50 @@ const PpmDetailView = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium">{asset.asset_name} - {asset.serial_number || 'No Serial'}</span>
+                            <span className="font-medium">{asset.asset_name} - {asset.serial_number || t('ppm.notAvailable')}</span>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <p className="text-sm text-muted-foreground">Asset Tag</p>
+                              <p className="text-sm text-muted-foreground">{t('ppm.detail.assetTag')}</p>
                               <p className="font-medium">{asset.asset_tag}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground">Serial Number</p>
-                              <p className="font-medium">{asset.serial_number || 'Not available'}</p>
+                              <p className="text-sm text-muted-foreground">{t('ppm.detail.serialNumber')}</p>
+                              <p className="font-medium">{asset.serial_number || t('ppm.notAvailable')}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground">Asset Type</p>
+                              <p className="text-sm text-muted-foreground">{t('ppm.detail.assetType')}</p>
                               <p className="font-medium">{asset.asset_type}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground">Condition</p>
+                              <p className="text-sm text-muted-foreground">{t('ppm.detail.condition')}</p>
                               <p className="font-medium">{asset.condition}</p>
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Purchased Amount</p>
+                          <p className="text-sm text-muted-foreground">{t('ppm.detail.purchasedAmount')}</p>
                           <p className="text-xl font-bold">${asset.purchased_amount}</p>
-                          <p className="text-xs text-muted-foreground">Purchase Date: {new Date(asset.purchase_date).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground">{t('ppm.detail.purchaseDate')}: {new Date(asset.purchase_date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="mt-4 pt-4 border-t border-slate-200">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
-                            <p className="text-xs text-muted-foreground">Purchase Date</p>
+                            <p className="text-xs text-muted-foreground">{t('ppm.detail.purchaseDate')}</p>
                             <p className="text-sm">{new Date(asset.purchase_date).toLocaleDateString()}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Lifespan</p>
-                            <p className="text-sm">{asset.lifespan || 'Not specified'}</p>
+                            <p className="text-xs text-muted-foreground">{t('ppm.detail.lifespan')}</p>
+                            <p className="text-sm">{asset.lifespan || t('ppm.notSpecified')}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">OEM Warranty</p>
-                            <p className="text-sm">{asset.oem_warranty || 'Not specified'}</p>
+                            <p className="text-xs text-muted-foreground">{t('ppm.detail.oemWarranty')}</p>
+                            <p className="text-sm">{asset.oem_warranty || t('ppm.notSpecified')}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Category</p>
-                            <p className="text-sm">{asset.category_detail?.name || 'Not available'}</p>
+                            <p className="text-xs text-muted-foreground">{t('ppm.detail.assetCategory')}</p>
+                            <p className="text-sm">{asset.category_detail?.name || t('ppm.notAvailable')}</p>
                           </div>
                         </div>
                       </div>
@@ -517,16 +512,16 @@ const PpmDetailView = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Facilities Tab */}
         <TabsContent value="facilities" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Building className="h-5 w-5 mr-2 text-primary" />
-                Facilities ({ppm?.facilities?.length || 0})
+                {t('ppm.detail.facilitiesTitle', { count: ppm?.facilities?.length || 0 })}
               </CardTitle>
-              <CardDescription>Facilities linked to this PPM</CardDescription>
+              <CardDescription>{t('ppm.detail.facilitiesDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -536,30 +531,30 @@ const PpmDetailView = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="text-lg font-medium">{facility.name}</h3>
-                          <p className="text-sm text-muted-foreground">Code: {facility.code}</p>
+                          <p className="text-sm text-muted-foreground">{t('ppm.detail.facilityCode', { code: facility.code })}</p>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <p className="text-xs text-muted-foreground">Type</p>
+                          <p className="text-xs text-muted-foreground">{t('ppm.detail.facilityType')}</p>
                           <p className="text-sm">{facility.type}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Manager ID</p>
+                          <p className="text-xs text-muted-foreground">{t('ppm.detail.managerId')}</p>
                           <p className="text-sm">{facility.manager}</p>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4 pt-4 border-t border-slate-200">
-                        <p className="text-xs text-muted-foreground mb-2">GPS Address</p>
-                        <p className="text-sm">{facility.address_gps || 'Not provided'}</p>
+                        <p className="text-xs text-muted-foreground mb-2">{t('ppm.detail.gpsAddress')}</p>
+                        <p className="text-sm">{facility.address_gps || t('ppm.notProvided')}</p>
                       </div>
 
                       <div className="mt-4 pt-4 border-t border-slate-200">
                         <div>
-                          <p className="text-xs text-muted-foreground">Cluster</p>
-                          <p className="text-sm">{facility.cluster_detail?.name || 'Not available'}</p>
+                          <p className="text-xs text-muted-foreground">{t('ppm.detail.cluster')}</p>
+                          <p className="text-sm">{facility.cluster_detail?.name || t('ppm.notAvailable')}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -569,37 +564,37 @@ const PpmDetailView = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Buildings Tab */}
         <TabsContent value="apartments" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Home className="h-5 w-5 mr-2 text-primary" />
-                Buildings ({ppm?.buildings?.length || 0})
+                {t('ppm.detail.buildingsTitle', { count: ppm?.buildings?.length || 0 })}
               </CardTitle>
-              <CardDescription>Buildings linked to this PPM</CardDescription>
+              <CardDescription>{t('ppm.detail.buildingsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="text-center text-muted-foreground py-8">
-                  <p>Building details would be displayed here when available.</p>
-                  <p className="text-sm">({ppm?.buildings?.length || 0} buildings selected)</p>
-                      </div>
+                  <p>{t('ppm.detail.buildingsPlaceholder')}</p>
+                  <p className="text-sm">{t('ppm.detail.buildingsCount', { count: ppm?.buildings?.length || 0 })}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* PPM Items Tab */}
         <TabsContent value="payments" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Package className="h-5 w-5 mr-2 text-primary" />
-                PPM Items ({ppm?.items_detail?.length || 0})
+                {t('ppm.detail.ppmItemsTitle', { count: ppm?.items_detail?.length || 0 })}
               </CardTitle>
-              <CardDescription>PPM items associated with this PPM</CardDescription>
+              <CardDescription>{t('ppm.detail.ppmItemsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -609,24 +604,24 @@ const PpmDetailView = () => {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h3 className="text-lg font-medium">{item.description}</h3>
-                          <p className="text-sm text-muted-foreground">Item ID: {item.id}</p>
+                          <p className="text-sm text-muted-foreground">{t('ppm.detail.itemId', { id: item.id })}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Total Price</p>
+                          <p className="text-sm text-muted-foreground">{t('ppm.detail.totalPrice')}</p>
                           <p className="text-xl font-bold text-green-600">₦{item.total_price}</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Quantity</p>
+                          <p className="text-xs text-muted-foreground mb-1">{t('ppm.detail.quantity')}</p>
                           <p className="text-sm font-medium">{item.qty}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
+                          <p className="text-xs text-muted-foreground mb-1">{t('ppm.detail.unitPrice')}</p>
                           <p className="text-sm font-medium">₦{item.unit_price}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Unit</p>
+                          <p className="text-xs text-muted-foreground mb-1">{t('ppm.detail.unit')}</p>
                           <p className="text-sm font-medium">{item.unit}</p>
                         </div>
                       </div>
@@ -636,8 +631,8 @@ const PpmDetailView = () => {
                 {(!ppm?.items_detail || ppm?.items_detail?.length === 0) && (
                   <div className="text-center text-muted-foreground py-8">
                     <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>No PPM items found</p>
-                    <p className="text-sm">PPM items will be displayed here when available.</p>
+                    <p>{t('ppm.detail.noItemsFound')}</p>
+                    <p className="text-sm">{t('ppm.detail.noItemsHint')}</p>
                   </div>
                 )}
               </div>
@@ -651,15 +646,19 @@ const PpmDetailView = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {reviewAction === 'approve' ? 'Approve PPM' : 'Reject PPM'}
+              {reviewAction === 'approve' ? t('ppm.detail.reviewDialog.approveTitle') : t('ppm.detail.reviewDialog.rejectTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {reviewAction} this PPM? This action cannot be undone.
+              {t('ppm.detail.reviewDialog.confirmMessage', {
+                action: reviewAction === 'approve'
+                  ? t('ppm.detail.reviewDialog.approveAction')
+                  : t('ppm.detail.reviewDialog.rejectAction')
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('ppm.detail.reviewDialog.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmReview}
               disabled={reviewPpmMutation.isPending}
               className={reviewAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
@@ -667,7 +666,7 @@ const PpmDetailView = () => {
               {reviewPpmMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {reviewAction === 'approve' ? 'Approving...' : 'Rejecting...'}
+                  {reviewAction === 'approve' ? t('ppm.detail.reviewDialog.approving') : t('ppm.detail.reviewDialog.rejecting')}
                 </>
               ) : (
                 <>
@@ -676,7 +675,7 @@ const PpmDetailView = () => {
                   ) : (
                     <X className="mr-2 h-4 w-4" />
                   )}
-                  {reviewAction === 'approve' ? 'Approve' : 'Reject'}
+                  {reviewAction === 'approve' ? t('ppm.detail.reviewDialog.approve') : t('ppm.detail.reviewDialog.reject')}
                 </>
               )}
             </AlertDialogAction>
@@ -688,17 +687,17 @@ const PpmDetailView = () => {
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject PPM</DialogTitle>
+            <DialogTitle>{t('ppm.detail.rejectDialog.title')}</DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting PPM ID: {ppm.id}
+              {t('ppm.detail.rejectDialog.description', { id: ppm.id })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="rejection_reason">Rejection Reason <span className="text-red-500">*</span></Label>
+              <Label htmlFor="rejection_reason">{t('ppm.detail.rejectDialog.reasonLabel')} <span className="text-red-500">*</span></Label>
               <Textarea
                 id="rejection_reason"
-                placeholder="Enter the reason for rejection..."
+                placeholder={t('ppm.detail.rejectDialog.reasonPlaceholder')}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={4}
@@ -714,7 +713,7 @@ const PpmDetailView = () => {
                 setRejectionReason('');
               }}
             >
-              Cancel
+              {t('ppm.detail.rejectDialog.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -724,12 +723,12 @@ const PpmDetailView = () => {
               {rejectPpmMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Rejecting...
+                  {t('ppm.detail.rejectDialog.rejecting')}
                 </>
               ) : (
                 <>
                   <X className="mr-2 h-4 w-4" />
-                  Reject PPM
+                  {t('ppm.detail.rejectDialog.submit')}
                 </>
               )}
             </Button>

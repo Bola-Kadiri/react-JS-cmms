@@ -14,23 +14,25 @@ import { Region } from '@/types/region';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { User } from '@/types/user';
 import { useRegionQuery, useCreateRegion, useUpdateRegion } from '@/hooks/region/useRegionQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const userEndpoint = 'accounts/api/users/';
 
-// Form schema definition
-const regionSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  country: z.string().min(1, 'Country is required'),
-  select_manager: z.number().min(1, 'Manager is required'),
-});
-
-type RegionFormValues = z.infer<typeof regionSchema>;
-
 const RegionForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Schema defined inside component so validation messages are translated
+  const regionSchema = z.object({
+    name: z.string().min(1, t('region.form.validation.nameRequired')),
+    country: z.string().min(1, t('region.form.validation.countryRequired')),
+    select_manager: z.number().min(1, t('region.form.validation.managerRequired')),
+  });
+
+  type RegionFormValues = z.infer<typeof regionSchema>;
+
   // Region form setup
   const regionForm = useForm<RegionFormValues>({
     resolver: zodResolver(regionSchema),
@@ -45,9 +47,9 @@ const RegionForm = () => {
   const { data: users = [] } = useList<User>('users', userEndpoint);
 
   // Fetch region data for edit mode using our custom hook
-  const { 
-    data: regionData, 
-    isLoading: isLoadingRegion, 
+  const {
+    data: regionData,
+    isLoading: isLoadingRegion,
     isError: isRegionError,
     error: regionError
   } = useRegionQuery(isEditMode ? id : undefined);
@@ -59,7 +61,6 @@ const RegionForm = () => {
   // Handle region data loading
   useEffect(() => {
     if (regionData && isEditMode) {
-      // Reset the form with region data
       regionForm.reset({
         name: regionData.name,
         country: regionData.country,
@@ -91,7 +92,7 @@ const RegionForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading region details...</p>
+          <p className="text-sm text-muted-foreground">{t('region.form.loading')}</p>
         </div>
       </div>
     );
@@ -100,12 +101,12 @@ const RegionForm = () => {
   if (isEditMode && isRegionError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading region details</div>
+        <div className="text-red-500 text-xl">{t('region.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
           {regionError instanceof Error ? regionError.message : 'An unknown error occurred'}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Regions
+          {t('region.form.backToRegions')}
         </Button>
       </div>
     );
@@ -115,15 +116,15 @@ const RegionForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Region' : 'Create New Region'}
+            {isEditMode ? t('region.form.editTitle') : t('region.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -134,36 +135,36 @@ const RegionForm = () => {
             {/* Region Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-200 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Region Details</h2>
+                <h2 className="text-lg font-medium">{t('region.form.sectionTitle')}</h2>
                 <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                  Toggle
+                  {t('region.form.toggle')}
                 </Button>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">                  
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={regionForm.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('region.form.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Region name" {...field} />
+                          <Input placeholder={t('region.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={regionForm.control}
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country</FormLabel>
+                        <FormLabel>{t('region.form.country')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Country" {...field} />
+                          <Input placeholder={t('region.form.countryPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -175,14 +176,14 @@ const RegionForm = () => {
                     name="select_manager"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Manager</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('region.form.manager')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Manager" />
+                              <SelectValue placeholder={t('region.form.managerPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -201,25 +202,25 @@ const RegionForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('region.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createRegionMutation.isPending || updateRegionMutation.isPending}
             >
               {(createRegionMutation.isPending || updateRegionMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('region.form.update') : t('region.form.save')}
             </Button>
           </div>
         </form>

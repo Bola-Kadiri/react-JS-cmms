@@ -11,11 +11,13 @@ import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useSubsystemsQuery, useDeleteSubsystem } from '@/hooks/subsystem/useSubsystemQueries';
 import { Subsystem } from '@/types/subsystem';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'name' | 'building_code' | 'building_name' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
 const SubsystemManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -203,7 +205,7 @@ const SubsystemManagement = () => {
   const filterConfig = [
     {
       key: 'building',
-      label: 'Building',
+      label: t('subsystem.filter.building'),
       options: buildingOptions
     }
   ];
@@ -231,7 +233,7 @@ const SubsystemManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading subsystems...</p>
+          <p className="text-sm text-muted-foreground">{t('subsystem.loading')}</p>
         </div>
       </div>
     );
@@ -241,9 +243,9 @@ const SubsystemManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading subsystems</div>
+        <div className="text-red-500 text-xl">{t('subsystem.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -252,9 +254,9 @@ const SubsystemManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Subsystem Management</h1>
+        <h1 className="text-2xl font-bold">{t('subsystem.management')}</h1>
         <Button onClick={handleAddSubsystem}>
-          <Plus className="mr-2 h-4 w-4" /> Add Subsystem
+          <Plus className="mr-2 h-4 w-4" /> {t('subsystem.add')}
         </Button>
       </div>
 
@@ -264,7 +266,7 @@ const SubsystemManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search subsystems..."
+          placeholder={t('subsystem.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -281,7 +283,7 @@ const SubsystemManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('subsystem.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -290,7 +292,7 @@ const SubsystemManagement = () => {
                     onClick={() => handleSort('building_code')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Building Code {renderSortIcon('building_code')}
+                    {t('subsystem.columns.buildingCode')} {renderSortIcon('building_code')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -299,7 +301,7 @@ const SubsystemManagement = () => {
                     onClick={() => handleSort('building_name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Building Name {renderSortIcon('building_name')}
+                    {t('subsystem.columns.buildingName')} {renderSortIcon('building_name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -308,25 +310,25 @@ const SubsystemManagement = () => {
                     onClick={() => handleSort('created_at')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Created At {renderSortIcon('created_at')}
+                    {t('subsystem.columns.createdAt')} {renderSortIcon('created_at')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('subsystem.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No subsystems found.
+                    {t('subsystem.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((subsystem) => (
                   <TableRow key={subsystem.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium text-blue-600">{subsystem.name}</TableCell>
-                    <TableCell>{subsystem.building_detail?.code || 'N/A'}</TableCell>
-                    <TableCell>{subsystem.building_detail?.name || 'N/A'}</TableCell>
+                    <TableCell>{subsystem.building_detail?.code || t('subsystem.na')}</TableCell>
+                    <TableCell>{subsystem.building_detail?.name || t('subsystem.na')}</TableCell>
                     <TableCell>{formatDate(subsystem.created_at)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end">
@@ -382,14 +384,14 @@ const SubsystemManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the subsystem.
+              {t('subsystem.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('subsystem.delete.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteSubsystem}
               disabled={deleteSubsystemMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -397,10 +399,10 @@ const SubsystemManagement = () => {
               {deleteSubsystemMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

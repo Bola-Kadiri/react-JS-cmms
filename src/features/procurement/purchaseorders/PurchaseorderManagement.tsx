@@ -16,8 +16,10 @@ import { PurchaseorderQueryParams } from '@/services/purchaseordersApi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PurchaseorderManagement = () => {
+  const { t } = useTypedTranslation('procurement');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -162,7 +164,7 @@ const PurchaseorderManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading purchase orders...</p>
+          <p className="text-sm text-muted-foreground">{t('purchaseOrder.loading')}</p>
         </div>
       </div>
     );
@@ -172,9 +174,9 @@ const PurchaseorderManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading purchase orders</div>
+        <div className="text-red-500 text-xl">{t('purchaseOrder.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -187,9 +189,9 @@ const PurchaseorderManagement = () => {
       </Helmet> */}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Purchase Order Management</h1>
+        <h1 className="text-2xl font-bold">{t('purchaseOrder.management')}</h1>
         <Button onClick={handleAddPurchaseorder}>
-          <Plus className="mr-2 h-4 w-4" /> Add Purchase Order
+          <Plus className="mr-2 h-4 w-4" /> {t('purchaseOrder.add')}
         </Button>
       </div>
 
@@ -199,7 +201,7 @@ const PurchaseorderManagement = () => {
           <div className="flex-1">
             <SearchFilter 
               onSearch={handleSearch}
-              placeholder="Search by type, vendor, or requester..."
+              placeholder={t('purchaseOrder.searchPlaceholder')}
               initialSearchValue={searchValue}
             />
           </div>
@@ -207,10 +209,10 @@ const PurchaseorderManagement = () => {
           <div className="w-full md:w-72">
             <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('common:filter.filterByStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t('common:filter.allStatuses')}</SelectItem>
                 <SelectItem value="Draft">Draft</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="Sent">Sent</SelectItem>
@@ -241,7 +243,7 @@ const PurchaseorderManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No purchase orders found.
+                    {t('purchaseOrder.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -319,9 +321,9 @@ const PurchaseorderManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the purchase order.
+              {t('purchaseOrder.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -334,7 +336,7 @@ const PurchaseorderManagement = () => {
               {deletePurchaseorderMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
                 'Delete'

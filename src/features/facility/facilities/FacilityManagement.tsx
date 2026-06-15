@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { User } from '@/types/user';
 import { Cluster } from 'cluster';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const clusterEndpoint = 'facility/api/api/clusters/';
 const userEndpoint = 'accounts/api/users/';
@@ -23,6 +24,7 @@ type SortField = 'name' | 'code' | 'cluster' | 'type';
 type SortDirection = 'asc' | 'desc';
 
 const FacilityManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -205,7 +207,7 @@ const FacilityManagement = () => {
   const filterConfig = [
     {
       key: 'cluster',
-      label: 'Cluster',
+      label: t('facility.filter.cluster'),
       options: clusterOptions
     }
   ];
@@ -236,7 +238,7 @@ const FacilityManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading facilities...</p>
+          <p className="text-sm text-muted-foreground">{t('facility.loading')}</p>
         </div>
       </div>
     );
@@ -246,9 +248,9 @@ const FacilityManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading facilities</div>
+        <div className="text-red-500 text-xl">{t('facility.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -257,9 +259,9 @@ const FacilityManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Facility Management</h1>
+        <h1 className="text-2xl font-bold">{t('facility.management')}</h1>
         <Button onClick={handleAddFacility}>
-          <Plus className="mr-2 h-4 w-4" /> Add Facility
+          <Plus className="mr-2 h-4 w-4" /> {t('facility.add')}
         </Button>
       </div>
 
@@ -269,7 +271,7 @@ const FacilityManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search by name, code, cluster name, or type..."
+          placeholder={t('facility.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -286,7 +288,7 @@ const FacilityManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('facility.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -295,7 +297,7 @@ const FacilityManagement = () => {
                     onClick={() => handleSort('code')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Code {renderSortIcon('code')}
+                    {t('facility.columns.code')} {renderSortIcon('code')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -304,7 +306,7 @@ const FacilityManagement = () => {
                     onClick={() => handleSort('cluster')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Cluster Name {renderSortIcon('cluster')}
+                    {t('facility.columns.clusterName')} {renderSortIcon('cluster')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -313,17 +315,17 @@ const FacilityManagement = () => {
                     onClick={() => handleSort('type')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Type {renderSortIcon('type')}
+                    {t('facility.columns.type')} {renderSortIcon('type')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('facility.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No facilities found.
+                    {t('facility.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -331,7 +333,7 @@ const FacilityManagement = () => {
                   <TableRow key={facility.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium">{facility.name}</TableCell>
                     <TableCell>{facility.code}</TableCell>
-                    <TableCell>{facility.cluster_detail?.name || 'N/A'}</TableCell>
+                    <TableCell>{facility.cluster_detail?.name || t('facility.unknownCluster')}</TableCell>
                     <TableCell>
                       <Badge className={`${getTypeBadgeClass(facility.type)} px-2 py-1 rounded-full text-xs`}>
                         {facility.type}
@@ -391,13 +393,13 @@ const FacilityManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the facility.
+              {t('facility.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('facility.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDeleteFacility}
               disabled={deleteFacilityMutation.isPending}
@@ -406,10 +408,10 @@ const FacilityManagement = () => {
               {deleteFacilityMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -14,25 +14,27 @@ import { Building } from '@/types/building';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { useBuildingQuery, useBuildingZonesByFacilityQuery, useCreateBuilding, useUpdateBuilding } from '@/hooks/building/useBuildingQueries';
 import { Facility } from '@/types/facility';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const facilityEndpoint = 'facility/api/api/facilities/';
 
-// Updated form schema to match building.ts structure
-const buildingSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  facility: z.number().min(1, 'Facility is required'),
-  zone: z.number().min(1, 'Zone is required'),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
-});
-
-type BuildingFormValues = z.infer<typeof buildingSchema>;
-
 const BuildingForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  // Schema defined inside component so validation messages are translated
+  const buildingSchema = z.object({
+    code: z.string().min(1, t('building.form.validation.codeRequired')),
+    name: z.string().min(1, t('building.form.validation.nameRequired')),
+    facility: z.number().min(1, t('building.form.validation.facilityRequired')),
+    zone: z.number().min(1, t('building.form.validation.zoneRequired')),
+    status: z.enum(['Active', 'Inactive']).default('Active'),
+  });
+
+  type BuildingFormValues = z.infer<typeof buildingSchema>;
+
   // Building form setup
   const buildingForm = useForm<BuildingFormValues>({
     resolver: zodResolver(buildingSchema),
@@ -49,17 +51,17 @@ const BuildingForm = () => {
   const selectedFacility = buildingForm.watch('facility');
 
   const { data: facilities = [] } = useList<Facility>('facilities', facilityEndpoint);
-  
+
   // Fetch zones based on selected facility
-  const { 
-    data: zones = [], 
-    isLoading: isLoadingZones 
+  const {
+    data: zones = [],
+    isLoading: isLoadingZones
   } = useBuildingZonesByFacilityQuery(selectedFacility ? String(selectedFacility) : undefined);
 
   // Fetch building data for edit mode using our custom hook
-  const { 
-    data: buildingData, 
-    isLoading: isLoadingBuilding, 
+  const {
+    data: buildingData,
+    isLoading: isLoadingBuilding,
     isError: isBuildingError,
     error: buildingError
   } = useBuildingQuery(isEditMode ? id : undefined);
@@ -71,7 +73,6 @@ const BuildingForm = () => {
   // Handle building data loading
   useEffect(() => {
     if (buildingData && isEditMode) {
-      // Reset the form with building data
       buildingForm.reset({
         code: buildingData.code,
         name: buildingData.name,
@@ -112,7 +113,7 @@ const BuildingForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading building details...</p>
+          <p className="text-sm text-muted-foreground">{t('building.form.loading')}</p>
         </div>
       </div>
     );
@@ -121,12 +122,12 @@ const BuildingForm = () => {
   if (isEditMode && isBuildingError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading building details</div>
+        <div className="text-red-500 text-xl">{t('building.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {buildingError instanceof Error ? buildingError.message : 'An unknown error occurred'}
+          {buildingError instanceof Error ? buildingError.message : t('building.detail.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Buildings
+          {t('building.form.backToBuildings')}
         </Button>
       </div>
     );
@@ -136,15 +137,15 @@ const BuildingForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Building' : 'Create New Building'}
+            {isEditMode ? t('building.form.editTitle') : t('building.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -155,36 +156,36 @@ const BuildingForm = () => {
             {/* Building Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-200 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Building Details</h2>
+                <h2 className="text-lg font-medium">{t('building.form.sectionTitle')}</h2>
                 <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                  Toggle
+                  {t('building.form.toggle')}
                 </Button>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                  
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={buildingForm.control}
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Code</FormLabel>
+                        <FormLabel>{t('building.form.code')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Building code" {...field} />
+                          <Input placeholder={t('building.form.codePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={buildingForm.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('building.form.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Building name" {...field} />
+                          <Input placeholder={t('building.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -196,14 +197,14 @@ const BuildingForm = () => {
                     name="facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Facility</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('building.form.facility')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Facility" />
+                              <SelectValue placeholder={t('building.form.facilityPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -224,20 +225,20 @@ const BuildingForm = () => {
                     name="zone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zone</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(Number(value))} 
+                        <FormLabel>{t('building.form.zone')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value ? String(field.value) : ""}
                           disabled={!selectedFacility || isLoadingZones}
                         >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder={
-                                !selectedFacility 
-                                  ? "Select facility first"
-                                  : isLoadingZones 
-                                    ? "Loading zones..."
-                                    : "Select Zone"
+                                !selectedFacility
+                                  ? t('building.form.zonePlaceholderFirst')
+                                  : isLoadingZones
+                                    ? t('building.form.zonePlaceholderLoading')
+                                    : t('building.form.zonePlaceholder')
                               } />
                             </SelectTrigger>
                           </FormControl>
@@ -253,26 +254,26 @@ const BuildingForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={buildingForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
+                        <FormLabel>{t('building.form.status')}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
                           value={field.value}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('building.form.statusPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('building.form.statusOptions.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('building.form.statusOptions.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -283,25 +284,25 @@ const BuildingForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('building.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createBuildingMutation.isPending || updateBuildingMutation.isPending}
             >
               {(createBuildingMutation.isPending || updateBuildingMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('building.form.update') : t('building.form.save')}
             </Button>
           </div>
         </form>

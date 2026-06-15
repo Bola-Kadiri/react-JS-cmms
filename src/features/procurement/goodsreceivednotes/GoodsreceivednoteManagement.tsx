@@ -14,8 +14,10 @@ import { useGoodsreceivednotesQuery, useDeleteGoodsreceivednote } from '@/hooks/
 import { Goodsreceivednote } from '@/types/goodsreceivednote';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const GoodsreceivednoteManagement = () => {
+  const { t } = useTypedTranslation('procurement');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -134,7 +136,7 @@ const GoodsreceivednoteManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading goods received notes...</p>
+          <p className="text-sm text-muted-foreground">{t('goodsReceivedNote.loading')}</p>
         </div>
       </div>
     );
@@ -144,9 +146,9 @@ const GoodsreceivednoteManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading goods received notes</div>
+        <div className="text-red-500 text-xl">{t('goodsReceivedNote.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -159,9 +161,9 @@ const GoodsreceivednoteManagement = () => {
       </Helmet> */}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Goods Received Note Management</h1>
+        <h1 className="text-2xl font-bold">{t('goodsReceivedNote.management')}</h1>
         <Button onClick={handleAddGoodsreceivednote}>
-          <Plus className="mr-2 h-4 w-4" /> Add Goods Received Note
+          <Plus className="mr-2 h-4 w-4" /> {t('goodsReceivedNote.add')}
         </Button>
       </div>
 
@@ -169,7 +171,7 @@ const GoodsreceivednoteManagement = () => {
       <div className="mb-6">
         <SearchFilter 
           onSearch={handleSearch}
-          placeholder="Search by GRN number, delivery note, invoice, vendor, or facility..."
+          placeholder={t('goodsReceivedNote.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -194,7 +196,7 @@ const GoodsreceivednoteManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    No goods received notes found.
+                    {t('goodsReceivedNote.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -286,9 +288,9 @@ const GoodsreceivednoteManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the goods received note.
+              {t('goodsReceivedNote.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -301,7 +303,7 @@ const GoodsreceivednoteManagement = () => {
               {deleteGoodsreceivednote.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
                 'Delete'

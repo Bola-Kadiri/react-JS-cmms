@@ -7,19 +7,54 @@
     "save": "Enregistrer",
     "back": "Retour",
     "edit": "Modifier",
-    "view": "Afficher"
+    "view": "Afficher",
+    "add": "Ajouter",
+    "tryAgain": "Réessayer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "clearFilters": "Effacer les filtres",
+    "print": "Imprimer",
+    "export": "Exporter"
   },
   "status": {
     "loading": "Chargement...",
     "error": "Erreur",
-    "success": "Succès"
+    "success": "Succès",
+    "deleting": "Suppression en cours..."
   },
   "confirmation": {
     "delete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "deleteTitle": "Supprimer l'élément",
+    "deleteMessage": "Cette action est irréversible. Cet élément et toutes ses données associées seront définitivement supprimés.",
     "confirmButton": "Confirmer",
-    "cancelButton": "Annuler"
+    "cancelButton": "Annuler",
+    "areYouSure": "Êtes-vous sûr ?"
+  },
+  "table": {
+    "noResults": "Aucun élément trouvé",
+    "adjustSearch": "Essayez de modifier vos critères de recherche",
+    "createFirst": "Créez votre premier élément pour commencer",
+    "showing": "Affichage de {{count}} sur {{total}} éléments"
+  },
+  "filter": {
+    "all": "Tous",
+    "filterByType": "Filtrer par type",
+    "filterByStatus": "Filtrer par statut",
+    "filterByPriority": "Filtrer par priorité",
+    "filterByApproval": "Filtrer par approbation",
+    "filterByCurrency": "Filtrer par devise",
+    "filterByOwnershipType": "Filtrer par type de propriété",
+    "allTypes": "Tous les types",
+    "allStatuses": "Tous les statuts",
+    "allPriorities": "Toutes les priorités",
+    "allApprovalStatuses": "Tous les statuts d'approbation",
+    "allCurrencies": "Toutes les devises",
+    "allOwnershipTypes": "Tous les types de propriété"
   },
   "notSet": "Non défini",
+  "na": "N/D",
   "noItemsFound": "Aucun élément trouvé",
   "search": "Rechercher...",
   "currency": {

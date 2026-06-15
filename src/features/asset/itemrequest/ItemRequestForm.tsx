@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Loader2, Plus, Trash2, Package } from 'lucide-react';
 import { ItemRequest, ItemRequestItem } from '@/types/itemrequest';
 import { useItemRequestQuery, useCreateItemRequest, useUpdateItemRequest } from '@/hooks/itemrequest/useItemRequestQueries';
@@ -24,42 +23,43 @@ import { useModels } from '@/hooks/model/useModelQueries';
 import { useItemsQuery } from '@/hooks/item/useItemQueries';
 import { useAuth } from '@/contexts/AuthContext';
 import { ItemRequestCreatePayload } from '@/services/itemRequestApi';
-
-// Form schema definition
-const itemRequestItemSchema = z.object({
-  item_id: z.number().min(1, 'Item is required'),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-  description: z.string().min(1, 'Description is required'),
-  category: z.number().min(1, 'Category is required'),
-  subcategory: z.number().min(1, 'Subcategory is required'),
-  model: z.number().min(1, 'Model is required'),
-});
-
-const itemRequestSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  request_from: z.number().min(1, 'Request from is required'),
-  requested_by: z.number().min(1, 'Requested by is required'),
-  required_date: z.string().min(1, 'Required date is required'),
-  department: z.number().optional(),
-  type: z.enum(['for_use', 'for_store'], { required_error: 'Type is required' }),
-  facility: z.number().optional(),
-  building: z.number().optional(),
-  approved_by: z.number().min(1, 'Approved by is required'),
-  description: z.string().min(1, 'Description is required'),
-  comment: z.string().min(1, 'Comment is required'),
-  items: z.array(itemRequestItemSchema).min(1, 'At least one item is required'),
-});
-
-type ItemRequestFormValues = z.infer<typeof itemRequestSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ItemRequestForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEditMode = !!id;
-  
+
   const [selectedFacility, setSelectedFacility] = useState<number | undefined>();
-  
+
+  const itemRequestItemSchema = z.object({
+    item_id: z.number().min(1, t('itemRequest.form.validation.itemRequired')),
+    quantity: z.number().min(1, t('itemRequest.form.validation.quantityMin')),
+    description: z.string().min(1, t('itemRequest.form.validation.descriptionRequired')),
+    category: z.number().min(1, t('itemRequest.form.validation.categoryRequired')),
+    subcategory: z.number().min(1, t('itemRequest.form.validation.subcategoryRequired')),
+    model: z.number().min(1, t('itemRequest.form.validation.modelRequired')),
+  });
+
+  const itemRequestSchema = z.object({
+    name: z.string().min(1, t('itemRequest.form.validation.nameRequired')),
+    request_from: z.number().min(1, t('itemRequest.form.validation.requestFromRequired')),
+    requested_by: z.number().min(1, t('itemRequest.form.validation.requestedByRequired')),
+    required_date: z.string().min(1, t('itemRequest.form.validation.requiredDateRequired')),
+    department: z.number().optional(),
+    type: z.enum(['for_use', 'for_store'], { required_error: t('itemRequest.form.validation.typeRequired') }),
+    facility: z.number().optional(),
+    building: z.number().optional(),
+    approved_by: z.number().min(1, t('itemRequest.form.validation.approvedByRequired')),
+    description: z.string().min(1, t('itemRequest.form.validation.descriptionRequired')),
+    comment: z.string().min(1, t('itemRequest.form.validation.commentRequired')),
+    items: z.array(itemRequestItemSchema).min(1, t('itemRequest.form.validation.itemsRequired')),
+  });
+
+  type ItemRequestFormValues = z.infer<typeof itemRequestSchema>;
+
   // Form setup
   const form = useForm<ItemRequestFormValues>({
     resolver: zodResolver(itemRequestSchema),
@@ -99,9 +99,9 @@ const ItemRequestForm = () => {
   const { data: itemsData, isLoading: isLoadingItems } = useItemsQuery();
 
   // Fetch item request data for edit mode
-  const { 
-    data: itemRequestData, 
-    isLoading: isLoadingItemRequest, 
+  const {
+    data: itemRequestData,
+    isLoading: isLoadingItemRequest,
     isError: isItemRequestError,
     error: itemRequestError
   } = useItemRequestQuery(isEditMode ? id : undefined);
@@ -132,12 +132,11 @@ const ItemRequestForm = () => {
   }, [itemRequestData, isEditMode, form]);
 
   // Filter buildings based on selected facility
-  const filteredBuildings = buildingsData?.results?.filter(building => 
+  const filteredBuildings = buildingsData?.results?.filter(building =>
     selectedFacility ? building.facility === selectedFacility : true
   ) || [];
 
   const onSubmit = (data: ItemRequestFormValues) => {
-    // Ensure all required fields are properly typed and present
     const formattedData: ItemRequestCreatePayload = {
       name: data.name,
       description: data.description,
@@ -159,7 +158,7 @@ const ItemRequestForm = () => {
         model: item.model
       }))
     };
-    
+
     if (isEditMode && id) {
       updateItemRequestMutation.mutate(
         { id, itemRequest: formattedData },
@@ -189,7 +188,7 @@ const ItemRequestForm = () => {
 
   // Get filtered subcategories for a specific item
   const getFilteredSubcategories = (categoryId: number) => {
-    return assetSubcategoriesData?.results?.filter(subcategory => 
+    return assetSubcategoriesData?.results?.filter(subcategory =>
       subcategory.asset_category === categoryId
     ) || [];
   };
@@ -199,7 +198,7 @@ const ItemRequestForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-muted-foreground">Loading item request details...</p>
+          <p className="text-sm text-muted-foreground">{t('itemRequest.form.loading')}</p>
         </div>
       </div>
     );
@@ -208,12 +207,12 @@ const ItemRequestForm = () => {
   if (isEditMode && isItemRequestError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-lg font-medium">Error loading item request details</div>
+        <div className="text-red-500 text-lg font-medium">{t('itemRequest.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {itemRequestError instanceof Error ? itemRequestError.message : 'An unknown error occurred'}
+          {itemRequestError instanceof Error ? itemRequestError.message : t('itemRequest.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Item Requests
+          {t('itemRequest.form.backToList')}
         </Button>
       </div>
     );
@@ -223,19 +222,19 @@ const ItemRequestForm = () => {
     <div className="container mx-auto py-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? 'Edit Item Request' : 'Create Item Request'}
+              {isEditMode ? t('itemRequest.form.editTitle') : t('itemRequest.form.createTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isEditMode ? 'Update item request information' : 'Fill in the details to create a new item request'}
+              {isEditMode ? t('itemRequest.form.editSubtitle') : t('itemRequest.form.createSubtitle')}
             </p>
           </div>
         </div>
@@ -246,7 +245,7 @@ const ItemRequestForm = () => {
           {/* Basic Information Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">Basic Information</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">{t('itemRequest.form.sections.basicInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,9 +255,9 @@ const ItemRequestForm = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Name *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.name')} *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter request name" {...field} />
+                        <Input placeholder={t('itemRequest.form.placeholders.requestName')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -271,18 +270,18 @@ const ItemRequestForm = () => {
                   name="request_from"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Request From *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.requestFrom')} *</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value ? String(field.value) : ''}
                           onValueChange={(value) => field.onChange(Number(value))}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select store" />
+                            <SelectValue placeholder={t('itemRequest.form.placeholders.selectStore')} />
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingStores ? (
-                              <SelectItem value="loading" disabled>Loading stores...</SelectItem>
+                              <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingStores')}</SelectItem>
                             ) : (
                               storesData?.results?.map((store) => (
                                 <SelectItem key={store.id} value={String(store.id)}>
@@ -304,9 +303,9 @@ const ItemRequestForm = () => {
                   name="requested_by"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Requested By *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.requestedBy')} *</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           value={user ? `${user.name || user.email} (${user.email})` : ''}
                           disabled
                           className="bg-gray-50"
@@ -323,7 +322,7 @@ const ItemRequestForm = () => {
                   name="required_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Required Date *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.requiredDate')} *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -332,24 +331,24 @@ const ItemRequestForm = () => {
                   )}
                 />
 
-                {/* Department - Always shown */}
+                {/* Department */}
                 <FormField
                   control={form.control}
                   name="department"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Department</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.department')}</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value ? String(field.value) : ''}
                           onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select department" />
+                            <SelectValue placeholder={t('itemRequest.form.placeholders.selectDepartment')} />
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingDepartments ? (
-                              <SelectItem value="loading" disabled>Loading departments...</SelectItem>
+                              <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingDepartments')}</SelectItem>
                             ) : (
                               departmentsData?.results?.map((dept) => (
                                 <SelectItem key={dept.id} value={String(dept.id)}>
@@ -371,15 +370,15 @@ const ItemRequestForm = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Type *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.type')} *</FormLabel>
                       <FormControl>
                         <Select value={field.value} onValueChange={field.onChange}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
+                            <SelectValue placeholder={t('itemRequest.form.placeholders.selectType')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="for_use">For Use</SelectItem>
-                            <SelectItem value="for_store">For Store</SelectItem>
+                            <SelectItem value="for_use">{t('itemRequest.form.typeOptions.for_use')}</SelectItem>
+                            <SelectItem value="for_store">{t('itemRequest.form.typeOptions.for_store')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -395,7 +394,7 @@ const ItemRequestForm = () => {
                     name="facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Facility</FormLabel>
+                        <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.facility')}</FormLabel>
                         <FormControl>
                           <Select
                             value={field.value ? String(field.value) : ''}
@@ -407,11 +406,11 @@ const ItemRequestForm = () => {
                             }}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Select facility" />
+                              <SelectValue placeholder={t('itemRequest.form.placeholders.selectFacility')} />
                             </SelectTrigger>
                             <SelectContent>
                               {isLoadingFacilities ? (
-                                <SelectItem value="loading" disabled>Loading facilities...</SelectItem>
+                                <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingFacilities')}</SelectItem>
                               ) : (
                                 facilitiesData?.results?.map((facility) => (
                                   <SelectItem key={facility.id} value={String(facility.id)}>
@@ -435,18 +434,18 @@ const ItemRequestForm = () => {
                     name="building"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Building</FormLabel>
+                        <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.building')}</FormLabel>
                         <FormControl>
                           <Select
                             value={field.value ? String(field.value) : ''}
                             onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Select building" />
+                              <SelectValue placeholder={t('itemRequest.form.placeholders.selectBuilding')} />
                             </SelectTrigger>
                             <SelectContent>
                               {isLoadingBuildings ? (
-                                <SelectItem value="loading" disabled>Loading buildings...</SelectItem>
+                                <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingBuildings')}</SelectItem>
                               ) : (
                                 filteredBuildings.map((building) => (
                                   <SelectItem key={building.id} value={String(building.id)}>
@@ -469,18 +468,18 @@ const ItemRequestForm = () => {
                   name="approved_by"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Approved By *</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.approvedBy')} *</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value ? String(field.value) : ''}
                           onValueChange={(value) => field.onChange(Number(value))}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select approver" />
+                            <SelectValue placeholder={t('itemRequest.form.placeholders.selectApprover')} />
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingUsers ? (
-                              <SelectItem value="loading" disabled>Loading users...</SelectItem>
+                              <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingUsers')}</SelectItem>
                             ) : (
                               usersData?.results?.map((user) => (
                                 <SelectItem key={user.id} value={String(user.id)}>
@@ -506,12 +505,12 @@ const ItemRequestForm = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Description *</FormLabel>
+                    <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.description')} *</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter request description" 
+                      <Textarea
+                        placeholder={t('itemRequest.form.placeholders.requestDescription')}
                         rows={3}
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -524,7 +523,7 @@ const ItemRequestForm = () => {
           {/* Comment Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">Additional Comments</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">{t('itemRequest.form.sections.comments')}</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
@@ -532,12 +531,12 @@ const ItemRequestForm = () => {
                 name="comment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Comment *</FormLabel>
+                    <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.comment')} *</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter additional comments or special instructions" 
+                      <Textarea
+                        placeholder={t('itemRequest.form.placeholders.additionalComments')}
                         rows={4}
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -553,16 +552,16 @@ const ItemRequestForm = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Package className="h-5 w-5 text-green-600" />
-                  Requested Items
+                  {t('itemRequest.form.sections.items')}
                 </CardTitle>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={addItem}
                   className="bg-green-600 hover:bg-green-700"
                   size="sm"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Item
+                  {t('itemRequest.form.addItemButton')}
                 </Button>
               </div>
             </CardHeader>
@@ -570,7 +569,7 @@ const ItemRequestForm = () => {
               {fields.map((field, index) => (
                 <div key={field.id} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-medium text-gray-900">Item {index + 1}</h4>
+                    <h4 className="text-sm font-medium text-gray-900">{t('itemRequest.form.fields.itemLabel', { index: index + 1 })}</h4>
                     {fields.length > 1 && (
                       <Button
                         type="button"
@@ -583,7 +582,7 @@ const ItemRequestForm = () => {
                       </Button>
                     )}
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Item */}
                     <FormField
@@ -591,18 +590,18 @@ const ItemRequestForm = () => {
                       name={`items.${index}.item_id`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Item *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.item')} *</FormLabel>
                           <FormControl>
                             <Select
                               value={field.value ? String(field.value) : ''}
                               onValueChange={(value) => field.onChange(Number(value))}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select item" />
+                                <SelectValue placeholder={t('itemRequest.form.placeholders.selectItem')} />
                               </SelectTrigger>
                               <SelectContent>
                                 {isLoadingItems ? (
-                                  <SelectItem value="loading" disabled>Loading items...</SelectItem>
+                                  <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingItems')}</SelectItem>
                                 ) : (
                                   itemsData?.results?.map((item) => (
                                     <SelectItem key={item.id} value={String(item.id)}>
@@ -624,12 +623,12 @@ const ItemRequestForm = () => {
                       name={`items.${index}.quantity`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Quantity *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.quantity')} *</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
+                            <Input
+                              type="number"
                               min="1"
-                              placeholder="1" 
+                              placeholder="1"
                               {...field}
                               onChange={(e) => field.onChange(Number(e.target.value))}
                             />
@@ -645,7 +644,7 @@ const ItemRequestForm = () => {
                       name={`items.${index}.category`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Category *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.category')} *</FormLabel>
                           <FormControl>
                             <Select
                               value={field.value ? String(field.value) : ''}
@@ -655,11 +654,11 @@ const ItemRequestForm = () => {
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
+                                <SelectValue placeholder={t('itemRequest.form.placeholders.selectCategory')} />
                               </SelectTrigger>
                               <SelectContent>
                                 {isLoadingAssetCategories ? (
-                                  <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                                  <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingCategories')}</SelectItem>
                                 ) : (
                                   assetCategoriesData?.results?.map((category) => (
                                     <SelectItem key={category.id} value={String(category.id)}>
@@ -681,7 +680,7 @@ const ItemRequestForm = () => {
                       name={`items.${index}.subcategory`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Subcategory *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.subcategory')} *</FormLabel>
                           <FormControl>
                             <Select
                               value={field.value ? String(field.value) : ''}
@@ -689,11 +688,11 @@ const ItemRequestForm = () => {
                               disabled={!watchSelectedCategory[index]?.category}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select subcategory" />
+                                <SelectValue placeholder={t('itemRequest.form.placeholders.selectSubcategory')} />
                               </SelectTrigger>
                               <SelectContent>
                                 {isLoadingAssetSubcategories ? (
-                                  <SelectItem value="loading" disabled>Loading subcategories...</SelectItem>
+                                  <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingSubcategories')}</SelectItem>
                                 ) : (
                                   getFilteredSubcategories(watchSelectedCategory[index]?.category || 0).map((subcategory) => (
                                     <SelectItem key={subcategory.id} value={String(subcategory.id)}>
@@ -715,18 +714,18 @@ const ItemRequestForm = () => {
                       name={`items.${index}.model`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Model *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.model')} *</FormLabel>
                           <FormControl>
                             <Select
                               value={field.value ? String(field.value) : ''}
                               onValueChange={(value) => field.onChange(Number(value))}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select model" />
+                                <SelectValue placeholder={t('itemRequest.form.placeholders.selectModel')} />
                               </SelectTrigger>
                               <SelectContent>
                                 {isLoadingModels ? (
-                                  <SelectItem value="loading" disabled>Loading models...</SelectItem>
+                                  <SelectItem value="loading" disabled>{t('itemRequest.form.placeholders.loadingModels')}</SelectItem>
                                 ) : (
                                   modelsData?.results?.map((model) => (
                                     <SelectItem key={model.id} value={String(model.id)}>
@@ -750,12 +749,12 @@ const ItemRequestForm = () => {
                       name={`items.${index}.description`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Item Description *</FormLabel>
+                          <FormLabel className="text-sm font-medium">{t('itemRequest.form.fields.itemDescription')} *</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Describe the specific item requirements" 
+                            <Textarea
+                              placeholder={t('itemRequest.form.placeholders.itemDescription')}
                               rows={2}
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -772,17 +771,17 @@ const ItemRequestForm = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-end space-x-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleCancel}
                 >
-                  Cancel
+                  {t('itemRequest.form.cancel')}
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={
-                    createItemRequestMutation.isPending || 
+                    createItemRequestMutation.isPending ||
                     updateItemRequestMutation.isPending
                   }
                   className="bg-green-600 hover:bg-green-700"
@@ -790,10 +789,10 @@ const ItemRequestForm = () => {
                   {createItemRequestMutation.isPending || updateItemRequestMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? 'Updating...' : 'Creating...'}
+                      {isEditMode ? t('itemRequest.form.updating') : t('itemRequest.form.creating')}
                     </>
                   ) : (
-                    isEditMode ? 'Update Request' : 'Create Request'
+                    isEditMode ? t('itemRequest.form.update') : t('itemRequest.form.create')
                   )}
                 </Button>
               </div>
@@ -805,4 +804,4 @@ const ItemRequestForm = () => {
   );
 };
 
-export default ItemRequestForm; 
+export default ItemRequestForm;

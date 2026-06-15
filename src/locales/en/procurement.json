@@ -1,0 +1,152 @@
+{
+  "purchaseOrder": {
+    "management": "Purchase Order Management",
+    "add": "Add Purchase Order",
+    "loading": "Loading purchase orders...",
+    "error": "Error loading purchase orders",
+    "noItems": "No purchase orders found",
+    "deleteTitle": "Delete Purchase Order",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the purchase order.",
+    "searchPlaceholder": "Search by type, vendor, or requested by...",
+    "columns": {
+      "type": "Type",
+      "vendor": "Vendor",
+      "requestedBy": "Requested By",
+      "amount": "Amount",
+      "status": "Status",
+      "date": "Date"
+    },
+    "form": {
+      "createTitle": "Create Purchase Order",
+      "editTitle": "Edit Purchase Order",
+      "type": "Type",
+      "vendor": "Vendor",
+      "facility": "Facility",
+      "description": "Description",
+      "amount": "Amount",
+      "currency": "Currency",
+      "expectedDeliveryDate": "Expected Delivery Date"
+    }
+  },
+  "poRequisition": {
+    "management": "PO Requisition Management",
+    "add": "Add PO Requisition",
+    "loading": "Loading PO requisitions...",
+    "error": "Error loading PO requisitions",
+    "noItems": "No PO requisitions found",
+    "deleteTitle": "Delete PO Requisition",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this PO requisition.",
+    "searchPlaceholder": "Search by title, vendor, or status...",
+    "columns": {
+      "title": "Title",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "status": "Status",
+      "date": "Date",
+      "requestedBy": "Requested By"
+    },
+    "form": {
+      "createTitle": "Create PO Requisition",
+      "editTitle": "Edit PO Requisition",
+      "title": "Title",
+      "vendor": "Vendor",
+      "facility": "Facility",
+      "description": "Description",
+      "amount": "Amount"
+    }
+  },
+  "requestQuotation": {
+    "management": "Request Quotation Management",
+    "add": "Add Request Quotation",
+    "loading": "Loading request quotations...",
+    "error": "Error loading request quotations",
+    "noItems": "No request quotations found",
+    "deleteTitle": "Delete Request Quotation",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this request quotation.",
+    "searchPlaceholder": "Search by title, vendor, or status...",
+    "columns": {
+      "title": "Title",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "status": "Status",
+      "date": "Date"
+    },
+    "form": {
+      "createTitle": "Create Request Quotation",
+      "editTitle": "Edit Request Quotation",
+      "title": "Title",
+      "vendor": "Vendor",
+      "facility": "Facility",
+      "description": "Description",
+      "amount": "Amount",
+      "validUntil": "Valid Until"
+    }
+  },
+  "goodsReceivedNote": {
+    "management": "Goods Received Note Management",
+    "add": "Add Goods Received Note",
+    "loading": "Loading goods received notes...",
+    "error": "Error loading goods received notes",
+    "noItems": "No goods received notes found",
+    "deleteTitle": "Delete Goods Received Note",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this goods received note.",
+    "searchPlaceholder": "Search by GRN number, vendor, or purchase order...",
+    "columns": {
+      "grnNumber": "GRN Number",
+      "vendor": "Vendor",
+      "purchaseOrder": "Purchase Order",
+      "receivedDate": "Received Date",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Goods Received Note",
+      "editTitle": "Edit Goods Received Note",
+      "vendor": "Vendor",
+      "purchaseOrder": "Purchase Order",
+      "receivedDate": "Received Date",
+      "notes": "Notes"
+    }
+  },
+  "vendorContract": {
+    "management": "Vendor Contract Management",
+    "description": "Manage and track vendor contracts",
+    "add": "Add Vendor Contract",
+    "loading": "Loading vendor contracts...",
+    "error": "Error loading vendor contracts",
+    "noItems": "No vendor contracts found",
+    "deleteTitle": "Delete Vendor Contract",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this vendor contract.",
+    "searchPlaceholder": "Search by contract number, vendor, or status...",
+    "columns": {
+      "contractNumber": "Contract Number",
+      "vendor": "Vendor",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Vendor Contract",
+      "editTitle": "Edit Vendor Contract",
+      "vendor": "Vendor",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "amount": "Amount",
+      "description": "Description",
+      "currency": "Currency"
+    }
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "draft": "Draft",
+    "sent": "Sent",
+    "received": "Received",
+    "partiallyReceived": "Partially Received",
+    "fullyReceived": "Fully Received",
+    "cancelled": "Cancelled",
+    "active": "Active",
+    "expired": "Expired"
+  }
+}

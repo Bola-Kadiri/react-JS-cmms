@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit, Loader2 } from 'lucide-react';
 import { useLandlordQuery } from '@/hooks/landlord/useLandlordQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const LandlordDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
@@ -32,7 +34,7 @@ const LandlordDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading landlord details...</p>
+          <p className="text-sm text-muted-foreground">{t('landlord.detail.loading')}</p>
         </div>
       </div>
     );
@@ -41,12 +43,12 @@ const LandlordDetailView = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading landlord details</div>
+        <div className="text-red-500 text-xl">{t('landlord.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('landlord.detail.errorFallback')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Landlords
+          {t('landlord.detail.backButton')}
         </Button>
       </div>
     );
@@ -55,9 +57,9 @@ const LandlordDetailView = () => {
   if (!landlord) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Landlord not found</div>
+        <div className="text-red-500 text-xl">{t('landlord.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Landlords
+          {t('landlord.detail.backButton')}
         </Button>
       </div>
     );
@@ -67,17 +69,17 @@ const LandlordDetailView = () => {
     <div className="container mx-auto py-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">Landlord Details</h1>
+          <h1 className="text-2xl font-bold">{t('landlord.detail.title')}</h1>
         </div>
         <Button onClick={handleEdit}>
-          <Edit className="mr-2 h-4 w-4" /> Edit Landlord
+          <Edit className="mr-2 h-4 w-4" /> {t('landlord.detail.editButton')}
         </Button>
       </div>
 
@@ -85,20 +87,20 @@ const LandlordDetailView = () => {
         {/* Landlord Info Card */}
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Landlord Information</CardTitle>
+            <CardTitle>{t('landlord.detail.landlordInfo')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Name</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('landlord.detail.name')}</p>
                   <p className="text-lg">{landlord.name}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('landlord.detail.status')}</p>
                   <span className={`px-3 py-1 rounded-full text-xs ${
-                    landlord.status === 'Active' 
-                      ? 'bg-green-500 text-white' 
+                    landlord.status === 'Active'
+                      ? 'bg-green-500 text-white'
                       : 'bg-red-500 text-white'
                   }`}>
                     {landlord.status}
@@ -107,19 +109,19 @@ const LandlordDetailView = () => {
               </div>
               <div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('landlord.detail.email')}</p>
                   <p className="text-lg">{landlord.email}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                  <p className="text-lg">{landlord.phone || 'Not provided'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('landlord.detail.phone')}</p>
+                  <p className="text-lg">{landlord.phone || t('landlord.detail.notProvided')}</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-4">
-              <p className="text-sm font-medium text-muted-foreground">Address</p>
-              <p className="text-lg whitespace-pre-line">{landlord.address || 'No address provided'}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('landlord.detail.address')}</p>
+              <p className="text-lg whitespace-pre-line">{landlord.address || t('landlord.detail.noAddress')}</p>
             </div>
           </CardContent>
         </Card>

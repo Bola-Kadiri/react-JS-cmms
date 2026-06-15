@@ -16,8 +16,10 @@ import { PaymentitemQueryParams } from '@/services/paymentitemsApi';
 import { Badge } from '@/components/ui/badge';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PaymentitemManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -125,7 +127,7 @@ const PaymentitemManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading paymentitems...</p>
+          <p className="text-sm text-muted-foreground">{t('paymentItem.loading')}</p>
         </div>
       </div>
     );
@@ -135,9 +137,9 @@ const PaymentitemManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading paymentitems</div>
+        <div className="text-red-500 text-xl">{t('paymentItem.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -146,10 +148,10 @@ const PaymentitemManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Paymentitem Management</h1>
+        <h1 className="text-2xl font-bold">{t('paymentItem.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddPaymentitem}>
-          <Plus className="mr-2 h-4 w-4" /> Add Paymentitem
+          <Plus className="mr-2 h-4 w-4" /> {t('paymentItem.add')}
         </Button>
         )}
       </div>
@@ -158,7 +160,7 @@ const PaymentitemManagement = () => {
       <div className="mb-6">
         <SearchFilter 
           onSearch={handleSearch}
-          placeholder="Search paymentitems..."
+          placeholder={t('paymentItem.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -180,7 +182,7 @@ const PaymentitemManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No paymentitems found.
+                    {t('paymentItem.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -258,9 +260,9 @@ const PaymentitemManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the paymentitem.
+              {t('paymentItem.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -273,10 +275,10 @@ const PaymentitemManagement = () => {
               {deletePaymentitemMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

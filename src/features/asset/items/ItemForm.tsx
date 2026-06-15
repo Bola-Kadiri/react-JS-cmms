@@ -13,22 +13,21 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Item } from '@/types/item';
 import { useItemQuery, useCreateItem, useUpdateItem } from '@/hooks/item/useItemQueries';
-
-
-// Form schema definition
-const itemSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string(),
-});
-
-type ItemFormValues = z.infer<typeof itemSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ItemForm = () => {
+  const { t } = useTypedTranslation('assets');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
-  // Item form setup
+
+  const itemSchema = z.object({
+    name: z.string().min(1, t('item.form.validation.nameRequired')),
+    description: z.string(),
+  });
+
+  type ItemFormValues = z.infer<typeof itemSchema>;
+
   const itemForm = useForm<ItemFormValues>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
@@ -37,22 +36,18 @@ const ItemForm = () => {
     }
   });
 
-  // Fetch item data for edit mode using our custom hook
-  const { 
-    data: itemData, 
-    isLoading: isLoadingItem, 
+  const {
+    data: itemData,
+    isLoading: isLoadingItem,
     isError: isItemError,
     error: itemError
   } = useItemQuery(isEditMode ? id : undefined);
 
-  // Use our custom mutation hooks
   const createItemMutation = useCreateItem();
   const updateItemMutation = useUpdateItem(id);
 
-  // Handle item data loading
   useEffect(() => {
     if (itemData && isEditMode) {
-      // Reset the form with item data
       itemForm.reset({
         name: itemData.name,
         description: itemData.description,
@@ -83,7 +78,7 @@ const ItemForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading item details...</p>
+          <p className="text-sm text-muted-foreground">{t('item.form.loading')}</p>
         </div>
       </div>
     );
@@ -92,12 +87,12 @@ const ItemForm = () => {
   if (isEditMode && isItemError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading item details</div>
+        <div className="text-red-500 text-xl">{t('item.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {itemError instanceof Error ? itemError.message : 'An unknown error occurred'}
+          {itemError instanceof Error ? itemError.message : t('item.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Items
+          {t('item.form.backToList')}
         </Button>
       </div>
     );
@@ -107,15 +102,15 @@ const ItemForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Item' : 'Create New Item'}
+            {isEditMode ? t('item.form.editTitle') : t('item.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -126,68 +121,64 @@ const ItemForm = () => {
             {/* Item Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Item Details</h2>
-                {/* <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                  Toggle
-                </Button> */}
+                <h2 className="text-lg font-medium">{t('item.form.sections.itemDetails')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid gap-4">
-                  
                   <FormField
                     control={itemForm.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t('item.form.fields.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Item name" {...field} />
+                          <Input placeholder={t('item.form.placeholders.name')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
-                  control={itemForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter item description"
-                          {...field}
-                          className="min-h-[100px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    control={itemForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('item.form.fields.description')}</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder={t('item.form.placeholders.description')}
+                            {...field}
+                            className="min-h-[100px]"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('item.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createItemMutation.isPending || updateItemMutation.isPending}
             >
               {(createItemMutation.isPending || updateItemMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('item.form.update') : t('item.form.save')}
             </Button>
           </div>
         </form>

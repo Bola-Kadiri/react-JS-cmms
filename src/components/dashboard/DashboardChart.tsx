@@ -10,6 +10,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { ChartData } from '@/types/dashboard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,11 +27,21 @@ interface DashboardChartProps {
 }
 
 const DashboardChart = ({ chartData }: DashboardChartProps) => {
+  const { t } = useTypedTranslation('dashboard');
+
+  const translateDatasetLabel = (label: string): string => {
+    const map: Record<string, string> = {
+      'Work Requests': t('chart.datasetLabels.workRequests'),
+      'Work Orders': t('chart.datasetLabels.workOrders'),
+    };
+    return map[label] ?? label;
+  };
+
   // Convert the API chart data to Chart.js format
   const data = {
     labels: chartData.labels || [],
     datasets: chartData.datasets.map((dataset) => ({
-      label: dataset.label,
+      label: translateDatasetLabel(dataset.label),
       data: dataset.data,
       backgroundColor: dataset.backgroundColor,
       borderColor: dataset.backgroundColor,
@@ -54,7 +65,7 @@ const DashboardChart = ({ chartData }: DashboardChartProps) => {
       },
       title: {
         display: true,
-        text: 'Monthly Trends',
+        text: t('chart.monthlyTrends'),
         font: {
           size: 16,
           weight: 'bold' as const,
@@ -97,7 +108,7 @@ const DashboardChart = ({ chartData }: DashboardChartProps) => {
   if (!chartData.labels?.length || !chartData.datasets?.length) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No chart data available</p>
+        <p className="text-gray-500">{t('chart.noData')}</p>
       </div>
     );
   }

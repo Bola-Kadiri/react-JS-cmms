@@ -1,0 +1,717 @@
+{
+  "facility": {
+    "management": "Gestion des Installations",
+    "add": "Ajouter une Installation",
+    "loading": "Chargement des installations...",
+    "error": "Erreur lors du chargement des installations",
+    "noItems": "Aucune installation trouvée",
+    "unknownCluster": "N/D",
+    "deleteTitle": "Supprimer l'Installation",
+    "deleteMessage": "Cette action est irréversible. Cette installation sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par nom, code ou ensemble...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "cluster": "Ensemble",
+      "clusterName": "Nom de l'Ensemble",
+      "type": "Type",
+      "status": "Statut",
+      "manager": "Gestionnaire",
+      "actions": "Actions"
+    },
+    "filter": {
+      "cluster": "Ensemble"
+    },
+    "delete": {
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer une Nouvelle Installation",
+      "editTitle": "Modifier l'Installation",
+      "sectionTitle": "Informations sur l'Installation",
+      "name": "Nom",
+      "namePlaceholder": "Nom de l'installation",
+      "code": "Code",
+      "codePlaceholder": "Code de l'installation (ex. FAC-001)",
+      "type": "Type",
+      "typePlaceholder": "Sélectionner le type d'installation",
+      "typeOptions": {
+        "residentials": "Résidentiels",
+        "commercial": "Commercial",
+        "office": "Bureau",
+        "mall": "Centre Commercial",
+        "warehouse": "Entrepôt"
+      },
+      "cluster": "Ensemble",
+      "clusterPlaceholder": "Sélectionner un ensemble",
+      "manager": "Gestionnaire d'Installation",
+      "managerPlaceholder": "Sélectionner un gestionnaire",
+      "addressGps": "Adresse GPS",
+      "addressGpsPlaceholder": "Entrez l'adresse détaillée de l'installation incluant les coordonnées GPS si disponibles",
+      "addressGpsDescription": "Fournissez l'adresse physique complète et les coordonnées GPS de l'installation",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails de l'installation...",
+      "error": "Erreur lors du chargement des détails de l'installation",
+      "backToFacilities": "Retour aux Installations",
+      "validation": {
+        "clusterRequired": "L'ensemble est requis",
+        "codeRequired": "Le code est requis",
+        "nameRequired": "Le nom est requis",
+        "addressRequired": "L'adresse GPS est requise",
+        "typeRequired": "Le type est requis",
+        "managerRequired": "Le gestionnaire est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails de l'Installation",
+      "subtitle": "Consulter les informations et les détails de l'installation",
+      "editButton": "Modifier l'Installation",
+      "backButton": "Retour aux Installations",
+      "backToList": "Retour à la Liste",
+      "facilityInfo": "Informations sur l'Installation",
+      "locationManagement": "Localisation et Gestion",
+      "facilityId": "ID de l'Installation",
+      "facilityCode": "Code de l'Installation",
+      "facilityType": "Type d'Installation",
+      "gpsAddress": "Adresse GPS",
+      "cluster": "Ensemble",
+      "clusterId": "ID :",
+      "manager": "Gestionnaire",
+      "managerId": "ID du Gestionnaire :",
+      "quickActions": "Actions Rapides",
+      "facilityInfoLabel": "Informations sur l'Installation",
+      "id": "ID :",
+      "loading": "Chargement des détails de l'installation...",
+      "error": "Erreur lors du chargement des détails de l'installation",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Installation introuvable"
+    }
+  },
+  "building": {
+    "management": "Gestion des Classifications d'Actifs",
+    "add": "Ajouter une Classification d'Actif",
+    "loading": "Chargement des classifications d'actifs...",
+    "error": "Erreur lors du chargement des classifications d'actifs",
+    "noItems": "Aucune classification d'actif trouvée",
+    "unknownFacility": "Installation Inconnue",
+    "unknownZone": "Zone Inconnue",
+    "deleteTitle": "Supprimer la Classification d'Actif",
+    "deleteMessage": "Cette action est irréversible. Cette classification d'actif sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par nom, code, installation ou zone...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "facility": "Installation",
+      "zone": "Zone",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filter": {
+      "status": "Statut",
+      "facility": "Installation",
+      "zone": "Zone",
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      }
+    },
+    "delete": {
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Bâtiment",
+      "editTitle": "Modifier le Bâtiment",
+      "sectionTitle": "Détails du Bâtiment",
+      "toggle": "Basculer",
+      "name": "Nom",
+      "namePlaceholder": "Nom du bâtiment",
+      "code": "Code",
+      "codePlaceholder": "Code du bâtiment",
+      "facility": "Installation",
+      "facilityPlaceholder": "Sélectionner une Installation",
+      "zone": "Zone",
+      "zonePlaceholderFirst": "Sélectionner une installation d'abord",
+      "zonePlaceholderLoading": "Chargement des zones...",
+      "zonePlaceholder": "Sélectionner une Zone",
+      "status": "Statut",
+      "statusPlaceholder": "Sélectionner le statut",
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails du bâtiment...",
+      "error": "Erreur lors du chargement des détails du bâtiment",
+      "backToBuildings": "Retour aux Bâtiments",
+      "description": "Description",
+      "validation": {
+        "codeRequired": "Le code est requis",
+        "nameRequired": "Le nom est requis",
+        "facilityRequired": "L'installation est requise",
+        "zoneRequired": "La zone est requise"
+      }
+    },
+    "detail": {
+      "title": "Détails du Bâtiment",
+      "editButton": "Modifier le Bâtiment",
+      "backButton": "Retour aux Bâtiments",
+      "buildingInfo": "Informations du Bâtiment",
+      "code": "Code",
+      "name": "Nom",
+      "facility": "Installation",
+      "facilityCode": "Code :",
+      "zone": "Zone",
+      "zoneCode": "Code :",
+      "status": "Statut",
+      "unknownFacility": "Installation Inconnue",
+      "unknownZone": "Zone Inconnue",
+      "quickActions": "Actions Rapides",
+      "loading": "Chargement des détails du bâtiment...",
+      "error": "Erreur lors du chargement du bâtiment",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Bâtiment introuvable"
+    }
+  },
+  "region": {
+    "management": "Gestion des Régions",
+    "add": "Ajouter une Région",
+    "loading": "Chargement des régions...",
+    "error": "Erreur lors du chargement des régions",
+    "noItems": "Aucune région trouvée",
+    "unknownManager": "Gestionnaire Inconnu",
+    "deleteTitle": "Supprimer la Région",
+    "deleteMessage": "Cette action est irréversible. Cette région sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par nom, pays ou gestionnaire...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "status": "Statut",
+      "country": "Pays",
+      "manager": "Gestionnaire",
+      "actions": "Actions"
+    },
+    "filter": {
+      "country": "Pays"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Cette région sera définitivement supprimée.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer une Nouvelle Région",
+      "editTitle": "Modifier la Région",
+      "sectionTitle": "Détails de la Région",
+      "toggle": "Basculer",
+      "name": "Nom",
+      "namePlaceholder": "Nom de la région",
+      "country": "Pays",
+      "countryPlaceholder": "Pays",
+      "manager": "Gestionnaire",
+      "managerPlaceholder": "Sélectionner un Gestionnaire",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails de la région...",
+      "error": "Erreur lors du chargement des détails de la région",
+      "backToRegions": "Retour aux Régions",
+      "code": "Code",
+      "description": "Description",
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "countryRequired": "Le pays est requis",
+        "managerRequired": "Le gestionnaire est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails de la Région",
+      "subtitle": "Gérer et consulter les informations de la région",
+      "editButton": "Modifier la Région",
+      "backButton": "Retour aux Régions",
+      "regionId": "ID de la Région :",
+      "manager": "Gestionnaire de Région",
+      "managerRole": "Gestionnaire Régional",
+      "created": "Créé",
+      "daysAgo": "jours",
+      "lastUpdated": "Dernière Mise à Jour",
+      "recentlyModified": "Récemment modifié",
+      "overview": "Aperçu de la Région",
+      "loading": "Chargement des détails de la région",
+      "loadingSubtitle": "Veuillez patienter pendant que nous récupérons les informations...",
+      "error": "Erreur lors du chargement de la région",
+      "errorFallback": "Une erreur s'est produite lors du chargement des détails de la région",
+      "notFound": "Région introuvable",
+      "notFoundMessage": "La région que vous recherchez n'existe pas ou a peut-être été supprimée.",
+      "summary": "{{name}} est une région d'importance stratégique située en {{country}}. Sous la direction compétente de {{manager}}, cette région est opérationnelle depuis {{createdAt}}. Les informations de la région ont été mises à jour pour la dernière fois le {{updatedAt}}."
+    }
+  },
+  "cluster": {
+    "management": "Gestion des Clusters",
+    "add": "Ajouter un Cluster",
+    "loading": "Chargement des clusters...",
+    "error": "Erreur lors du chargement des clusters",
+    "noItems": "Aucun cluster trouvé",
+    "unknownRegion": "Région Inconnue",
+    "unknownManager": "Gestionnaire Inconnu",
+    "searchPlaceholder": "Rechercher par nom, région ou gestionnaire...",
+    "columns": {
+      "name": "Nom",
+      "region": "Région",
+      "manager": "Gestionnaire",
+      "actions": "Actions"
+    },
+    "filter": {
+      "region": "Région"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Ce cluster sera définitivement supprimé.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Cluster",
+      "editTitle": "Modifier le Cluster",
+      "sectionTitle": "Détails du Cluster",
+      "toggle": "Basculer",
+      "region": "Région",
+      "regionPlaceholder": "Sélectionner une Région",
+      "name": "Nom",
+      "namePlaceholder": "Nom du cluster",
+      "manager": "Gestionnaire",
+      "managerPlaceholder": "Sélectionner un Gestionnaire",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails du cluster...",
+      "error": "Erreur lors du chargement des détails du cluster",
+      "backToClusters": "Retour aux Clusters",
+      "validation": {
+        "regionRequired": "La région est requise",
+        "nameRequired": "Le nom est requis",
+        "managerRequired": "Le gestionnaire est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails du Cluster",
+      "subtitle": "Gérer et consulter les informations du cluster",
+      "editButton": "Modifier le Cluster",
+      "backButton": "Retour aux Clusters",
+      "clusterId": "ID du Cluster :",
+      "regionInfo": "Informations de la Région",
+      "regionId": "ID de la Région :",
+      "manager": "Gestionnaire de Cluster",
+      "managerRole": "Gestionnaire de Cluster",
+      "created": "Créé",
+      "daysAgo": "jours",
+      "lastUpdated": "Dernière Mise à Jour",
+      "recentlyModified": "Récemment modifié",
+      "overview": "Aperçu du Cluster",
+      "loading": "Chargement des détails du cluster",
+      "loadingSubtitle": "Veuillez patienter pendant que nous récupérons les informations...",
+      "error": "Erreur lors du chargement du cluster",
+      "errorFallback": "Une erreur s'est produite lors du chargement des détails du cluster",
+      "notFound": "Cluster introuvable",
+      "notFoundMessage": "Le cluster que vous recherchez n'existe pas ou a peut-être été supprimé.",
+      "summary": "{{name}} est un cluster essentiel opérant au sein de la région {{region}} en {{country}}. Sous la direction compétente de {{manager}}, ce cluster est opérationnel depuis {{createdAt}}. Les informations du cluster ont été mises à jour pour la dernière fois le {{updatedAt}}."
+    }
+  },
+  "subsystem": {
+    "management": "Gestion des Emplacements d'Actifs",
+    "add": "Ajouter un Emplacement d'Actif",
+    "loading": "Chargement des emplacements d'actifs...",
+    "error": "Erreur lors du chargement des emplacements d'actifs",
+    "noItems": "Aucun sous-système trouvé",
+    "na": "N/D",
+    "deleteTitle": "Supprimer l'Emplacement d'Actif",
+    "deleteMessage": "Cette action est irréversible. Ce sous-système sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom, code ou bâtiment...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "facility": "Installation",
+      "status": "Statut",
+      "buildingCode": "Code du Bâtiment",
+      "buildingName": "Nom du Bâtiment",
+      "createdAt": "Créé le",
+      "actions": "Actions"
+    },
+    "filter": {
+      "building": "Bâtiment"
+    },
+    "delete": {
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Sous-système",
+      "editTitle": "Modifier le Sous-système",
+      "sectionTitle": "Détails du Sous-système",
+      "toggle": "Basculer",
+      "name": "Nom",
+      "namePlaceholder": "Nom du sous-système",
+      "building": "Bâtiment",
+      "buildingPlaceholder": "Sélectionner un Bâtiment",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails du sous-système...",
+      "error": "Erreur lors du chargement des détails du sous-système",
+      "backToSubsystems": "Retour aux Sous-systèmes",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "code": "Code",
+      "facility": "Installation",
+      "description": "Description",
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "buildingRequired": "Le bâtiment est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails du Sous-système",
+      "subtitle": "Voir les informations et paramètres du sous-système",
+      "editButton": "Modifier le Sous-système",
+      "backButton": "Retour aux Sous-systèmes",
+      "backToList": "Retour à la Liste",
+      "subsystemInfo": "Informations du Sous-système",
+      "subsystemId": "ID du Sous-système",
+      "subsystemName": "Nom du Sous-système",
+      "associatedBuilding": "Bâtiment Associé",
+      "buildingName": "Nom du Bâtiment",
+      "buildingCode": "Code du Bâtiment",
+      "buildingIdLabel": "ID du Bâtiment :",
+      "idLabel": "ID :",
+      "timestamps": "Horodatages",
+      "createdAt": "Créé le",
+      "updatedAt": "Mis à jour le",
+      "quickActions": "Actions Rapides",
+      "infoLabel": "Informations du Sous-système",
+      "loading": "Chargement des détails du sous-système...",
+      "error": "Erreur lors du chargement du sous-système",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Sous-système introuvable"
+    }
+  },
+  "zone": {
+    "management": "Gestion des Zones",
+    "add": "Ajouter une Zone",
+    "loading": "Chargement des zones...",
+    "error": "Erreur lors du chargement des zones",
+    "noItems": "Aucune zone trouvée",
+    "unknownFacility": "Installation Inconnue",
+    "none": "Aucune",
+    "deleteTitle": "Supprimer la Zone",
+    "deleteMessage": "Cette action est irréversible. Cette zone sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par nom, code ou installation...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "facility": "Installation",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filter": {
+      "facility": "Installation"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Cette zone sera définitivement supprimée.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer une Nouvelle Zone",
+      "editTitle": "Modifier la Zone",
+      "sectionTitle": "Détails de la Zone",
+      "toggle": "Basculer",
+      "code": "Code",
+      "codePlaceholder": "Code de la zone",
+      "name": "Nom",
+      "namePlaceholder": "Nom de la zone",
+      "facility": "Installation",
+      "facilityOptional": "Installation (Optionnel)",
+      "facilityPlaceholder": "Sélectionner une Installation",
+      "noneOption": "Aucune",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "update": "Mettre à jour",
+      "loading": "Chargement des détails de la zone...",
+      "error": "Erreur lors du chargement des détails de la zone",
+      "backToZones": "Retour aux Zones",
+      "description": "Description",
+      "validation": {
+        "codeRequired": "Le code est requis",
+        "nameRequired": "Le nom est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails de la Zone",
+      "editButton": "Modifier la Zone",
+      "backButton": "Retour aux Zones",
+      "zoneInfo": "Informations de la Zone",
+      "code": "Code",
+      "name": "Nom",
+      "associatedFacility": "Installation Associée",
+      "none": "Aucune",
+      "quickActions": "Actions Rapides",
+      "loading": "Chargement des détails de la zone...",
+      "error": "Erreur lors du chargement de la zone",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Zone introuvable"
+    }
+  },
+  "landlord": {
+    "management": "Gestion des Propriétaires",
+    "add": "Ajouter un Propriétaire",
+    "loading": "Chargement des propriétaires...",
+    "error": "Erreur lors du chargement des propriétaires",
+    "noItems": "Aucun propriétaire trouvé",
+    "deleteTitle": "Supprimer le Propriétaire",
+    "deleteMessage": "Cette action est irréversible. Ce propriétaire sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom, email ou téléphone...",
+    "columns": {
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "facility": "Installation",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Ce propriétaire sera définitivement supprimé.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Propriétaire",
+      "editTitle": "Modifier le Propriétaire",
+      "sectionTitle": "Détails du Propriétaire",
+      "name": "Nom",
+      "namePlaceholder": "Nom du propriétaire",
+      "email": "Email",
+      "emailPlaceholder": "Adresse email",
+      "phone": "Téléphone",
+      "phonePlaceholder": "Numéro de téléphone",
+      "address": "Adresse",
+      "addressPlaceholder": "Entrer l'adresse du propriétaire",
+      "facility": "Installation",
+      "status": "Statut",
+      "statusPlaceholder": "Sélectionner le statut",
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "loading": "Chargement des détails du propriétaire...",
+      "error": "Erreur lors du chargement des détails du propriétaire",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToLandlords": "Retour aux Propriétaires",
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "emailInvalid": "Adresse email invalide"
+      }
+    },
+    "detail": {
+      "title": "Détails du Propriétaire",
+      "editButton": "Modifier le Propriétaire",
+      "backButton": "Retour aux Propriétaires",
+      "landlordInfo": "Informations du Propriétaire",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "status": "Statut",
+      "notProvided": "Non fourni",
+      "noAddress": "Aucune adresse fournie",
+      "loading": "Chargement des détails du propriétaire...",
+      "error": "Erreur lors du chargement des détails du propriétaire",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Propriétaire introuvable"
+    }
+  },
+  "apartment": {
+    "management": "Gestion des Appartements",
+    "add": "Ajouter un Appartement",
+    "loading": "Chargement des appartements...",
+    "error": "Erreur lors du chargement des appartements",
+    "noItems": "Aucun appartement trouvé",
+    "deleteTitle": "Supprimer l'Appartement",
+    "deleteMessage": "Cette action est irréversible. Cet appartement sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par type, bâtiment ou propriétaire...",
+    "columns": {
+      "no": "N°",
+      "type": "Type",
+      "building": "Bâtiment",
+      "size": "Surface (m²)",
+      "ownershipType": "Type de propriété",
+      "landlord": "Propriétaire",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filter": {
+      "ownershipTypePlaceholder": "Filtrer par type de propriété",
+      "allOwnershipTypes": "Tous les types de propriété",
+      "statusPlaceholder": "Filtrer par statut",
+      "allStatuses": "Tous les statuts"
+    },
+    "ownershipType": {
+      "freehold": "Pleine propriété",
+      "leasehold": "Bail",
+      "freeholdLeasedOut": "Pleine propriété (Loué)"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Cet appartement sera définitivement supprimé.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouvel Appartement",
+      "editTitle": "Modifier l'Appartement",
+      "sectionTitle": "Détails de l'Appartement",
+      "no": "Numéro d'Appartement",
+      "noPlaceholder": "Entrer le numéro d'appartement",
+      "type": "Type",
+      "typePlaceholder": "Entrer le type d'appartement",
+      "building": "Bâtiment",
+      "buildingPlaceholder": "Sélectionner un bâtiment",
+      "noOfSqm": "Surface (m²)",
+      "noOfSqmPlaceholder": "Entrer la surface en m²",
+      "address": "Adresse",
+      "addressPlaceholder": "Entrer l'adresse de l'appartement",
+      "description": "Description",
+      "descriptionPlaceholder": "Entrer la description de l'appartement",
+      "landlord": "Propriétaire",
+      "landlordPlaceholder": "Sélectionner un propriétaire",
+      "ownershipType": "Type de propriété",
+      "ownershipTypePlaceholder": "Sélectionner le type de propriété",
+      "ownershipTypeOptions": {
+        "freehold": "Pleine propriété",
+        "leasehold": "Bail",
+        "freeholdLeasedOut": "Pleine propriété (Loué)"
+      },
+      "servicePowerChargeStartDate": "Date de début de facturation service/énergie",
+      "status": "Statut",
+      "statusPlaceholder": "Sélectionner le statut",
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "bookable": "Réservable",
+      "commonArea": "Espace commun",
+      "availableForLease": "Disponible à la location",
+      "remitLeasePayment": "Virer le paiement du bail",
+      "loading": "Chargement des détails de l'appartement...",
+      "error": "Erreur lors du chargement des détails de l'appartement",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToApartments": "Retour aux Appartements",
+      "validation": {
+        "noRequired": "Le numéro d'appartement est requis",
+        "typeRequired": "Le type est requis",
+        "buildingRequired": "Le bâtiment est requis",
+        "sqmPositive": "La surface doit être un nombre positif",
+        "landlordRequired": "Le propriétaire est requis",
+        "addressRequired": "L'adresse est requise"
+      }
+    },
+    "detail": {
+      "title": "Détails de l'Appartement",
+      "editButton": "Modifier",
+      "backButton": "Retour aux Appartements",
+      "overview": "Aperçu",
+      "statusInfo": "Informations de statut",
+      "building": "Bâtiment",
+      "ownershipType": "Type de propriété",
+      "landlord": "Propriétaire",
+      "size": "Surface",
+      "sizeSuffix": "m²",
+      "address": "Adresse",
+      "servicePowerChargeStartDate": "Date de début de facturation service/énergie",
+      "description": "Description",
+      "noDescription": "Aucune description fournie",
+      "buildingCode": "Code du bâtiment",
+      "bookable": "Réservable",
+      "commonArea": "Espace commun",
+      "availableForLease": "Disponible à la location",
+      "remitLeasePayment": "Virer le paiement du bail",
+      "loading": "Chargement des détails de l'appartement...",
+      "error": "Erreur lors du chargement des détails de l'appartement",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Appartement introuvable"
+    }
+  },
+  "apartmentType": {
+    "management": "Gestion des Types d'Appartement",
+    "add": "Ajouter un Type d'Appartement",
+    "loading": "Chargement des types d'appartement...",
+    "error": "Erreur lors du chargement des types d'appartement",
+    "noItems": "Aucun type d'appartement trouvé",
+    "deleteTitle": "Supprimer le Type d'Appartement",
+    "deleteMessage": "Cette action est irréversible. Ce type d'appartement sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom...",
+    "columns": {
+      "name": "Nom",
+      "description": "Description",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filter": {
+      "status": "Statut",
+      "all": "Tous",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "delete": {
+      "title": "Êtes-vous sûr ?",
+      "message": "Cette action est irréversible. Ce type d'appartement sera définitivement supprimé.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Type d'Appartement",
+      "editTitle": "Modifier le Type d'Appartement",
+      "sectionTitle": "Détails du Type d'Appartement",
+      "name": "Nom",
+      "namePlaceholder": "Nom du type d'appartement",
+      "description": "Description",
+      "status": "Statut",
+      "statusPlaceholder": "Sélectionner le statut",
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "loading": "Chargement des détails du type d'appartement...",
+      "error": "Erreur lors du chargement des détails du type d'appartement",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToApartmentTypes": "Retour aux Types d'Appartement",
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "statusRequired": "Le statut est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails du Type d'Appartement",
+      "editButton": "Modifier le Type d'Appartement",
+      "backButton": "Retour aux Types d'Appartement",
+      "idLabel": "ID :",
+      "slugLabel": "Slug :",
+      "activeTitle": "Ce type d'appartement est actuellement",
+      "activeStatus": "Actif",
+      "inactiveStatus": "Inactif",
+      "activeDescription": "Les types d'appartement actifs sont disponibles dans le système",
+      "inactiveDescription": "Les types d'appartement inactifs ne sont pas disponibles dans le système",
+      "lastUpdated": "Dernière mise à jour :",
+      "loading": "Chargement des détails du type d'appartement...",
+      "error": "Erreur lors du chargement des détails du type d'appartement",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Type d'appartement introuvable"
+    }
+  }
+}

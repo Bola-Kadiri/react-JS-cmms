@@ -17,13 +17,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const UnitmeasurementManagement = () => {
+  const { t } = useTypedTranslation('accounts');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [unitmeasurementToDelete, setUnitmeasurementToDelete] = useState<string | null>(null);
-  
+
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -32,13 +34,13 @@ const UnitmeasurementManagement = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const {canEdit} = useFeatureAccess('reference')
-  
+
   // Fetch all unitmeasurements - we'll filter client-side
-  const { 
-    data = { count: 0, results: [] }, 
-    isFetching, 
-    isError, 
-    refetch 
+  const {
+    data = { count: 0, results: [] },
+    isFetching,
+    isError,
+    refetch
   } = useUnitmeasurementsQuery();
 
   // Delete unitmeasurement mutation using our custom hook
@@ -47,39 +49,39 @@ const UnitmeasurementManagement = () => {
   // Client-side filtering logic
   const filteredData = useMemo(() => {
     let results = [...(data.results || [])];
-    
+
     // Search filter - search by code
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(unitmeasurement => 
+      results = results.filter(unitmeasurement =>
         unitmeasurement.code.toLowerCase().includes(searchLower)
       );
     }
-    
+
     // Status filter
     if (statusFilter && statusFilter !== 'all') {
       results = results.filter(unitmeasurement => unitmeasurement.status === statusFilter);
     }
-    
+
     // Type filter
     if (typeFilter && typeFilter !== 'all') {
       results = results.filter(unitmeasurement => unitmeasurement.type === typeFilter);
     }
-    
+
     return results;
   }, [data.results, searchValue, statusFilter, typeFilter]);
-  
+
   // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, pageSize]);
-  
+
   // Calculate total pages
   const totalUnitmeasurements = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalUnitmeasurements / pageSize));
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
@@ -178,7 +180,7 @@ const UnitmeasurementManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading unit measurements...</p>
+          <p className="text-sm text-muted-foreground">{t('unitMeasurement.loading')}</p>
         </div>
       </div>
     );
@@ -188,9 +190,9 @@ const UnitmeasurementManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading unit measurements</div>
+        <div className="text-red-500 text-xl">{t('unitMeasurement.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -201,18 +203,18 @@ const UnitmeasurementManagement = () => {
       {/* <Helmet>
         <title>Unit Measurement Management</title>
       </Helmet> */}
-      
+
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Unit Measurement Management</h1>
+        <h1 className="text-2xl font-bold">{t('unitMeasurement.management')}</h1>
         {/* {canEdit && (
           <Button onClick={handleAddUnitmeasurement}>
           <Plus className="mr-2 h-4 w-4" /> Add Unit Measurement
         </Button>
         )} */}
-         <PermissionGuard feature='reference' permission='view'>
+        <PermissionGuard feature='reference' permission='view'>
           <Button onClick={handleAddUnitmeasurement}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Unit Measurement
+            {t('unitMeasurement.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -221,40 +223,40 @@ const UnitmeasurementManagement = () => {
       <div className="mb-6 space-y-4">
         <div className="flex flex-row gap-4">
           <div className="flex-grow">
-            <SearchFilter 
+            <SearchFilter
               onSearch={handleSearch}
-              placeholder="Search by code..."
+              placeholder={t('unitMeasurement.searchPlaceholder')}
               initialSearchValue={searchValue}
             />
           </div>
-          
+
           <div className="w-48">
             <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder={t('unitMeasurement.filters.typePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Area">Area</SelectItem>
-                <SelectItem value="Packing">Packing</SelectItem>
-                <SelectItem value="Piece">Piece</SelectItem>
-                <SelectItem value="Time">Time</SelectItem>
-                <SelectItem value="Volume">Volume</SelectItem>
-                <SelectItem value="Weight">Weight</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="all">{t('unitMeasurement.filters.allTypes')}</SelectItem>
+                <SelectItem value="Area">{t('unitMeasurement.types.area')}</SelectItem>
+                <SelectItem value="Packing">{t('unitMeasurement.types.packing')}</SelectItem>
+                <SelectItem value="Piece">{t('unitMeasurement.types.piece')}</SelectItem>
+                <SelectItem value="Time">{t('unitMeasurement.types.time')}</SelectItem>
+                <SelectItem value="Volume">{t('unitMeasurement.types.volume')}</SelectItem>
+                <SelectItem value="Weight">{t('unitMeasurement.types.weight')}</SelectItem>
+                <SelectItem value="Other">{t('unitMeasurement.types.other')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="w-48">
             <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('unitMeasurement.filters.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="all">{t('unitMeasurement.filters.allStatuses')}</SelectItem>
+                <SelectItem value="Active">{t('unitMeasurement.status.active')}</SelectItem>
+                <SelectItem value="Inactive">{t('unitMeasurement.status.inactive')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -267,18 +269,18 @@ const UnitmeasurementManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Code</TableHead>
-                <TableHead className="font-medium text-gray-600">Symbol</TableHead>
-                <TableHead className="font-medium text-gray-600">Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('unitMeasurement.columns.code')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('unitMeasurement.columns.symbol')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('unitMeasurement.columns.type')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('unitMeasurement.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('unitMeasurement.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No unit measurements found.
+                    {t('unitMeasurement.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -301,9 +303,9 @@ const UnitmeasurementManagement = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end">
                         <PermissionGuard feature='reference' permission='view'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleViewUnitmeasurement(String(unitmeasurement.code))}
                           className="h-8 w-8"
                         >
@@ -311,9 +313,9 @@ const UnitmeasurementManagement = () => {
                         </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleEditUnitmeasurement(String(unitmeasurement.code))}
                           className="h-8 w-8"
                         >
@@ -321,9 +323,9 @@ const UnitmeasurementManagement = () => {
                         </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeleteUnitmeasurement(String(unitmeasurement.code))}
                           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
@@ -337,7 +339,7 @@ const UnitmeasurementManagement = () => {
               )}
             </TableBody>
           </Table>
-          
+
           {/* Pagination */}
           {totalUnitmeasurements > 0 && (
             <div className="p-4 border-t">
@@ -358,14 +360,14 @@ const UnitmeasurementManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the unit measurement.
+              {t('unitMeasurement.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteUnitmeasurement}
               disabled={deleteUnitmeasurementMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -373,10 +375,10 @@ const UnitmeasurementManagement = () => {
               {deleteUnitmeasurementMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -4,42 +4,43 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { useModels, useDeleteModel } from '@/hooks/model/useModelQueries';
 import { useAssetSubcategoriesQuery } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
 import { useManufacturers } from '@/hooks/manufacturer/useManufacturerQueries';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Model } from '@/types/model';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  ArrowUpDown, 
-  ArrowUp, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  ArrowUpDown,
+  ArrowUp,
   ArrowDown,
   Loader2,
   Filter
 } from 'lucide-react';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'code' | 'name' | 'subcategory' | 'manufacturer';
 type SortOrder = 'asc' | 'desc';
@@ -55,12 +56,13 @@ interface FilterState {
 }
 
 export const ModelManagement: React.FC = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sort, setSort] = useState<SortState>({ field: null, order: 'asc' });
   const [filters, setFilters] = useState<FilterState>({ subcategory: '', manufacturer: '' });
   const [modelToDelete, setModelToDelete] = useState<Model | null>(null);
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const deleteModel = useDeleteModel();
 
@@ -71,7 +73,6 @@ export const ModelManagement: React.FC = () => {
   const subcategories = subcategoriesResponse?.results || [];
   const manufacturers = manufacturersResponse?.results || [];
 
-  // Get subcategory and manufacturer names for display
   const getSubcategoryName = (subcategoryId: number) => {
     const subcategory = subcategories.find(s => s.id === subcategoryId);
     return subcategory?.name || 'Unknown';
@@ -82,13 +83,11 @@ export const ModelManagement: React.FC = () => {
     return manufacturer?.name || 'Unknown';
   };
 
-  // Filter and sort models
   const filteredAndSortedModels = useMemo(() => {
     if (!response?.results) return [];
-    
+
     let filtered = response.results;
 
-    // Apply search filter
     if (debouncedSearchTerm) {
       filtered = filtered.filter((model) =>
         model.code.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
@@ -96,21 +95,18 @@ export const ModelManagement: React.FC = () => {
       );
     }
 
-    // Apply subcategory filter
     if (filters.subcategory) {
-      filtered = filtered.filter((model) => 
+      filtered = filtered.filter((model) =>
         model.subcategory.toString() === filters.subcategory
       );
     }
 
-    // Apply manufacturer filter
     if (filters.manufacturer) {
-      filtered = filtered.filter((model) => 
+      filtered = filtered.filter((model) =>
         model.manufacturer.toString() === filters.manufacturer
       );
     }
 
-    // Apply sorting
     if (sort.field) {
       filtered.sort((a, b) => {
         let aValue: string | number;
@@ -195,10 +191,10 @@ export const ModelManagement: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Models</h1>
+        <h1 className="text-2xl font-bold">{t('model.management')}</h1>
         <Button onClick={() => navigate('/dashboard/asset/inventory-reference/models/create')}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Model
+          {t('model.addButton')}
         </Button>
       </div>
 
@@ -207,7 +203,7 @@ export const ModelManagement: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Filter className="h-5 w-5 mr-2" />
-            Search & Filter Models
+            {t('model.searchTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -216,7 +212,7 @@ export const ModelManagement: React.FC = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by code or name..."
+                placeholder={t('model.searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10"
@@ -229,10 +225,10 @@ export const ModelManagement: React.FC = () => {
               onValueChange={(value) => handleFilterChange('subcategory', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Filter by subcategory" />
+                <SelectValue placeholder={t('model.filterBySubcategory')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">All Subcategories</SelectItem>
+                <SelectItem value="none">{t('model.allSubcategories')}</SelectItem>
                 {subcategories.map((subcategory) => (
                   <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
                     {subcategory.name}
@@ -247,10 +243,10 @@ export const ModelManagement: React.FC = () => {
               onValueChange={(value) => handleFilterChange('manufacturer', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Filter by manufacturer" />
+                <SelectValue placeholder={t('model.filterByManufacturer')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">All Manufacturers</SelectItem>
+                <SelectItem value="none">{t('model.allManufacturers')}</SelectItem>
                 {manufacturers.map((manufacturer) => (
                   <SelectItem key={manufacturer.id} value={manufacturer.id.toString()}>
                     {manufacturer.name}
@@ -265,7 +261,7 @@ export const ModelManagement: React.FC = () => {
               onClick={clearFilters}
               disabled={!searchTerm && !filters.subcategory && !filters.manufacturer && !sort.field}
             >
-              Clear Filters
+              {t('model.clearFilters')}
             </Button>
           </div>
         </CardContent>
@@ -277,14 +273,14 @@ export const ModelManagement: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead>{t('model.columns.id')}</TableHead>
                 <TableHead>
                   <Button
                     variant="ghost"
                     onClick={() => handleSort('code')}
                     className="h-auto p-0 font-semibold"
                   >
-                    Code
+                    {t('model.columns.code')}
                     {getSortIcon('code')}
                   </Button>
                 </TableHead>
@@ -294,7 +290,7 @@ export const ModelManagement: React.FC = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-semibold"
                   >
-                    Name
+                    {t('model.columns.name')}
                     {getSortIcon('name')}
                   </Button>
                 </TableHead>
@@ -304,7 +300,7 @@ export const ModelManagement: React.FC = () => {
                     onClick={() => handleSort('subcategory')}
                     className="h-auto p-0 font-semibold"
                   >
-                    Subcategory
+                    {t('model.columns.subcategory')}
                     {getSortIcon('subcategory')}
                   </Button>
                 </TableHead>
@@ -314,11 +310,11 @@ export const ModelManagement: React.FC = () => {
                     onClick={() => handleSort('manufacturer')}
                     className="h-auto p-0 font-semibold"
                   >
-                    Manufacturer
+                    {t('model.columns.manufacturer')}
                     {getSortIcon('manufacturer')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">{t('model.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -326,13 +322,13 @@ export const ModelManagement: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-                    <p className="mt-2 text-sm text-gray-500">Loading models...</p>
+                    <p className="mt-2 text-sm text-gray-500">{t('model.loading')}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredAndSortedModels.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    <p className="text-gray-500">No models found</p>
+                    <p className="text-gray-500">{t('model.noItems')}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -372,8 +368,7 @@ export const ModelManagement: React.FC = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the
-                              model "{model.name}" and remove all associated data.
+                              {t('model.delete.description', { name: model.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -382,7 +377,7 @@ export const ModelManagement: React.FC = () => {
                               onClick={() => handleDelete(model)}
                               className="bg-red-500 hover:bg-red-600"
                             >
-                              Delete
+                              {t('model.delete.confirm')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -409,4 +404,4 @@ export const ModelManagement: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

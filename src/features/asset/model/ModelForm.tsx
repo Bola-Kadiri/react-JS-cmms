@@ -12,15 +12,7 @@ import { useAssetSubcategoriesQuery } from '@/hooks/assetsubcategory/useAssetSub
 import { useManufacturers } from '@/hooks/manufacturer/useManufacturerQueries';
 import { Model } from '@/types/model';
 import { Loader2, Save, X } from 'lucide-react';
-
-const modelSchema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  subcategory: z.number().min(1, 'Subcategory is required'),
-  manufacturer: z.number().min(1, 'Manufacturer is required'),
-});
-
-type ModelFormData = z.infer<typeof modelSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface ModelFormProps {
   model?: Model;
@@ -28,16 +20,26 @@ interface ModelFormProps {
   onSuccess?: () => void;
 }
 
-export const ModelForm: React.FC<ModelFormProps> = ({ 
-  model, 
-  onCancel, 
-  onSuccess 
+export const ModelForm: React.FC<ModelFormProps> = ({
+  model,
+  onCancel,
+  onSuccess
 }) => {
+  const { t } = useTypedTranslation('assets');
+
+  const modelSchema = z.object({
+    code: z.string().min(1, 'Code is required'),
+    name: z.string().min(1, 'Name is required'),
+    subcategory: z.number().min(1, 'Subcategory is required'),
+    manufacturer: z.number().min(1, 'Manufacturer is required'),
+  });
+
+  type ModelFormData = z.infer<typeof modelSchema>;
+
   const isEditing = Boolean(model);
   const createModel = useCreateModel();
   const updateModel = useUpdateModel();
 
-  // Fetch subcategories and manufacturers for dropdowns
   const { data: subcategoriesResponse } = useAssetSubcategoriesQuery();
   const { data: manufacturersResponse } = useManufacturers();
 
@@ -97,12 +99,12 @@ export const ModelForm: React.FC<ModelFormProps> = ({
     <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle>
-          {isEditing ? 'Edit Model' : 'Create New Model'}
+          {isEditing ? t('model.form.editTitle') : t('model.form.createTitle')}
         </CardTitle>
         <CardDescription>
-          {isEditing 
-            ? 'Update the model information below.'
-            : 'Enter the model details below.'
+          {isEditing
+            ? t('model.form.editDesc')
+            : t('model.form.createDesc')
           }
         </CardDescription>
       </CardHeader>
@@ -111,11 +113,11 @@ export const ModelForm: React.FC<ModelFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Code Field */}
             <div className="space-y-2">
-              <Label htmlFor="code">Code</Label>
+              <Label htmlFor="code">{t('model.form.fields.code')}</Label>
               <Input
                 id="code"
                 {...register('code')}
-                placeholder="Enter model code"
+                placeholder={t('model.form.placeholders.code')}
                 className={errors.code ? 'border-red-500' : ''}
               />
               {errors.code && (
@@ -125,11 +127,11 @@ export const ModelForm: React.FC<ModelFormProps> = ({
 
             {/* Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t('model.form.fields.name')}</Label>
               <Input
                 id="name"
                 {...register('name')}
-                placeholder="Enter model name"
+                placeholder={t('model.form.placeholders.name')}
                 className={errors.name ? 'border-red-500' : ''}
               />
               {errors.name && (
@@ -139,13 +141,13 @@ export const ModelForm: React.FC<ModelFormProps> = ({
 
             {/* Subcategory Dropdown */}
             <div className="space-y-2">
-              <Label htmlFor="subcategory">Asset Subcategory</Label>
+              <Label htmlFor="subcategory">{t('model.form.fields.subcategory')}</Label>
               <Select
                 value={selectedSubcategory ? selectedSubcategory.toString() : ''}
                 onValueChange={(value) => setValue('subcategory', parseInt(value, 10))}
               >
                 <SelectTrigger className={errors.subcategory ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select subcategory" />
+                  <SelectValue placeholder={t('model.form.placeholders.selectSubcategory')} />
                 </SelectTrigger>
                 <SelectContent>
                   {subcategories.map((subcategory) => (
@@ -162,13 +164,13 @@ export const ModelForm: React.FC<ModelFormProps> = ({
 
             {/* Manufacturer Dropdown */}
             <div className="space-y-2">
-              <Label htmlFor="manufacturer">Manufacturer</Label>
+              <Label htmlFor="manufacturer">{t('model.form.fields.manufacturer')}</Label>
               <Select
                 value={selectedManufacturer ? selectedManufacturer.toString() : ''}
                 onValueChange={(value) => setValue('manufacturer', parseInt(value, 10))}
               >
                 <SelectTrigger className={errors.manufacturer ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select manufacturer" />
+                  <SelectValue placeholder={t('model.form.placeholders.selectManufacturer')} />
                 </SelectTrigger>
                 <SelectContent>
                   {manufacturers.map((manufacturer) => (
@@ -193,18 +195,18 @@ export const ModelForm: React.FC<ModelFormProps> = ({
               disabled={isLoading}
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {t('model.form.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditing ? 'Updating...' : 'Creating...'}
+                  {isEditing ? t('model.form.updating') : t('model.form.creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  {isEditing ? 'Update' : 'Create'}
+                  {isEditing ? t('model.form.update') : t('model.form.create')}
                 </>
               )}
             </Button>
@@ -213,4 +215,4 @@ export const ModelForm: React.FC<ModelFormProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

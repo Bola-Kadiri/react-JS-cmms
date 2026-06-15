@@ -16,8 +16,10 @@ import { PorequisitionQueryParams } from '@/services/porequisitionsApi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PorequisitionManagement = () => {
+  const { t } = useTypedTranslation('procurement');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -149,7 +151,7 @@ const PorequisitionManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading PO requisitions...</p>
+          <p className="text-sm text-muted-foreground">{t('poRequisition.loading')}</p>
         </div>
       </div>
     );
@@ -159,9 +161,9 @@ const PorequisitionManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading PO requisitions</div>
+        <div className="text-red-500 text-xl">{t('poRequisition.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -174,9 +176,9 @@ const PorequisitionManagement = () => {
       </Helmet> */}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">PO Requisition Management</h1>
+        <h1 className="text-2xl font-bold">{t('poRequisition.management')}</h1>
         <Button onClick={handleAddPorequisition}>
-          <Plus className="mr-2 h-4 w-4" /> Add PO Requisition
+          <Plus className="mr-2 h-4 w-4" /> {t('poRequisition.add')}
         </Button>
       </div>
 
@@ -184,7 +186,7 @@ const PorequisitionManagement = () => {
       <div className="mb-6">
         <SearchFilter 
           onSearch={handleSearch}
-          placeholder="Search by invoice number, title, or vendor..."
+          placeholder={t('poRequisition.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -208,7 +210,7 @@ const PorequisitionManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No PO requisitions found.
+                    {t('poRequisition.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -297,9 +299,9 @@ const PorequisitionManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the PO requisition.
+              {t('poRequisition.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -312,7 +314,7 @@ const PorequisitionManagement = () => {
               {deletePorequisitionMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
                 'Delete'

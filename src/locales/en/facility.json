@@ -1,0 +1,717 @@
+{
+  "facility": {
+    "management": "Facility Management",
+    "add": "Add Facility",
+    "loading": "Loading facilities...",
+    "error": "Error loading facilities",
+    "noItems": "No facilities found",
+    "unknownCluster": "N/A",
+    "deleteTitle": "Delete Facility",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this facility.",
+    "searchPlaceholder": "Search by name, code, or cluster...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "cluster": "Cluster",
+      "clusterName": "Cluster Name",
+      "type": "Type",
+      "status": "Status",
+      "manager": "Manager",
+      "actions": "Actions"
+    },
+    "filter": {
+      "cluster": "Cluster"
+    },
+    "delete": {
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create New Facility",
+      "editTitle": "Edit Facility",
+      "sectionTitle": "Facility Information",
+      "name": "Name",
+      "namePlaceholder": "Facility name",
+      "code": "Code",
+      "codePlaceholder": "Facility code (e.g. FAC-001)",
+      "type": "Type",
+      "typePlaceholder": "Select facility type",
+      "typeOptions": {
+        "residentials": "Residentials",
+        "commercial": "Commercial",
+        "office": "Office",
+        "mall": "Mall",
+        "warehouse": "Warehouse"
+      },
+      "cluster": "Cluster",
+      "clusterPlaceholder": "Select cluster",
+      "manager": "Manager",
+      "managerPlaceholder": "Select manager",
+      "addressGps": "Address GPS",
+      "addressGpsPlaceholder": "Enter the detailed address of the facility including GPS coordinates if available",
+      "addressGpsDescription": "Provide the complete physical address and GPS coordinates of the facility",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading facility details...",
+      "error": "Error loading facility details",
+      "backToFacilities": "Back to Facilities",
+      "validation": {
+        "clusterRequired": "Cluster is required",
+        "codeRequired": "Code is required",
+        "nameRequired": "Name is required",
+        "addressRequired": "Address GPS is required",
+        "typeRequired": "Type is required",
+        "managerRequired": "Manager is required"
+      }
+    },
+    "detail": {
+      "title": "Facility Details",
+      "subtitle": "View facility information and details",
+      "editButton": "Edit Facility",
+      "backButton": "Back to Facilities",
+      "backToList": "Back to List",
+      "facilityInfo": "Facility Information",
+      "locationManagement": "Location & Management",
+      "facilityId": "Facility ID",
+      "facilityCode": "Facility Code",
+      "facilityType": "Facility Type",
+      "gpsAddress": "GPS Address",
+      "cluster": "Cluster",
+      "clusterId": "ID:",
+      "manager": "Manager",
+      "managerId": "Manager ID:",
+      "quickActions": "Quick Actions",
+      "facilityInfoLabel": "Facility Information",
+      "id": "ID:",
+      "loading": "Loading facility details...",
+      "error": "Error loading facility details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Facility not found"
+    }
+  },
+  "building": {
+    "management": "Asset Classification Management",
+    "add": "Add Asset Classification",
+    "loading": "Loading asset classifications...",
+    "error": "Error loading asset classifications",
+    "noItems": "No asset classifications found",
+    "unknownFacility": "Unknown Facility",
+    "unknownZone": "Unknown Zone",
+    "deleteTitle": "Delete Asset Classification",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this asset classification.",
+    "searchPlaceholder": "Search by name, code, facility, or zone...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "facility": "Facility",
+      "zone": "Zone",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filter": {
+      "status": "Status",
+      "facility": "Facility",
+      "zone": "Zone",
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "delete": {
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create New Building",
+      "editTitle": "Edit Building",
+      "sectionTitle": "Building Details",
+      "toggle": "Toggle",
+      "name": "Name",
+      "namePlaceholder": "Building name",
+      "code": "Code",
+      "codePlaceholder": "Building code",
+      "facility": "Facility",
+      "facilityPlaceholder": "Select Facility",
+      "zone": "Zone",
+      "zonePlaceholderFirst": "Select facility first",
+      "zonePlaceholderLoading": "Loading zones...",
+      "zonePlaceholder": "Select Zone",
+      "status": "Status",
+      "statusPlaceholder": "Select status",
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading building details...",
+      "error": "Error loading building details",
+      "backToBuildings": "Back to Buildings",
+      "description": "Description",
+      "validation": {
+        "codeRequired": "Code is required",
+        "nameRequired": "Name is required",
+        "facilityRequired": "Facility is required",
+        "zoneRequired": "Zone is required"
+      }
+    },
+    "detail": {
+      "title": "Building Details",
+      "editButton": "Edit Building",
+      "backButton": "Back to Buildings",
+      "buildingInfo": "Building Information",
+      "code": "Code",
+      "name": "Name",
+      "facility": "Facility",
+      "facilityCode": "Code:",
+      "zone": "Zone",
+      "zoneCode": "Code:",
+      "status": "Status",
+      "unknownFacility": "Unknown Facility",
+      "unknownZone": "Unknown Zone",
+      "quickActions": "Quick Actions",
+      "loading": "Loading building details...",
+      "error": "Error loading building details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Building not found"
+    }
+  },
+  "region": {
+    "management": "Region Management",
+    "add": "Add Region",
+    "loading": "Loading regions...",
+    "error": "Error loading regions",
+    "noItems": "No regions found",
+    "unknownManager": "Unknown Manager",
+    "deleteTitle": "Delete Region",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this region.",
+    "searchPlaceholder": "Search by name, country, or manager...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "status": "Status",
+      "country": "Country",
+      "manager": "Manager",
+      "actions": "Actions"
+    },
+    "filter": {
+      "country": "Country"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the region.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Region",
+      "editTitle": "Edit Region",
+      "sectionTitle": "Region Details",
+      "toggle": "Toggle",
+      "name": "Name",
+      "namePlaceholder": "Region name",
+      "country": "Country",
+      "countryPlaceholder": "Country",
+      "manager": "Manager",
+      "managerPlaceholder": "Select Manager",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading region details...",
+      "error": "Error loading region details",
+      "backToRegions": "Back to Regions",
+      "code": "Code",
+      "description": "Description",
+      "validation": {
+        "nameRequired": "Name is required",
+        "countryRequired": "Country is required",
+        "managerRequired": "Manager is required"
+      }
+    },
+    "detail": {
+      "title": "Region Details",
+      "subtitle": "Manage and view region information",
+      "editButton": "Edit Region",
+      "backButton": "Back to Regions",
+      "regionId": "Region ID:",
+      "manager": "Region Manager",
+      "managerRole": "Regional Manager",
+      "created": "Created",
+      "daysAgo": "days ago",
+      "lastUpdated": "Last Updated",
+      "recentlyModified": "Recently modified",
+      "overview": "Region Overview",
+      "loading": "Loading region details",
+      "loadingSubtitle": "Please wait while we fetch the information...",
+      "error": "Error loading region",
+      "errorFallback": "Something went wrong while loading the region details",
+      "notFound": "Region not found",
+      "notFoundMessage": "The region you're looking for doesn't exist or may have been removed.",
+      "summary": "{{name}} is a strategically important region located in {{country}}. Under the capable leadership of {{manager}}, this region has been operational since {{createdAt}}. The region's information was last updated on {{updatedAt}}."
+    }
+  },
+  "cluster": {
+    "management": "Cluster Management",
+    "add": "Add Cluster",
+    "loading": "Loading clusters...",
+    "error": "Error loading clusters",
+    "noItems": "No clusters found",
+    "unknownRegion": "Unknown Region",
+    "unknownManager": "Unknown Manager",
+    "searchPlaceholder": "Search by name, region, or manager...",
+    "columns": {
+      "name": "Name",
+      "region": "Region",
+      "manager": "Manager",
+      "actions": "Actions"
+    },
+    "filter": {
+      "region": "Region"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the cluster.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Cluster",
+      "editTitle": "Edit Cluster",
+      "sectionTitle": "Cluster Details",
+      "toggle": "Toggle",
+      "region": "Region",
+      "regionPlaceholder": "Select Region",
+      "name": "Name",
+      "namePlaceholder": "Cluster name",
+      "manager": "Manager",
+      "managerPlaceholder": "Select Manager",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading cluster details...",
+      "error": "Error loading cluster details",
+      "backToClusters": "Back to Clusters",
+      "validation": {
+        "regionRequired": "Region is required",
+        "nameRequired": "Name is required",
+        "managerRequired": "Manager is required"
+      }
+    },
+    "detail": {
+      "title": "Cluster Details",
+      "subtitle": "Manage and view cluster information",
+      "editButton": "Edit Cluster",
+      "backButton": "Back to Clusters",
+      "clusterId": "Cluster ID:",
+      "regionInfo": "Region Info",
+      "regionId": "Region ID:",
+      "manager": "Cluster Manager",
+      "managerRole": "Cluster Manager",
+      "created": "Created",
+      "daysAgo": "days ago",
+      "lastUpdated": "Last Updated",
+      "recentlyModified": "Recently modified",
+      "overview": "Cluster Overview",
+      "loading": "Loading cluster details",
+      "loadingSubtitle": "Please wait while we fetch the information...",
+      "error": "Error loading cluster",
+      "errorFallback": "Something went wrong while loading the cluster details",
+      "notFound": "Cluster not found",
+      "notFoundMessage": "The cluster you're looking for doesn't exist or may have been removed.",
+      "summary": "{{name}} is a vital cluster operating within the {{region}} region in {{country}}. Under the capable leadership of {{manager}}, this cluster has been operational since {{createdAt}}. The cluster's information was last updated on {{updatedAt}}."
+    }
+  },
+  "subsystem": {
+    "management": "Asset Location Management",
+    "add": "Add Asset Location",
+    "loading": "Loading asset locations...",
+    "error": "Error loading asset locations",
+    "noItems": "No subsystems found",
+    "na": "N/A",
+    "deleteTitle": "Delete Asset Location",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the subsystem.",
+    "searchPlaceholder": "Search by name, code, or building...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "facility": "Facility",
+      "status": "Status",
+      "buildingCode": "Building Code",
+      "buildingName": "Building Name",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "filter": {
+      "building": "Building"
+    },
+    "delete": {
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "Create New Subsystem",
+      "editTitle": "Edit Subsystem",
+      "sectionTitle": "Subsystem Details",
+      "toggle": "Toggle",
+      "name": "Name",
+      "namePlaceholder": "Subsystem name",
+      "building": "Building",
+      "buildingPlaceholder": "Select Building",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading subsystem details...",
+      "error": "Error loading subsystem details",
+      "backToSubsystems": "Back to Subsystems",
+      "errorFallback": "An unknown error occurred",
+      "code": "Code",
+      "facility": "Facility",
+      "description": "Description",
+      "validation": {
+        "nameRequired": "Name is required",
+        "buildingRequired": "Building is required"
+      }
+    },
+    "detail": {
+      "title": "Subsystem Details",
+      "subtitle": "View subsystem information and settings",
+      "editButton": "Edit Subsystem",
+      "backButton": "Back to Subsystems",
+      "backToList": "Back to List",
+      "subsystemInfo": "Subsystem Information",
+      "subsystemId": "Subsystem ID",
+      "subsystemName": "Subsystem Name",
+      "associatedBuilding": "Associated Building",
+      "buildingName": "Building Name",
+      "buildingCode": "Building Code",
+      "buildingIdLabel": "Building ID:",
+      "idLabel": "ID:",
+      "timestamps": "Timestamps",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "quickActions": "Quick Actions",
+      "infoLabel": "Subsystem Information",
+      "loading": "Loading subsystem details...",
+      "error": "Error loading subsystem details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Subsystem not found"
+    }
+  },
+  "zone": {
+    "management": "Zone Management",
+    "add": "Add Zone",
+    "loading": "Loading zones...",
+    "error": "Error loading zones",
+    "noItems": "No zones found",
+    "unknownFacility": "Unknown Facility",
+    "none": "None",
+    "deleteTitle": "Delete Zone",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this zone.",
+    "searchPlaceholder": "Search by name, code, or facility...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "facility": "Facility",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filter": {
+      "facility": "Facility"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the zone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Zone",
+      "editTitle": "Edit Zone",
+      "sectionTitle": "Zone Details",
+      "toggle": "Toggle",
+      "code": "Code",
+      "codePlaceholder": "Zone code",
+      "name": "Name",
+      "namePlaceholder": "Zone name",
+      "facility": "Facility",
+      "facilityOptional": "Facility (Optional)",
+      "facilityPlaceholder": "Select Facility",
+      "noneOption": "None",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update",
+      "loading": "Loading zone details...",
+      "error": "Error loading zone details",
+      "backToZones": "Back to Zones",
+      "description": "Description",
+      "validation": {
+        "codeRequired": "Code is required",
+        "nameRequired": "Name is required"
+      }
+    },
+    "detail": {
+      "title": "Zone Details",
+      "editButton": "Edit Zone",
+      "backButton": "Back to Zones",
+      "zoneInfo": "Zone Information",
+      "code": "Code",
+      "name": "Name",
+      "associatedFacility": "Associated Facility",
+      "none": "None",
+      "quickActions": "Quick Actions",
+      "loading": "Loading zone details...",
+      "error": "Error loading zone details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Zone not found"
+    }
+  },
+  "landlord": {
+    "management": "Landlord Management",
+    "add": "Add Landlord",
+    "loading": "Loading landlords...",
+    "error": "Error loading landlords",
+    "noItems": "No landlords found",
+    "deleteTitle": "Delete Landlord",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this landlord.",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "facility": "Facility",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the landlord.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Landlord",
+      "editTitle": "Edit Landlord",
+      "sectionTitle": "Landlord Details",
+      "name": "Name",
+      "namePlaceholder": "Landlord name",
+      "email": "Email",
+      "emailPlaceholder": "Email address",
+      "phone": "Phone",
+      "phonePlaceholder": "Phone number",
+      "address": "Address",
+      "addressPlaceholder": "Enter landlord address",
+      "facility": "Facility",
+      "status": "Status",
+      "statusPlaceholder": "Select status",
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "loading": "Loading landlord details...",
+      "error": "Error loading landlord details",
+      "errorFallback": "An unknown error occurred",
+      "backToLandlords": "Back to Landlords",
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailInvalid": "Invalid email address"
+      }
+    },
+    "detail": {
+      "title": "Landlord Details",
+      "editButton": "Edit Landlord",
+      "backButton": "Back to Landlords",
+      "landlordInfo": "Landlord Information",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "status": "Status",
+      "notProvided": "Not provided",
+      "noAddress": "No address provided",
+      "loading": "Loading landlord details...",
+      "error": "Error loading landlord details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Landlord not found"
+    }
+  },
+  "apartment": {
+    "management": "Apartment Management",
+    "add": "Add Apartment",
+    "loading": "Loading apartments...",
+    "error": "Error loading apartments",
+    "noItems": "No apartments found",
+    "deleteTitle": "Delete Apartment",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this apartment.",
+    "searchPlaceholder": "Search by type, building, or landlord...",
+    "columns": {
+      "no": "No.",
+      "type": "Type",
+      "building": "Building",
+      "size": "Size (sqm)",
+      "ownershipType": "Ownership Type",
+      "landlord": "Landlord",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filter": {
+      "ownershipTypePlaceholder": "Filter by ownership type",
+      "allOwnershipTypes": "All Ownership Types",
+      "statusPlaceholder": "Filter by status",
+      "allStatuses": "All Statuses"
+    },
+    "ownershipType": {
+      "freehold": "Freehold",
+      "leasehold": "Leasehold",
+      "freeholdLeasedOut": "Freehold (Leased Out)"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the apartment.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Apartment",
+      "editTitle": "Edit Apartment",
+      "sectionTitle": "Apartment Details",
+      "no": "Apartment Number",
+      "noPlaceholder": "Enter apartment number",
+      "type": "Type",
+      "typePlaceholder": "Enter apartment type",
+      "building": "Building",
+      "buildingPlaceholder": "Select building",
+      "noOfSqm": "Square Meters",
+      "noOfSqmPlaceholder": "Enter square meters",
+      "address": "Address",
+      "addressPlaceholder": "Enter apartment address",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter apartment description",
+      "landlord": "Landlord",
+      "landlordPlaceholder": "Select landlord",
+      "ownershipType": "Ownership Type",
+      "ownershipTypePlaceholder": "Select ownership type",
+      "ownershipTypeOptions": {
+        "freehold": "Freehold",
+        "leasehold": "Leasehold",
+        "freeholdLeasedOut": "Freehold (Leased Out)"
+      },
+      "servicePowerChargeStartDate": "Service/Power Charge Start Date",
+      "status": "Status",
+      "statusPlaceholder": "Select status",
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "bookable": "Bookable",
+      "commonArea": "Common Area",
+      "availableForLease": "Available For Lease",
+      "remitLeasePayment": "Remit Lease Payment",
+      "loading": "Loading apartment details...",
+      "error": "Error loading apartment details",
+      "errorFallback": "An unknown error occurred",
+      "backToApartments": "Back to Apartments",
+      "validation": {
+        "noRequired": "Apartment number is required",
+        "typeRequired": "Type is required",
+        "buildingRequired": "Building is required",
+        "sqmPositive": "Square meters must be a positive number",
+        "landlordRequired": "Landlord is required",
+        "addressRequired": "Address is required"
+      }
+    },
+    "detail": {
+      "title": "Apartment Details",
+      "editButton": "Edit",
+      "backButton": "Back to Apartments",
+      "overview": "Overview",
+      "statusInfo": "Status Information",
+      "building": "Building",
+      "ownershipType": "Ownership Type",
+      "landlord": "Landlord",
+      "size": "Size",
+      "sizeSuffix": "sqm",
+      "address": "Address",
+      "servicePowerChargeStartDate": "Service/Power Charge Start Date",
+      "description": "Description",
+      "noDescription": "No description provided",
+      "buildingCode": "Building Code",
+      "bookable": "Bookable",
+      "commonArea": "Common Area",
+      "availableForLease": "Available for Lease",
+      "remitLeasePayment": "Remit Lease Payment",
+      "loading": "Loading apartment details...",
+      "error": "Error loading apartment details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Apartment not found"
+    }
+  },
+  "apartmentType": {
+    "management": "Apartment Type Management",
+    "add": "Add Apartment Type",
+    "loading": "Loading apartment types...",
+    "error": "Error loading apartment types",
+    "noItems": "No apartment types found",
+    "deleteTitle": "Delete Apartment Type",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this apartment type.",
+    "searchPlaceholder": "Search by name...",
+    "columns": {
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filter": {
+      "status": "Status",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "delete": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone. This will permanently delete the apartment type.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "form": {
+      "createTitle": "Create New Apartment Type",
+      "editTitle": "Edit Apartment Type",
+      "sectionTitle": "Apartment Type Details",
+      "name": "Name",
+      "namePlaceholder": "Apartment type name",
+      "description": "Description",
+      "status": "Status",
+      "statusPlaceholder": "Select status",
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "loading": "Loading apartment type details...",
+      "error": "Error loading apartment type details",
+      "errorFallback": "An unknown error occurred",
+      "backToApartmentTypes": "Back to Apartment Types",
+      "validation": {
+        "nameRequired": "Name is required",
+        "statusRequired": "Status is required"
+      }
+    },
+    "detail": {
+      "title": "Apartment Type Details",
+      "editButton": "Edit Apartment Type",
+      "backButton": "Back to Apartment Types",
+      "idLabel": "ID:",
+      "slugLabel": "Slug:",
+      "activeTitle": "This apartment type is currently",
+      "activeStatus": "Active",
+      "inactiveStatus": "Inactive",
+      "activeDescription": "Active apartment types are available for use in the system",
+      "inactiveDescription": "Inactive apartment types are not available for use in the system",
+      "lastUpdated": "Last updated:",
+      "loading": "Loading apartment type details...",
+      "error": "Error loading apartment type details",
+      "errorFallback": "An unknown error occurred",
+      "notFound": "Apartment type not found"
+    }
+  }
+}

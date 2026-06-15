@@ -1,5 +1,5 @@
 // src/features/work/paymentrequisitions/PaymentrequisitionForm.tsx
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -19,69 +19,39 @@ import { Vendor } from '@/types/vendor';
 import { User } from '@/types/user';
 import { Workorder } from '@/types/workorder';
 import { Paymentitem } from '@/types/paymentitem';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const endpoint1 = 'accounts/api/vendors/';
 const endpoint2 = 'accounts/api/users/';
-const endpoint3 = 'work/api/work-orders/'
-const endpoint4 = 'work/api/payment-items/'
-
-// Form schema definition
-const paymentrequisitionSchema = z.object({
-  requisition_date: z.string().min(1, 'Requisition date is required'),
-  pay_to: z.number().int().positive('Pay to is required'),
-  status: z.enum(['Active', 'Inactive']),
-  expected_payment_date: z.string().min(1, 'Expected payment date is required'),
-  retirement: z.boolean(),
-  remark: z.string().optional(),
-  approval_status: z.enum(['request', 'approve']),
-  comment: z.string().optional(),
-  withholding_tax: z.string().optional(),
-  expected_payment_amount: z.string().min(1, 'Expected payment amount is required'),
-  owner: z.number().int().positive('Owner is required'),
-  work_orders: z.array(z.number().int()),
-  request_to: z.array(z.number().int()),
-  items: z.array(z.number().int())
-});
-
-type PaymentrequisitionFormValues = z.infer<typeof paymentrequisitionSchema>;
+const endpoint3 = 'work/api/work-orders/';
+const endpoint4 = 'work/api/payment-items/';
 
 const PaymentrequisitionForm = () => {
+  const { t } = useTypedTranslation('work');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
-  // Mock data for select fields
-  const [payToOptions, setPayToOptions] = useState([
-    { id: 1, name: 'Vendor 1' },
-    { id: 2, name: 'Vendor 2' },
-    { id: 3, name: 'Vendor 3' }
-  ]);
-  
-  const [ownerOptions, setOwnerOptions] = useState([
-    { id: 1, name: 'User 1' },
-    { id: 2, name: 'User 2' },
-    { id: 3, name: 'User 3' }
-  ]);
-  
-  const [_workOrders, setWorkOrders] = useState([
-    { id: 1, name: 'Work Order 1' },
-    { id: 2, name: 'Work Order 2' },
-    { id: 3, name: 'Work Order 3' }
-  ]);
-  
-  const [requestTo, setRequestTo] = useState([
-    { id: 1, name: 'Approver 1' },
-    { id: 2, name: 'Approver 2' },
-    { id: 3, name: 'Approver 3' }
-  ]);
-  
-  const [_items, setItems] = useState([
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-    { id: 3, name: 'Item 3' }
-  ]);
-  
-  // Paymentrequisition form setup
+
+  const paymentrequisitionSchema = z.object({
+    requisition_date: z.string().min(1, t('paymentRequisition.form.validation.requisitionDateRequired')),
+    pay_to: z.number().int().positive(t('paymentRequisition.form.validation.payToRequired')),
+    status: z.enum(['Active', 'Inactive']),
+    expected_payment_date: z.string().min(1, t('paymentRequisition.form.validation.expectedPaymentDateRequired')),
+    retirement: z.boolean(),
+    remark: z.string().optional(),
+    approval_status: z.enum(['request', 'approve']),
+    comment: z.string().optional(),
+    withholding_tax: z.string().optional(),
+    expected_payment_amount: z.string().min(1, t('paymentRequisition.form.validation.expectedPaymentAmountRequired')),
+    owner: z.number().int().positive(t('paymentRequisition.form.validation.ownerRequired')),
+    reviewer: z.number({ required_error: t('paymentRequisition.form.validation.reviewerRequired') }).int().positive(t('paymentRequisition.form.validation.reviewerRequired')),
+    work_orders: z.array(z.number().int()).min(1, t('paymentRequisition.form.validation.workOrderRequired')),
+    request_to: z.array(z.number().int()).min(1, t('paymentRequisition.form.validation.requestToRequired')),
+    items: z.array(z.number().int())
+  });
+
+  type PaymentrequisitionFormValues = z.infer<typeof paymentrequisitionSchema>;
+
   const paymentrequisitionForm = useForm<PaymentrequisitionFormValues>({
     resolver: zodResolver(paymentrequisitionSchema),
     defaultValues: {
@@ -96,34 +66,70 @@ const PaymentrequisitionForm = () => {
       withholding_tax: '',
       expected_payment_amount: '',
       owner: undefined as unknown as number,
+      reviewer: undefined as unknown as number,
       work_orders: [],
       request_to: [],
       items: []
     }
   });
 
-  // Fetch all categories
-    const { data: vendors = [] } = useList<Vendor>('vendors', endpoint1);
-    const { data: users = [] } = useList<User>('users', endpoint2);
-    const { data: workOrders = [] } = useList<Workorder>('workorders', endpoint3);
-    const { data: paymentItems = [] } = useList<Paymentitem>('paymentitems', endpoint4);
+  const { data: vendors = [] } = useList<Vendor>('vendors', endpoint1);
+  const { data: users = [] } = useList<User>('users', endpoint2);
+  const { data: workOrders = [] } = useList<Workorder>('workorders', endpoint3);
+  const { data: paymentItems = [] } = useList<Paymentitem>('paymentitems', endpoint4);
 
-  // Fetch paymentrequisition data for edit mode using our custom hook
-  const { 
-    data: paymentrequisitionData, 
-    isLoading: isLoadingPaymentrequisition, 
+  // Only fully approved work orders can be attached to a payment requisition
+  const approvedWorkOrders = useMemo(() => workOrders.filter(wo => wo.approval_status === 'Approved'), [workOrders]);
+
+  // Role-filtered user lists
+  const reviewers = useMemo(() => users.filter(u => u.roles === 'REVIEWER'), [users]);
+  const approvers = useMemo(() => users.filter(u => u.roles === 'APPROVER'), [users]);
+
+  // Watch at component level — stable subscriptions, no stale closures
+  const selectedWorkOrders = paymentrequisitionForm.watch('work_orders') ?? [];
+  const selectedReviewer = paymentrequisitionForm.watch('reviewer');
+  const selectedPersons = paymentrequisitionForm.watch('request_to') ?? [];
+
+  const setReviewer = useCallback((uid: number) => {
+    const current = paymentrequisitionForm.getValues('reviewer');
+    // Single selection: clicking the already-selected card deselects it
+    paymentrequisitionForm.setValue(
+      'reviewer',
+      current === uid ? (undefined as unknown as number) : uid,
+      { shouldValidate: true }
+    );
+  }, [paymentrequisitionForm]);
+
+  const toggleWorkOrder = useCallback((wid: number) => {
+    const current = paymentrequisitionForm.getValues('work_orders') ?? [];
+    paymentrequisitionForm.setValue(
+      'work_orders',
+      current.includes(wid) ? current.filter(id => id !== wid) : [...current, wid],
+      { shouldValidate: true }
+    );
+  }, [paymentrequisitionForm]);
+
+  const togglePerson = useCallback((pid: number) => {
+    const current = paymentrequisitionForm.getValues('request_to') ?? [];
+    paymentrequisitionForm.setValue(
+      'request_to',
+      current.includes(pid) ? current.filter(id => id !== pid) : [...current, pid],
+      { shouldValidate: true }
+    );
+  }, [paymentrequisitionForm]);
+
+  const {
+    data: paymentrequisitionData,
+    isLoading: isLoadingPaymentrequisition,
     isError: isPaymentrequisitionError,
     error: paymentrequisitionError
   } = usePaymentrequisitionQuery(isEditMode ? id : undefined);
 
-  // Use our custom mutation hooks
   const createPaymentrequisitionMutation = useCreatePaymentrequisition();
   const updatePaymentrequisitionMutation = useUpdatePaymentrequisition(id);
 
-  // Handle paymentrequisition data loading
   useEffect(() => {
     if (paymentrequisitionData && isEditMode) {
-      // Reset the form with paymentrequisition data
       paymentrequisitionForm.reset({
         requisition_date: paymentrequisitionData.requisition_date,
         pay_to: paymentrequisitionData.pay_to,
@@ -136,6 +142,7 @@ const PaymentrequisitionForm = () => {
         withholding_tax: paymentrequisitionData.withholding_tax,
         expected_payment_amount: paymentrequisitionData.expected_payment_amount,
         owner: paymentrequisitionData.owner,
+        reviewer: paymentrequisitionData.reviewer ?? (undefined as unknown as number),
         work_orders: paymentrequisitionData.work_orders,
         request_to: paymentrequisitionData.request_to,
         items: paymentrequisitionData.items
@@ -147,26 +154,24 @@ const PaymentrequisitionForm = () => {
     if (isEditMode && id) {
       updatePaymentrequisitionMutation.mutate(
         { id, paymentrequisition: data },
-        { onSuccess: () => navigate('/work/payment-requisitions') }
+        { onSuccess: () => navigate('/dashboard/work/payment-requisitions') }
       );
     } else {
       createPaymentrequisitionMutation.mutate(
         data as Omit<Paymentrequisition, 'id'>,
-        { onSuccess: () => navigate('/work/payment-requisitions') }
+        { onSuccess: () => navigate('/dashboard/work/payment-requisitions') }
       );
     }
   };
 
-  const handleCancel = () => {
-    navigate('/work/payment-requisitions');
-  };
+  const handleCancel = () => navigate('/dashboard/work/payment-requisitions');
 
   if (isEditMode && isLoadingPaymentrequisition) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading paymentrequisition details...</p>
+          <p className="text-sm text-muted-foreground">{t('paymentRequisition.form.loading')}</p>
         </div>
       </div>
     );
@@ -175,12 +180,14 @@ const PaymentrequisitionForm = () => {
   if (isEditMode && isPaymentrequisitionError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading paymentrequisition details</div>
+        <div className="text-red-500 text-xl">{t('paymentRequisition.form.errorLoading')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {paymentrequisitionError instanceof Error ? paymentrequisitionError.message : 'An unknown error occurred'}
+          {paymentrequisitionError instanceof Error
+            ? paymentrequisitionError.message
+            : t('paymentRequisition.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Paymentrequisitions
+          {t('paymentRequisition.form.backToList')}
         </Button>
       </div>
     );
@@ -190,15 +197,11 @@ const PaymentrequisitionForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleCancel}
-          >
+          <Button variant="outline" size="icon" onClick={handleCancel}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Paymentrequisition' : 'Create New Paymentrequisition'}
+            {isEditMode ? t('paymentRequisition.form.editTitle') : t('paymentRequisition.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -206,12 +209,13 @@ const PaymentrequisitionForm = () => {
       <Form {...paymentrequisitionForm}>
         <form onSubmit={paymentrequisitionForm.handleSubmit(onSubmitPaymentrequisition)} className="space-y-6">
           <div className="space-y-4">
-            {/* Paymentrequisition Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
-              <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Payment Requisition Details</h2>
+              <CollapsibleTrigger asChild>
+                <div className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md cursor-pointer">
+                  <h2 className="text-lg font-medium">{t('paymentRequisition.form.sectionTitle')}</h2>
+                </div>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -219,7 +223,7 @@ const PaymentrequisitionForm = () => {
                     name="requisition_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Requisition Date</FormLabel>
+                        <FormLabel>{t('paymentRequisition.form.requisitionDate')}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -227,13 +231,13 @@ const PaymentrequisitionForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={paymentrequisitionForm.control}
                     name="expected_payment_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Expected Payment Date</FormLabel>
+                        <FormLabel>{t('paymentRequisition.form.expectedPaymentDate')}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -249,14 +253,14 @@ const PaymentrequisitionForm = () => {
                     name="pay_to"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Pay To</FormLabel>
-                        <Select 
+                        <FormLabel>{t('paymentRequisition.form.payTo')}</FormLabel>
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a vendor" />
+                              <SelectValue placeholder={t('paymentRequisition.form.selectVendor')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -271,20 +275,20 @@ const PaymentrequisitionForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={paymentrequisitionForm.control}
                     name="owner"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Owner</FormLabel>
-                        <Select 
+                        <FormLabel>{t('paymentRequisition.form.owner')}</FormLabel>
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select an owner" />
+                              <SelectValue placeholder={t('paymentRequisition.form.selectOwner')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -307,23 +311,23 @@ const PaymentrequisitionForm = () => {
                     name="expected_payment_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Expected Payment Amount</FormLabel>
+                        <FormLabel>{t('paymentRequisition.form.expectedPaymentAmount')}</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="Enter amount" {...field} />
+                          <Input type="text" placeholder={t('paymentRequisition.form.enterAmount')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={paymentrequisitionForm.control}
                     name="withholding_tax"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Withholding Tax</FormLabel>
+                        <FormLabel>{t('paymentRequisition.form.withholdingTax')}</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="Enter tax amount" {...field} />
+                          <Input type="text" placeholder={t('paymentRequisition.form.enterTaxAmount')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -337,44 +341,38 @@ const PaymentrequisitionForm = () => {
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
+                        <FormLabel>{t('paymentRequisition.form.status')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('paymentRequisition.form.selectStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('paymentRequisition.form.statusOptions.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('paymentRequisition.form.statusOptions.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={paymentrequisitionForm.control}
                     name="approval_status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Approval Status</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
+                        <FormLabel>{t('paymentRequisition.form.approvalStatus')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select approval status" />
+                              <SelectValue placeholder={t('paymentRequisition.form.selectApprovalStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="request">Request</SelectItem>
-                            <SelectItem value="approve">Approve</SelectItem>
+                            <SelectItem value="request">{t('paymentRequisition.form.approvalStatusOptions.request')}</SelectItem>
+                            <SelectItem value="approve">{t('paymentRequisition.form.approvalStatusOptions.approve')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -395,7 +393,7 @@ const PaymentrequisitionForm = () => {
                           ref={field.ref}
                         />
                       </FormControl>
-                      <FormLabel className="font-normal">Retirement</FormLabel>
+                      <FormLabel className="font-normal">{t('paymentRequisition.form.retirement')}</FormLabel>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -406,10 +404,10 @@ const PaymentrequisitionForm = () => {
                   name="remark"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Remark</FormLabel>
+                      <FormLabel>{t('paymentRequisition.form.remark')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter remarks"
+                        <Textarea
+                          placeholder={t('paymentRequisition.form.enterRemarks')}
                           {...field}
                           className="min-h-[100px]"
                         />
@@ -424,10 +422,10 @@ const PaymentrequisitionForm = () => {
                   name="comment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Comment</FormLabel>
+                      <FormLabel>{t('paymentRequisition.form.comment')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter comments"
+                        <Textarea
+                          placeholder={t('paymentRequisition.form.enterComments')}
                           {...field}
                           className="min-h-[100px]"
                         />
@@ -442,32 +440,50 @@ const PaymentrequisitionForm = () => {
                   name="work_orders"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Work Orders</FormLabel>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {workOrders.map((workOrder) => {
-                          const workOrderId = workOrder.id;
-                          const selectedWorkOrders = paymentrequisitionForm.watch("work_orders");
-                          
+                      <FormLabel>
+                        {t('paymentRequisition.form.workOrders')}
+                        <span className="text-red-500 ml-1">*</span>
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {t('paymentRequisition.form.workOrdersHint')}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+                        {approvedWorkOrders.length === 0 ? (
+                          <p className="text-sm text-muted-foreground col-span-2 py-2">
+                            {t('paymentRequisition.form.noWorkOrders')}
+                          </p>
+                        ) : approvedWorkOrders.map((wo) => {
+                          const checked = selectedWorkOrders.includes(wo.id);
                           return (
-                            <label key={workOrder.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                value={workOrderId}
-                                checked={selectedWorkOrders.includes(workOrderId)}
-                                onChange={(e) => {
-                                  const newValue = Number(e.target.value);
-                                  if (e.target.checked) {
-                                    paymentrequisitionForm.setValue("work_orders", [...selectedWorkOrders, newValue]);
-                                  } else {
-                                    paymentrequisitionForm.setValue(
-                                      "work_orders",
-                                      selectedWorkOrders.filter((id) => id !== newValue)
-                                    );
-                                  }
-                                }}
-                              />
-                              <span>{workOrder.title}</span>
-                            </label>
+                            <div
+                              key={wo.id}
+                              role="checkbox"
+                              aria-checked={checked}
+                              tabIndex={0}
+                              onClick={() => toggleWorkOrder(wo.id)}
+                              onKeyDown={e => { if (e.key === ' ') { e.preventDefault(); toggleWorkOrder(wo.id); } }}
+                              className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer select-none transition-colors ${
+                                checked ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className={`h-4 w-4 shrink-0 mt-0.5 rounded-sm border-2 flex items-center justify-center transition-colors ${
+                                checked ? 'bg-primary border-primary' : 'border-gray-300 bg-white'
+                              }`}>
+                                {checked && <span className="text-white text-[10px] leading-none font-bold">✓</span>}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium leading-tight">{wo.title}</p>
+                                <p className="text-xs text-muted-foreground font-mono mt-0.5">{wo.work_order_number}</p>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  {wo.facility_detail?.name && (
+                                    <span className="text-xs text-muted-foreground">{wo.facility_detail.name}</span>
+                                  )}
+                                  <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-green-100 text-green-700">
+                                    {wo.approval_status}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
@@ -476,37 +492,116 @@ const PaymentrequisitionForm = () => {
                   )}
                 />
 
+                {/* Step 1 of approval flow: Reviewer */}
+                <FormField
+                  control={paymentrequisitionForm.control}
+                  name="reviewer"
+                  render={() => (
+                    <FormItem>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-xs font-bold">1</span>
+                        <FormLabel className="mb-0">{t('paymentRequisition.form.reviewer')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">{t('paymentRequisition.form.reviewerHint')}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1">
+                        {reviewers.length === 0 ? (
+                          <p className="text-sm text-muted-foreground col-span-2 py-2">{t('paymentRequisition.form.noReviewers')}</p>
+                        ) : reviewers.map((person) => {
+                          const checked = selectedReviewer === person.id;
+                          const fullName = [person.first_name, person.last_name].filter(Boolean).join(' ');
+                          return (
+                            <div
+                              key={person.id}
+                              role="radio"
+                              aria-checked={checked}
+                              tabIndex={0}
+                              onClick={() => setReviewer(person.id)}
+                              onKeyDown={e => { if (e.key === ' ') { e.preventDefault(); setReviewer(person.id); } }}
+                              className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer select-none transition-colors ${
+                                checked ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className={`h-4 w-4 shrink-0 mt-0.5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                checked ? 'border-primary' : 'border-gray-300 bg-white'
+                              }`}>
+                                {checked && <div className="h-2 w-2 rounded-full bg-primary" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium leading-tight">{fullName || person.email}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{person.email}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-purple-100 text-purple-700">{person.roles}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Divider with arrow showing flow direction */}
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs font-medium px-2">↓ {t('paymentRequisition.form.flowArrow')}</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Step 2 of approval flow: Approver */}
                 <FormField
                   control={paymentrequisitionForm.control}
                   name="request_to"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Request To</FormLabel>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {users.map((person) => {
-                          const personId = person.id;
-                          const selectedPersons = paymentrequisitionForm.watch("request_to");
-                          
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-xs font-bold">2</span>
+                        <FormLabel className="mb-0">{t('paymentRequisition.form.requestTo')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {t('paymentRequisition.form.approversHint')}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+                        {approvers.length === 0 ? (
+                          <p className="text-sm text-muted-foreground col-span-2 py-2">
+                            {t('paymentRequisition.form.noApprovers')}
+                          </p>
+                        ) : approvers.map((person) => {
+                          const checked = selectedPersons.includes(person.id);
+                          const fullName = [person.first_name, person.last_name].filter(Boolean).join(' ');
                           return (
-                            <label key={person.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                value={personId}
-                                checked={selectedPersons.includes(personId)}
-                                onChange={(e) => {
-                                  const newValue = Number(e.target.value);
-                                  if (e.target.checked) {
-                                    paymentrequisitionForm.setValue("request_to", [...selectedPersons, newValue]);
-                                  } else {
-                                    paymentrequisitionForm.setValue(
-                                      "request_to",
-                                      selectedPersons.filter((id) => id !== newValue)
-                                    );
-                                  }
-                                }}
-                              />
-                              <span>{person.first_name}</span>
-                            </label>
+                            <div
+                              key={person.id}
+                              role="checkbox"
+                              aria-checked={checked}
+                              tabIndex={0}
+                              onClick={() => togglePerson(person.id)}
+                              onKeyDown={e => { if (e.key === ' ') { e.preventDefault(); togglePerson(person.id); } }}
+                              className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer select-none transition-colors ${
+                                checked ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className={`h-4 w-4 shrink-0 mt-0.5 rounded-sm border-2 flex items-center justify-center transition-colors ${
+                                checked ? 'bg-primary border-primary' : 'border-gray-300 bg-white'
+                              }`}>
+                                {checked && <span className="text-white text-[10px] leading-none font-bold">✓</span>}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium leading-tight">{fullName || person.email}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{person.email}</p>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                                    {person.roles}
+                                  </span>
+                                  {person.approval_limit != null && (
+                                    <span className="text-xs text-muted-foreground">
+                                      Limit: {Number(person.approval_limit).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
@@ -520,12 +615,11 @@ const PaymentrequisitionForm = () => {
                   name="items"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Items</FormLabel>
+                      <FormLabel>{t('paymentRequisition.form.items')}</FormLabel>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {paymentItems.map((item) => {
                           const itemId = item.id;
-                          const selectedItems = paymentrequisitionForm.watch("items");
-                          
+                          const selectedItems = paymentrequisitionForm.watch('items');
                           return (
                             <label key={item.id} className="flex items-center space-x-2">
                               <input
@@ -535,11 +629,11 @@ const PaymentrequisitionForm = () => {
                                 onChange={(e) => {
                                   const newValue = Number(e.target.value);
                                   if (e.target.checked) {
-                                    paymentrequisitionForm.setValue("items", [...selectedItems, newValue]);
+                                    paymentrequisitionForm.setValue('items', [...selectedItems, newValue]);
                                   } else {
                                     paymentrequisitionForm.setValue(
-                                      "items",
-                                      selectedItems.filter((id) => id !== newValue)
+                                      'items',
+                                      selectedItems.filter((iid) => iid !== newValue)
                                     );
                                   }
                                 }}
@@ -556,25 +650,20 @@ const PaymentrequisitionForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
-          {/* Form submit buttons */}
+
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleCancel}
-            >
-              Cancel
+            <Button type="button" variant="outline" onClick={handleCancel}>
+              {t('paymentRequisition.form.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createPaymentrequisitionMutation.isPending || updatePaymentrequisitionMutation.isPending}
             >
               {(createPaymentrequisitionMutation.isPending || updatePaymentrequisitionMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('paymentRequisition.form.update') : t('paymentRequisition.form.save')}
             </Button>
           </div>
         </form>

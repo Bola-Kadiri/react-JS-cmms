@@ -18,13 +18,15 @@ import { SubcategoryQueryParams } from '@/services/subcategoriesApi';
 import { Facility } from '@/types/facility';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const SubcategoryManagement = () => {
+ const { t } = useTypedTranslation('accounts');
  const navigate = useNavigate();
  const queryClient = useQueryClient();
  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
  const [subcategoryToDelete, setSubcategoryToDelete] = useState<string | null>(null);
- 
+
  // Filter and pagination state
  const [searchValue, setSearchValue] = useState('');
  const [statusFilter, setStatusFilter] = useState('');
@@ -33,18 +35,18 @@ const SubcategoryManagement = () => {
  const [pageSize, setPageSize] = useState(10);
 
  const {canEdit} = useFeatureAccess('reference')
- 
+
  // Fetch all subcategories - we'll filter client-side
- const { 
-   data = { count: 0, results: [] }, 
-   isLoading, 
+ const {
+   data = { count: 0, results: [] },
+   isLoading,
    isFetching,
-   isError, 
-   refetch 
+   isError,
+   refetch
  } = useSubcategoriesQuery();
- 
+
  // Get facilities for filter dropdown
-//  const { 
+//  const {
 //    data: facilities = []
 //  } = useList<Facility>('facilities', 'facility/api/api/facilities/');
 
@@ -54,39 +56,39 @@ const SubcategoryManagement = () => {
  // Client-side filtering logic
  const filteredData = useMemo(() => {
    let results = [...(data.results || [])];
-   
+
    // Search filter
    if (searchValue) {
      const searchLower = searchValue.toLowerCase();
-     results = results.filter(subcategory => 
-       subcategory.title.toLowerCase().includes(searchLower) 
+     results = results.filter(subcategory =>
+       subcategory.title.toLowerCase().includes(searchLower)
      );
    }
-   
+
    // Status filter
    if (statusFilter) {
      results = results.filter(subcategory => subcategory.status === statusFilter);
    }
-   
+
    // Facility filter
   //  if (facilityFilter) {
   //    results = results.filter(subcategory => subcategory.facility_detail?.name === facilityFilter);
   //  }
-   
+
    return results;
  }, [data.results, searchValue, statusFilter]);
- 
+
  // Client-side pagination
  const paginatedData = useMemo(() => {
    const startIndex = (page - 1) * pageSize;
    const endIndex = startIndex + pageSize;
    return filteredData.slice(startIndex, endIndex);
  }, [filteredData, page, pageSize]);
- 
+
  // Calculate total pages
  const totalItems = filteredData.length;
  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
- 
+
  // Reset to page 1 when filters change
  useEffect(() => {
    setPage(1);
@@ -130,7 +132,7 @@ const SubcategoryManagement = () => {
  const handleFilter = (key: string, value: string) => {
    if (key === 'status') {
      setStatusFilter(value);
-   } 
+   }
   //  else if (key === 'facility') {
   //    setFacilityFilter(value);
   //  }
@@ -146,20 +148,14 @@ const SubcategoryManagement = () => {
    setPage(1); // Reset to first page when changing page size
  };
 
- // Prepare filter options for facilities
-//  const facilityOptions = facilities?.map(facility => ({
-//    value: facility.name,
-//    label: facility.name
-//  })) || [];
-
  // Define filter configuration
  const filterConfig = [
    {
      key: 'status',
-     label: 'Status',
+     label: t('subcategory.filters.status'),
      options: [
-       { value: 'Active', label: 'Active' },
-       { value: 'Inactive', label: 'Inactive' }
+       { value: 'Active', label: t('subcategory.status.active') },
+       { value: 'Inactive', label: t('subcategory.status.inactive') }
      ]
    },
   //  {
@@ -175,7 +171,7 @@ const SubcategoryManagement = () => {
      <div className="flex justify-center items-center h-64">
        <div className="flex flex-col items-center gap-2">
          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-         <p className="text-sm text-muted-foreground">Loading subcategories...</p>
+         <p className="text-sm text-muted-foreground">{t('subcategory.loading')}</p>
        </div>
      </div>
    );
@@ -185,9 +181,9 @@ const SubcategoryManagement = () => {
  if (isError) {
    return (
      <div className="flex flex-col items-center justify-center h-64 gap-4">
-       <div className="text-red-500 text-xl">Error loading subcategories</div>
+       <div className="text-red-500 text-xl">{t('subcategory.error')}</div>
        <Button onClick={() => refetch()} variant="outline">
-         Try Again
+         {t('common:actions.tryAgain')}
        </Button>
      </div>
    );
@@ -196,28 +192,28 @@ const SubcategoryManagement = () => {
  return (
    <div className="py-8">
      <div className="flex justify-between items-center mb-6">
-       <h1 className="text-2xl font-bold">Subcategory Management</h1>
+       <h1 className="text-2xl font-bold">{t('subcategory.management')}</h1>
        {/* {canEdit && (
         <Button onClick={handleAddSubcategory}>
          <Plus className="mr-2 h-4 w-4" /> Add Subcategory
        </Button>
        )} */}
        <PermissionGuard feature='reference' permission='view'>
-                 <Button onClick={handleAddSubcategory}>
-                   <Plus className="mr-2 h-4 w-4" />
-                   Add Subcategory
-                 </Button>
-               </PermissionGuard>
-      
+         <Button onClick={handleAddSubcategory}>
+           <Plus className="mr-2 h-4 w-4" />
+           {t('subcategory.add')}
+         </Button>
+       </PermissionGuard>
+
      </div>
 
      {/* Search and Filter Controls */}
      <div className="mb-6">
-       <SearchFilter 
+       <SearchFilter
          onSearch={handleSearch}
          onFilter={handleFilter}
          filters={filterConfig}
-         placeholder="Search subcategories..."
+         placeholder={t('subcategory.searchPlaceholder')}
          initialSearchValue={searchValue}
        />
      </div>
@@ -228,17 +224,17 @@ const SubcategoryManagement = () => {
          <Table>
            <TableHeader>
              <TableRow className="bg-gray-50">
-               <TableHead className="font-medium text-gray-600">Title</TableHead>
-               <TableHead className="font-medium text-gray-600">Description</TableHead>
-               <TableHead className="font-medium text-gray-600">Status</TableHead>
-               <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+               <TableHead className="font-medium text-gray-600">{t('subcategory.columns.title')}</TableHead>
+               <TableHead className="font-medium text-gray-600">{t('subcategory.columns.description')}</TableHead>
+               <TableHead className="font-medium text-gray-600">{t('subcategory.columns.status')}</TableHead>
+               <TableHead className="font-medium text-gray-600 text-right">{t('subcategory.columns.actions')}</TableHead>
              </TableRow>
            </TableHeader>
            <TableBody>
              {paginatedData.length === 0 ? (
                <TableRow>
                  <TableCell colSpan={6} className="h-24 text-center">
-                   No subcategories found.
+                   {t('subcategory.noItems')}
                  </TableCell>
                </TableRow>
              ) : (
@@ -248,8 +244,8 @@ const SubcategoryManagement = () => {
                    <TableCell>{subcategory.description}</TableCell>
                    <TableCell>
                      <span className={`px-3 py-1 rounded-full text-xs ${
-                       subcategory.status === 'Active' 
-                         ? 'bg-green-100 text-green-800 font-semibold' 
+                       subcategory.status === 'Active'
+                         ? 'bg-green-100 text-green-800 font-semibold'
                           : 'bg-red-100 text-red-800 font-semibold'
                      }`}>
                        {subcategory.status}
@@ -258,9 +254,9 @@ const SubcategoryManagement = () => {
                    <TableCell className="text-right">
                      <div className="flex justify-end">
                       <PermissionGuard feature='reference' permission='view'>
-                       <Button 
-                         variant="ghost" 
-                         size="icon" 
+                       <Button
+                         variant="ghost"
+                         size="icon"
                          onClick={() => handleViewSubcategory(String(subcategory.id))}
                          className="h-8 w-8"
                        >
@@ -268,9 +264,9 @@ const SubcategoryManagement = () => {
                        </Button>
                        </PermissionGuard>
                        <PermissionGuard feature='reference' permission='edit'>
-                       <Button 
-                         variant="ghost" 
-                         size="icon" 
+                       <Button
+                         variant="ghost"
+                         size="icon"
                          onClick={() => handleEditSubcategory(String(subcategory.id))}
                          className="h-8 w-8"
                        >
@@ -278,9 +274,9 @@ const SubcategoryManagement = () => {
                        </Button>
                        </PermissionGuard>
                        <PermissionGuard feature='reference' permission='edit'>
-                       <Button 
-                         variant="ghost" 
-                         size="icon" 
+                       <Button
+                         variant="ghost"
+                         size="icon"
                          onClick={() => handleDeleteSubcategory(String(subcategory.id))}
                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                        >
@@ -294,7 +290,7 @@ const SubcategoryManagement = () => {
              )}
            </TableBody>
          </Table>
-         
+
          {/* Pagination */}
          {totalItems > 0 && (
            <div className="p-4 border-t">
@@ -315,14 +311,14 @@ const SubcategoryManagement = () => {
      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
        <AlertDialogContent>
          <AlertDialogHeader>
-           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+           <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
            <AlertDialogDescription>
-             This action cannot be undone. This will permanently delete the subcategory.
+             {t('subcategory.deleteMessage')}
            </AlertDialogDescription>
          </AlertDialogHeader>
          <AlertDialogFooter>
-           <AlertDialogCancel>Cancel</AlertDialogCancel>
-           <AlertDialogAction 
+           <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+           <AlertDialogAction
              onClick={confirmDeleteSubcategory}
              disabled={deleteSubcategoryMutation.isPending}
              className="bg-red-500 hover:bg-red-600"
@@ -330,10 +326,10 @@ const SubcategoryManagement = () => {
              {deleteSubcategoryMutation.isPending ? (
                <>
                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                 Deleting...
+                 {t('common:status.deleting')}
                </>
              ) : (
-               'Delete'
+               t('common:actions.delete')
              )}
            </AlertDialogAction>
          </AlertDialogFooter>

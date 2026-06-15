@@ -71,6 +71,20 @@ class AuthTokenManager {
 // Create a singleton instance
 export const tokenManager = new AuthTokenManager();
 
+// Global abort controller — aborted and reset on logout to cancel all in-flight requests
+let globalAbortController = new AbortController();
+
+export const cancelAllRequests = () => {
+    globalAbortController.abort();
+    globalAbortController = new AbortController();
+};
+
+// Attach the global abort signal to every outgoing request
+api.interceptors.request.use((config) => {
+    config.signal = globalAbortController.signal;
+    return config;
+});
+
 // Add an interceptor to handle token expiration
 api.interceptors.response.use(
     (response) => response,

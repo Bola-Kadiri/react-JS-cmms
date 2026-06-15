@@ -19,6 +19,8 @@ import WorkCalendar from "@/pages/work-calendar";
 import Login from "./pages/auth/Login";
 import AlphaCMMSLanding from "./pages/AlphaCMMSLanding";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import FeatureRoute from "./components/FeatureRoute";
 import Unauthorized from "./pages/Unauthorized";
 // import ApartmentTypeManagementPage from "./pages/facility/apartment-types/ApartmentTypeManagementPage";
 // import StoreManagementPage from "./pages/facility/stores/StoreManagementPage";
@@ -581,6 +583,7 @@ const protectedRoutes: RouteObject[] = [
           },
           {
             path: "procurement",
+            element: <FeatureRoute feature="vendor_contract" />,
             children: [
               {
                 path: 'purchase-order',
@@ -749,6 +752,7 @@ const protectedRoutes: RouteObject[] = [
             children: [
               {
                 path: 'inventory-reference',
+                element: <AdminRoute />,
                 children: [
                   {
                     path: 'asset-categories',
@@ -945,245 +949,256 @@ const protectedRoutes: RouteObject[] = [
                 ]
               },
               {
-                path: 'warehouses',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <WarehouseManagementPage />
-                  </Suspense>
-                )
+                element: <FeatureRoute feature="asset_register" />,
+                children: [
+                  {
+                    path: 'warehouses',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <WarehouseManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'warehouses/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <WarehouseForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'warehouses/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <WarehouseForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'warehouses/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <WarehouseDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'stores',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <StoreManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'stores/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <StoreForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'stores/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <StoreForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'stores/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <StoreDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'assets',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <AssetManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'assets/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <AssetForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'assets/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <AssetForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'assets/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <AssetDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'inventories',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <InventoryManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'inventories/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <InventoryForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'inventories/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <InventoryForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'inventories/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <InventoryDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'transfers',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <TransferManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'transfers/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <TransferForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'transfers/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <TransferForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'transfers/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <TransferDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'items',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'items/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'items/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'items/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: "transfer",
+                    element: <TransferForm />,
+                  },
+                  {
+                    path: "movement",
+                    element: <MovementHistory />,
+                  },
+                ],
               },
               {
-                path: 'warehouses/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <WarehouseForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'warehouses/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <WarehouseForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'warehouses/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <WarehouseDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'stores',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <StoreManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'stores/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <StoreForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'stores/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <StoreForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'stores/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <StoreDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'assets',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <AssetManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'assets/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <AssetForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'assets/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <AssetForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'assets/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <AssetDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'inventories',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <InventoryManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'inventories/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <InventoryForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'inventories/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <InventoryForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'inventories/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <InventoryDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'transfers',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <TransferManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'transfers/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <TransferForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'transfers/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <TransferForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'transfers/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <TransferDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'items',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'items/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'items/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'items/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'item-requests',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemRequestManagementPage />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'item-requests/create',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemRequestForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'item-requests/edit/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemRequestForm />
-                  </Suspense>
-                )
-              },
-              {
-                path: 'item-requests/view/:id',
-                element: (
-                  <Suspense fallback={<LoadingComponent />}>
-                    <ItemRequestDetailView />
-                  </Suspense>
-                )
-              },
-              {
-                path: "request",
-                element: <ItemRequest />,
-              },
-              {
-                path: "transfer",
-                element: <TransferForm />,
-              },
-              {
-                path: "movement",
-                element: <MovementHistory />,
+                element: <FeatureRoute feature="item_request" />,
+                children: [
+                  {
+                    path: 'item-requests',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemRequestManagementPage />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'item-requests/create',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemRequestForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'item-requests/edit/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemRequestForm />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: 'item-requests/view/:id',
+                    element: (
+                      <Suspense fallback={<LoadingComponent />}>
+                        <ItemRequestDetailView />
+                      </Suspense>
+                    )
+                  },
+                  {
+                    path: "request",
+                    element: <ItemRequest />,
+                  },
+                ],
               },
             ],
           },
           {
             path: "facility",
+            element: <AdminRoute />,
             children: [
               {
                 path: 'list',
@@ -1477,10 +1492,12 @@ const protectedRoutes: RouteObject[] = [
           },
           {
             path: "reports",
-            element: <Reports />,
+            element: <FeatureRoute feature="report" />,
+            children: [{ index: true, element: <Reports /> }],
           },
           {
             path: "accounts",
+            element: <AdminRoute />,
             children: [
               {
                 path: 'users',

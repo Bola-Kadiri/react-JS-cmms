@@ -3,27 +3,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  AlertTriangle, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
+  AlertTriangle,
   ClipboardCheck,
   Tag,
   Info,
   Scale,
   CalendarDays,
-  CheckCircle2, 
+  CheckCircle2,
   XCircle
 } from 'lucide-react';
 import { useUnitmeasurementQuery } from '@/hooks/unitmeasurement/useUnitmeasurementQueries';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const UnitmeasurementDetailView = () => {
+  const { t } = useTypedTranslation('accounts');
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
-  
+
   // Using our custom hook instead of direct query
   const {
     data: unitmeasurement,
@@ -90,7 +92,7 @@ const UnitmeasurementDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading unit measurement details...</p>
+          <p className="text-sm text-muted-foreground">{t('unitMeasurement.detail.loading')}</p>
         </div>
       </div>
     );
@@ -100,12 +102,12 @@ const UnitmeasurementDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Error loading unit measurement details</div>
+        <div className="text-red-500 text-xl">{t('unitMeasurement.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('unitMeasurement.detail.unknownError')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Unit Measurements
+          {t('unitMeasurement.detail.backToList')}
         </Button>
       </div>
     );
@@ -115,9 +117,9 @@ const UnitmeasurementDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Unit measurement not found</div>
+        <div className="text-red-500 text-xl">{t('unitMeasurement.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Unit Measurements
+          {t('unitMeasurement.detail.backToList')}
         </Button>
       </div>
     );
@@ -135,7 +137,7 @@ const UnitmeasurementDetailView = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Unit Measurement: {unitmeasurement.code}</h1>
+            <h1 className="text-2xl font-bold">{t('unitMeasurement.detail.titleWithCode', { code: unitmeasurement.code })}</h1>
             {/* {unitmeasurement.created_at && (
               <p className="text-muted-foreground text-sm">Created on {formatDate(unitmeasurement.created_at)}</p>
             )} */}
@@ -148,7 +150,7 @@ const UnitmeasurementDetailView = () => {
           </div>
           <PermissionGuard feature='reference' permission='edit'>
           <Button onClick={handleEdit} className="bg-green-600 hover:bg-green-700">
-            <Edit className="mr-2 h-4 w-4" /> Edit
+            <Edit className="mr-2 h-4 w-4" /> {t('common:actions.edit')}
           </Button>
           </PermissionGuard>
         </div>
@@ -159,8 +161,8 @@ const UnitmeasurementDetailView = () => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Info className="h-5 w-5 text-primary" /> 
-              Unit Measurement Details
+              <Info className="h-5 w-5 text-primary" />
+              {t('unitMeasurement.detail.cardTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -168,31 +170,31 @@ const UnitmeasurementDetailView = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Code</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('unitMeasurement.detail.fields.code')}</p>
                     <p className="text-lg font-semibold">{unitmeasurement.code}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Symbol</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('unitMeasurement.detail.fields.symbol')}</p>
                     <p className="text-lg font-semibold">{unitmeasurement.symbol}</p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Type</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('unitMeasurement.detail.fields.type')}</p>
                     <div className="mt-1">{getTypeBadge(unitmeasurement.type)}</div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('unitMeasurement.detail.fields.status')}</p>
                     <div className="mt-1">{getStatusBadge(unitmeasurement.status)}</div>
                   </div>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
-                <p className="text-gray-700 whitespace-pre-line">{unitmeasurement.description || 'No description provided'}</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">{t('unitMeasurement.detail.fields.description')}</p>
+                <p className="text-gray-700 whitespace-pre-line">{unitmeasurement.description || t('unitMeasurement.detail.noDescription')}</p>
               </div>
             </div>
           </CardContent>
@@ -203,61 +205,61 @@ const UnitmeasurementDetailView = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-primary" />
-              Usage Information
+              {t('unitMeasurement.detail.usageCardTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Symbol representation with styling based on type */}
             <div className="flex justify-center">
               <div className={`
-                flex items-center justify-center rounded-full h-24 w-24 
-                ${unitmeasurement.type === 'Weight' ? 'bg-green-50' : 
-                  unitmeasurement.type === 'Area' ? 'bg-green-50' : 
-                  unitmeasurement.type === 'Volume' ? 'bg-indigo-50' : 
-                  unitmeasurement.type === 'Time' ? 'bg-yellow-50' : 
-                  unitmeasurement.type === 'Piece' ? 'bg-pink-50' : 
+                flex items-center justify-center rounded-full h-24 w-24
+                ${unitmeasurement.type === 'Weight' ? 'bg-green-50' :
+                  unitmeasurement.type === 'Area' ? 'bg-green-50' :
+                  unitmeasurement.type === 'Volume' ? 'bg-indigo-50' :
+                  unitmeasurement.type === 'Time' ? 'bg-yellow-50' :
+                  unitmeasurement.type === 'Piece' ? 'bg-pink-50' :
                   unitmeasurement.type === 'Packing' ? 'bg-purple-50' : 'bg-gray-50'}`
               }>
                 {unitmeasurement.type === 'Weight' && <Scale className="h-10 w-10 text-green-600" />}
                 {unitmeasurement.type === 'Area' && <Tag className="h-10 w-10 text-green-600" />}
                 {unitmeasurement.type === 'Volume' && <Tag className="h-10 w-10 text-indigo-600" />}
                 {unitmeasurement.type === 'Time' && <CalendarDays className="h-10 w-10 text-yellow-600" />}
-                {(unitmeasurement.type === 'Piece' || unitmeasurement.type === 'Packing' || unitmeasurement.type === 'Other') && 
+                {(unitmeasurement.type === 'Piece' || unitmeasurement.type === 'Packing' || unitmeasurement.type === 'Other') &&
                   <Tag className="h-10 w-10 text-gray-600" />}
               </div>
             </div>
 
             <Separator />
-            
+
             {/* Unit presentation */}
             <div className="text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Symbol</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('unitMeasurement.detail.sidebar.symbol')}</p>
               <div className="text-3xl font-bold font-mono">{unitmeasurement.symbol}</div>
             </div>
-            
+
             <Separator />
-            
+
             {/* Status indicator */}
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Availability</p>
+              <p className="text-sm font-medium text-muted-foreground mb-2">{t('unitMeasurement.detail.sidebar.availability')}</p>
               <div className="flex items-center justify-center p-3 rounded-md bg-gray-50">
                 {unitmeasurement.status === 'Active' ? (
                   <div className="flex items-center">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
-                    <span className="text-sm">Available for use</span>
+                    <span className="text-sm">{t('unitMeasurement.detail.sidebar.available')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center">
                     <XCircle className="h-5 w-5 text-gray-600 mr-2" />
-                    <span className="text-sm">Not available for use</span>
+                    <span className="text-sm">{t('unitMeasurement.detail.sidebar.notAvailable')}</span>
                   </div>
                 )}
               </div>
             </div>
-            
+
             {/* Example usage */}
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Example Usage</p>
+              <p className="text-sm font-medium text-muted-foreground mb-2">{t('unitMeasurement.detail.sidebar.exampleUsage')}</p>
               <div className="p-3 rounded-md bg-gray-50 font-mono text-sm">
                 100 {unitmeasurement.symbol}
               </div>
@@ -265,7 +267,7 @@ const UnitmeasurementDetailView = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Related information */}
       {/* {unitmeasurement.updated_at && (
         <div className="mt-6 text-sm text-muted-foreground">

@@ -36,6 +36,9 @@
   "tabs": {
     "workRequest": "DEMANDE DE TRAVAIL",
     "workOrder": "ORDRE DE TRAVAIL",
+    "workCompletion": "ACHÈVEMENT DES TRAVAUX",
+    "invoices": "FACTURES",
+    "paymentRequisition": "RÉQUISITION DE PAIEMENT",
     "stockLevel": "NIVEAUX DE STOCK",
     "transactions": "TRANSACTIONS",
     "purchaseRequests": "DEMANDES D'ACHAT",
@@ -100,7 +103,8 @@
       "inReview": "En révision",
       "approved": "Approuvé",
       "rejected": "Rejeté",
-      "convertingToPO": "Conversion en BC"
+      "convertingToPO": "Conversion en BC",
+      "itemsOn": "Articles en"
     },
     "subtitle": {
       "items": "Articles",
@@ -140,5 +144,41 @@
     "critical": "Critique : Stock en dessous du niveau minimum ! Commandez immédiatement.",
     "warning": "Avertissement : Stock en dessous du point de réapprovisionnement. Envisagez de réapprovisionner bientôt.",
     "healthy": "État : Les niveaux de stock sont sains."
+  },
+  "loading": "Chargement du tableau de bord...",
+  "error": "Erreur lors du chargement du tableau de bord",
+  "noData": "Aucune donnée disponible pour le tableau de bord",
+  "welcomeBack": "Bienvenue,",
+  "chart": {
+    "monthlyTrends": "Tendances mensuelles",
+    "noData": "Aucune donnée graphique disponible",
+    "datasetLabels": {
+      "workRequests": "Demandes de travail",
+      "workOrders": "Ordres de travail"
+    }
+  },
+  "statusGrid": {
+    "noData": "Aucune donnée de statut disponible pour",
+    "overview": "Aperçu des statuts"
+  },
+  "summaryCards": {
+    "noData": "Aucune donnée de résumé disponible pour"
+  },
+  "statusLabels": {
+    "newAwaiting": "Nouvelle demande en attente",
+    "newAwaitingReview": "Nouvelle révision en attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "overdue": "En retard",
+    "awaitingApproval": "En attente d'approbation",
+    "cpApproved": "Approuvé par CP",
+    "reviewed": "Révisé",
+    "completed": "Terminé",
+    "requestedPayment": "Paiement demandé",
+    "awaitingProcessing": "En attente de traitement",
+    "processedPayment": "Paiement traité",
+    "open": "Ouvert",
+    "pending": "En attente",
+    "partPaid": "Partiellement payé"
   }
 }

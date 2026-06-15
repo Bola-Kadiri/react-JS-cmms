@@ -16,25 +16,27 @@ import { Category } from '@/types/category';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { useSubcategoryQuery, useCreateSubcategory, useUpdateSubcategory } from '@/hooks/subcategory/useSubcategoryQueries';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const endpoint = 'accounts/api/categories/';
 
-// Form schema definition
-const subcategorySchema = z.object({
- title: z.string().min(1, 'Title is required'),
- category: z.string(),
- exclude_costing_limit: z.boolean(),
- description: z.string().optional(),
- status: z.enum(['Active', 'Inactive']).default('Active'),
-});
-
-type SubcategoryFormValues = z.infer<typeof subcategorySchema>;
-
 const SubcategoryForm = () => {
+ const { t } = useTypedTranslation('accounts');
  const { id } = useParams<{ id: string }>();
  const navigate = useNavigate();
  const isEditMode = !!id;
- 
+
+ // Form schema — defined inside component so validation messages use t()
+ const subcategorySchema = z.object({
+   title: z.string().min(1, t('subcategory.form.validation.titleRequired')),
+   category: z.string(),
+   exclude_costing_limit: z.boolean(),
+   description: z.string().optional(),
+   status: z.enum(['Active', 'Inactive']).default('Active'),
+ });
+
+ type SubcategoryFormValues = z.infer<typeof subcategorySchema>;
+
  // Subcategory form setup
  const subcategoryForm = useForm<SubcategoryFormValues>({
    resolver: zodResolver(subcategorySchema),
@@ -51,9 +53,9 @@ const SubcategoryForm = () => {
  const { data: categories = [] } = useList<Category>('categories', endpoint);
 
  // Fetch subcategory data for edit mode using our custom hook
- const { 
-   data: subcategoryData, 
-   isLoading: isLoadingSubcategory, 
+ const {
+   data: subcategoryData,
+   isLoading: isLoadingSubcategory,
    isError: isSubcategoryError,
    error: subcategoryError
  } = useSubcategoryQuery(isEditMode ? id : undefined);
@@ -99,7 +101,7 @@ const SubcategoryForm = () => {
      <div className="flex justify-center items-center h-64">
        <div className="flex flex-col items-center gap-2">
          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-         <p className="text-sm text-muted-foreground">Loading subcategory details...</p>
+         <p className="text-sm text-muted-foreground">{t('subcategory.form.loading')}</p>
        </div>
      </div>
    );
@@ -108,12 +110,12 @@ const SubcategoryForm = () => {
  if (isEditMode && isSubcategoryError) {
    return (
      <div className="flex flex-col items-center justify-center h-64 gap-4">
-       <div className="text-red-500 text-xl">Error loading subcategory details</div>
+       <div className="text-red-500 text-xl">{t('subcategory.form.error')}</div>
        <p className="text-sm text-muted-foreground mb-4">
-         {subcategoryError instanceof Error ? subcategoryError.message : 'An unknown error occurred'}
+         {subcategoryError instanceof Error ? subcategoryError.message : t('subcategory.form.unknownError')}
        </p>
        <Button onClick={handleCancel} variant="outline">
-         Back to Subcategories
+         {t('subcategory.form.backToList')}
        </Button>
      </div>
    );
@@ -123,15 +125,15 @@ const SubcategoryForm = () => {
    <div className="container mx-auto py-8">
      <div className="flex items-center justify-between mb-6">
        <div className="flex items-center gap-4">
-         <Button 
-           variant="outline" 
-           size="icon" 
+         <Button
+           variant="outline"
+           size="icon"
            onClick={handleCancel}
          >
            <ArrowLeft className="h-4 w-4" />
          </Button>
          <h1 className="text-2xl font-bold">
-           {isEditMode ? 'Edit Subcategory' : 'Create New Subcategory'}
+           {isEditMode ? t('subcategory.form.editTitle') : t('subcategory.form.createPageTitle')}
          </h1>
        </div>
      </div>
@@ -142,22 +144,19 @@ const SubcategoryForm = () => {
            {/* Subcategory Details Section */}
            <Collapsible defaultOpen={true} className="w-full">
              <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-200 text-black rounded-t-md">
-               <h2 className="text-lg font-medium">Subcategory Details</h2>
-               {/* <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                 Toggle
-               </Button> */}
+               <h2 className="text-lg font-medium">{t('subcategory.form.sections.details')}</h2>
              </CollapsibleTrigger>
-             
+
              <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                  
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <FormField
                    control={subcategoryForm.control}
                    name="title"
                    render={({ field }) => (
                      <FormItem>
-                       <FormLabel>Title</FormLabel>
+                       <FormLabel>{t('subcategory.form.fields.title')}</FormLabel>
                        <FormControl>
-                         <Input placeholder="Subcategory title" {...field} />
+                         <Input placeholder={t('subcategory.form.placeholders.title')} {...field} />
                        </FormControl>
                        <FormMessage />
                      </FormItem>
@@ -169,15 +168,15 @@ const SubcategoryForm = () => {
                    name="category"
                    render={({ field }) => (
                      <FormItem>
-                       <FormLabel>Category</FormLabel>
-                       <Select 
-                         onValueChange={field.onChange} 
+                       <FormLabel>{t('subcategory.form.fields.category')}</FormLabel>
+                       <Select
+                         onValueChange={field.onChange}
                          value={field.value}
                          defaultValue={field.value}
                        >
                          <FormControl>
                            <SelectTrigger>
-                             <SelectValue placeholder="Select Category" />
+                             <SelectValue placeholder={t('subcategory.form.placeholders.selectCategory')} />
                            </SelectTrigger>
                          </FormControl>
                          <SelectContent>
@@ -200,20 +199,20 @@ const SubcategoryForm = () => {
                    name="status"
                    render={({ field }) => (
                      <FormItem>
-                       <FormLabel>Status</FormLabel>
-                       <Select 
-                         onValueChange={field.onChange} 
+                       <FormLabel>{t('subcategory.form.fields.status')}</FormLabel>
+                       <Select
+                         onValueChange={field.onChange}
                          value={field.value}
                          defaultValue={field.value}
                        >
                          <FormControl>
                            <SelectTrigger>
-                             <SelectValue placeholder="Select status" />
+                             <SelectValue placeholder={t('subcategory.form.placeholders.selectStatus')} />
                            </SelectTrigger>
                          </FormControl>
                          <SelectContent>
-                           <SelectItem value="Active">Active</SelectItem>
-                           <SelectItem value="Inactive">Inactive</SelectItem>
+                           <SelectItem value="Active">{t('subcategory.status.active')}</SelectItem>
+                           <SelectItem value="Inactive">{t('subcategory.status.inactive')}</SelectItem>
                          </SelectContent>
                        </Select>
                        <FormMessage />
@@ -228,12 +227,12 @@ const SubcategoryForm = () => {
                       <FormItem className="flex items-center gap-2 space-y-0">
                         <FormControl>
                           <Checkbox
-                            checked={!!field.value} // ensures true/false, no null
-                            onCheckedChange={(checked) => field.onChange(!!checked)} // convert to boolean
+                            checked={!!field.value}
+                            onCheckedChange={(checked) => field.onChange(!!checked)}
                             ref={field.ref}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal">Exclude costing limit</FormLabel>
+                        <FormLabel className="font-normal">{t('subcategory.form.fields.excludeCostingLimit')}</FormLabel>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -245,10 +244,10 @@ const SubcategoryForm = () => {
                  name="description"
                  render={({ field }) => (
                    <FormItem>
-                     <FormLabel>Description</FormLabel>
+                     <FormLabel>{t('subcategory.form.fields.description')}</FormLabel>
                      <FormControl>
-                       <Textarea 
-                         placeholder="Enter subcategory description"
+                       <Textarea
+                         placeholder={t('subcategory.form.placeholders.description')}
                          {...field}
                          className="min-h-[100px]"
                        />
@@ -260,25 +259,25 @@ const SubcategoryForm = () => {
              </CollapsibleContent>
            </Collapsible>
          </div>
-         
+
          {/* Form submit buttons */}
          <div className="flex justify-between pt-4">
-           <Button 
-             type="button" 
-             variant="outline" 
+           <Button
+             type="button"
+             variant="outline"
              onClick={handleCancel}
            >
-             Cancel
+             {t('common:actions.cancel')}
            </Button>
-           
-           <Button 
+
+           <Button
              type="submit"
              disabled={createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending}
            >
              {(createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending) && (
                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
              )}
-             {isEditMode ? 'Update' : 'Save'}
+             {isEditMode ? t('subcategory.form.update') : t('subcategory.form.save')}
            </Button>
          </div>
        </form>

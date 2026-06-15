@@ -2,7 +2,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-// import { Helmet } from 'react-helmet-async';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -17,8 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const VendorManagement = () => {
+  const { t } = useTypedTranslation('accounts');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -33,7 +34,6 @@ const VendorManagement = () => {
 
   const { canEdit } = useFeatureAccess('reference')
 
-  // Fetch all vendors - we'll filter client-side
   const {
     data = { count: 0, results: [] },
     isFetching,
@@ -41,14 +41,11 @@ const VendorManagement = () => {
     refetch
   } = useVendorsQuery();
 
-  // Delete vendor mutation using our custom hook
   const deleteVendorMutation = useDeleteVendor();
 
-  // Client-side filtering logic
   const filteredData = useMemo(() => {
     let results = [...(data.results || [])];
 
-    // Search filter - search by name, email, bank, or account_name
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
       results = results.filter(vendor =>
@@ -59,12 +56,10 @@ const VendorManagement = () => {
       );
     }
 
-    // Status filter
     if (statusFilter && statusFilter !== 'all') {
       results = results.filter(vendor => vendor.status === statusFilter);
     }
 
-    // Type filter
     if (typeFilter && typeFilter !== 'all') {
       results = results.filter(vendor => vendor.type === typeFilter);
     }
@@ -72,34 +67,22 @@ const VendorManagement = () => {
     return results;
   }, [data.results, searchValue, statusFilter, typeFilter]);
 
-  // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, pageSize]);
 
-  // Calculate total pages
   const totalVendors = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalVendors / pageSize));
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
   }, [searchValue, statusFilter, typeFilter]);
 
-  // Event handlers
-  const handleAddVendor = () => {
-    navigate('/dashboard/accounts/vendors/create');
-  };
-
-  const handleViewVendor = (slug: string) => {
-    navigate(`/dashboard/accounts/vendors/view/${slug}`);
-  };
-
-  const handleEditVendor = (slug: string) => {
-    navigate(`/dashboard/accounts/vendors/edit/${slug}`);
-  };
+  const handleAddVendor = () => navigate('/dashboard/accounts/vendors/create');
+  const handleViewVendor = (slug: string) => navigate(`/dashboard/accounts/vendors/view/${slug}`);
+  const handleEditVendor = (slug: string) => navigate(`/dashboard/accounts/vendors/edit/${slug}`);
 
   const handleDeleteVendor = (slug: string) => {
     setVendorToDelete(slug);
@@ -117,73 +100,45 @@ const VendorManagement = () => {
     }
   };
 
-  // Handle search
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-  };
+  const handleSearch = (value: string) => setSearchValue(value);
+  const handleStatusFilterChange = (value: string) => setStatusFilter(value);
+  const handleTypeFilterChange = (value: string) => setTypeFilter(value);
+  const handlePageChange = (newPage: number) => setPage(newPage);
+  const handlePageSizeChange = (newPageSize: number) => { setPageSize(newPageSize); setPage(1); };
 
-  // Handle status filter
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
-  };
-
-  // Handle type filter
-  const handleTypeFilterChange = (value: string) => {
-    setTypeFilter(value);
-  };
-
-  // Handle pagination
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-    setPage(1); // Reset to first page when changing page size
-  };
-
-  // Helper function to get badge styles
   const getTypeBadgeStyles = (type: string) => {
     switch (type) {
-      case 'Corporate':
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      case 'Individual':
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+      case 'Corporate': return "bg-green-100 text-green-800 hover:bg-green-100";
+      case 'Individual': return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
+      default: return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
   };
 
   const getStatusBadgeStyles = (status: string) => {
     switch (status) {
-      case 'Active':
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      case 'Inactive':
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+      case 'Active': return "bg-green-100 text-green-800 hover:bg-green-100";
+      case 'Inactive': return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+      default: return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
   };
 
-  // Loading state
   if (isFetching) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading vendors...</p>
+          <p className="text-sm text-muted-foreground">{t('vendor.loading')}</p>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading vendors</div>
+        <div className="text-red-500 text-xl">{t('vendor.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -191,21 +146,12 @@ const VendorManagement = () => {
 
   return (
     <div className="py-8">
-      {/* <Helmet>
-        <title>Vendor Management</title>
-      </Helmet> */}
-
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Vendor Management</h1>
-        {/* {canEdit && (
-          <Button onClick={handleAddVendor} className="bg-green-600 hover:bg-green-700">
-          <Plus className="mr-2 h-4 w-4" /> Add Vendor
-        </Button>
-        )} */}
+        <h1 className="text-2xl font-bold">{t('vendor.management')}</h1>
         <PermissionGuard feature='reference' permission='view'>
           <Button onClick={handleAddVendor}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Vendor
+            {t('vendor.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -216,7 +162,7 @@ const VendorManagement = () => {
           <div className="flex-1">
             <SearchFilter
               onSearch={handleSearch}
-              placeholder="Search by name, email, bank, or account name..."
+              placeholder={t('vendor.searchPlaceholder')}
               initialSearchValue={searchValue}
             />
           </div>
@@ -225,23 +171,23 @@ const VendorManagement = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('vendor.filters.byStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Inactive">Inactive</SelectItem>
+              <SelectItem value="all">{t('vendor.filters.allStatuses')}</SelectItem>
+              <SelectItem value="Active">{t('vendor.status.active')}</SelectItem>
+              <SelectItem value="Inactive">{t('vendor.status.inactive')}</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by type" />
+              <SelectValue placeholder={t('vendor.filters.byType')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="Company">Company</SelectItem>
-              <SelectItem value="Individual">Individual</SelectItem>
+              <SelectItem value="all">{t('vendor.filters.allTypes')}</SelectItem>
+              <SelectItem value="Company">{t('vendor.types.company')}</SelectItem>
+              <SelectItem value="Individual">{t('vendor.types.individual')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -253,20 +199,20 @@ const VendorManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Email</TableHead>
-                <TableHead className="font-medium text-gray-600">Bank</TableHead>
-                <TableHead className="font-medium text-gray-600">Account Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.email')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.bank')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.accountName')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.type')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('vendor.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('vendor.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No vendors found.
+                    {t('vendor.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -328,7 +274,6 @@ const VendorManagement = () => {
             </TableBody>
           </Table>
 
-          {/* Pagination */}
           {totalVendors > 0 && (
             <div className="p-4 border-t">
               <Pagination
@@ -348,13 +293,13 @@ const VendorManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the vendor.
+              {t('vendor.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteVendor}
               disabled={deleteVendorMutation.isPending}
@@ -363,10 +308,10 @@ const VendorManagement = () => {
               {deleteVendorMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

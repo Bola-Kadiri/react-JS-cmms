@@ -15,8 +15,10 @@ import { Apartment } from '@/types/apartment';
 import { ApartmentQueryParams } from '@/services/apartmentsApi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ApartmentManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -191,7 +193,7 @@ const ApartmentManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartments...</p>
+          <p className="text-sm text-muted-foreground">{t('apartment.loading')}</p>
         </div>
       </div>
     );
@@ -201,9 +203,9 @@ const ApartmentManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartments</div>
+        <div className="text-red-500 text-xl">{t('apartment.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -216,9 +218,9 @@ const ApartmentManagement = () => {
       </Helmet> */}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Apartment Management</h1>
+        <h1 className="text-2xl font-bold">{t('apartment.management')}</h1>
         <Button onClick={handleAddApartment}>
-          <Plus className="mr-2 h-4 w-4" /> Add Apartment
+          <Plus className="mr-2 h-4 w-4" /> {t('apartment.add')}
         </Button>
       </div>
 
@@ -227,7 +229,7 @@ const ApartmentManagement = () => {
         <div className="flex-1">
           <SearchFilter 
             onSearch={handleSearch}
-            placeholder="Search by type, building, or landlord..."
+            placeholder={t('apartment.searchPlaceholder')}
             initialSearchValue={searchValue}
           />
         </div>
@@ -235,26 +237,26 @@ const ApartmentManagement = () => {
         <div className="w-full md:w-64">
           <Select value={ownershipTypeFilter} onValueChange={handleOwnershipTypeFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by ownership type" />
+              <SelectValue placeholder={t('apartment.filter.ownershipTypePlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Ownership Types</SelectItem>
-              <SelectItem value="Freehold">Freehold</SelectItem>
-              <SelectItem value="Leasehold">Leasehold</SelectItem>
-              <SelectItem value="Freehold (Leased Out)">Freehold (Leased Out)</SelectItem>
+              <SelectItem value="all">{t('apartment.filter.allOwnershipTypes')}</SelectItem>
+              <SelectItem value="Freehold">{t('apartment.ownershipType.freehold')}</SelectItem>
+              <SelectItem value="Leasehold">{t('apartment.ownershipType.leasehold')}</SelectItem>
+              <SelectItem value="Freehold (Leased Out)">{t('apartment.ownershipType.freeholdLeasedOut')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="w-full md:w-52">
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('apartment.filter.statusPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Inactive">Inactive</SelectItem>
+              <SelectItem value="all">{t('apartment.filter.allStatuses')}</SelectItem>
+              <SelectItem value="Active">{t('apartment.form.statusOptions.active')}</SelectItem>
+              <SelectItem value="Inactive">{t('apartment.form.statusOptions.inactive')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -266,21 +268,21 @@ const ApartmentManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">No.</TableHead>
-                <TableHead className="font-medium text-gray-600">Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Building</TableHead>
-                <TableHead className="font-medium text-gray-600">Size (sqm)</TableHead>
-                <TableHead className="font-medium text-gray-600">Ownership Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Landlord</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.no')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.type')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.building')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.size')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.ownershipType')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.landlord')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartment.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('apartment.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    No apartments found.
+                    {t('apartment.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -356,14 +358,14 @@ const ApartmentManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('apartment.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the apartment.
+              {t('apartment.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteApartment}
               disabled={deleteApartmentMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -371,10 +373,10 @@ const ApartmentManagement = () => {
               {deleteApartmentMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('apartment.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('apartment.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

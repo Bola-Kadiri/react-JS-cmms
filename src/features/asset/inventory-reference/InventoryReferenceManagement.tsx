@@ -33,8 +33,10 @@ import {
 import { Pagination } from '@/components/Pagination';
 import { useInventoryReferencesQuery, useDeleteInventoryReference } from '@/hooks/inventoryreference/useInventoryReferenceQueries';
 import { InventoryReference } from '@/types/inventoryreference';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 export const InventoryReferenceManagement: React.FC = () => {
+  const { t } = useTypedTranslation('assets');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export const InventoryReferenceManagement: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading inventory references...</p>
+          <p className="text-gray-600">{t('inventoryRef.loading')}</p>
         </div>
       </div>
     );
@@ -81,9 +83,9 @@ export const InventoryReferenceManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Error loading inventory references</p>
+          <p className="text-red-600 mb-4">{t('inventoryRef.error')}</p>
           <Button onClick={() => window.location.reload()}>
-            Try Again
+            {t('inventoryRef.tryAgain')}
           </Button>
         </div>
       </div>
@@ -93,19 +95,19 @@ export const InventoryReferenceManagement: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory References</h1>
-        <p className="text-gray-600">Manage inventory reference entries</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('inventoryRef.management')}</h1>
+        <p className="text-gray-600">{t('inventoryRef.managementDesc')}</p>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>Inventory Reference List</CardTitle>
+            <CardTitle>{t('inventoryRef.listTitle')}</CardTitle>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1 sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search inventory references..."
+                  placeholder={t('inventoryRef.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
                   className="pl-10"
@@ -114,7 +116,7 @@ export const InventoryReferenceManagement: React.FC = () => {
               <Button asChild>
                 <Link to="/dashboard/asset/inventory-reference/inventory-references/create">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add New
+                  {t('inventoryRef.addButton')}
                 </Link>
               </Button>
             </div>
@@ -125,13 +127,13 @@ export const InventoryReferenceManagement: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Inventory Type</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Subcategory</TableHead>
-                  <TableHead>Model</TableHead>
-                  <TableHead>Manufacturer</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('inventoryRef.columns.id')}</TableHead>
+                  <TableHead>{t('inventoryRef.columns.inventoryType')}</TableHead>
+                  <TableHead>{t('inventoryRef.columns.category')}</TableHead>
+                  <TableHead>{t('inventoryRef.columns.subcategory')}</TableHead>
+                  <TableHead>{t('inventoryRef.columns.model')}</TableHead>
+                  <TableHead>{t('inventoryRef.columns.manufacturer')}</TableHead>
+                  <TableHead className="text-right">{t('inventoryRef.columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -139,7 +141,7 @@ export const InventoryReferenceManagement: React.FC = () => {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
                       <div className="text-gray-500">
-                        {searchTerm ? 'No inventory references match your search.' : 'No inventory references found.'}
+                        {searchTerm ? t('inventoryRef.noItemsFiltered') : t('inventoryRef.noItems')}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -163,13 +165,13 @@ export const InventoryReferenceManagement: React.FC = () => {
                             <DropdownMenuItem asChild>
                               <Link to={`/dashboard/asset/inventory-reference/inventory-references/view/${item.id}`}>
                                 <Eye className="h-4 w-4 mr-2" />
-                                View
+                                {t('inventoryRef.rowActions.view')}
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <Link to={`/dashboard/asset/inventory-reference/inventory-references/edit/${item.id}`}>
                                 <Edit className="h-4 w-4 mr-2" />
-                                Edit
+                                {t('inventoryRef.rowActions.edit')}
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -177,7 +179,7 @@ export const InventoryReferenceManagement: React.FC = () => {
                               className="text-red-600"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t('inventoryRef.rowActions.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -206,22 +208,22 @@ export const InventoryReferenceManagement: React.FC = () => {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the inventory reference.
+              {t('inventoryRef.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('inventoryRef.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
-}; 
+};

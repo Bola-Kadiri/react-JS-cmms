@@ -15,11 +15,13 @@ import { useList } from '@/hooks/crud/useCrudOperations';
 import { Region } from '@/types/region';
 import { RegionQueryParams } from '@/services/regionsApi';
 import { User } from '@/types/user';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'name' | 'country' | 'manager';
 type SortDirection = 'asc' | 'desc';
 
 const RegionManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -69,7 +71,7 @@ const RegionManagement = () => {
   // Helper function to get manager name
   const getManagerName = (managerId: number) => {
     const manager = users.find(user => user.id === managerId);
-    return manager ? `${manager.first_name} ${manager.last_name}` : 'Unknown Manager';
+    return manager ? `${manager.first_name} ${manager.last_name}` : t('region.unknownManager');
   };
 
   // Client-side filtering and sorting logic
@@ -206,7 +208,7 @@ const RegionManagement = () => {
   const filterConfig = [
     {
       key: 'country',
-      label: 'Country',
+      label: t('region.filter.country'),
       options: countryOptions
     }
   ];
@@ -225,7 +227,7 @@ const RegionManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading regions...</p>
+          <p className="text-sm text-muted-foreground">{t('region.loading')}</p>
         </div>
       </div>
     );
@@ -235,9 +237,9 @@ const RegionManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading regions</div>
+        <div className="text-red-500 text-xl">{t('region.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -246,9 +248,9 @@ const RegionManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Region Management</h1>
+        <h1 className="text-2xl font-bold">{t('region.management')}</h1>
         <Button onClick={handleAddRegion} className="bg-green-600 hover:bg-green-700">
-          <Plus className="mr-2 h-4 w-4" /> Add Region
+          <Plus className="mr-2 h-4 w-4" /> {t('region.add')}
         </Button>
       </div>
 
@@ -258,7 +260,7 @@ const RegionManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search regions..."
+          placeholder={t('region.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -275,7 +277,7 @@ const RegionManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('region.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -284,7 +286,7 @@ const RegionManagement = () => {
                     onClick={() => handleSort('country')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Country {renderSortIcon('country')}
+                    {t('region.columns.country')} {renderSortIcon('country')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -293,17 +295,17 @@ const RegionManagement = () => {
                     onClick={() => handleSort('manager')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Manager {renderSortIcon('manager')}
+                    {t('region.columns.manager')} {renderSortIcon('manager')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('region.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    No regions found.
+                    {t('region.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -366,14 +368,14 @@ const RegionManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('region.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the region.
+              {t('region.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('region.delete.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteRegion}
               disabled={deleteRegionMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -381,10 +383,10 @@ const RegionManagement = () => {
               {deleteRegionMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('region.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('region.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -13,8 +13,9 @@ import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Bankaccount } from '@/types/bankaccount';
 import { useBankaccountQuery, useCreateBankaccount, useUpdateBankaccount } from '@/hooks/bankaccount/useBankaccountQueries';
 import { toast } from '@/components/ui/use-toast';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
-// Form schema definition
+// Form schema definition — no t() calls so can stay at module level
 const bankaccountSchema = z.object({
   bank: z.string(),
   account_name: z.string(),
@@ -28,16 +29,17 @@ const bankaccountSchema = z.object({
 type BankaccountFormValues = z.infer<typeof bankaccountSchema>;
 
 const BankaccountForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
-  
+
   // Collapsible section states
   const [openSections, setOpenSections] = useState({
     basic: true,
     additional: false
   });
-  
+
   // Bankaccount form setup
   const bankaccountForm = useForm<BankaccountFormValues>({
     resolver: zodResolver(bankaccountSchema),
@@ -53,9 +55,9 @@ const BankaccountForm = () => {
   });
 
   // Fetch bankaccount data for edit mode using our custom hook
-  const { 
-    data: bankaccountData, 
-    isLoading: isLoadingBankaccount, 
+  const {
+    data: bankaccountData,
+    isLoading: isLoadingBankaccount,
     isError: isBankaccountError,
     error: bankaccountError
   } = useBankaccountQuery(isEditMode ? slug : undefined);
@@ -104,8 +106,8 @@ const BankaccountForm = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem submitting the form",
+        title: t('bankAccount.form.toast.errorTitle'),
+        description: t('bankAccount.form.toast.submitError'),
         variant: "destructive",
       });
     }
@@ -121,7 +123,7 @@ const BankaccountForm = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading bank account details...</p>
+            <p className="text-sm text-muted-foreground">{t('bankAccount.form.loading')}</p>
           </div>
         </div>
       </div>
@@ -132,12 +134,12 @@ const BankaccountForm = () => {
     return (
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading bank account details</div>
+          <div className="text-red-500 text-xl">{t('bankAccount.form.error')}</div>
           <p className="text-sm text-muted-foreground mb-4">
-            {bankaccountError instanceof Error ? bankaccountError.message : 'An unknown error occurred'}
+            {bankaccountError instanceof Error ? bankaccountError.message : t('bankAccount.form.unknownError')}
           </p>
           <Button onClick={handleCancel} variant="outline">
-            Back to Bank Accounts
+            {t('bankAccount.form.backToList')}
           </Button>
         </div>
       </div>
@@ -148,16 +150,16 @@ const BankaccountForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
-            aria-label="Go back"
+            aria-label={t('common:actions.back')}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Bank Account' : 'Create New Bank Account'}
+            {isEditMode ? t('bankAccount.form.editTitle') : t('bankAccount.form.createPageTitle')}
           </h1>
         </div>
       </div>
@@ -171,13 +173,13 @@ const BankaccountForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('basic')}
             >
-              <h2 className="text-lg font-medium">Basic Information</h2>
-              {openSections.basic ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('bankAccount.form.sections.basic')}</h2>
+              {openSections.basic ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.basic && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -186,10 +188,10 @@ const BankaccountForm = () => {
                     name="bank"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bank<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('bankAccount.form.fields.bank')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter bank name"
+                          <Input
+                            placeholder={t('bankAccount.form.placeholders.bank')}
                             {...field}
                           />
                         </FormControl>
@@ -197,25 +199,25 @@ const BankaccountForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={bankaccountForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
+                        <FormLabel>{t('bankAccount.form.fields.status')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('bankAccount.form.placeholders.selectStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('bankAccount.status.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('bankAccount.status.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -223,17 +225,17 @@ const BankaccountForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={bankaccountForm.control}
                     name="account_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('bankAccount.form.fields.accountName')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter account name"
+                          <Input
+                            placeholder={t('bankAccount.form.placeholders.accountName')}
                             {...field}
                           />
                         </FormControl>
@@ -241,16 +243,16 @@ const BankaccountForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={bankaccountForm.control}
                     name="account_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Number<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('bankAccount.form.fields.accountNumber')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter account number"
+                          <Input
+                            placeholder={t('bankAccount.form.placeholders.accountNumber')}
                             {...field}
                           />
                         </FormControl>
@@ -259,43 +261,43 @@ const BankaccountForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={bankaccountForm.control}
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <Select 
+                      <FormLabel>{t('bankAccount.form.fields.currency')}</FormLabel>
+                      <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select currency" />
+                            <SelectValue placeholder={t('bankAccount.form.placeholders.selectCurrency')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="NGN">Nigerian Naira (NGN)</SelectItem>
-                          <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                          <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                          <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+                          <SelectItem value="NGN">{t('bankAccount.form.currencies.ngn')}</SelectItem>
+                          <SelectItem value="USD">{t('bankAccount.form.currencies.usd')}</SelectItem>
+                          <SelectItem value="EUR">{t('bankAccount.form.currencies.eur')}</SelectItem>
+                          <SelectItem value="GBP">{t('bankAccount.form.currencies.gbp')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={bankaccountForm.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>{t('bankAccount.form.fields.address')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter bank address"
+                        <Textarea
+                          placeholder={t('bankAccount.form.placeholders.address')}
                           {...field}
                           className="min-h-[100px] resize-y"
                         />
@@ -315,13 +317,13 @@ const BankaccountForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('additional')}
             >
-              <h2 className="text-lg font-medium">Additional Information</h2>
-              {openSections.additional ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('bankAccount.form.sections.additional')}</h2>
+              {openSections.additional ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.additional && (
               <div className="p-6 space-y-6 bg-white">
                 <FormField
@@ -329,10 +331,10 @@ const BankaccountForm = () => {
                   name="details"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Additional Details</FormLabel>
+                      <FormLabel>{t('bankAccount.form.fields.additionalDetails')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter additional details or notes about this account"
+                        <Textarea
+                          placeholder={t('bankAccount.form.placeholders.details')}
                           {...field}
                           className="min-h-[120px] resize-y"
                         />
@@ -346,21 +348,21 @@ const BankaccountForm = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createBankaccountMutation.isPending || updateBankaccountMutation.isPending}
             >
               {(createBankaccountMutation.isPending || updateBankaccountMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Bank Account' : 'Create Bank Account'}
+              {isEditMode ? t('bankAccount.form.update') : t('bankAccount.form.create')}
             </Button>
           </div>
         </form>

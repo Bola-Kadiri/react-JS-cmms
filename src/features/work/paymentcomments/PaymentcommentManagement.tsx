@@ -16,8 +16,10 @@ import { PaymentcommentQueryParams } from '@/services/paymentcommentApi';
 import { Badge } from '@/components/ui/badge';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PaymentcommentManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -124,7 +126,7 @@ const PaymentcommentManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading paymentcomments...</p>
+          <p className="text-sm text-muted-foreground">{t('paymentComment.loading')}</p>
         </div>
       </div>
     );
@@ -134,9 +136,9 @@ const PaymentcommentManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading paymentcomments</div>
+        <div className="text-red-500 text-xl">{t('paymentComment.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -145,10 +147,10 @@ const PaymentcommentManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Paymentcomment Management</h1>
+        <h1 className="text-2xl font-bold">{t('paymentComment.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddPaymentcomment}>
-          <Plus className="mr-2 h-4 w-4" /> Add Paymentcomment
+          <Plus className="mr-2 h-4 w-4" /> {t('paymentComment.add')}
         </Button>
         )}
       </div>
@@ -157,7 +159,7 @@ const PaymentcommentManagement = () => {
       <div className="mb-6">
         <SearchFilter 
           onSearch={handleSearch}
-          placeholder="Search paymentcomments..."
+          placeholder={t('paymentComment.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -179,7 +181,7 @@ const PaymentcommentManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No paymentcomments found.
+                    {t('paymentComment.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -261,9 +263,9 @@ const PaymentcommentManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the paymentcomment.
+              {t('paymentComment.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -276,10 +278,10 @@ const PaymentcommentManagement = () => {
               {deletePaymentcommentMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

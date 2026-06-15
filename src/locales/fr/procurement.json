@@ -1,0 +1,152 @@
+{
+  "purchaseOrder": {
+    "management": "Gestion des Bons de Commande",
+    "add": "Ajouter un Bon de Commande",
+    "loading": "Chargement des bons de commande...",
+    "error": "Erreur lors du chargement des bons de commande",
+    "noItems": "Aucun bon de commande trouvé",
+    "deleteTitle": "Supprimer le Bon de Commande",
+    "deleteMessage": "Cette action est irréversible. Ce bon de commande sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par type, fournisseur ou demandeur...",
+    "columns": {
+      "type": "Type",
+      "vendor": "Fournisseur",
+      "requestedBy": "Demandé par",
+      "amount": "Montant",
+      "status": "Statut",
+      "date": "Date"
+    },
+    "form": {
+      "createTitle": "Créer un Bon de Commande",
+      "editTitle": "Modifier le Bon de Commande",
+      "type": "Type",
+      "vendor": "Fournisseur",
+      "facility": "Installation",
+      "description": "Description",
+      "amount": "Montant",
+      "currency": "Devise",
+      "expectedDeliveryDate": "Date de livraison prévue"
+    }
+  },
+  "poRequisition": {
+    "management": "Gestion des Réquisitions de BC",
+    "add": "Ajouter une Réquisition de BC",
+    "loading": "Chargement des réquisitions de BC...",
+    "error": "Erreur lors du chargement des réquisitions de BC",
+    "noItems": "Aucune réquisition de BC trouvée",
+    "deleteTitle": "Supprimer la Réquisition de BC",
+    "deleteMessage": "Cette action est irréversible. Cette réquisition de BC sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par titre, fournisseur ou statut...",
+    "columns": {
+      "title": "Titre",
+      "vendor": "Fournisseur",
+      "amount": "Montant",
+      "status": "Statut",
+      "date": "Date",
+      "requestedBy": "Demandé par"
+    },
+    "form": {
+      "createTitle": "Créer une Réquisition de BC",
+      "editTitle": "Modifier la Réquisition de BC",
+      "title": "Titre",
+      "vendor": "Fournisseur",
+      "facility": "Installation",
+      "description": "Description",
+      "amount": "Montant"
+    }
+  },
+  "requestQuotation": {
+    "management": "Gestion des Demandes de Devis",
+    "add": "Ajouter une Demande de Devis",
+    "loading": "Chargement des demandes de devis...",
+    "error": "Erreur lors du chargement des demandes de devis",
+    "noItems": "Aucune demande de devis trouvée",
+    "deleteTitle": "Supprimer la Demande de Devis",
+    "deleteMessage": "Cette action est irréversible. Cette demande de devis sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par titre, fournisseur ou statut...",
+    "columns": {
+      "title": "Titre",
+      "vendor": "Fournisseur",
+      "amount": "Montant",
+      "status": "Statut",
+      "date": "Date"
+    },
+    "form": {
+      "createTitle": "Créer une Demande de Devis",
+      "editTitle": "Modifier la Demande de Devis",
+      "title": "Titre",
+      "vendor": "Fournisseur",
+      "facility": "Installation",
+      "description": "Description",
+      "amount": "Montant",
+      "validUntil": "Valide jusqu'au"
+    }
+  },
+  "goodsReceivedNote": {
+    "management": "Gestion des Bons de Réception",
+    "add": "Ajouter un Bon de Réception",
+    "loading": "Chargement des bons de réception...",
+    "error": "Erreur lors du chargement des bons de réception",
+    "noItems": "Aucun bon de réception trouvé",
+    "deleteTitle": "Supprimer le Bon de Réception",
+    "deleteMessage": "Cette action est irréversible. Ce bon de réception sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par numéro BR, fournisseur ou bon de commande...",
+    "columns": {
+      "grnNumber": "Numéro BR",
+      "vendor": "Fournisseur",
+      "purchaseOrder": "Bon de Commande",
+      "receivedDate": "Date de réception",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer un Bon de Réception",
+      "editTitle": "Modifier le Bon de Réception",
+      "vendor": "Fournisseur",
+      "purchaseOrder": "Bon de Commande",
+      "receivedDate": "Date de réception",
+      "notes": "Notes"
+    }
+  },
+  "vendorContract": {
+    "management": "Gestion des Contrats Fournisseurs",
+    "description": "Gérer et suivre les contrats fournisseurs",
+    "add": "Ajouter un Contrat Fournisseur",
+    "loading": "Chargement des contrats fournisseurs...",
+    "error": "Erreur lors du chargement des contrats fournisseurs",
+    "noItems": "Aucun contrat fournisseur trouvé",
+    "deleteTitle": "Supprimer le Contrat Fournisseur",
+    "deleteMessage": "Cette action est irréversible. Ce contrat fournisseur sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par numéro de contrat, fournisseur ou statut...",
+    "columns": {
+      "contractNumber": "Numéro de Contrat",
+      "vendor": "Fournisseur",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "amount": "Montant",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer un Contrat Fournisseur",
+      "editTitle": "Modifier le Contrat Fournisseur",
+      "vendor": "Fournisseur",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "amount": "Montant",
+      "description": "Description",
+      "currency": "Devise"
+    }
+  },
+  "status": {
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "draft": "Brouillon",
+    "sent": "Envoyé",
+    "received": "Reçu",
+    "partiallyReceived": "Partiellement reçu",
+    "fullyReceived": "Entièrement reçu",
+    "cancelled": "Annulé",
+    "active": "Actif",
+    "expired": "Expiré"
+  }
+}

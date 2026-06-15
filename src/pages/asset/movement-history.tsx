@@ -1,12 +1,15 @@
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+
 const MovementHistory = () => {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold tracking-tight">Movement History</h1>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <p>Movement history content will go here</p>
-        </div>
+  const { t } = useTypedTranslation('assets');
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold tracking-tight">{t('movement.title')}</h1>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <p>{t('movement.placeholder')}</p>
       </div>
-    );
-  };
-  
-  export default MovementHistory;
+    </div>
+  );
+};
+
+export default MovementHistory;

@@ -5,20 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Clock, Repeat, FileText, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCalendarEventQuery } from '@/hooks/calendarevent/useCalendareventQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PPMCalendarDetail = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
-  // Fetch calendar event details
-  const { 
-    data: event, 
-    isFetching, 
-    isError, 
-    refetch 
+
+  const {
+    data: event,
+    isFetching,
+    isError,
+    refetch
   } = useCalendarEventQuery(id);
 
-  // Helper function for date formatting
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
@@ -31,26 +31,33 @@ const PPMCalendarDetail = () => {
     });
   };
 
-  // Helper function for duration calculation
   const calculateDuration = (start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
     const diffMs = endDate.getTime() - startDate.getTime();
-    
+
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (diffDays > 0) {
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ${diffHours > 0 ? `${diffHours} hour${diffHours > 1 ? 's' : ''}` : ''}`;
+      const dayLabel = diffDays === 1 ? t('calendar.detail.units.day') : t('calendar.detail.units.days');
+      const hourPart = diffHours > 0
+        ? ` ${diffHours} ${diffHours === 1 ? t('calendar.detail.units.hour') : t('calendar.detail.units.hours')}`
+        : '';
+      return `${diffDays} ${dayLabel}${hourPart}`;
     } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ${diffMinutes > 0 ? `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}` : ''}`;
+      const hourLabel = diffHours === 1 ? t('calendar.detail.units.hour') : t('calendar.detail.units.hours');
+      const minutePart = diffMinutes > 0
+        ? ` ${diffMinutes} ${diffMinutes === 1 ? t('calendar.detail.units.minute') : t('calendar.detail.units.minutes')}`
+        : '';
+      return `${diffHours} ${hourLabel}${minutePart}`;
     } else {
-      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+      const minuteLabel = diffMinutes === 1 ? t('calendar.detail.units.minute') : t('calendar.detail.units.minutes');
+      return `${diffMinutes} ${minuteLabel}`;
     }
   };
 
-  // Helper function for frequency badge styling
   const getFrequencyBadgeStyles = (unit: string) => {
     switch (unit) {
       case 'Days':
@@ -66,37 +73,34 @@ const PPMCalendarDetail = () => {
     }
   };
 
-  // Event handlers
   const handleGoBack = () => {
     navigate('/calendar/ppm');
   };
 
-  // Loading state
   if (isFetching) {
     return (
       <div className="py-8">
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading calendar event details...</p>
+            <p className="text-sm text-muted-foreground">{t('calendar.detail.loading')}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading calendar event details</div>
+          <div className="text-red-500 text-xl">{t('calendar.detail.error')}</div>
           <div className="flex gap-2">
             <Button onClick={() => refetch()} variant="outline">
-              Try Again
+              {t('calendar.detail.tryAgain')}
             </Button>
             <Button onClick={handleGoBack} variant="default">
-              Go Back
+              {t('calendar.detail.goBack')}
             </Button>
           </div>
         </div>
@@ -104,19 +108,26 @@ const PPMCalendarDetail = () => {
     );
   }
 
-  // Not found state
   if (!event) {
     return (
       <div className="py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-gray-500 text-xl">Calendar event not found</div>
+          <div className="text-gray-500 text-xl">{t('calendar.detail.notFound')}</div>
           <Button onClick={handleGoBack} variant="default">
-            Go Back
+            {t('calendar.detail.goBack')}
           </Button>
         </div>
       </div>
     );
   }
+
+  const frequencyAdverbMap: Record<string, string> = {
+    Days: t('calendar.detail.frequencyAdverb.Days'),
+    Hours: t('calendar.detail.frequencyAdverb.Hours'),
+    Weeks: t('calendar.detail.frequencyAdverb.Weeks'),
+    Months: t('calendar.detail.frequencyAdverb.Months'),
+  };
+  const frequencyAdverb = frequencyAdverbMap[event.frequency_unit] ?? '';
 
   return (
     <div className="py-8">
@@ -124,9 +135,9 @@ const PPMCalendarDetail = () => {
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" onClick={handleGoBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Calendar
+          {t('calendar.detail.backToCalendar')}
         </Button>
-        <h1 className="text-2xl font-bold">PPM Calendar Event Details</h1>
+        <h1 className="text-2xl font-bold">{t('calendar.detail.pageTitle')}</h1>
       </div>
 
       {/* Event Details */}
@@ -139,7 +150,7 @@ const PPMCalendarDetail = () => {
                 <CardTitle className="text-xl mb-2">{event.title}</CardTitle>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Event ID: {event.id}</span>
+                  <span className="text-sm text-gray-600">{t('calendar.detail.eventId', { id: event.id })}</span>
                 </div>
               </div>
             </div>
@@ -151,33 +162,33 @@ const PPMCalendarDetail = () => {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Start Date & Time
+                    {t('calendar.detail.startDateTime')}
                   </h3>
                   <p className="text-gray-700">{formatDateTime(event.start)}</p>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    End Date & Time
+                    {t('calendar.detail.endDateTime')}
                   </h3>
                   <p className="text-gray-700">{formatDateTime(event.end)}</p>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    Duration
+                    {t('calendar.detail.durationLabel')}
                   </h3>
                   <p className="text-gray-700">{calculateDuration(event.start, event.end)}</p>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <Repeat className="h-4 w-4" />
-                    Frequency
+                    {t('calendar.detail.frequency')}
                   </h3>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-lg">{event.frequency}</span>
@@ -188,12 +199,12 @@ const PPMCalendarDetail = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Description */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Description
+                {t('calendar.detail.description')}
               </h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -204,19 +215,24 @@ const PPMCalendarDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Additional Information Card */}
+        {/* Schedule Summary Card */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Schedule Summary</CardTitle>
+            <CardTitle className="text-lg">{t('calendar.detail.scheduleSummary')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-blue-800">
-                <strong>This event occurs every {event.frequency} {event.frequency_unit.toLowerCase()}</strong>
-                {event.frequency === 1 ? ` (${event.frequency_unit.slice(0, -1).toLowerCase()}ly)` : ''}
+                <strong>
+                  {t('calendar.detail.occursEvery', {
+                    frequency: event.frequency,
+                    unit: event.frequency_unit.toLowerCase()
+                  })}
+                </strong>
+                {event.frequency === 1 && frequencyAdverb ? ` (${frequencyAdverb})` : ''}
               </p>
               <p className="text-blue-700 mt-1 text-sm">
-                Next occurrence: {formatDateTime(event.start)}
+                {t('calendar.detail.nextOccurrence', { date: formatDateTime(event.start) })}
               </p>
             </div>
           </CardContent>

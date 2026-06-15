@@ -21,37 +21,39 @@ import { useModels } from '@/hooks/model/useModelQueries';
 import { useInventoryQuery, useCreateInventory, useUpdateInventory } from '@/hooks/inventory/useInventoryQueries';
 import { AssetSubcategory } from '@/types/assetsubcategory';
 import { Model } from '@/types/model';
-
-// Form schema definition matching the Inventory interface
-const inventorySchema = z.object({
-  type: z.number().min(1, 'Type is required'),
-  category: z.number().min(1, 'Category is required'),
-  subcategory: z.number().min(1, 'Subcategory is required'),
-  model: z.number().min(1, 'Model is required'),
-  part_no: z.string().min(1, 'Part number is required'),
-  tag: z.string().min(1, 'Tag is required'),
-  serial_number: z.string().min(1, 'Serial number is required'),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-  unit_price: z.string().min(1, 'Unit price is required'),
-  log_value: z.string().optional(),
-  vendor: z.number().min(1, 'Vendor is required'),
-  purchase_number: z.string().min(1, 'Purchase number is required'),
-  purchase_date: z.string().min(1, 'Purchase date is required'),
-  manufacture_date: z.string().optional(),
-  expiry_date: z.string().optional(),
-  warranty_end_date: z.string().optional(),
-  facility: z.number().min(1, 'Facility is required'),
-  reorder_level: z.number().min(0, 'Reorder level must be 0 or greater'),
-  minimum_stock: z.number().min(0, 'Minimum stock must be 0 or greater'),
-  max_stock: z.number().min(0, 'Maximum stock must be 0 or greater'),
-  flags: z.string().optional(),
-  status: z.enum(['Available', 'Low Stock', 'Out of Stock', 'Discontinued']).default('Available'),
-  total_value: z.string().optional(),
-});
-
-type InventoryFormValues = z.infer<typeof inventorySchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const InventoryForm = () => {
+  const { t } = useTypedTranslation('assets');
+
+  // Form schema definition matching the Inventory interface
+  const inventorySchema = z.object({
+    type: z.number().min(1, t('inventoryForm.validation.typeRequired')),
+    category: z.number().min(1, t('inventoryForm.validation.categoryRequired')),
+    subcategory: z.number().min(1, t('inventoryForm.validation.subcategoryRequired')),
+    model: z.number().min(1, t('inventoryForm.validation.modelRequired')),
+    part_no: z.string().min(1, t('inventoryForm.validation.partNoRequired')),
+    tag: z.string().min(1, t('inventoryForm.validation.tagRequired')),
+    serial_number: z.string().min(1, t('inventoryForm.validation.serialNumberRequired')),
+    quantity: z.number().min(1, t('inventoryForm.validation.quantityMin')),
+    unit_price: z.string().min(1, t('inventoryForm.validation.unitPriceRequired')),
+    log_value: z.string().optional(),
+    vendor: z.number().min(1, t('inventoryForm.validation.vendorRequired')),
+    purchase_number: z.string().min(1, t('inventoryForm.validation.purchaseNumberRequired')),
+    purchase_date: z.string().min(1, t('inventoryForm.validation.purchaseDateRequired')),
+    manufacture_date: z.string().optional(),
+    expiry_date: z.string().optional(),
+    warranty_end_date: z.string().optional(),
+    facility: z.number().min(1, t('inventoryForm.validation.facilityRequired')),
+    reorder_level: z.number().min(0, t('inventoryForm.validation.reorderLevelMin')),
+    minimum_stock: z.number().min(0, t('inventoryForm.validation.minimumStockMin')),
+    max_stock: z.number().min(0, t('inventoryForm.validation.maxStockMin')),
+    flags: z.string().optional(),
+    status: z.enum(['Available', 'Low Stock', 'Out of Stock', 'Discontinued']).default('Available'),
+    total_value: z.string().optional(),
+  });
+
+  type InventoryFormValues = z.infer<typeof inventorySchema>;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
@@ -204,7 +206,7 @@ const InventoryForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading inventory details...</p>
+          <p className="text-sm text-muted-foreground">{t('inventoryForm.loading')}</p>
         </div>
       </div>
     );
@@ -213,12 +215,12 @@ const InventoryForm = () => {
   if (isEditMode && isInventoryError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading inventory details</div>
+        <div className="text-red-500 text-xl">{t('inventoryForm.errorLoading')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {inventoryError instanceof Error ? inventoryError.message : 'An unknown error occurred'}
+          {inventoryError instanceof Error ? inventoryError.message : t('inventoryForm.unknownError')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Inventories
+          {t('inventoryForm.backToList')}
         </Button>
       </div>
     );
@@ -228,15 +230,15 @@ const InventoryForm = () => {
     <div className="container mx-auto py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit Inventory' : 'Create New Inventory'}
+            {isEditMode ? t('inventoryForm.editTitle') : t('inventoryForm.createTitle')}
           </h1>
         </div>
       </div>
@@ -246,9 +248,9 @@ const InventoryForm = () => {
           {/* Basic Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('inventoryForm.sections.basicInfo')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormField
@@ -256,11 +258,11 @@ const InventoryForm = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Type *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.type')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select inventory type" />
+                            <SelectValue placeholder={t('inventoryForm.placeholders.selectType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -281,14 +283,14 @@ const InventoryForm = () => {
                   name="model"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Model *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.model')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select model" />
+                            <SelectValue placeholder={t('inventoryForm.placeholders.selectModel')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -309,9 +311,9 @@ const InventoryForm = () => {
                   name="part_no"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Part Number *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.partNo')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter part number" {...field} />
+                        <Input placeholder={t('inventoryForm.placeholders.partNo')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -323,9 +325,9 @@ const InventoryForm = () => {
                   name="tag"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Tag *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.tag')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter tag" {...field} />
+                        <Input placeholder={t('inventoryForm.placeholders.tag')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -339,9 +341,9 @@ const InventoryForm = () => {
                   name="serial_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Serial Number *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.serialNumber')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter serial number" {...field} />
+                        <Input placeholder={t('inventoryForm.placeholders.serialNumber')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -353,9 +355,9 @@ const InventoryForm = () => {
                   name="purchase_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Purchase Number *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.purchaseNumber')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter purchase number" {...field} />
+                        <Input placeholder={t('inventoryForm.placeholders.purchaseNumber')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -367,18 +369,18 @@ const InventoryForm = () => {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Status *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.status')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder={t('inventoryForm.placeholders.selectStatus')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Available">Available</SelectItem>
-                          <SelectItem value="Low Stock">Low Stock</SelectItem>
-                          <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                          <SelectItem value="Discontinued">Discontinued</SelectItem>
+                          <SelectItem value="Available">{t('inventoryForm.statusOptions.available')}</SelectItem>
+                          <SelectItem value="Low Stock">{t('inventoryForm.statusOptions.lowStock')}</SelectItem>
+                          <SelectItem value="Out of Stock">{t('inventoryForm.statusOptions.outOfStock')}</SelectItem>
+                          <SelectItem value="Discontinued">{t('inventoryForm.statusOptions.discontinued')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -392,9 +394,9 @@ const InventoryForm = () => {
           {/* Category and Vendor Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Category & Vendor Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('inventoryForm.sections.categoryVendor')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
@@ -402,11 +404,11 @@ const InventoryForm = () => {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Category *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.assetCategory')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select asset category" />
+                            <SelectValue placeholder={t('inventoryForm.placeholders.selectCategory')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -427,18 +429,18 @@ const InventoryForm = () => {
                   name="subcategory"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Asset Subcategory *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(Number(value))} 
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.assetSubcategory')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
                         disabled={filteredSubcategories.length === 0}
                       >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={
-                              filteredSubcategories.length === 0 
-                                ? "Select an asset category first" 
-                                : "Select asset subcategory"
+                              filteredSubcategories.length === 0
+                                ? t('inventoryForm.placeholders.selectCategoryFirst')
+                                : t('inventoryForm.placeholders.selectSubcategory')
                             } />
                           </SelectTrigger>
                         </FormControl>
@@ -460,11 +462,11 @@ const InventoryForm = () => {
                   name="vendor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Vendor *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.vendor')}</FormLabel>
                       <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select vendor" />
+                            <SelectValue placeholder={t('inventoryForm.placeholders.selectVendor')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -486,11 +488,11 @@ const InventoryForm = () => {
                 name="facility"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Facility *</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.facility')}</FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select facility" />
+                          <SelectValue placeholder={t('inventoryForm.placeholders.selectFacility')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -508,7 +510,7 @@ const InventoryForm = () => {
 
               {filteredSubcategories.length === 0 && selectedCategory > 0 && (
                 <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
-                  No asset subcategories available for the selected category.
+                  {t('inventoryForm.noSubcategoriesWarning')}
                 </div>
               )}
             </CollapsibleContent>
@@ -517,9 +519,9 @@ const InventoryForm = () => {
           {/* Financial Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Financial & Quantity Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('inventoryForm.sections.financial')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormField
@@ -527,11 +529,11 @@ const InventoryForm = () => {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Quantity *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.quantity')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Enter quantity" 
+                        <Input
+                          type="number"
+                          placeholder={t('inventoryForm.placeholders.quantity')}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -546,9 +548,9 @@ const InventoryForm = () => {
                   name="unit_price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Unit Price *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.unitPrice')}</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" placeholder="Enter unit price" {...field} />
+                        <Input type="number" step="0.01" placeholder={t('inventoryForm.placeholders.unitPrice')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -560,9 +562,9 @@ const InventoryForm = () => {
                   name="total_value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Total Value</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.totalValue')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Auto-calculated" {...field} readOnly />
+                        <Input placeholder={t('inventoryForm.placeholders.autoCalculated')} {...field} readOnly />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -574,9 +576,9 @@ const InventoryForm = () => {
                   name="log_value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Log Value</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.logValue')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter log value" {...field} />
+                        <Input placeholder={t('inventoryForm.placeholders.logValue')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -590,11 +592,11 @@ const InventoryForm = () => {
                   name="reorder_level"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Reorder Level</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.reorderLevel')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Enter reorder level" 
+                        <Input
+                          type="number"
+                          placeholder={t('inventoryForm.placeholders.reorderLevel')}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -609,11 +611,11 @@ const InventoryForm = () => {
                   name="minimum_stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Minimum Stock</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.minimumStock')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Enter minimum stock" 
+                        <Input
+                          type="number"
+                          placeholder={t('inventoryForm.placeholders.minimumStock')}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -628,11 +630,11 @@ const InventoryForm = () => {
                   name="max_stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Maximum Stock</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.maximumStock')}</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Enter maximum stock" 
+                        <Input
+                          type="number"
+                          placeholder={t('inventoryForm.placeholders.maximumStock')}
                           {...field}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
@@ -648,9 +650,9 @@ const InventoryForm = () => {
           {/* Date Information Section */}
           <Collapsible defaultOpen={true} className="w-full">
             <CollapsibleTrigger className="flex justify-between items-center w-full p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-xl font-semibold text-gray-800">Date Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('inventoryForm.sections.dates')}</h2>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="border border-t-0 rounded-b-lg p-6 space-y-6 bg-white shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormField
@@ -658,7 +660,7 @@ const InventoryForm = () => {
                   name="purchase_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Purchase Date *</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.purchaseDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -672,7 +674,7 @@ const InventoryForm = () => {
                   name="manufacture_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Manufacture Date</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.manufactureDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -686,7 +688,7 @@ const InventoryForm = () => {
                   name="expiry_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Expiry Date</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.expiryDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -700,7 +702,7 @@ const InventoryForm = () => {
                   name="warranty_end_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Warranty End Date</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.warrantyEndDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -715,10 +717,10 @@ const InventoryForm = () => {
                 name="flags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Flags</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('inventoryForm.fields.flags')}</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter any flags or notes"
+                      <Textarea
+                        placeholder={t('inventoryForm.placeholders.flags')}
                         {...field}
                         className="min-h-[100px]"
                       />
@@ -729,19 +731,19 @@ const InventoryForm = () => {
               />
             </CollapsibleContent>
           </Collapsible>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-6 border-t border-gray-200">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               className="px-8"
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createInventoryMutation.isPending || updateInventoryMutation.isPending}
               className="px-8"
@@ -749,7 +751,7 @@ const InventoryForm = () => {
               {(createInventoryMutation.isPending || updateInventoryMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Inventory' : 'Create Inventory'}
+              {isEditMode ? t('inventoryForm.update') : t('inventoryForm.create')}
             </Button>
           </div>
         </form>

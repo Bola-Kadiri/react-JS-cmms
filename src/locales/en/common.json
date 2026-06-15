@@ -7,19 +7,54 @@
     "save": "Save",
     "back": "Back",
     "edit": "Edit",
-    "view": "View"
+    "view": "View",
+    "add": "Add",
+    "tryAgain": "Try Again",
+    "confirm": "Confirm",
+    "close": "Close",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clearFilters": "Clear Filters",
+    "print": "Print",
+    "export": "Export"
   },
   "status": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "deleting": "Deleting..."
   },
   "confirmation": {
     "delete": "Are you sure you want to delete this item?",
+    "deleteTitle": "Delete Item",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this item and remove all associated data.",
     "confirmButton": "Confirm",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "areYouSure": "Are you sure?"
+  },
+  "table": {
+    "noResults": "No items found",
+    "adjustSearch": "Try adjusting your search criteria",
+    "createFirst": "Create your first item to get started",
+    "showing": "Showing {{count}} of {{total}} items"
+  },
+  "filter": {
+    "all": "All",
+    "filterByType": "Filter by type",
+    "filterByStatus": "Filter by status",
+    "filterByPriority": "Filter by priority",
+    "filterByApproval": "Filter by approval",
+    "filterByCurrency": "Filter by currency",
+    "filterByOwnershipType": "Filter by ownership type",
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "allPriorities": "All Priorities",
+    "allApprovalStatuses": "All Approval Statuses",
+    "allCurrencies": "All Currencies",
+    "allOwnershipTypes": "All Ownership Types"
   },
   "notSet": "Not set",
+  "na": "N/A",
   "noItemsFound": "No items found",
   "search": "Search...",
   "currency": {

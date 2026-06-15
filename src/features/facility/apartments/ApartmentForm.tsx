@@ -17,33 +17,34 @@ import { Building } from '@/types/building';
 import { Landlord } from '@/types/landlord';
 import { useApartmentQuery, useCreateApartment, useUpdateApartment } from '@/hooks/apartment/useApartmentQueries';
 import { useList } from '@/hooks/crud/useCrudOperations';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const buildingEndpoint = 'facility/api/api/buildings/';
 const landlordEndpoint = 'facility/api/api/landlords/';
 
-// Form schema definition
-const apartmentSchema = z.object({
-  no: z.string().min(1, "Apartment number is required"),
-  type: z.string().min(1, "Type is required"),
-  building: z.number().positive("Building is required"),
-  no_of_sqm: z.number().positive("Square meters must be a positive number"),
-  description: z.string().optional(),
-  landlord: z.number().positive("Landlord is required"),
-  ownership_type: z.enum(["Freehold", "Leasehold", "Freehold (Leased Out)"]),
-  service_power_charge_start_date: z.string(),
-  address: z.string().min(1, "Address is required"),
-  bookable: z.boolean().default(false),
-  common_area: z.boolean().default(false),
-  available_for_lease: z.boolean().default(false),
-  remit_lease_payment: z.boolean().default(false),
-  status: z.enum(["Active", "Inactive"])
-});
-
-type ApartmentFormValues = z.infer<typeof apartmentSchema>;
-
 const ApartmentForm = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Form schema definition (inside component so t() is in scope)
+  const apartmentSchema = z.object({
+    no: z.string().min(1, t('apartment.form.validation.noRequired')),
+    type: z.string().min(1, t('apartment.form.validation.typeRequired')),
+    building: z.number().positive(t('apartment.form.validation.buildingRequired')),
+    no_of_sqm: z.number().positive(t('apartment.form.validation.sqmPositive')),
+    description: z.string().optional(),
+    landlord: z.number().positive(t('apartment.form.validation.landlordRequired')),
+    ownership_type: z.enum(["Freehold", "Leasehold", "Freehold (Leased Out)"]),
+    service_power_charge_start_date: z.string(),
+    address: z.string().min(1, t('apartment.form.validation.addressRequired')),
+    bookable: z.boolean().default(false),
+    common_area: z.boolean().default(false),
+    available_for_lease: z.boolean().default(false),
+    remit_lease_payment: z.boolean().default(false),
+    status: z.enum(["Active", "Inactive"])
+  });
+  type ApartmentFormValues = z.infer<typeof apartmentSchema>;
   const isEditMode = !!id;
   
   // Apartment form setup
@@ -128,7 +129,7 @@ const ApartmentForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartment details...</p>
+          <p className="text-sm text-muted-foreground">{t('apartment.form.loading')}</p>
         </div>
       </div>
     );
@@ -137,12 +138,12 @@ const ApartmentForm = () => {
   if (isEditMode && isApartmentError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartment details</div>
+        <div className="text-red-500 text-xl">{t('apartment.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {apartmentError instanceof Error ? apartmentError.message : 'An unknown error occurred'}
+          {apartmentError instanceof Error ? apartmentError.message : t('apartment.form.errorFallback')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Apartments
+          {t('apartment.form.backToApartments')}
         </Button>
       </div>
     );
@@ -152,15 +153,15 @@ const ApartmentForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Apartment' : 'Create New Apartment'}
+            {isEditMode ? t('apartment.form.editTitle') : t('apartment.form.createTitle')}
           </h1>
         </div>
       </div>
@@ -171,9 +172,9 @@ const ApartmentForm = () => {
             {/* Apartment Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-50 border-2 border-gray-100 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Apartment Details</h2>
+                <h2 className="text-lg font-medium">{t('apartment.form.sectionTitle')}</h2>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -181,44 +182,44 @@ const ApartmentForm = () => {
                     name="no"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Apartment Number</FormLabel>
+                        <FormLabel>{t('apartment.form.no')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter apartment number" {...field} />
+                          <Input placeholder={t('apartment.form.noPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel>{t('apartment.form.type')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter apartment type" {...field} />
+                          <Input placeholder={t('apartment.form.typePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={apartmentForm.control}
                     name="building"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Building</FormLabel>
-                        <Select 
+                        <FormLabel>{t('apartment.form.building')}</FormLabel>
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select building" />
+                              <SelectValue placeholder={t('apartment.form.buildingPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -233,17 +234,17 @@ const ApartmentForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="no_of_sqm"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Square Meters</FormLabel>
+                        <FormLabel>{t('apartment.form.noOfSqm')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Enter square meters" 
+                          <Input
+                            type="number"
+                            placeholder={t('apartment.form.noOfSqmPlaceholder')}
                             {...field}
                             onChange={e => field.onChange(Number(e.target.value))}
                           />
@@ -253,30 +254,30 @@ const ApartmentForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={apartmentForm.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>{t('apartment.form.address')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter apartment address" {...field} />
+                        <Input placeholder={t('apartment.form.addressPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={apartmentForm.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{t('apartment.form.description')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter apartment description"
+                        <Textarea
+                          placeholder={t('apartment.form.descriptionPlaceholder')}
                           {...field}
                           className="min-h-[100px]"
                         />
@@ -285,21 +286,21 @@ const ApartmentForm = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={apartmentForm.control}
                     name="landlord"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Landlord</FormLabel>
-                        <Select 
+                        <FormLabel>{t('apartment.form.landlord')}</FormLabel>
+                        <Select
                           onValueChange={(value) => field.onChange(Number(value))}
                           value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select landlord" />
+                              <SelectValue placeholder={t('apartment.form.landlordPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -314,26 +315,26 @@ const ApartmentForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="ownership_type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ownership Type</FormLabel>
-                        <Select 
+                        <FormLabel>{t('apartment.form.ownershipType')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select ownership type" />
+                              <SelectValue placeholder={t('apartment.form.ownershipTypePlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Freehold">Freehold</SelectItem>
-                            <SelectItem value="Leasehold">Leasehold</SelectItem>
-                            <SelectItem value="Freehold (Leased Out)">Freehold (Leased Out)</SelectItem>
+                            <SelectItem value="Freehold">{t('apartment.form.ownershipTypeOptions.freehold')}</SelectItem>
+                            <SelectItem value="Leasehold">{t('apartment.form.ownershipTypeOptions.leasehold')}</SelectItem>
+                            <SelectItem value="Freehold (Leased Out)">{t('apartment.form.ownershipTypeOptions.freeholdLeasedOut')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -341,17 +342,17 @@ const ApartmentForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={apartmentForm.control}
                     name="service_power_charge_start_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service/Power Charge Start Date</FormLabel>
+                        <FormLabel>{t('apartment.form.servicePowerChargeStartDate')}</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="date" 
+                          <Input
+                            type="date"
                             {...field}
                           />
                         </FormControl>
@@ -359,25 +360,25 @@ const ApartmentForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
+                        <FormLabel>{t('apartment.form.status')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('apartment.form.statusPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('apartment.form.statusOptions.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('apartment.form.statusOptions.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -385,7 +386,7 @@ const ApartmentForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={apartmentForm.control}
@@ -399,13 +400,13 @@ const ApartmentForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Bookable</FormLabel>
+                          <FormLabel>{t('apartment.form.bookable')}</FormLabel>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="common_area"
@@ -418,14 +419,14 @@ const ApartmentForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Common Area</FormLabel>
+                          <FormLabel>{t('apartment.form.commonArea')}</FormLabel>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={apartmentForm.control}
@@ -439,13 +440,13 @@ const ApartmentForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Available For Lease</FormLabel>
+                          <FormLabel>{t('apartment.form.availableForLease')}</FormLabel>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={apartmentForm.control}
                     name="remit_lease_payment"
@@ -458,7 +459,7 @@ const ApartmentForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Remit Lease Payment</FormLabel>
+                          <FormLabel>{t('apartment.form.remitLeasePayment')}</FormLabel>
                         </div>
                         <FormMessage />
                       </FormItem>
@@ -468,25 +469,25 @@ const ApartmentForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createApartmentMutation.isPending || updateApartmentMutation.isPending}
             >
               {(createApartmentMutation.isPending || updateApartmentMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('common:actions.update') : t('common:actions.save')}
             </Button>
           </div>
         </form>

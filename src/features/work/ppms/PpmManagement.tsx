@@ -17,8 +17,10 @@ import { PpmQueryParams } from '@/services/ppmsApi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PpmManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -190,7 +192,7 @@ const PpmManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading ppms...</p>
+          <p className="text-sm text-muted-foreground">{t('ppm.loading')}</p>
         </div>
       </div>
     );
@@ -200,9 +202,9 @@ const PpmManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading ppms</div>
+        <div className="text-red-500 text-xl">{t('ppm.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -211,9 +213,9 @@ const PpmManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Ppm Management</h1>
+        <h1 className="text-2xl font-bold">{t('ppm.management')}</h1>
         <Button onClick={handleAddPpm}>
-          <Plus className="mr-2 h-4 w-4" /> Add Ppm
+          <Plus className="mr-2 h-4 w-4" /> {t('ppm.add')}
         </Button>
       </div>
 
@@ -222,7 +224,7 @@ const PpmManagement = () => {
         <div className="flex-1">
           <SearchFilter 
             onSearch={handleSearch}
-            placeholder="Search by owner, category, or subcategory..."
+            placeholder={t('ppm.searchPlaceholder')}
             initialSearchValue={searchValue}
           />
         </div>
@@ -230,10 +232,10 @@ const PpmManagement = () => {
         <div className="w-full md:w-52">
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('common:filter.filterByStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">{t('common:filter.allStatuses')}</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
@@ -243,10 +245,10 @@ const PpmManagement = () => {
         <div className="w-full md:w-52">
           <Select value={currencyFilter} onValueChange={handleCurrencyFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by currency" />
+              <SelectValue placeholder={t('common:filter.filterByCurrency')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Currencies</SelectItem>
+              <SelectItem value="all">{t('common:filter.allCurrencies')}</SelectItem>
               <SelectItem value="NGN">Naira (NGN)</SelectItem>
               <SelectItem value="USD">US Dollar (USD)</SelectItem>
               <SelectItem value="EUR">Euro (EUR)</SelectItem>
@@ -261,38 +263,38 @@ const PpmManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">S/N</TableHead>
-                <TableHead className="font-medium text-gray-600">Location</TableHead>
-                <TableHead className="font-medium text-gray-600">Category</TableHead>
-                <TableHead className="font-medium text-gray-600">Description</TableHead>
-                <TableHead className="font-medium text-gray-600">Start Date</TableHead>
-                <TableHead className="font-medium text-gray-600">End Date</TableHead>
-                <TableHead className="font-medium text-gray-600">Frequency</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.sn')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.location')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.category')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.description')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.startDate')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.endDate')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.frequency')}</TableHead>
                 {/* <TableHead className="font-medium text-gray-600">Total Amount</TableHead> */}
-                <TableHead className="font-medium text-gray-600">Review Status</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.reviewStatus')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('ppm.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('ppm.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="h-24 text-center">
-                    No ppms found.
+                    {t('ppm.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((ppm, index) => (
                   <TableRow key={ppm.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium">{(page - 1) * pageSize + index + 1}</TableCell>
-                    <TableCell>{ppm.facilities_detail[0]?.address_gps || 'N/A'}</TableCell>
+                    <TableCell>{ppm.facilities_detail[0]?.address_gps || t('ppm.na')}</TableCell>
                     <TableCell>{ppm.category_detail?.title}</TableCell>
                     <TableCell>{ppm?.description}</TableCell>
                     <TableCell>
-                      {ppm.start_date ? new Date(ppm.start_date).toLocaleDateString() : 'N/A'}
+                      {ppm.start_date ? new Date(ppm.start_date).toLocaleDateString() : t('ppm.na')}
                     </TableCell>
                     <TableCell>
-                      {ppm.end_date ? new Date(ppm.end_date).toLocaleDateString() : 'N/A'}
+                      {ppm.end_date ? new Date(ppm.end_date).toLocaleDateString() : t('ppm.na')}
                     </TableCell>
                     <TableCell>
                       {ppm.frequency} {ppm.frequency_unit}
@@ -386,13 +388,13 @@ const PpmManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the ppm.
+              {t('ppm.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('ppm.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDeletePpm}
               disabled={deletePpmMutation.isPending}
@@ -401,10 +403,10 @@ const PpmManagement = () => {
               {deletePpmMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

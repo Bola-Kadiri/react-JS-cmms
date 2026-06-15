@@ -35,7 +35,6 @@ import {
 } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
 import { WorkOrderCompletion } from '@/types/workordercompletion';
 import { formatDate } from '@/utils/formatters';
-import { toast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,9 +45,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const WorkordercompletionManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // State for pagination, search, and filtering
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,9 +76,26 @@ const WorkordercompletionManagement = () => {
   const { data: rawData, isLoading, error } = useWorkOrderCompletionsQuery();
   const deleteMutation = useDeleteWorkOrderCompletionMutation();
 
+  // Isolate records to the current user's assignments
+  const userIsolatedResults = useMemo(() => {
+    if (!rawData?.results) return [];
+    if (!user) return rawData.results;
+    const roleUpper = (user.role || '').toUpperCase();
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return rawData.results;
+    const userId = Number(user.id);
+    return rawData.results.filter(wcc => {
+      switch (roleUpper) {
+        case 'REQUESTER': return wcc.owner === userId;
+        case 'REVIEWER':  return wcc.reviewers?.includes(userId);
+        case 'APPROVER':  return wcc.approver === userId;
+        default:          return true;
+      }
+    });
+  }, [rawData?.results, user]);
+
   // Client-side filtering and pagination
   const filteredAndPaginatedData = useMemo(() => {
-    if (!rawData?.results) {
+    if (!userIsolatedResults.length && !isLoading) {
       return {
         results: [],
         count: 0,
@@ -85,7 +105,7 @@ const WorkordercompletionManagement = () => {
       };
     }
 
-    let filteredResults = [...rawData.results];
+    let filteredResults = [...userIsolatedResults];
 
     // Apply search filter
     if (debouncedSearchQuery.trim()) {
@@ -129,7 +149,7 @@ const WorkordercompletionManagement = () => {
       startItem,
       endItem
     };
-  }, [rawData?.results, debouncedSearchQuery, approvalStatusFilter, currentPage, pageSize]);
+  }, [userIsolatedResults, isLoading, debouncedSearchQuery, approvalStatusFilter, currentPage, pageSize]);
 
   // Handle search
   const handleSearch = (value: string) => {
@@ -164,19 +184,19 @@ const WorkordercompletionManagement = () => {
     switch (status?.toLowerCase()) {
       case 'on time':
       case 'ontime':
-        return <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">On Time</Badge>;
+        return <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">{t('wcc.dueStatus.onTime')}</Badge>;
       case 'overdue':
-        return <Badge variant="destructive">Overdue</Badge>;
+        return <Badge variant="destructive">{t('wcc.dueStatus.overdue')}</Badge>;
       case 'upcoming':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">Upcoming</Badge>;
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">{t('wcc.dueStatus.upcoming')}</Badge>;
       case 'future':
-        return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-300">Future</Badge>;
+        return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-300">{t('wcc.dueStatus.future')}</Badge>;
       case 'due within 1 week':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">Due Within 1 Week</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">{t('wcc.dueStatus.dueWithin1Week')}</Badge>;
       case 'due today':
-        return <Badge variant="default" className="bg-orange-100 text-orange-800 border-orange-300">Due Today</Badge>;
+        return <Badge variant="default" className="bg-orange-100 text-orange-800 border-orange-300">{t('wcc.dueStatus.dueToday')}</Badge>;
       default:
-        return <Badge variant="outline">{status || 'N/A'}</Badge>;
+        return <Badge variant="outline">{status || t('wcc.na')}</Badge>;
     }
   };
 
@@ -184,11 +204,11 @@ const WorkordercompletionManagement = () => {
   const getApprovalStatusBadge = (status: string) => {
     switch (status) {
       case 'Approved':
-        return <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">Approved</Badge>;
+        return <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">{t('wcc.approvalStatus.approved')}</Badge>;
       case 'Rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">{t('wcc.approvalStatus.rejected')}</Badge>;
       case 'Pending':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">{t('wcc.approvalStatus.pending')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -200,13 +220,13 @@ const WorkordercompletionManagement = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 mb-2">Failed to load work order completions</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            variant="outline" 
+          <p className="text-red-600 mb-2">{t('wcc.error')}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
             size="sm"
           >
-            Try Again
+            {t('common:actions.tryAgain')}
           </Button>
         </div>
       </div>
@@ -218,9 +238,9 @@ const WorkordercompletionManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Work Order Completions</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t('wcc.management')}</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Manage and track work order completion records
+            {t('wcc.description')}
           </p>
         </div>
         <Button 
@@ -228,7 +248,7 @@ const WorkordercompletionManagement = () => {
           className="bg-green-600 hover:bg-green-700"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Completion
+          {t('wcc.add')}
         </Button>
       </div>
 
@@ -240,7 +260,7 @@ const WorkordercompletionManagement = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search work order completions..."
+                placeholder={t('wcc.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10 pr-10"
@@ -266,13 +286,13 @@ const WorkordercompletionManagement = () => {
           <div className="sm:w-48">
             <Select value={approvalStatusFilter} onValueChange={handleFilterChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('common:filter.filterByStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="all">{t('common:filter.allStatuses')}</SelectItem>
+                <SelectItem value="Pending">{t('wcc.approvalStatus.pending')}</SelectItem>
+                <SelectItem value="Approved">{t('wcc.approvalStatus.approved')}</SelectItem>
+                <SelectItem value="Rejected">{t('wcc.approvalStatus.rejected')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -284,13 +304,13 @@ const WorkordercompletionManagement = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="text-xs font-medium text-gray-700">Work Order Number</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700">Start Date</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700">Due Date</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700">Due Status</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700">Resources</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700">Approval Status</TableHead>
-              <TableHead className="text-xs font-medium text-gray-700 w-20">Actions</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.workOrderNumber')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.startDate')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.dueDate')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.dueStatus')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.resources')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700">{t('wcc.columns.approvalStatus')}</TableHead>
+              <TableHead className="text-xs font-medium text-gray-700 w-20">{t('wcc.columns.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -299,7 +319,7 @@ const WorkordercompletionManagement = () => {
                 <TableCell colSpan={7} className="h-32 text-center">
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-2 border-green-600 border-t-transparent"></div>
-                    <span className="ml-2 text-sm text-gray-600">Loading...</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('wcc.loading')}</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -310,17 +330,17 @@ const WorkordercompletionManagement = () => {
                     {completion.work_order_detail?.work_order_number ? (
                       `WO-${completion.work_order_detail.work_order_number}`
                     ) : (
-                      <span className="text-gray-400">N/A</span>
+                      <span className="text-gray-400">{t('wcc.na')}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
                     {completion.start_date ? formatDate(completion.start_date) : (
-                      <span className="text-gray-400">Not set</span>
+                      <span className="text-gray-400">{t('wcc.notSet')}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
                     {completion.due_date ? formatDate(completion.due_date) : (
-                      <span className="text-gray-400">Not set</span>
+                      <span className="text-gray-400">{t('wcc.notSet')}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -329,10 +349,10 @@ const WorkordercompletionManagement = () => {
                   <TableCell className="text-sm text-gray-600">
                     {completion.resources_data?.length ? (
                       <span className="text-green-700 font-medium">
-                        {completion.resources_data.length} file(s)
+                        {t('wcc.filesCount', { count: completion.resources_data.length })}
                       </span>
                     ) : (
-                      <span className="text-gray-400">No files</span>
+                      <span className="text-gray-400">{t('wcc.noFiles')}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -346,24 +366,24 @@ const WorkordercompletionManagement = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => navigate(`/dashboard/work/work-order-completions/${completion.id}`)}
                         >
                           <Eye className="h-4 w-4 mr-2" />
-                          View
+                          {t('wcc.actions.view')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => navigate(`/dashboard/work/work-order-completions/${completion.id}/edit`)}
                         >
                           <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          {t('wcc.actions.edit')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => setDeleteItem(completion)}
                           className="text-red-700"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          {t('wcc.actions.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -375,13 +395,13 @@ const WorkordercompletionManagement = () => {
                 <TableCell colSpan={7} className="h-32 text-center text-gray-500">
                   {debouncedSearchQuery || approvalStatusFilter !== 'all' ? (
                     <div>
-                      <p>No work order completions match your search criteria</p>
+                      <p>{t('common:table.noResults')}</p>
                       <p className="text-sm mt-1">
-                        Try adjusting your search terms or filters
+                        {t('common:table.adjustSearch')}
                       </p>
                     </div>
                   ) : (
-                    "No work order completions found"
+                    t('wcc.noItemsFallback')
                   )}
                 </TableCell>
               </TableRow>
@@ -393,10 +413,10 @@ const WorkordercompletionManagement = () => {
         {filteredAndPaginatedData.count > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
             <div className="text-sm text-gray-700">
-              Showing {filteredAndPaginatedData.startItem} to {filteredAndPaginatedData.endItem} of {filteredAndPaginatedData.count} results
+              {t('wcc.pagination.showing', { start: filteredAndPaginatedData.startItem, end: filteredAndPaginatedData.endItem, total: filteredAndPaginatedData.count })}
               {(debouncedSearchQuery || approvalStatusFilter !== 'all') && rawData?.results && (
                 <span className="text-gray-500 ml-1">
-                  (filtered from {rawData.results.length} total)
+                  {t('wcc.pagination.filteredFrom', { total: rawData.results.length })}
                 </span>
               )}
             </div>
@@ -408,10 +428,10 @@ const WorkordercompletionManagement = () => {
                 disabled={currentPage === 1 || isLoading}
               >
                 <ChevronLeft className="h-4 w-4" />
-                Previous
+                {t('wcc.pagination.previous')}
               </Button>
               <span className="text-sm text-gray-600">
-                Page {currentPage} of {filteredAndPaginatedData.totalPages}
+                {t('wcc.pagination.page', { current: currentPage, total: filteredAndPaginatedData.totalPages })}
               </span>
               <Button
                 variant="outline"
@@ -419,7 +439,7 @@ const WorkordercompletionManagement = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === filteredAndPaginatedData.totalPages || isLoading}
               >
-                Next
+                {t('wcc.pagination.next')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -431,18 +451,18 @@ const WorkordercompletionManagement = () => {
       <AlertDialog open={!!deleteItem} onOpenChange={(open) => !open && setDeleteItem(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Work Order Completion</AlertDialogTitle>
+            <AlertDialogTitle>{t('wcc.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this work order completion? This action cannot be undone.
+              {t('wcc.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('wcc.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteItem && handleDelete(deleteItem)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('wcc.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

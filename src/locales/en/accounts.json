@@ -1,0 +1,1239 @@
+{
+  "user": {
+    "management": "User Management",
+    "add": "Add User",
+    "loading": "Loading users...",
+    "error": "Error loading users",
+    "noItems": "No users found",
+    "deleteTitle": "Delete User",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the user account.",
+    "searchPlaceholder": "Search by name, email...",
+    "columns": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "byStatus": "Filter by status",
+      "byRole": "Filter by role",
+      "allStatuses": "All Statuses",
+      "allGenders": "All Genders",
+      "allRoles": "All Roles"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "roles": {
+      "superAdmin": "Super Admin",
+      "facilityAdmin": "Facility Admin",
+      "facilityProcurement": "Facility Procurement",
+      "facilityManager": "Facility Manager",
+      "facilityOfficer": "Facility Officer",
+      "facilityAuditor": "Facility Auditor",
+      "facilityAccount": "Facility Account",
+      "facilityStore": "Facility Store",
+      "facilityView": "Facility View"
+    },
+    "detail": {
+      "loading": "Loading user details...",
+      "error": "Error loading user details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Users",
+      "editUser": "Edit User",
+      "verified": "Verified",
+      "tabs": {
+        "profile": "Profile",
+        "permissions": "Permissions",
+        "facilities": "Facilities",
+        "activity": "Activity"
+      },
+      "summary": {
+        "designation": "Designation",
+        "approvalLimit": "Approval Limit",
+        "accountStatus": "Account Status",
+        "teamLead": "Team Lead",
+        "teamMember": "Team Member",
+        "canGenerateReports": "Can generate reports",
+        "cannotGenerateReports": "Cannot generate reports",
+        "joined": "Joined:"
+      },
+      "personalInfo": {
+        "title": "Personal Information",
+        "description": "User details and contact information",
+        "fullName": "Full Name",
+        "gender": "Gender",
+        "email": "Email",
+        "phone": "Phone",
+        "dateOfBirth": "Date of Birth",
+        "nationality": "Nationality",
+        "userId": "User ID",
+        "passportNo": "Passport No.",
+        "address": "Address"
+      },
+      "accountInfo": {
+        "title": "Account Information",
+        "description": "Account status and permissions",
+        "status": "Status",
+        "emailVerified": "Email Verified",
+        "accountBlocked": "Account Blocked",
+        "accountActive": "Account Active",
+        "dateJoined": "Date Joined",
+        "lastLogin": "Last Login",
+        "capabilities": "User Capabilities",
+        "teamLead": "Team Lead",
+        "generateReports": "Generate Reports"
+      },
+      "permissions": {
+        "title": "Access Control",
+        "description": "User's access permissions across the system",
+        "allAccess": "All Access",
+        "limited": "Limited",
+        "facilitiesTitle": "Facilities",
+        "facilitiesCount": "Accessible Facilities: {{count}}",
+        "apartmentsTitle": "Apartments",
+        "apartmentsCount": "Accessible Apartments: {{count}}",
+        "warehousesTitle": "Warehouses",
+        "warehousesCount": "Accessible Warehouses: {{count}}",
+        "departmentsTitle": "Departments",
+        "departmentsCount": "Accessible Departments: {{count}}",
+        "clientsTitle": "Clients",
+        "clientsCount": "Accessible Clients: {{count}}"
+      },
+      "facilitiesTab": {
+        "assignedFacilities": "Assigned Facilities",
+        "facilitiesDesc": "Facilities the user has access to",
+        "assignedApartments": "Assigned Apartments",
+        "apartmentsDesc": "Apartments the user has access to",
+        "noBuilding": "No building assigned"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "description": "User's recent system activity",
+        "lastLogin": "Last Login",
+        "lastLoginDesc": "User logged into the system",
+        "accountCreated": "Account Created",
+        "accountCreatedDesc": "User account was created"
+      }
+    },
+    "form": {
+      "createTitle": "Create User",
+      "editTitle": "Edit User",
+      "createPageTitle": "Create New User",
+      "backToList": "Back to Users",
+      "loading": "Loading user details...",
+      "error": "Error loading user details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update User",
+      "create": "Create User",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "gender": "Gender",
+      "status": "Status",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "sections": {
+        "personal": "Personal Information",
+        "additional": "Additional Information",
+        "roles": "Role & Status",
+        "options": "Options",
+        "accesses": "Access Permissions"
+      },
+      "fields": {
+        "designation": "Designation",
+        "supervisor": "Supervisor",
+        "selectSupervisor": "Select supervisor",
+        "dateOfBirth": "Date of Birth",
+        "selectGender": "Select gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "nationality": "Nationality",
+        "passportNumber": "Passport Number",
+        "address": "Address",
+        "selectRole": "Select role",
+        "selectStatus": "Select status",
+        "approvalLimit": "Approval Limit"
+      },
+      "placeholders": {
+        "firstName": "Enter first name",
+        "lastName": "Enter last name",
+        "email": "Enter email address",
+        "phone": "Enter phone number",
+        "designation": "Enter designation",
+        "nationality": "Enter nationality",
+        "passportNumber": "Enter passport number",
+        "address": "Enter address",
+        "approvalLimit": "Enter approval limit amount"
+      },
+      "checkboxes": {
+        "teamLead": "Team Lead",
+        "teamLeadDesc": "Mark if user is a team lead",
+        "generateReports": "Generate Reports",
+        "generateReportsDesc": "User can generate reports",
+        "verified": "Verified",
+        "verifiedDesc": "User is verified",
+        "blocked": "Blocked",
+        "blockedDesc": "User is blocked",
+        "active": "Active",
+        "activeDesc": "User is active"
+      },
+      "access": {
+        "facilitySection": "Facility Access",
+        "flatSection": "Area / Building Access",
+        "categoriesSection": "Categories Access",
+        "warehousesSection": "Warehouses Access",
+        "departmentsSection": "Departments Access",
+        "clientsSection": "Clients Access",
+        "allFacilities": "Access to All Facilities",
+        "allFacilitiesDesc": "Grant access to all facilities",
+        "allFlats": "Access to All Area / Building",
+        "allFlatsDesc": "Grant access to all Area / Building",
+        "allCategories": "Access to All Categories",
+        "allCategoriesDesc": "Grant access to all categories",
+        "allWarehouses": "Access to All Warehouses",
+        "allWarehousesDesc": "Grant access to all warehouses",
+        "allDepartments": "Access to All Departments",
+        "allDepartmentsDesc": "Grant access to all departments",
+        "allClients": "Access to All Clients",
+        "allClientsDesc": "Grant access to all clients",
+        "selectFacilities": "Select Facilities",
+        "selectFlats": "Select Area / Building",
+        "selectCategories": "Select Categories",
+        "selectWarehouses": "Select Warehouses",
+        "selectDepartments": "Select Departments",
+        "selectClients": "Select Clients"
+      },
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "invalidEmail": "Invalid email address",
+        "phoneRequired": "Phone number is required"
+      },
+      "toast": {
+        "errorTitle": "Error",
+        "submitError": "There was a problem submitting the form"
+      }
+    }
+  },
+  "personnel": {
+    "management": "Personnel Management",
+    "add": "Add Personnel",
+    "loading": "Loading personnels...",
+    "error": "Error loading personnels",
+    "noItems": "No personnels found.",
+    "deleteTitle": "Delete Personnel",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the personnel.",
+    "searchPlaceholder": "Search personnels...",
+    "filters": {
+      "status": "Status",
+      "facility": "Facility"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "staffNumber": "Staff Number",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "Create Personnel",
+      "editTitle": "Edit Personnel",
+      "createPageTitle": "Create New Personnel",
+      "backToList": "Back to Personnels",
+      "loading": "Loading personnel details...",
+      "error": "Error loading personnel details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update",
+      "save": "Save",
+      "toggle": "Toggle",
+      "sections": {
+        "details": "Personnel Details"
+      },
+      "fields": {
+        "user": "User",
+        "staffNumber": "Staff Number",
+        "facility": "Facility",
+        "email": "Email",
+        "phoneNumber": "Phone Number",
+        "status": "Status",
+        "categories": "Categories",
+        "accessToAllCategories": "Access to all categories",
+        "documents": "Documents",
+        "selectedFiles": "Selected files:",
+        "selectUser": "--Select User--",
+        "selectFacility": "--Select--",
+        "selectStatus": "Select status"
+      },
+      "placeholders": {
+        "staffNumber": "Staff number",
+        "email": "Email address",
+        "phoneNumber": "Phone number"
+      },
+      "validation": {
+        "staffNumberRequired": "Staff number is required",
+        "invalidEmail": "Invalid email address"
+      }
+    }
+  },
+  "client": {
+    "management": "Client Management",
+    "add": "Add Client",
+    "loading": "Loading clients...",
+    "error": "Error loading clients",
+    "noItems": "No clients found. Click \"Add Client\" to create one.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the client and all associated contacts.",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "toast": {
+      "deleteSuccess": "Client deleted successfully",
+      "deleteError": "Failed to delete client"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "types": {
+      "individual": "Individual",
+      "company": "Company"
+    },
+    "detail": {
+      "loading": "Loading client details...",
+      "error": "Error loading client details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Clients",
+      "notFound": "Client not found",
+      "title": "Client Details",
+      "editClient": "Edit Client",
+      "clientInfo": "Client Information",
+      "notProvided": "Not provided",
+      "notAssigned": "Not assigned",
+      "noAddress": "No address provided",
+      "quickStats": "Quick Stats",
+      "contactsTitle": "Contacts",
+      "noContacts": "No contacts available for this client",
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "type": "Type",
+        "status": "Status",
+        "email": "Email",
+        "phone": "Phone",
+        "group": "Group",
+        "address": "Address"
+      },
+      "stats": {
+        "clientId": "Client ID",
+        "totalContacts": "Total Contacts",
+        "activeContacts": "Active Contacts"
+      },
+      "contactColumns": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status"
+      }
+    },
+    "form": {
+      "createPageTitle": "Create New Client",
+      "editTitle": "Edit Client",
+      "backToList": "Back to Clients",
+      "loading": "Loading client details...",
+      "error": "Error loading client details",
+      "toggle": "Toggle",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "clientDetails": "Client Details",
+        "contactDetails": "Contact Details"
+      },
+      "fields": {
+        "type": "Type",
+        "code": "Code",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "address": "Address"
+      },
+      "placeholders": {
+        "select": "--Select--",
+        "code": "Client code",
+        "name": "Client name",
+        "email": "Email address",
+        "phone": "Phone number",
+        "selectStatus": "Select status",
+        "address": "Enter client address"
+      },
+      "contact": {
+        "add": "Add Contact",
+        "editTitle": "Edit Contact",
+        "addTitle": "Add Contact",
+        "noItems": "No contacts added",
+        "update": "Update Contact",
+        "save": "Add Contact",
+        "columns": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "phone": "Phone",
+          "status": "Status",
+          "action": "Action"
+        },
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "phone": "Phone",
+          "status": "Status"
+        },
+        "placeholders": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email address",
+          "phone": "Phone number",
+          "selectStatus": "Select status"
+        }
+      },
+      "validation": {
+        "codeRequired": "Code is required",
+        "nameRequired": "Name is required",
+        "invalidEmail": "Invalid email address",
+        "contactFirstNameRequired": "First name is required",
+        "contactLastNameRequired": "Last name is required",
+        "contactInvalidEmail": "Invalid email address"
+      },
+      "toast": {
+        "loadError": "Failed to load client details",
+        "createSuccess": "Client created successfully",
+        "createError": "Failed to create client",
+        "updateSuccess": "Client updated successfully",
+        "updateError": "Failed to update client"
+      }
+    }
+  },
+  "vendor": {
+    "management": "Vendor Management",
+    "add": "Add Vendor",
+    "loading": "Loading vendors...",
+    "error": "Error loading vendors",
+    "noItems": "No vendors found.",
+    "deleteTitle": "Delete Vendor",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the vendor.",
+    "searchPlaceholder": "Search by name, email, bank, or account name...",
+    "filters": {
+      "byStatus": "Filter by status",
+      "allStatuses": "All Statuses",
+      "byType": "Filter by type",
+      "allTypes": "All Types"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "types": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "bank": "Bank",
+      "accountName": "Account Name",
+      "type": "Type",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Loading vendor details...",
+      "error": "Error loading vendor details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Vendors",
+      "notFound": "Vendor not found",
+      "vendorLabel": "Vendor",
+      "editVendor": "Edit Vendor",
+      "vendorInfo": "Vendor Information",
+      "noEmail": "No email provided",
+      "noPhone": "No phone provided",
+      "bankingInfo": "Banking Information",
+      "notProvided": "Not provided",
+      "verifiedAccount": "Verified Account",
+      "verifiedAccountDesc": "This vendor has verified banking information and is ready to receive payments.",
+      "activityTitle": "Vendor Activity",
+      "activityDesc": "Recent transactions and activities with this vendor",
+      "noActivity": "No Recent Activity",
+      "noActivityDesc": "This vendor doesn't have any recent activity or transactions in the system.",
+      "fields": {
+        "accountName": "Account Name",
+        "bank": "Bank",
+        "accountNumber": "Account Number",
+        "currency": "Currency"
+      }
+    },
+    "form": {
+      "createTitle": "Create Vendor",
+      "editTitle": "Edit Vendor",
+      "createPageTitle": "Create New Vendor",
+      "backToList": "Back to Vendors",
+      "loading": "Loading vendor details...",
+      "error": "Error loading vendor details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update Vendor",
+      "create": "Create Vendor",
+      "sections": {
+        "basic": "Basic Information",
+        "banking": "Banking Information"
+      },
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "email": "Email",
+        "phone": "Phone Number",
+        "status": "Status",
+        "accountName": "Account Name",
+        "bank": "Bank",
+        "accountNumber": "Account Number",
+        "currency": "Currency",
+        "selectType": "Select vendor type",
+        "selectStatus": "Select status",
+        "selectCurrency": "Select currency"
+      },
+      "placeholders": {
+        "name": "Enter vendor name",
+        "email": "Enter email address",
+        "phone": "Enter phone number",
+        "accountName": "Enter account name",
+        "bank": "Enter bank name",
+        "accountNumber": "Enter account number"
+      },
+      "currencies": {
+        "ngn": "Nigerian Naira (NGN)",
+        "usd": "US Dollar (USD)",
+        "eur": "Euro (EUR)",
+        "gbp": "British Pound (GBP)"
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "phoneRequired": "Phone number is required",
+        "invalidEmail": "Invalid email address",
+        "accountNameRequired": "Account name is required",
+        "bankRequired": "Bank name is required",
+        "accountNumberRequired": "Account number is required"
+      },
+      "toast": {
+        "errorTitle": "Error",
+        "submitError": "There was a problem submitting the form"
+      }
+    }
+  },
+  "department": {
+    "management": "Department Management",
+    "add": "Add Department",
+    "loading": "Loading departments...",
+    "error": "Error loading departments",
+    "noItems": "No departments found.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the department.",
+    "searchPlaceholder": "Search by department name...",
+    "columns": {
+      "name": "Department Name",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Loading department details...",
+      "error": "Error loading department details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Departments",
+      "notFound": "Department not found",
+      "editDepartment": "Edit Department",
+      "label": "Department",
+      "cardTitle": "Department Information",
+      "idLabel": "Department ID: {{id}}",
+      "fields": {
+        "name": "Department Name",
+        "id": "Department ID"
+      }
+    },
+    "form": {
+      "createPageTitle": "Create New Department",
+      "editTitle": "Edit Department",
+      "backToList": "Back to Departments",
+      "loading": "Loading department details...",
+      "error": "Error loading department details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update Department",
+      "create": "Create Department",
+      "sections": {
+        "info": "Department Information"
+      },
+      "fields": {
+        "name": "Department Name"
+      },
+      "placeholders": {
+        "name": "Enter department name"
+      },
+      "validation": {
+        "nameRequired": "Name is required"
+      },
+      "toast": {
+        "errorTitle": "Error",
+        "submitError": "There was a problem submitting the form"
+      }
+    }
+  },
+  "category": {
+    "management": "Category Management",
+    "add": "Add Category",
+    "loading": "Loading categories...",
+    "error": "Error loading categories",
+    "noItems": "No categories found.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the category.",
+    "searchPlaceholder": "Search categories...",
+    "yes": "Yes",
+    "no": "No",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "allowed": "Allowed",
+    "notAllowed": "Not Allowed",
+    "blocked": "Blocked",
+    "notSpecified": "Not specified",
+    "filters": {
+      "status": "Status",
+      "workRequest": "Work Request"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "workRequestOptions": {
+      "none": "None",
+      "createWorkOrder": "Create work order",
+      "closeWorkRequest": "Close work request"
+    },
+    "columns": {
+      "code": "Code",
+      "title": "Title",
+      "workRequestApproved": "Work Request Approved",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Loading category details...",
+      "error": "Error loading category details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Categories",
+      "notFound": "Category not found",
+      "title": "Category Details",
+      "editCategory": "Edit Category",
+      "cardTitle": "Category Management",
+      "tabs": {
+        "details": "Category Details",
+        "subcategories": "Subcategories"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "workRequestConfig": "Work Request Configuration",
+        "systemPermissions": "System Permissions",
+        "description": "Description"
+      },
+      "fields": {
+        "code": "Code",
+        "title": "Title",
+        "status": "Status",
+        "problemType": "Problem Type",
+        "workRequestApproved": "Work Request Approved",
+        "excludeCostingLimit": "Exclude Costing Limit",
+        "power": "Power",
+        "createPaymentRequisition": "Create Payment Requisition"
+      },
+      "subcategories": {
+        "title": "Subcategories",
+        "found": "{{count}} subcategories found",
+        "empty": "No subcategories",
+        "emptyDesc": "This category doesn't have any subcategories yet.",
+        "noTitle": "No Title",
+        "noDescription": "No Description",
+        "columns": {
+          "id": "ID",
+          "title": "Title",
+          "description": "Description",
+          "excludeCostingLimit": "Exclude Costing Limit",
+          "status": "Status"
+        }
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "addSubcategory": "Add Subcategory"
+      },
+      "statusSidebar": {
+        "title": "Category Status",
+        "activeStatus": "Active Status",
+        "powerEnabled": "Power Enabled",
+        "paymentCreation": "Payment Creation"
+      },
+      "subcategoryForm": {
+        "title": "Create New Subcategory",
+        "submit": "Create Subcategory",
+        "fields": {
+          "title": "Title",
+          "code": "Code",
+          "workRequestApproved": "Work Request Approved",
+          "status": "Status"
+        },
+        "placeholders": {
+          "title": "Subcategory title",
+          "code": "Subcategory code",
+          "selectApprovalType": "Select approval type",
+          "selectStatus": "Select status"
+        },
+        "sections": {
+          "permissions": "System Permissions"
+        },
+        "switches": {
+          "excludeCostingLimit": "Exclude Costing Limit",
+          "excludeCostingLimitDesc": "Enable to exclude costing limits for this subcategory",
+          "power": "Power",
+          "powerDesc": "Enable power functionality for this subcategory",
+          "createPaymentRequisition": "Create Payment Requisition",
+          "createPaymentRequisitionDesc": "Allow creation of payment requisitions"
+        },
+        "validation": {
+          "titleRequired": "Title is required",
+          "codeRequired": "Code is required"
+        }
+      }
+    },
+    "form": {
+      "createPageTitle": "Create New Category",
+      "editTitle": "Edit Category",
+      "backToList": "Back to Categories",
+      "loading": "Loading category details...",
+      "error": "Error loading category details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "categoryDetails": "Category Details"
+      },
+      "fields": {
+        "code": "Code",
+        "title": "Title",
+        "problemType": "Problem Type",
+        "workRequestApproved": "Work Request Approved",
+        "status": "Status",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Category code",
+        "title": "Category title",
+        "problemType": "Category problem type",
+        "selectWorkRequestApproved": "Select work request approved",
+        "selectStatus": "Select status",
+        "description": "Enter category description"
+      },
+      "checkboxes": {
+        "excludeCostingLimit": "Exclude costing limit",
+        "power": "Power",
+        "createPaymentRequisition": "Create payment requisition"
+      },
+      "validation": {
+        "codeRequired": "Code is required",
+        "titleRequired": "Title is required",
+        "descriptionRequired": "Description is required",
+        "problemTypeRequired": "Problem type is required"
+      }
+    }
+  },
+  "subcategory": {
+    "management": "Sub-Category Management",
+    "add": "Add Sub-Category",
+    "loading": "Loading sub-categories...",
+    "error": "Error loading sub-categories",
+    "noItems": "No sub-categories found.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this sub-category.",
+    "searchPlaceholder": "Search sub-categories...",
+    "filters": {
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Loading subcategory details...",
+      "error": "Error loading subcategory details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Subcategories",
+      "notFound": "Subcategory not found",
+      "title": "Subcategory Details",
+      "editSubcategory": "Edit Subcategory",
+      "cardTitle": "Subcategory Information",
+      "fields": {
+        "title": "Title",
+        "status": "Status",
+        "excludeCostLimit": "Exclude Cost Limit",
+        "category": "Category",
+        "description": "Description"
+      },
+      "notProvided": "Not provided",
+      "noDescription": "No description provided"
+    },
+    "form": {
+      "createPageTitle": "Create New Subcategory",
+      "editTitle": "Edit Subcategory",
+      "backToList": "Back to Subcategories",
+      "loading": "Loading subcategory details...",
+      "error": "Error loading subcategory details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update",
+      "save": "Save",
+      "sections": {
+        "details": "Subcategory Details"
+      },
+      "fields": {
+        "title": "Title",
+        "category": "Category",
+        "status": "Status",
+        "excludeCostingLimit": "Exclude costing limit",
+        "description": "Description"
+      },
+      "placeholders": {
+        "title": "Subcategory title",
+        "selectCategory": "Select Category",
+        "selectStatus": "Select status",
+        "description": "Enter subcategory description"
+      },
+      "validation": {
+        "titleRequired": "Title is required"
+      }
+    }
+  },
+  "bankAccount": {
+    "management": "Bank Account Management",
+    "add": "Add Bank Account",
+    "loading": "Loading bank accounts...",
+    "error": "Error loading bank accounts",
+    "noItems": "No bank accounts found.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the bank account.",
+    "searchPlaceholder": "Search by bank, account name, or account number...",
+    "filters": {
+      "statusPlaceholder": "Filter by status",
+      "allStatuses": "All Statuses"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "bank": "Bank",
+      "accountName": "Account Name",
+      "accountNumber": "Account Number",
+      "currency": "Currency",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Loading bank account details...",
+      "error": "Error loading bank account details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Bank Accounts",
+      "notFound": "Bank account not found",
+      "editAccount": "Edit Account",
+      "accountNumberLabel": "Account Number: {{number}}",
+      "cardTitle": "Bank Account Information",
+      "additionalSection": "Additional Details",
+      "accountStatus": "Account Status",
+      "activeAccount": "Active Account",
+      "activeAccountDesc": "This bank account is currently active and can be used for transactions.",
+      "accountDetails": "Account Details",
+      "noAddress": "No address provided",
+      "fields": {
+        "accountName": "Account Name",
+        "accountNumber": "Account Number",
+        "bankName": "Bank Name",
+        "currency": "Currency",
+        "address": "Address"
+      }
+    },
+    "form": {
+      "createPageTitle": "Create New Bank Account",
+      "editTitle": "Edit Bank Account",
+      "backToList": "Back to Bank Accounts",
+      "loading": "Loading bank account details...",
+      "error": "Error loading bank account details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update Bank Account",
+      "create": "Create Bank Account",
+      "sections": {
+        "basic": "Basic Information",
+        "additional": "Additional Information"
+      },
+      "fields": {
+        "bank": "Bank",
+        "status": "Status",
+        "accountName": "Account Name",
+        "accountNumber": "Account Number",
+        "currency": "Currency",
+        "address": "Address",
+        "additionalDetails": "Additional Details"
+      },
+      "placeholders": {
+        "bank": "Enter bank name",
+        "selectStatus": "Select status",
+        "accountName": "Enter account name",
+        "accountNumber": "Enter account number",
+        "selectCurrency": "Select currency",
+        "address": "Enter bank address",
+        "details": "Enter additional details or notes about this account"
+      },
+      "currencies": {
+        "ngn": "Nigerian Naira (NGN)",
+        "usd": "US Dollar (USD)",
+        "eur": "Euro (EUR)",
+        "gbp": "British Pound (GBP)"
+      },
+      "toast": {
+        "errorTitle": "Error",
+        "submitError": "There was a problem submitting the form"
+      }
+    }
+  },
+  "unitMeasurement": {
+    "management": "Unit Measurement Management",
+    "add": "Add Unit Measurement",
+    "loading": "Loading unit measurements...",
+    "error": "Error loading unit measurements",
+    "noItems": "No unit measurements found.",
+    "deleteMessage": "This action cannot be undone. This will permanently delete the unit measurement.",
+    "searchPlaceholder": "Search by code...",
+    "filters": {
+      "typePlaceholder": "Filter by type",
+      "allTypes": "All Types",
+      "statusPlaceholder": "Filter by status",
+      "allStatuses": "All Statuses"
+    },
+    "columns": {
+      "code": "Code",
+      "symbol": "Symbol",
+      "type": "Type",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "types": {
+      "area": "Area",
+      "packing": "Packing",
+      "piece": "Piece",
+      "time": "Time",
+      "volume": "Volume",
+      "weight": "Weight",
+      "other": "Other"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "detail": {
+      "loading": "Loading unit measurement details...",
+      "error": "Error loading unit measurement details",
+      "unknownError": "An unknown error occurred",
+      "backToList": "Back to Unit Measurements",
+      "notFound": "Unit measurement not found",
+      "titleWithCode": "Unit Measurement: {{code}}",
+      "cardTitle": "Unit Measurement Details",
+      "usageCardTitle": "Usage Information",
+      "noDescription": "No description provided",
+      "fields": {
+        "code": "Code",
+        "symbol": "Symbol",
+        "type": "Type",
+        "status": "Status",
+        "description": "Description"
+      },
+      "sidebar": {
+        "symbol": "Symbol",
+        "availability": "Availability",
+        "available": "Available for use",
+        "notAvailable": "Not available for use",
+        "exampleUsage": "Example Usage"
+      }
+    },
+    "form": {
+      "createPageTitle": "Create New Unit Measurement",
+      "editTitle": "Edit Unit Measurement",
+      "backToList": "Back to Unit Measurements",
+      "loading": "Loading unit measurement details...",
+      "error": "Error loading unit measurement details",
+      "unknownError": "An unknown error occurred",
+      "update": "Update Unit Measurement",
+      "create": "Create Unit Measurement",
+      "sections": {
+        "basic": "Basic Information"
+      },
+      "fields": {
+        "code": "Code",
+        "symbol": "Symbol",
+        "type": "Type",
+        "status": "Status",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Enter unit measurement code",
+        "symbol": "Enter symbol",
+        "selectType": "Select type",
+        "selectStatus": "Select status",
+        "description": "Enter unit measurement description"
+      },
+      "toast": {
+        "errorTitle": "Error",
+        "submitError": "There was a problem submitting the form"
+      }
+    }
+  },
+  "warehouse": {
+    "management": "Warehouse Management",
+    "add": "Add Warehouse",
+    "loading": "Loading warehouses...",
+    "error": "Error loading warehouses",
+    "noItems": "No warehouses found",
+    "deleteTitle": "Delete Warehouse",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this warehouse.",
+    "searchPlaceholder": "Search by name or location...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "location": "Location",
+      "manager": "Manager",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Warehouse",
+      "editTitle": "Edit Warehouse",
+      "name": "Name",
+      "code": "Code",
+      "location": "Location",
+      "manager": "Manager",
+      "description": "Description"
+    }
+  },
+  "store": {
+    "management": "Store Management",
+    "add": "Add Store",
+    "loading": "Loading stores...",
+    "error": "Error loading stores",
+    "noItems": "No stores found",
+    "deleteTitle": "Delete Store",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this store.",
+    "searchPlaceholder": "Search by name or warehouse...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "warehouse": "Warehouse",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Store",
+      "editTitle": "Edit Store",
+      "name": "Name",
+      "code": "Code",
+      "warehouse": "Warehouse",
+      "description": "Description"
+    }
+  },
+  "item": {
+    "management": "Item Management",
+    "add": "Add Item",
+    "loading": "Loading items...",
+    "error": "Error loading items",
+    "noItems": "No items found",
+    "deleteTitle": "Delete Item",
+    "deleteMessage": "This action cannot be undone. This will permanently delete this item.",
+    "searchPlaceholder": "Search by name, code, or category...",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "category": "Category",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Item",
+      "editTitle": "Edit Item",
+      "name": "Name",
+      "code": "Code",
+      "category": "Category",
+      "unit": "Unit",
+      "quantity": "Quantity",
+      "description": "Description"
+    }
+  },
+  "itemRequest": {
+    "management": "Item Request Management",
+    "add": "Add Item Request",
+    "loading": "Loading item requests...",
+    "error": "Error loading item requests",
+    "noItems": "No item requests found",
+    "deleteTitle": "Delete Item Request",
+    "deleteMessage": "This action cannot be undone.",
+    "searchPlaceholder": "Search by item name or requester...",
+    "columns": {
+      "item": "Item",
+      "quantity": "Quantity",
+      "requestedBy": "Requested By",
+      "status": "Status",
+      "date": "Date"
+    }
+  },
+  "inventory": {
+    "management": "Inventory Management",
+    "add": "Add Inventory",
+    "loading": "Loading inventory...",
+    "error": "Error loading inventory",
+    "noItems": "No inventory items found",
+    "deleteTitle": "Delete Inventory Record",
+    "deleteMessage": "This action cannot be undone.",
+    "searchPlaceholder": "Search by name, category, or store...",
+    "columns": {
+      "name": "Name",
+      "category": "Category",
+      "quantity": "Quantity",
+      "store": "Store",
+      "status": "Status"
+    }
+  },
+  "transfer": {
+    "management": "Transfer Management",
+    "add": "Add Transfer",
+    "loading": "Loading transfers...",
+    "error": "Error loading transfers",
+    "noItems": "No transfers found",
+    "deleteTitle": "Delete Transfer",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "item": "Item",
+      "fromStore": "From Store",
+      "toStore": "To Store",
+      "quantity": "Quantity",
+      "status": "Status",
+      "date": "Date"
+    }
+  },
+  "assetCategory": {
+    "management": "Asset Category Management",
+    "add": "Add Asset Category",
+    "loading": "Loading asset categories...",
+    "error": "Error loading asset categories",
+    "noItems": "No asset categories found",
+    "deleteTitle": "Delete Asset Category",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create Asset Category",
+      "editTitle": "Edit Asset Category",
+      "name": "Name",
+      "code": "Code",
+      "description": "Description"
+    }
+  },
+  "assetSubcategory": {
+    "management": "Asset Sub-Category Management",
+    "add": "Add Asset Sub-Category",
+    "loading": "Loading asset sub-categories...",
+    "error": "Error loading asset sub-categories",
+    "noItems": "No asset sub-categories found",
+    "deleteTitle": "Delete Asset Sub-Category",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "category": "Category",
+      "status": "Status"
+    }
+  },
+  "inventoryType": {
+    "management": "Inventory Type Management",
+    "add": "Add Inventory Type",
+    "loading": "Loading inventory types...",
+    "error": "Error loading inventory types",
+    "noItems": "No inventory types found",
+    "deleteTitle": "Delete Inventory Type",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "status": "Status"
+    }
+  },
+  "manufacturer": {
+    "management": "Manufacturer Management",
+    "add": "Add Manufacturer",
+    "loading": "Loading manufacturers...",
+    "error": "Error loading manufacturers",
+    "noItems": "No manufacturers found",
+    "deleteTitle": "Delete Manufacturer",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "country": "Country",
+      "status": "Status"
+    }
+  },
+  "model": {
+    "management": "Model Management",
+    "add": "Add Model",
+    "loading": "Loading models...",
+    "error": "Error loading models",
+    "noItems": "No models found",
+    "deleteTitle": "Delete Model",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "manufacturer": "Manufacturer",
+      "status": "Status"
+    }
+  },
+  "inventoryReference": {
+    "management": "Inventory Reference Management",
+    "add": "Add Inventory Reference",
+    "loading": "Loading inventory references...",
+    "error": "Error loading inventory references",
+    "noItems": "No inventory references found",
+    "deleteTitle": "Delete Inventory Reference",
+    "deleteMessage": "This action cannot be undone.",
+    "columns": {
+      "name": "Name",
+      "code": "Code",
+      "category": "Category",
+      "status": "Status"
+    }
+  }
+}

@@ -23,44 +23,47 @@ import {
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
-
-const workorderSchema = z.object({
-  type: z.enum(['FROM-PPM', 'FROM-WORK-REQUEST', 'RAISE-PAYMENT']),
-  source_ppm: z.number().optional(),
-  source_work_request: z.number().optional(),
-  category: z.number().optional(),
-  subcategory: z.number().optional(),
-  facility: z.number().optional(),
-  building: z.number().optional(),
-  department: z.number().optional(),
-  asset: z.number().optional(),
-  description: z.string().optional().default(''),
-  expected_start_date: z.string().min(1, 'Expected start date is required'),
-  priority: z.enum(['Low', 'Medium', 'High']).optional(),
-  cost: z.string().optional().default(''),
-  currency: z.enum(['USD', 'EUR', 'NGN']).optional(),
-  approver: z.number().optional(),
-  reviewers: z.array(z.number()).optional().default([]),
-  invoice_no: z.string().optional().default(''),
-  request_to: z.number().optional(),
-}).superRefine((data, ctx) => {
-  if (data.type === 'FROM-WORK-REQUEST' && !data.source_work_request) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Source work request is required', path: ['source_work_request'] });
-  }
-  if (data.type === 'FROM-PPM' && !data.source_ppm) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Source PPM is required', path: ['source_ppm'] });
-  }
-  if (!data.reviewers || data.reviewers.length === 0) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'At least one reviewer must be selected', path: ['reviewers'] });
-  }
-  if (!data.approver) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Approver is required — select a reviewer first', path: ['approver'] });
-  }
-});
-
-type WorkorderFormValues = z.infer<typeof workorderSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WorkorderForm = () => {
+  const { t } = useTypedTranslation('work');
+
+  const workorderSchema = z.object({
+    type: z.enum(['FROM-PPM', 'FROM-WORK-REQUEST', 'RAISE-PAYMENT']),
+    source_ppm: z.number().optional(),
+    source_work_request: z.number().optional(),
+    category: z.number().optional(),
+    subcategory: z.number().optional(),
+    facility: z.number().optional(),
+    building: z.number().optional(),
+    department: z.number().optional(),
+    asset: z.number().optional(),
+    description: z.string().optional().default(''),
+    expected_start_date: z.string().min(1, t('workOrder.form.validation.expectedStartDateRequired')),
+    priority: z.enum(['Low', 'Medium', 'High']).optional(),
+    cost: z.string().optional().default(''),
+    currency: z.enum(['USD', 'EUR', 'NGN']).optional(),
+    approver: z.number().optional(),
+    reviewers: z.array(z.number()).optional().default([]),
+    invoice_no: z.string().optional().default(''),
+    request_to: z.number().optional(),
+  }).superRefine((data, ctx) => {
+    if (data.type === 'FROM-WORK-REQUEST' && !data.source_work_request) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.sourceWorkRequestRequired'), path: ['source_work_request'] });
+    }
+    if (data.type === 'FROM-PPM' && !data.source_ppm) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.sourcePpmRequired'), path: ['source_ppm'] });
+    }
+    if (!data.reviewers || data.reviewers.length === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.reviewerRequired'), path: ['reviewers'] });
+    }
+    if (!data.approver) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.approverRequired'), path: ['approver'] });
+    }
+  });
+
+  type WorkorderFormValues = z.infer<typeof workorderSchema>;
+
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
@@ -113,12 +116,11 @@ const WorkorderForm = () => {
   const { data: categoriesData = { results: [] } } = useCategoriesQuery();
   const { data: facilitiesData = { results: [] } } = useFacilitiesQuery();
   const { data: departmentsData = { results: [] } } = useDepartmentsQuery();
-  const { data: approverUsers = { results: [] } } = useApproverUsersQuery();
+  useApproverUsersQuery();
   const { data: approvers = [] } = useApproversQuery();
   const { data: approvedRequests = [] } = useApprovedWorkrequestsQuery();
   const { data: approvedPpms = { results: [] } } = useApprovedPpmsQuery();
   const { data: reviewers = [] } = useReviewersQuery();
-
 
   const { data: buildingsData = [] } = useBuildingsByFacilityQuery(selectedFacility || undefined);
   const { data: assetsData = [] } = useAssetsByFacilityQuery(selectedFacility || undefined);
@@ -299,31 +301,39 @@ const WorkorderForm = () => {
         updateWorkorderMutation.mutate(
           { slug, formData },
           {
-            onSuccess: () => { toast({ title: 'Success', description: 'Workorder updated successfully' }); navigate('/dashboard/work/orders'); },
-            onError: () => { toast({ title: 'Error', description: 'Failed to update workorder', variant: 'destructive' }); },
+            onSuccess: () => {
+              toast({ title: t('workOrder.form.toast.successTitle'), description: t('workOrder.form.toast.updateSuccess') });
+              navigate('/dashboard/work/orders');
+            },
+            onError: () => {
+              toast({ title: t('workOrder.form.toast.errorTitle'), description: t('workOrder.form.toast.updateError'), variant: 'destructive' });
+            },
           },
         );
       } else {
         createWorkorderMutation.mutate(
           formData,
           {
-            onSuccess: () => { toast({ title: 'Success', description: 'Workorder created successfully' }); navigate('/dashboard/work/orders'); },
+            onSuccess: () => {
+              toast({ title: t('workOrder.form.toast.successTitle'), description: t('workOrder.form.toast.createSuccess') });
+              navigate('/dashboard/work/orders');
+            },
             onError: (error: any) => {
               const data = error?.response?.data;
               const FIELD_LABELS: Record<string, string> = {
-                source_ppm: 'Source PPM',
-                source_work_request: 'Source Work Request',
+                source_ppm: t('workOrder.form.sourcePpmLabel'),
+                source_work_request: t('workOrder.form.sourceWrLabel'),
               };
               const description = data && typeof data === 'object'
                 ? Object.entries(data).map(([k, v]) => `${FIELD_LABELS[k] ?? k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')
-                : 'Failed to create workorder';
-              toast({ title: 'Validation Error', description, variant: 'destructive' });
+                : t('workOrder.form.toast.createFallbackError');
+              toast({ title: t('workOrder.form.toast.validationErrorTitle'), description, variant: 'destructive' });
             },
           },
         );
       }
     } catch {
-      toast({ title: 'Error', description: 'There was a problem submitting the form', variant: 'destructive' });
+      toast({ title: t('workOrder.form.toast.errorTitle'), description: t('workOrder.form.toast.submitError'), variant: 'destructive' });
     }
   };
 
@@ -334,7 +344,7 @@ const WorkorderForm = () => {
       <div className="container mx-auto py-8 flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading workorder details...</p>
+          <p className="text-sm text-muted-foreground">{t('workOrder.form.loadingDetails')}</p>
         </div>
       </div>
     );
@@ -343,11 +353,11 @@ const WorkorderForm = () => {
   if (isEditMode && isWorkorderError) {
     return (
       <div className="container mx-auto py-8 flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading workorder details</div>
+        <div className="text-red-500 text-xl">{t('workOrder.form.errorLoading')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {workorderError instanceof Error ? workorderError.message : 'An unknown error occurred'}
+          {workorderError instanceof Error ? workorderError.message : t('workOrder.form.errorFallback')}
         </p>
-        <Button onClick={handleCancel} variant="outline">Back to Workorders</Button>
+        <Button onClick={handleCancel} variant="outline">{t('workOrder.form.backToWorkorders')}</Button>
       </div>
     );
   }
@@ -359,7 +369,7 @@ const WorkorderForm = () => {
           <Button variant="outline" size="icon" onClick={handleCancel} aria-label="Go back">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">{isEditMode ? 'Edit Workorder' : 'Create New Workorder'}</h1>
+          <h1 className="text-2xl font-bold">{isEditMode ? t('workOrder.form.editTitle') : t('workOrder.form.createNewTitle')}</h1>
         </div>
       </div>
 
@@ -369,23 +379,23 @@ const WorkorderForm = () => {
           {/* Type Selection */}
           <div className="rounded-lg border border-green-200 overflow-hidden bg-white shadow-sm">
             <div className="p-6 bg-green-50 border-b border-green-100">
-              <h2 className="text-lg font-semibold text-green-800">Work Order Type</h2>
-              <p className="text-sm text-green-600 mt-1">Select the type of work order you want to create</p>
+              <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionType')}</h2>
+              <p className="text-sm text-green-600 mt-1">{t('workOrder.form.sectionTypeHint')}</p>
             </div>
             <div className="p-6 bg-white">
               <FormField control={workorderForm.control} name="type" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Type<span className="text-red-500 ml-1">*</span></FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.type')}<span className="text-red-500 ml-1">*</span></FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-10 border-green-200 focus:border-green-500 focus:ring-green-500">
-                        <SelectValue placeholder="Select work order type" />
+                        <SelectValue placeholder={t('workOrder.form.typeSelectPlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FROM-PPM">From PPM</SelectItem>
-                      <SelectItem value="FROM-WORK-REQUEST">From Work Request</SelectItem>
-                      <SelectItem value="RAISE-PAYMENT">Raise Payment</SelectItem>
+                      <SelectItem value="FROM-PPM">{t('workOrder.types.fromPpm')}</SelectItem>
+                      <SelectItem value="FROM-WORK-REQUEST">{t('workOrder.types.fromWorkRequest')}</SelectItem>
+                      <SelectItem value="RAISE-PAYMENT">{t('workOrder.types.raisePayment')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -400,19 +410,19 @@ const WorkorderForm = () => {
               {/* Source Work Request */}
               <div className="rounded-lg border border-green-200 overflow-hidden bg-white shadow-sm">
                 <div className="p-6 bg-green-50 border-b border-green-100">
-                  <h2 className="text-lg font-semibold text-green-800">Source Work Request</h2>
-                  <p className="text-sm text-green-600 mt-1">Select the approved work request to raise this work order from</p>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionSourceWr')}</h2>
+                  <p className="text-sm text-green-600 mt-1">{t('workOrder.form.sectionSourceWrHint')}</p>
                 </div>
                 <div className="p-6 bg-white">
                   <FormField control={workorderForm.control} name="source_work_request" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Source Work Request<span className="text-red-500 ml-1">*</span>
+                        {t('workOrder.form.sourceWrLabel')}<span className="text-red-500 ml-1">*</span>
                       </FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-                            <SelectValue placeholder="Select approved work request" />
+                            <SelectValue placeholder={t('workOrder.form.sourceWrPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -423,7 +433,7 @@ const WorkorderForm = () => {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="no-approved-requests" disabled>No approved work requests available</SelectItem>
+                            <SelectItem value="no-approved-requests" disabled>{t('workOrder.form.noApprovedRequests')}</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -436,7 +446,7 @@ const WorkorderForm = () => {
               {/* Basic Information */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrBasic')}>
-                  <h2 className="text-lg font-semibold text-green-800">Basic Information</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionBasic')}</h2>
                   {openSections.wrBasic ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrBasic && (
@@ -444,9 +454,9 @@ const WorkorderForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField control={workorderForm.control} name="category" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Category</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.category')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={autoFilledFields.has('category')}>
-                            <FormControl><SelectTrigger className="h-10 text-black"><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10 text-black"><SelectValue placeholder={t('workOrder.form.selectCategory')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {categoriesData.results.map((c: any) => (
                                 <SelectItem key={c.id} value={String(c.id)}>{c.description || c.name}</SelectItem>
@@ -459,9 +469,9 @@ const WorkorderForm = () => {
 
                       <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Subcategory</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory || autoFilledFields.has('subcategory')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? 'Select category first' : 'Select subcategory'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {filteredSubcategories.map((s: any) => (
                                 <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
@@ -475,9 +485,9 @@ const WorkorderForm = () => {
 
                     <FormField control={workorderForm.control} name="description" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Description<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.description')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Enter work order description" {...field} className="min-h-[120px] resize-y" disabled={autoFilledFields.has('description')} />
+                          <Textarea placeholder={t('workOrder.form.descriptionPlaceholder')} {...field} className="min-h-[120px] resize-y" disabled={autoFilledFields.has('description')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -485,13 +495,13 @@ const WorkorderForm = () => {
 
                     <FormField control={workorderForm.control} name="priority" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Priority<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.priority')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={autoFilledFields.has('priority')}>
-                          <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectPriority')} /></SelectTrigger></FormControl>
                           <SelectContent>
-                            <SelectItem value="Low">Low</SelectItem>
-                            <SelectItem value="Medium">Medium</SelectItem>
-                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Low">{t('workOrder.priority.low')}</SelectItem>
+                            <SelectItem value="Medium">{t('workOrder.priority.medium')}</SelectItem>
+                            <SelectItem value="High">{t('workOrder.priority.high')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -504,7 +514,7 @@ const WorkorderForm = () => {
               {/* Location & Asset Details */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrDetails')}>
-                  <h2 className="text-lg font-semibold text-green-800">Location & Asset Details</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionLocation')}</h2>
                   {openSections.wrDetails ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrDetails && (
@@ -512,9 +522,9 @@ const WorkorderForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField control={workorderForm.control} name="facility" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Facility<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.facility')}<span className="text-red-500 ml-1">*</span></FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={autoFilledFields.has('facility')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select facility" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectFacility')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {facilitiesData.results.map((f: any) => (
                                 <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
@@ -527,9 +537,9 @@ const WorkorderForm = () => {
 
                       <FormField control={workorderForm.control} name="building" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Building</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.building')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility || autoFilledFields.has('building')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select building'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectBuilding')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {(Array.isArray(buildingsData) ? buildingsData : []).map((b: any) => (
                                 <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
@@ -544,9 +554,9 @@ const WorkorderForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField control={workorderForm.control} name="department" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Department</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.department')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={autoFilledFields.has('department')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select department" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectDepartment')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {departmentsData.results.map((d: any) => (
                                 <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
@@ -559,9 +569,9 @@ const WorkorderForm = () => {
 
                       <FormField control={workorderForm.control} name="asset" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Asset</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.asset')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility || autoFilledFields.has('asset')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select asset'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectAsset')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {(Array.isArray(assetsData) ? assetsData : []).map((a: any) => (
                                 <SelectItem key={a.id} value={String(a.id)}>{a.asset_name}</SelectItem>
@@ -579,23 +589,23 @@ const WorkorderForm = () => {
               {/* Invoice & Vendor */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrInvoice')}>
-                  <h2 className="text-lg font-semibold text-green-800">Invoice & Vendor</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionInvoice')}</h2>
                   {openSections.wrInvoice ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrInvoice && (
                   <div className="p-6 space-y-6 bg-white">
                     {selectedWrInvoiceUrl && (
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1.5">Vendor Invoice (from Work Request)</label>
+                        <label className="text-sm font-medium text-gray-700 block mb-1.5">{t('workOrder.form.vendorInvoiceFromWr')}</label>
                         <a href={selectedWrInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 underline text-sm">
-                          View uploaded vendor invoice
+                          {t('workOrder.form.viewUploadedVendorInvoice')}
                         </a>
                       </div>
                     )}
 
                     {selectedWrVendorName && (
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1.5">Vendor on Invoice</label>
+                        <label className="text-sm font-medium text-gray-700 block mb-1.5">{t('workOrder.form.vendorOnInvoice')}</label>
                         <div className="h-10 px-3 flex items-center border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700">
                           {selectedWrVendorName}
                         </div>
@@ -605,9 +615,9 @@ const WorkorderForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField control={workorderForm.control} name="invoice_no" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Invoice Number</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.invoiceNumber')}</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. INV-2026-001" {...field} className="h-10" />
+                            <Input placeholder={t('workOrder.form.invoiceNoPlaceholder')} {...field} className="h-10" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -615,9 +625,9 @@ const WorkorderForm = () => {
 
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                          Cost (from PO)
+                          {t('workOrder.form.costFromPo')}
                           {autoFilledFields.has('cost') && (
-                            <span className="text-xs text-green-600 ml-2 font-normal">Auto-filled from PO amount</span>
+                            <span className="text-xs text-green-600 ml-2 font-normal">{t('workOrder.form.autoFilledFromPoAmount')}</span>
                           )}
                         </label>
                         <Input
@@ -625,7 +635,7 @@ const WorkorderForm = () => {
                           value={workorderForm.watch('cost') || ''}
                           readOnly
                           className="h-10 bg-gray-50 cursor-not-allowed"
-                          placeholder="Select work request to auto-fill"
+                          placeholder={t('workOrder.form.costAutoFillPlaceholder')}
                         />
                       </div>
                     </div>
@@ -638,7 +648,7 @@ const WorkorderForm = () => {
                 <FormField control={workorderForm.control} name="expected_start_date" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Expected Start Date<span className="text-red-500 ml-1">*</span>
+                      {t('workOrder.form.expectedStartDate')}<span className="text-red-500 ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input type="date" {...field} className="h-10" />
@@ -651,24 +661,24 @@ const WorkorderForm = () => {
               {/* Approval Chain */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrApproval')}>
-                  <h2 className="text-lg font-semibold text-green-800">Approval Chain</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionApproval')}</h2>
                   {openSections.wrApproval ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrApproval && (
                   <div className="p-6 space-y-6 bg-white">
                     <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      Approval chain is pre-filled from the Work Request. Select in order: Reviewer → Approver.
+                      {t('workOrder.form.approvalChainHintWr')}
                     </p>
 
                     {/* Step 1: Reviewers */}
                     <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          Step 1 — Reviewer<span className="text-red-500 ml-1">*</span>
+                          {t('workOrder.form.step1Reviewer')}<span className="text-red-500 ml-1">*</span>
                         </FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50">
                           {(Array.isArray(reviewers) && reviewers.length === 0) ? (
-                            <p className="text-sm text-gray-500">No reviewers available</p>
+                            <p className="text-sm text-gray-500">{t('workOrder.form.noReviewers')}</p>
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {(reviewers as any[]).map((reviewer: any) => (
@@ -700,12 +710,12 @@ const WorkorderForm = () => {
                     <FormField control={workorderForm.control} name="approver" render={({ field }) => (
                       <FormItem>
                         <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
-                          Step 2 — Approver{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
+                          {t('workOrder.form.step2Approver')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
                         </FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
                           <FormControl>
                             <SelectTrigger className="h-10">
-                              <SelectValue placeholder={!selectedReviewers?.length ? 'Select a reviewer first' : 'Select approver'} />
+                              <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -731,17 +741,17 @@ const WorkorderForm = () => {
               {/* Source PPM */}
               <div className="rounded-lg border border-green-200 overflow-hidden bg-white shadow-sm">
                 <div className="p-6 bg-green-50 border-b border-green-100">
-                  <h2 className="text-lg font-semibold text-green-800">Source PPM</h2>
-                  <p className="text-sm text-green-600 mt-1">Select the approved PPM to raise this work order from — fields will auto-fill</p>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionSourcePpm')}</h2>
+                  <p className="text-sm text-green-600 mt-1">{t('workOrder.form.sectionSourcePpmHint')}</p>
                 </div>
                 <div className="p-6 bg-white">
                   <FormField control={workorderForm.control} name="source_ppm" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Source PPM<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.sourcePpmLabel')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger className="h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-                            <SelectValue placeholder="Select approved PPM" />
+                            <SelectValue placeholder={t('workOrder.form.sourcePpmPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -752,7 +762,7 @@ const WorkorderForm = () => {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="no-approved-ppms" disabled>No approved PPMs available</SelectItem>
+                            <SelectItem value="no-approved-ppms" disabled>{t('workOrder.form.noApprovedPpms')}</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -765,7 +775,7 @@ const WorkorderForm = () => {
               {/* Basic Information */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrBasic')}>
-                  <h2 className="text-lg font-semibold text-green-800">Basic Information</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionBasic')}</h2>
                   {openSections.wrBasic ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrBasic && (
@@ -774,10 +784,10 @@ const WorkorderForm = () => {
                       <FormField control={workorderForm.control} name="category" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium text-gray-700">
-                            Category {autoFilledFields.has('category') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled from PPM</span>}
+                            {t('workOrder.form.category')} {autoFilledFields.has('category') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilledFromPpm')}</span>}
                           </FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={autoFilledFields.has('category')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectCategory')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {categoriesData.results.map((c: any) => (
                                 <SelectItem key={c.id} value={String(c.id)}>{c.description || c.name}</SelectItem>
@@ -791,10 +801,10 @@ const WorkorderForm = () => {
                       <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium text-gray-700">
-                            Subcategory {autoFilledFields.has('subcategory') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled</span>}
+                            {t('workOrder.form.subcategory')} {autoFilledFields.has('subcategory') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilled')}</span>}
                           </FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory || autoFilledFields.has('subcategory')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? 'Select category first' : 'Select subcategory'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {filteredSubcategories.map((s: any) => (
                                 <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
@@ -809,10 +819,10 @@ const WorkorderForm = () => {
                     <FormField control={workorderForm.control} name="description" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          Description {autoFilledFields.has('description') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled from PPM</span>}
+                          {t('workOrder.form.description')} {autoFilledFields.has('description') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilledFromPpm')}</span>}
                         </FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Enter work order description" {...field} className="min-h-[120px] resize-y" disabled={autoFilledFields.has('description')} />
+                          <Textarea placeholder={t('workOrder.form.descriptionPlaceholder')} {...field} className="min-h-[120px] resize-y" disabled={autoFilledFields.has('description')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -820,13 +830,13 @@ const WorkorderForm = () => {
 
                     <FormField control={workorderForm.control} name="priority" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Priority<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.priority')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectPriority')} /></SelectTrigger></FormControl>
                           <SelectContent>
-                            <SelectItem value="Low">Low</SelectItem>
-                            <SelectItem value="Medium">Medium</SelectItem>
-                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Low">{t('workOrder.priority.low')}</SelectItem>
+                            <SelectItem value="Medium">{t('workOrder.priority.medium')}</SelectItem>
+                            <SelectItem value="High">{t('workOrder.priority.high')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -839,7 +849,7 @@ const WorkorderForm = () => {
               {/* Location & Asset Details */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrDetails')}>
-                  <h2 className="text-lg font-semibold text-green-800">Location & Asset Details</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionLocation')}</h2>
                   {openSections.wrDetails ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrDetails && (
@@ -848,10 +858,10 @@ const WorkorderForm = () => {
                       <FormField control={workorderForm.control} name="facility" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium text-gray-700">
-                            Facility {autoFilledFields.has('facility') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled</span>}
+                            {t('workOrder.form.facility')} {autoFilledFields.has('facility') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilled')}</span>}
                           </FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={autoFilledFields.has('facility')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select facility" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectFacility')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {facilitiesData.results.map((f: any) => (
                                 <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
@@ -865,10 +875,10 @@ const WorkorderForm = () => {
                       <FormField control={workorderForm.control} name="building" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium text-gray-700">
-                            Building {autoFilledFields.has('building') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled</span>}
+                            {t('workOrder.form.building')} {autoFilledFields.has('building') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilled')}</span>}
                           </FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility || autoFilledFields.has('building')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select building'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectBuilding')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {(Array.isArray(buildingsData) ? buildingsData : []).map((b: any) => (
                                 <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
@@ -883,9 +893,9 @@ const WorkorderForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField control={workorderForm.control} name="department" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Department</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.department')}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select department" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectDepartment')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {departmentsData.results.map((d: any) => (
                                 <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
@@ -899,10 +909,10 @@ const WorkorderForm = () => {
                       <FormField control={workorderForm.control} name="asset" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium text-gray-700">
-                            Asset {autoFilledFields.has('asset') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled</span>}
+                            {t('workOrder.form.asset')} {autoFilledFields.has('asset') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilled')}</span>}
                           </FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility || autoFilledFields.has('asset')}>
-                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select asset'} /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectAsset')} /></SelectTrigger></FormControl>
                             <SelectContent>
                               {(Array.isArray(assetsData) ? assetsData : []).map((a: any) => (
                                 <SelectItem key={a.id} value={String(a.id)}>{a.asset_name}</SelectItem>
@@ -919,13 +929,13 @@ const WorkorderForm = () => {
 
               {/* Cost & Schedule */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm p-6 space-y-6">
-                <h2 className="text-lg font-semibold text-green-800">Cost & Schedule</h2>
+                <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionCostSchedule')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={workorderForm.control} name="cost" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Cost</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.cost')}</FormLabel>
                       <FormControl>
-                        <Input type="text" placeholder="e.g. 150000.00" {...field} className="h-10" />
+                        <Input type="text" placeholder={t('workOrder.form.costPlaceholder')} {...field} className="h-10" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -933,10 +943,10 @@ const WorkorderForm = () => {
                   <FormField control={workorderForm.control} name="currency" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Currency {autoFilledFields.has('currency') && <span className="text-xs text-green-600 font-normal ml-1">Auto-filled</span>}
+                        {t('workOrder.form.currency')} {autoFilledFields.has('currency') && <span className="text-xs text-green-600 font-normal ml-1">{t('workOrder.form.autoFilled')}</span>}
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={autoFilledFields.has('currency')}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder="Select currency" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectCurrency')} /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="USD">USD</SelectItem>
                           <SelectItem value="EUR">EUR</SelectItem>
@@ -949,7 +959,7 @@ const WorkorderForm = () => {
                 </div>
                 <FormField control={workorderForm.control} name="expected_start_date" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Expected Start Date<span className="text-red-500 ml-1">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.expectedStartDate')}<span className="text-red-500 ml-1">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} className="h-10" />
                     </FormControl>
@@ -961,24 +971,24 @@ const WorkorderForm = () => {
               {/* Approval Chain */}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
                 <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('wrApproval')}>
-                  <h2 className="text-lg font-semibold text-green-800">Approval Chain</h2>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionApproval')}</h2>
                   {openSections.wrApproval ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
                 </button>
                 {openSections.wrApproval && (
                   <div className="p-6 space-y-6 bg-white">
                     <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      Select in order: Reviewer → Approver. Both are required before the work order can be submitted.
+                      {t('workOrder.form.approvalChainHintPpm')}
                     </p>
 
                     {/* Step 1: Reviewers */}
                     <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          Step 1 — Reviewer<span className="text-red-500 ml-1">*</span>
+                          {t('workOrder.form.step1Reviewer')}<span className="text-red-500 ml-1">*</span>
                         </FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50">
                           {(Array.isArray(reviewers) && reviewers.length === 0) ? (
-                            <p className="text-sm text-gray-500">No reviewers available</p>
+                            <p className="text-sm text-gray-500">{t('workOrder.form.noReviewers')}</p>
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {(reviewers as any[]).map((reviewer: any) => (
@@ -1009,12 +1019,12 @@ const WorkorderForm = () => {
                     <FormField control={workorderForm.control} name="approver" render={({ field }) => (
                       <FormItem>
                         <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
-                          Step 2 — Approver{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
+                          {t('workOrder.form.step2Approver')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
                         </FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
                           <FormControl>
                             <SelectTrigger className="h-10">
-                              <SelectValue placeholder={!selectedReviewers?.length ? 'Select a reviewer first' : 'Select approver'} />
+                              <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -1042,7 +1052,7 @@ const WorkorderForm = () => {
                 className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors"
                 onClick={() => toggleSection('conditional')}
               >
-                <h2 className="text-lg font-semibold text-green-800">Work Order Details</h2>
+                <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionWorkOrderDetails')}</h2>
                 {openSections.conditional ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
               </button>
               {openSections.conditional && (
@@ -1050,9 +1060,9 @@ const WorkorderForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={workorderForm.control} name="category" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Category</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.category')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectCategory')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {categoriesData.results.map((c: any) => (
                               <SelectItem key={c.id} value={String(c.id)}>{c.name || c.title}</SelectItem>
@@ -1064,9 +1074,9 @@ const WorkorderForm = () => {
                     )} />
                     <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Subcategory</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedCategory ? 'Select category first' : 'Select subcategory'} /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {filteredSubcategories.map((s: any) => (
                               <SelectItem key={s.id} value={String(s.id)}>{s.name || s.title}</SelectItem>
@@ -1080,9 +1090,9 @@ const WorkorderForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={workorderForm.control} name="facility" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Facility</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.facility')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder="Select facility" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectFacility')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {facilitiesData.results.map((f: any) => (
                               <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
@@ -1094,9 +1104,9 @@ const WorkorderForm = () => {
                     )} />
                     <FormField control={workorderForm.control} name="building" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Building</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.building')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select building'} /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectBuilding')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {(Array.isArray(buildingsData) ? buildingsData : []).map((b: any) => (
                               <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
@@ -1110,9 +1120,9 @@ const WorkorderForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={workorderForm.control} name="department" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Department</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.department')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder="Select department" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectDepartment')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {departmentsData.results.map((d: any) => (
                               <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
@@ -1124,9 +1134,9 @@ const WorkorderForm = () => {
                     )} />
                     <FormField control={workorderForm.control} name="asset" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Asset</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.asset')}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? 'Select facility first' : 'Select asset'} /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectAsset')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {(Array.isArray(assetsData) ? assetsData : []).map((a: any) => (
                               <SelectItem key={a.id} value={String(a.id)}>{a.asset_name}</SelectItem>
@@ -1139,9 +1149,9 @@ const WorkorderForm = () => {
                   </div>
                   <FormField control={workorderForm.control} name="description" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.description')}</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Enter work order description" {...field} className="min-h-[120px] resize-y border-gray-300" />
+                        <Textarea placeholder={t('workOrder.form.descriptionPlaceholder')} {...field} className="min-h-[120px] resize-y border-gray-300" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1149,18 +1159,18 @@ const WorkorderForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={workorderForm.control} name="cost" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Cost</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.cost')}</FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder="1500.00" {...field} className="h-10 border-gray-300" />
+                          <Input type="text" placeholder={t('workOrder.form.costPlaceholder')} {...field} className="h-10 border-gray-300" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
                     <FormField control={workorderForm.control} name="currency" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Currency</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.currency')}</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder="Select currency" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectCurrency')} /></SelectTrigger></FormControl>
                           <SelectContent>
                             <SelectItem value="USD">USD</SelectItem>
                             <SelectItem value="EUR">EUR</SelectItem>
@@ -1173,7 +1183,7 @@ const WorkorderForm = () => {
                   </div>
                   <FormField control={workorderForm.control} name="expected_start_date" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Expected Start Date<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.expectedStartDate')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <FormControl>
                         <Input type="date" {...field} className="h-10 border-gray-300" />
                       </FormControl>
@@ -1182,13 +1192,13 @@ const WorkorderForm = () => {
                   )} />
                   <FormField control={workorderForm.control} name="priority" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Priority</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.priority')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectPriority')} /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value="Low">Low</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="High">High</SelectItem>
+                          <SelectItem value="Low">{t('workOrder.priority.low')}</SelectItem>
+                          <SelectItem value="Medium">{t('workOrder.priority.medium')}</SelectItem>
+                          <SelectItem value="High">{t('workOrder.priority.high')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -1196,16 +1206,16 @@ const WorkorderForm = () => {
                   )} />
                   <FormField control={workorderForm.control} name="invoice_no" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Invoice No.</FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.invoiceNoLabel')}</FormLabel>
                       <FormControl>
-                        <Input type="text" placeholder="e.g. INV-2024-001" {...field} className="h-10 border-gray-300" />
+                        <Input type="text" placeholder={t('workOrder.form.invoiceNoPlaceholder')} {...field} className="h-10 border-gray-300" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <div>
                     <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                      Invoice Document<span className="text-red-500 ml-1">*</span>
+                      {t('workOrder.form.invoiceDocument')}<span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="file"
@@ -1219,7 +1229,7 @@ const WorkorderForm = () => {
                   </div>
                   <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Reviewers<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.reviewers')}<span className="text-red-500 ml-1">*</span></FormLabel>
                       <div className="border rounded-lg p-4 bg-gray-50">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {Array.isArray(reviewers) && reviewers.length > 0 ? (reviewers as any[]).map((reviewer: any) => (
@@ -1239,7 +1249,7 @@ const WorkorderForm = () => {
                               </label>
                             </div>
                           )) : (
-                            <div className="col-span-full text-center py-4 text-gray-500">No reviewers available</div>
+                            <div className="col-span-full text-center py-4 text-gray-500">{t('workOrder.form.noReviewers')}</div>
                           )}
                         </div>
                       </div>
@@ -1249,12 +1259,12 @@ const WorkorderForm = () => {
                   <FormField control={workorderForm.control} name="approver" render={({ field }) => (
                     <FormItem>
                       <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
-                        Select Approver{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
+                        {t('workOrder.form.selectApproverLabel')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
                       </FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
                         <FormControl>
                           <SelectTrigger className="h-10 border-gray-300">
-                            <SelectValue placeholder={!selectedReviewers?.length ? 'Select a reviewer first' : 'Select approver'} />
+                            <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -1274,7 +1284,7 @@ const WorkorderForm = () => {
           )}
 
           <div className="flex justify-end gap-3 pt-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <Button type="button" variant="outline" onClick={handleCancel} className="px-6">Cancel</Button>
+            <Button type="button" variant="outline" onClick={handleCancel} className="px-6">{t('workOrder.form.cancel')}</Button>
             <Button
               type="submit"
               disabled={createWorkorderMutation.isPending || updateWorkorderMutation.isPending}
@@ -1283,7 +1293,7 @@ const WorkorderForm = () => {
               {(createWorkorderMutation.isPending || updateWorkorderMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Work Order' : 'Create Work Order'}
+              {isEditMode ? t('workOrder.form.update') : t('workOrder.form.createNew')}
             </Button>
           </div>
         </form>

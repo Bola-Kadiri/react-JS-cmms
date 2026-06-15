@@ -18,7 +18,7 @@
 //   if (statusItems.length === 0) {
 //     return (
 //       <div className="text-center py-8 text-gray-500">
-//         No status data available for {activeTab}
+//         {t('statusGrid.noData')} {displayTab}
 //       </div>
 //     );
 //   }
@@ -26,7 +26,7 @@
 //   return (
 //     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
 //       <h3 className="text-lg font-semibold text-gray-800 mb-4">
-//         {activeTab} Status Overview
+//         {displayTab} {t('statusGrid.overview')}
 //       </h3>
       
 //       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -61,13 +61,39 @@
 import { Link } from 'react-router-dom';
 import { SummaryCards, SummaryCardItem } from '@/types/dashboard';
 import { getIconByName, getColorClasses } from '@/utils/dashboardIcons';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface StatusGridProps {
   summaryCards: SummaryCards;
   activeTab: string;
+  activeTabLabel?: string;
 }
 
-const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
+const StatusGrid = ({ summaryCards, activeTab, activeTabLabel }: StatusGridProps) => {
+  const displayTab = activeTabLabel ?? activeTab;
+  const { t } = useTypedTranslation('dashboard');
+
+  const translateLabel = (label: string): string => {
+    const map: Record<string, string> = {
+      'New-Awaiting Work Request': t('statusLabels.newAwaiting'),
+      'New-Awaiting Review': t('statusLabels.newAwaitingReview'),
+      'Approved': t('statusLabels.approved'),
+      'Rejected': t('statusLabels.rejected'),
+      'Overdue': t('statusLabels.overdue'),
+      'Awaiting Approval': t('statusLabels.awaitingApproval'),
+      'CP Approved': t('statusLabels.cpApproved'),
+      'Reviewed': t('statusLabels.reviewed'),
+      'Completed': t('statusLabels.completed'),
+      'Requested Payment': t('statusLabels.requestedPayment'),
+      'Awaiting Processing': t('statusLabels.awaitingProcessing'),
+      'Processed Payment': t('statusLabels.processedPayment'),
+      'Open': t('statusLabels.open'),
+      'Pending': t('statusLabels.pending'),
+      'Part Paid': t('statusLabels.partPaid'),
+    };
+    return map[label] ?? label;
+  };
+
   // Determine which status items to show based on active tab
   const getStatusItemsToDisplay = (): SummaryCardItem[] => {
     const tabKey = activeTab.toLowerCase().replace(/ /g, '_') as keyof SummaryCards;
@@ -155,7 +181,7 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
   if (statusItems.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No status data available for {activeTab}
+        {t('statusGrid.noData')} {displayTab}
       </div>
     );
   }
@@ -163,7 +189,7 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        {activeTab} Status Overview
+        {displayTab} {t('statusGrid.overview')}
       </h3>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -190,7 +216,7 @@ const StatusGrid = ({ summaryCards, activeTab }: StatusGridProps) => {
                   {item.count}
                 </p>
                 <p className="text-xs text-gray-600 text-center leading-tight">
-                  {item.label}
+                  {translateLabel(item.label)}
                 </p>
                 {item.amount && item.amount !== "N 0" && (
                   <p className="text-xs text-gray-500 mt-1 font-medium">

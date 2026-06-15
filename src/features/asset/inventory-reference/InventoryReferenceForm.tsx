@@ -9,50 +9,52 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, X } from 'lucide-react';
-import { 
-  useCreateInventoryReference, 
-  useUpdateInventoryReference, 
-  useInventoryReferenceQuery 
+import {
+  useCreateInventoryReference,
+  useUpdateInventoryReference,
+  useInventoryReferenceQuery
 } from '@/hooks/inventoryreference/useInventoryReferenceQueries';
 import { useInventoryTypesQuery } from '@/hooks/inventorytype/useInventoryTypeQueries';
 import { useAssetCategoriesQuery } from '@/hooks/assetcategory/useAssetCategoryQueries';
 import { useAssetSubcategoriesQuery } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
 import { useModels } from '@/hooks/model/useModelQueries';
 import { useManufacturers } from '@/hooks/manufacturer/useManufacturerQueries';
-
-const formSchema = z.object({
-  inventory_type: z.preprocess(
-    (val) => val ? Number(val) : undefined,
-    z.number().min(1, 'Inventory type is required')
-  ),
-  category: z.preprocess(
-    (val) => val ? Number(val) : undefined,
-    z.number().min(1, 'Category is required')
-  ),
-  subcategory: z.preprocess(
-    (val) => val ? Number(val) : undefined,
-    z.number().min(1, 'Subcategory is required')
-  ),
-  model_reference: z.preprocess(
-    (val) => val ? Number(val) : undefined,
-    z.number().min(1, 'Model reference is required')
-  ),
-  manufacturer: z.preprocess(
-    (val) => val ? Number(val) : undefined,
-    z.number().min(1, 'Manufacturer is required')
-  ),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface InventoryReferenceFormProps {
   mode: 'create' | 'edit';
 }
 
 export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ mode }) => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
+  const formSchema = z.object({
+    inventory_type: z.preprocess(
+      (val) => val ? Number(val) : undefined,
+      z.number().min(1, 'Inventory type is required')
+    ),
+    category: z.preprocess(
+      (val) => val ? Number(val) : undefined,
+      z.number().min(1, 'Category is required')
+    ),
+    subcategory: z.preprocess(
+      (val) => val ? Number(val) : undefined,
+      z.number().min(1, 'Subcategory is required')
+    ),
+    model_reference: z.preprocess(
+      (val) => val ? Number(val) : undefined,
+      z.number().min(1, 'Model reference is required')
+    ),
+    manufacturer: z.preprocess(
+      (val) => val ? Number(val) : undefined,
+      z.number().min(1, 'Manufacturer is required')
+    ),
+  });
+
+  type FormData = z.infer<typeof formSchema>;
+
   const { data: inventoryReference, isLoading: loadingInventoryReference } = useInventoryReferenceQuery(mode === 'edit' ? id : undefined);
   const { data: inventoryTypesData, isLoading: loadingInventoryTypes } = useInventoryTypesQuery();
   const { data: categoriesData, isLoading: loadingCategories } = useAssetCategoriesQuery();
@@ -110,7 +112,7 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
     navigate('/dashboard/asset/inventory-reference/inventory-references');
   };
 
-  const isLoading = loadingInventoryReference || loadingInventoryTypes || loadingCategories || 
+  const isLoading = loadingInventoryReference || loadingInventoryTypes || loadingCategories ||
                    loadingSubcategories || loadingModels || loadingManufacturers;
 
   if (isLoading) {
@@ -118,7 +120,7 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t('inventoryRef.form.loading')}</p>
         </div>
       </div>
     );
@@ -134,24 +136,21 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Inventory References
+            {t('inventoryRef.form.backToList')}
           </Button>
           <h1 className="text-3xl font-bold text-gray-900">
-            {mode === 'create' ? 'Create New Inventory Reference' : 'Edit Inventory Reference'}
+            {mode === 'create' ? t('inventoryRef.form.createTitle') : t('inventoryRef.form.editTitle')}
           </h1>
           <p className="text-gray-600 mt-2">
-            {mode === 'create' 
-              ? 'Create a new inventory reference entry' 
-              : 'Update the inventory reference information'
-            }
+            {mode === 'create' ? t('inventoryRef.form.createSubtitle') : t('inventoryRef.form.editSubtitle')}
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Inventory Reference Details</CardTitle>
+            <CardTitle>{t('inventoryRef.form.cardTitle')}</CardTitle>
             <CardDescription>
-              Enter the details for the inventory reference
+              {t('inventoryRef.form.cardDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -159,13 +158,13 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Inventory Type */}
                 <div className="space-y-2">
-                  <Label htmlFor="inventory_type">Inventory Type *</Label>
+                  <Label htmlFor="inventory_type">{t('inventoryRef.form.fields.inventoryType')}</Label>
                   <Select
                     value={watch('inventory_type') ? String(watch('inventory_type')) : ''}
                     onValueChange={(value) => setValue('inventory_type', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select inventory type" />
+                      <SelectValue placeholder={t('inventoryRef.form.placeholders.selectInventoryType')} />
                     </SelectTrigger>
                     <SelectContent>
                       {inventoryTypesData?.results.map((type) => (
@@ -182,13 +181,13 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
 
                 {/* Category */}
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">{t('inventoryRef.form.fields.category')}</Label>
                   <Select
                     value={watch('category') ? String(watch('category')) : ''}
                     onValueChange={(value) => setValue('category', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('inventoryRef.form.placeholders.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categoriesData?.results.map((category) => (
@@ -205,13 +204,13 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
 
                 {/* Subcategory */}
                 <div className="space-y-2">
-                  <Label htmlFor="subcategory">Subcategory *</Label>
+                  <Label htmlFor="subcategory">{t('inventoryRef.form.fields.subcategory')}</Label>
                   <Select
                     value={watch('subcategory') ? String(watch('subcategory')) : ''}
                     onValueChange={(value) => setValue('subcategory', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select subcategory" />
+                      <SelectValue placeholder={t('inventoryRef.form.placeholders.selectSubcategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {subcategoriesData?.results.map((subcategory) => (
@@ -228,13 +227,13 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
 
                 {/* Model Reference */}
                 <div className="space-y-2">
-                  <Label htmlFor="model_reference">Model Reference *</Label>
+                  <Label htmlFor="model_reference">{t('inventoryRef.form.fields.modelReference')}</Label>
                   <Select
                     value={watch('model_reference') ? String(watch('model_reference')) : ''}
                     onValueChange={(value) => setValue('model_reference', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select model reference" />
+                      <SelectValue placeholder={t('inventoryRef.form.placeholders.selectModelReference')} />
                     </SelectTrigger>
                     <SelectContent>
                       {modelsData?.results.map((model) => (
@@ -251,13 +250,13 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
 
                 {/* Manufacturer */}
                 <div className="space-y-2">
-                  <Label htmlFor="manufacturer">Manufacturer *</Label>
+                  <Label htmlFor="manufacturer">{t('inventoryRef.form.fields.manufacturer')}</Label>
                   <Select
                     value={watch('manufacturer') ? String(watch('manufacturer')) : ''}
                     onValueChange={(value) => setValue('manufacturer', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select manufacturer" />
+                      <SelectValue placeholder={t('inventoryRef.form.placeholders.selectManufacturer')} />
                     </SelectTrigger>
                     <SelectContent>
                       {manufacturersData?.results.map((manufacturer) => (
@@ -280,7 +279,7 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
                   className="flex-1"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create Inventory Reference' : 'Update Inventory Reference'}
+                  {isSubmitting ? t('inventoryRef.form.saving') : mode === 'create' ? t('inventoryRef.form.create') : t('inventoryRef.form.update')}
                 </Button>
                 <Button
                   type="button"
@@ -289,7 +288,7 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
                   className="flex-1"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  Cancel
+                  {t('inventoryRef.form.cancel')}
                 </Button>
               </div>
             </form>
@@ -298,4 +297,4 @@ export const InventoryReferenceForm: React.FC<InventoryReferenceFormProps> = ({ 
       </div>
     </div>
   );
-}; 
+};

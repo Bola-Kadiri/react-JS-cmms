@@ -7,28 +7,40 @@ import { ChevronLeft, ChevronRight, Calendar, Loader2, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge';
 import { useCalendarEventsQuery } from '@/hooks/calendarevent/useCalendareventQueries';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PPMEventCalendar = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [categoryFilter, setCategoryFilter] = useState('all');
-  
+
   // Fetch calendar events
-  const { 
-    data = { count: 0, results: [] }, 
-    isFetching, 
-    isError, 
-    refetch 
+  const {
+    data = { count: 0, results: [] },
+    isFetching,
+    isError,
+    refetch
   } = useCalendarEventsQuery();
 
   // Get current month and year
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
-  // Month names
+  // Month names (translated)
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    t('calendarEvent.monthNames.january'),
+    t('calendarEvent.monthNames.february'),
+    t('calendarEvent.monthNames.march'),
+    t('calendarEvent.monthNames.april'),
+    t('calendarEvent.monthNames.may'),
+    t('calendarEvent.monthNames.june'),
+    t('calendarEvent.monthNames.july'),
+    t('calendarEvent.monthNames.august'),
+    t('calendarEvent.monthNames.september'),
+    t('calendarEvent.monthNames.october'),
+    t('calendarEvent.monthNames.november'),
+    t('calendarEvent.monthNames.december'),
   ];
 
   // Filter events by category
@@ -129,7 +141,7 @@ const PPMEventCalendar = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading calendar events...</p>
+            <p className="text-sm text-muted-foreground">{t('calendarEvent.loading')}</p>
           </div>
         </div>
       </div>
@@ -141,9 +153,9 @@ const PPMEventCalendar = () => {
     return (
       <div className="py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading calendar events</div>
+          <div className="text-red-500 text-xl">{t('calendarEvent.error')}</div>
           <Button onClick={() => refetch()} variant="outline">
-            Try Again
+            {t('common:actions.tryAgain')}
           </Button>
         </div>
       </div>
@@ -158,16 +170,16 @@ const PPMEventCalendar = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Calendar className="h-6 w-6" />
-          PPM Event Calendar
+          {t('calendarEvent.management')}
         </h1>
-        
+
         <div className="flex items-center gap-2">
           <Select value={categoryFilter} onValueChange={handleCategoryFilterChange}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by category" />
+              <SelectValue placeholder={t('calendarEvent.filter.categoryPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t('calendarEvent.filter.allCategories')}</SelectItem>
               {uniqueCategories.map(category => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
@@ -192,7 +204,7 @@ const PPMEventCalendar = () => {
               </Button>
             </div>
             <Button variant="outline" size="sm" onClick={goToToday}>
-              Today
+              {t('calendarEvent.today')}
             </Button>
           </div>
         </CardHeader>
@@ -203,7 +215,15 @@ const PPMEventCalendar = () => {
         <CardContent className="p-0">
           {/* Days of week header */}
           <div className="grid grid-cols-7 border-b">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {[
+              t('calendarEvent.weekdays.sun'),
+              t('calendarEvent.weekdays.mon'),
+              t('calendarEvent.weekdays.tue'),
+              t('calendarEvent.weekdays.wed'),
+              t('calendarEvent.weekdays.thu'),
+              t('calendarEvent.weekdays.fri'),
+              t('calendarEvent.weekdays.sat'),
+            ].map(day => (
               <div key={day} className="p-3 text-center font-medium text-gray-600 bg-gray-50">
                 {day}
               </div>
@@ -257,7 +277,7 @@ const PPMEventCalendar = () => {
                       {/* Show more indicator */}
                       {dayData.events.length > 3 && (
                         <div className="text-xs text-gray-500 mt-1">
-                          +{dayData.events.length - 3} more
+                          {t('calendarEvent.moreEvents', { count: dayData.events.length - 3 })}
                         </div>
                       )}
                     </div>
@@ -272,7 +292,7 @@ const PPMEventCalendar = () => {
       {/* Legend */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-lg">Legend</CardTitle>
+          <CardTitle className="text-lg">{t('calendarEvent.legend')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">

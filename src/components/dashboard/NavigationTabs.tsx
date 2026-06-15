@@ -4,14 +4,16 @@ interface NavigationTabsProps {
   tabs: string[];
   activeTab: string;
   onTabChange: (tab: string) => void;
+  tabLabels?: string[];
 }
 
-const NavigationTabs = ({ tabs, activeTab, onTabChange }: NavigationTabsProps) => {
+const NavigationTabs = ({ tabs, activeTab, onTabChange, tabLabels }: NavigationTabsProps) => {
   return (
     <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
       {tabs.map((tab, index) => {
         const isActive = activeTab === tab;
-        
+        const displayLabel = tabLabels?.[index] ?? tab;
+
         return (
           <button
             key={`${tab}-${index}`}
@@ -24,7 +26,7 @@ const NavigationTabs = ({ tabs, activeTab, onTabChange }: NavigationTabsProps) =
                 : 'text-gray-500 border-transparent hover:text-gray-700'
             )}
           >
-            {tab}
+            {displayLabel}
           </button>
         );
       })}

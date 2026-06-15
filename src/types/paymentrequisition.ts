@@ -15,6 +15,7 @@ export interface ResourceData {
 export interface Paymentrequisition {
     id: number;
     pay_to_detail: Vendor;
+    reviewer_detail: User | null;
     request_to_detail: User[];
     work_orders_detail: Workorder[];
     items_detail: Paymentitem[];
@@ -33,6 +34,7 @@ export interface Paymentrequisition {
     expected_payment_amount: string;
     owner: number;
     pay_to: number;
+    reviewer: number | null;
     work_orders: number[];
     request_to: number[];
     items: number[];

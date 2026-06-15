@@ -9,30 +9,32 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useAssetCategoriesQuery, useDeleteAssetCategory } from '@/hooks/assetcategory/useAssetCategoryQueries';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'type' | 'code' | 'name' | 'salvage_value_percent' | 'useful_life_year';
 type SortDirection = 'asc' | 'desc';
 
 const AssetCategoryManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assetCategoryToDelete, setAssetCategoryToDelete] = useState<string | null>(null);
-  
+
   // Filter, sorting, and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
+
   // Fetch all asset categories - we'll filter client-side
-  const { 
-    data = { count: 0, results: [] }, 
-    isLoading, 
+  const {
+    data = { count: 0, results: [] },
+    isLoading,
     isFetching,
-    isError, 
-    refetch 
+    isError,
+    refetch
   } = useAssetCategoriesQuery();
 
   // Delete asset category mutation using our custom hook
@@ -41,21 +43,21 @@ const AssetCategoryManagement = () => {
   // Client-side filtering and sorting logic
   const filteredAndSortedData = useMemo(() => {
     let results = [...(data.results || [])];
-    
+
     // Search filter (by name or code)
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(assetCategory => 
+      results = results.filter(assetCategory =>
         assetCategory.name.toLowerCase().includes(searchLower) ||
         assetCategory.code.toLowerCase().includes(searchLower)
       );
     }
-    
+
     // Sorting
     results.sort((a, b) => {
       let aValue: string | number = '';
       let bValue: string | number = '';
-      
+
       switch (sortField) {
         case 'type':
           aValue = a.type;
@@ -81,32 +83,32 @@ const AssetCategoryManagement = () => {
           aValue = a.name;
           bValue = b.name;
       }
-      
+
       // Handle numeric sorting for useful_life_year
       if (sortField === 'useful_life_year') {
         const comparison = (aValue as number) - (bValue as number);
         return sortDirection === 'asc' ? comparison : -comparison;
       }
-      
+
       // Handle string sorting for other fields
       const comparison = (aValue as string).localeCompare(bValue as string);
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-    
+
     return results;
   }, [data.results, searchValue, sortField, sortDirection]);
-  
+
   // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredAndSortedData.slice(startIndex, endIndex);
   }, [filteredAndSortedData, page, pageSize]);
-  
+
   // Calculate total pages
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
@@ -180,7 +182,7 @@ const AssetCategoryManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading asset categories...</p>
+          <p className="text-sm text-muted-foreground">{t('assetCategory.loading')}</p>
         </div>
       </div>
     );
@@ -190,9 +192,9 @@ const AssetCategoryManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading asset categories</div>
+        <div className="text-red-500 text-xl">{t('assetCategory.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('assetCategory.tryAgain')}
         </Button>
       </div>
     );
@@ -201,17 +203,17 @@ const AssetCategoryManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Asset Category Management</h1>
+        <h1 className="text-2xl font-bold">{t('assetCategory.management')}</h1>
         <Button onClick={handleAddAssetCategory}>
-          <Plus className="mr-2 h-4 w-4" /> Add Asset Category
+          <Plus className="mr-2 h-4 w-4" /> {t('assetCategory.addButton')}
         </Button>
       </div>
 
       {/* Search Controls */}
       <div className="mb-6">
-        <SearchFilter 
+        <SearchFilter
           onSearch={handleSearch}
-          placeholder="Search by name or code..."
+          placeholder={t('assetCategory.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -228,7 +230,7 @@ const AssetCategoryManagement = () => {
                     onClick={() => handleSort('type')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Type {renderSortIcon('type')}
+                    {t('assetCategory.columns.type')} {renderSortIcon('type')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -237,7 +239,7 @@ const AssetCategoryManagement = () => {
                     onClick={() => handleSort('code')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Code {renderSortIcon('code')}
+                    {t('assetCategory.columns.code')} {renderSortIcon('code')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -246,7 +248,7 @@ const AssetCategoryManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('assetCategory.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -255,7 +257,7 @@ const AssetCategoryManagement = () => {
                     onClick={() => handleSort('salvage_value_percent')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Salvage Value % {renderSortIcon('salvage_value_percent')}
+                    {t('assetCategory.columns.salvageValue')} {renderSortIcon('salvage_value_percent')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -264,17 +266,17 @@ const AssetCategoryManagement = () => {
                     onClick={() => handleSort('useful_life_year')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Useful Life (Years) {renderSortIcon('useful_life_year')}
+                    {t('assetCategory.columns.usefulLife')} {renderSortIcon('useful_life_year')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('assetCategory.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No asset categories found.
+                    {t('assetCategory.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -287,25 +289,25 @@ const AssetCategoryManagement = () => {
                     <TableCell>{assetCategory.useful_life_year} years</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleViewAssetCategory(String(assetCategory.id))}
                           className="h-8 w-8"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleEditAssetCategory(String(assetCategory.id))}
                           className="h-8 w-8"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeleteAssetCategory(String(assetCategory.id))}
                           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
@@ -318,7 +320,7 @@ const AssetCategoryManagement = () => {
               )}
             </TableBody>
           </Table>
-          
+
           {/* Pagination */}
           {totalItems > 0 && (
             <div className="p-4 border-t">
@@ -339,14 +341,14 @@ const AssetCategoryManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the asset category.
+              {t('assetCategory.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteAssetCategory}
               disabled={deleteAssetCategoryMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -354,10 +356,10 @@ const AssetCategoryManagement = () => {
               {deleteAssetCategoryMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('assetCategory.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('assetCategory.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -367,4 +369,4 @@ const AssetCategoryManagement = () => {
   );
 };
 
-export default AssetCategoryManagement; 
+export default AssetCategoryManagement;

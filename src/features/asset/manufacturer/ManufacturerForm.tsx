@@ -10,13 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useCreateManufacturer, useUpdateManufacturer } from '@/hooks/manufacturer/useManufacturerQueries';
 import { Manufacturer } from '@/types/manufacturer';
 import { Loader2, Save, X } from 'lucide-react';
-
-const manufacturerSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  is_active: z.boolean(),
-});
-
-type ManufacturerFormData = z.infer<typeof manufacturerSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 interface ManufacturerFormProps {
   manufacturer?: Manufacturer;
@@ -24,11 +18,20 @@ interface ManufacturerFormProps {
   onSuccess?: () => void;
 }
 
-export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({ 
-  manufacturer, 
-  onCancel, 
-  onSuccess 
+export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
+  manufacturer,
+  onCancel,
+  onSuccess
 }) => {
+  const { t } = useTypedTranslation('assets');
+
+  const manufacturerSchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    is_active: z.boolean(),
+  });
+
+  type ManufacturerFormData = z.infer<typeof manufacturerSchema>;
+
   const isEditing = Boolean(manufacturer);
   const createManufacturer = useCreateManufacturer();
   const updateManufacturer = useUpdateManufacturer();
@@ -81,12 +84,12 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
     <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle>
-          {isEditing ? 'Edit Manufacturer' : 'Create New Manufacturer'}
+          {isEditing ? t('manufacturer.form.editTitle') : t('manufacturer.form.createTitle')}
         </CardTitle>
         <CardDescription>
-          {isEditing 
-            ? 'Update the manufacturer information below.'
-            : 'Enter the manufacturer details below.'
+          {isEditing
+            ? t('manufacturer.form.editDesc')
+            : t('manufacturer.form.createDesc')
           }
         </CardDescription>
       </CardHeader>
@@ -94,7 +97,7 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Name Field */}
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('manufacturer.form.fields.name')}</Label>
             <Input
               id="name"
               {...register('name')}
@@ -113,7 +116,7 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
               checked={isActive}
               onCheckedChange={(checked) => setValue('is_active', checked)}
             />
-            <Label htmlFor="is_active">Active</Label>
+            <Label htmlFor="is_active">{t('manufacturer.form.fields.active')}</Label>
           </div>
 
           {/* Action Buttons */}
@@ -125,18 +128,18 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
               disabled={isLoading}
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {t('manufacturer.form.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditing ? 'Updating...' : 'Creating...'}
+                  {isEditing ? t('manufacturer.form.updating') : t('manufacturer.form.creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  {isEditing ? 'Update' : 'Create'}
+                  {isEditing ? t('manufacturer.form.update') : t('manufacturer.form.create')}
                 </>
               )}
             </Button>
@@ -145,4 +148,4 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

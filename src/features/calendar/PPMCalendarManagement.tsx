@@ -12,100 +12,90 @@ import { usePPMCalendarQuery } from '@/hooks/calendarevent/useCalendareventQueri
 import { Calendarevent } from '@/types/calendarevent';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PPMCalendarManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [frequencyUnitFilter, setFrequencyUnitFilter] = useState('all');
   const [colorFilter, setColorFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
+
   // Fetch PPM Calendar data
-  const { 
-    data = [], 
-    isFetching, 
-    isError, 
-    refetch 
+  const {
+    data = [],
+    isFetching,
+    isError,
+    refetch
   } = usePPMCalendarQuery();
 
   // Client-side filtering logic
   const filteredData = useMemo(() => {
     let results = [...(Array.isArray(data) ? data : [])];
-    
-    // Search filter - search by title or description
+
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(event => 
+      results = results.filter(event =>
         event.title.toLowerCase().includes(searchLower) ||
         event.description.toLowerCase().includes(searchLower)
       );
     }
-    
-    // Frequency unit filter
+
     if (frequencyUnitFilter && frequencyUnitFilter !== 'all') {
       results = results.filter(event => event.frequency_unit === frequencyUnitFilter);
     }
-    
-    // Color filter
+
     if (colorFilter && colorFilter !== 'all') {
       results = results.filter(event => event.color === colorFilter);
     }
-    
+
     return results;
   }, [data, searchValue, frequencyUnitFilter, colorFilter]);
-  
+
   // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, pageSize]);
-  
-  // Calculate total pages
+
   const totalEvents = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalEvents / pageSize));
-  
-  // Reset to page 1 when filters change
+
   useEffect(() => {
     setPage(1);
   }, [searchValue, frequencyUnitFilter, colorFilter]);
 
-  // Event handlers
   const handleViewEvent = (id: number) => {
     navigate(`/calendar/ppm/view/${id}`);
   };
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchValue(value);
   };
 
-  // Handle frequency unit filter
   const handleFrequencyUnitFilterChange = (value: string) => {
     setFrequencyUnitFilter(value);
   };
 
-  // Handle color filter
   const handleColorFilterChange = (value: string) => {
     setColorFilter(value);
   };
 
-  // Handle pagination
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setPage(1); // Reset to first page when changing page size
+    setPage(1);
   };
 
-  // Helper functions for date formatting
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
@@ -117,7 +107,6 @@ const PPMCalendarManagement = () => {
     });
   };
 
-  // Helper function for frequency badge styling
   const getFrequencyBadgeStyles = (unit: string) => {
     switch (unit) {
       case 'Days':
@@ -133,7 +122,6 @@ const PPMCalendarManagement = () => {
     }
   };
 
-  // Get unique values for filter options
   const uniqueFrequencyUnits = useMemo(() => {
     if (!Array.isArray(data)) return [];
     return [...new Set(data.map(event => event.frequency_unit))];
@@ -144,25 +132,23 @@ const PPMCalendarManagement = () => {
     return [...new Set(data.map(event => event.color))];
   }, [data]);
 
-  // Loading state
   if (isFetching) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading PPM calendar events...</p>
+          <p className="text-sm text-muted-foreground">{t('calendar.loading')}</p>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading PPM calendar events</div>
+        <div className="text-red-500 text-xl">{t('calendar.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('calendar.tryAgain')}
         </Button>
       </div>
     );
@@ -171,45 +157,45 @@ const PPMCalendarManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">PPM Calendar Management</h1>
+        <h1 className="text-2xl font-bold">{t('calendar.management')}</h1>
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <div className="flex-1">
-          <SearchFilter 
+          <SearchFilter
             onSearch={handleSearch}
-            placeholder="Search by title or description..."
+            placeholder={t('calendar.searchPlaceholder')}
             initialSearchValue={searchValue}
           />
         </div>
-        
+
         <div className="w-full md:w-56">
           <Select value={frequencyUnitFilter} onValueChange={handleFrequencyUnitFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by frequency unit" />
+              <SelectValue placeholder={t('calendar.filter.frequencyUnitPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Frequency Units</SelectItem>
+              <SelectItem value="all">{t('calendar.filter.allFrequencyUnits')}</SelectItem>
               {uniqueFrequencyUnits.map(unit => (
                 <SelectItem key={unit} value={unit}>{unit}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="w-full md:w-48">
           <Select value={colorFilter} onValueChange={handleColorFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by color" />
+              <SelectValue placeholder={t('calendar.filter.colorPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Colors</SelectItem>
+              <SelectItem value="all">{t('calendar.filter.allColors')}</SelectItem>
               {uniqueColors.map(color => (
                 <SelectItem key={color} value={color}>
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border border-gray-300" 
+                    <div
+                      className="w-4 h-4 rounded-full border border-gray-300"
                       style={{ backgroundColor: color }}
                     />
                     {color}
@@ -227,21 +213,21 @@ const PPMCalendarManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">ID</TableHead>
-                <TableHead className="font-medium text-gray-600">Title</TableHead>
-                <TableHead className="font-medium text-gray-600">Start</TableHead>
-                <TableHead className="font-medium text-gray-600">End</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('calendar.columns.id')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('calendar.columns.title')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('calendar.columns.start')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('calendar.columns.end')}</TableHead>
                 {/* <TableHead className="font-medium text-gray-600">Color</TableHead> */}
-                <TableHead className="font-medium text-gray-600">Frequency</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('calendar.columns.frequency')}</TableHead>
                 {/* <TableHead className="font-medium text-gray-600">Description</TableHead> */}
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('calendar.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
-                    No PPM calendar events found.
+                    {t('calendar.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -259,8 +245,8 @@ const PPMCalendarManagement = () => {
                     </TableCell>
                     {/* <TableCell>
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded-full border border-gray-300" 
+                        <div
+                          className="w-4 h-4 rounded-full border border-gray-300"
                           style={{ backgroundColor: event.color }}
                         />
                         <span className="text-sm">{event.color}</span>
@@ -279,9 +265,9 @@ const PPMCalendarManagement = () => {
                     </TableCell> */}
                     <TableCell className="text-right">
                       <div className="flex justify-end">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleViewEvent(event.id)}
                           className="h-8 w-8"
                         >
@@ -294,7 +280,7 @@ const PPMCalendarManagement = () => {
               )}
             </TableBody>
           </Table>
-          
+
           {/* Pagination */}
           {totalEvents > 0 && (
             <div className="p-4 border-t">

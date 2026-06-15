@@ -13,8 +13,9 @@ import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Unitmeasurement } from '@/types/unitmeasurement';
 import { useUnitmeasurementQuery, useCreateUnitmeasurement, useUpdateUnitmeasurement } from '@/hooks/unitmeasurement/useUnitmeasurementQueries';
 import { toast } from '@/components/ui/use-toast';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
-// Form schema definition
+// Form schema definition — no t() calls so can stay at module level
 const unitmeasurementSchema = z.object({
   code: z.string(),
   description: z.string().optional().default(""),
@@ -26,16 +27,17 @@ const unitmeasurementSchema = z.object({
 type UnitmeasurementFormValues = z.infer<typeof unitmeasurementSchema>;
 
 const UnitmeasurementForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
   const isEditMode = !!code;
-  
+
   // Collapsible section states
   const [openSections, setOpenSections] = useState({
     basic: true,
     additional: false
   });
-  
+
   // Unitmeasurement form setup
   const unitmeasurementForm = useForm<UnitmeasurementFormValues>({
     resolver: zodResolver(unitmeasurementSchema),
@@ -49,9 +51,9 @@ const UnitmeasurementForm = () => {
   });
 
   // Fetch unitmeasurement data for edit mode using our custom hook
-  const { 
-    data: unitmeasurementData, 
-    isLoading: isLoadingUnitmeasurement, 
+  const {
+    data: unitmeasurementData,
+    isLoading: isLoadingUnitmeasurement,
     isError: isUnitmeasurementError,
     error: unitmeasurementError
   } = useUnitmeasurementQuery(isEditMode ? code : undefined);
@@ -98,8 +100,8 @@ const UnitmeasurementForm = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem submitting the form",
+        title: t('unitMeasurement.form.toast.errorTitle'),
+        description: t('unitMeasurement.form.toast.submitError'),
         variant: "destructive",
       });
     }
@@ -115,7 +117,7 @@ const UnitmeasurementForm = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading unit measurement details...</p>
+            <p className="text-sm text-muted-foreground">{t('unitMeasurement.form.loading')}</p>
           </div>
         </div>
       </div>
@@ -126,12 +128,12 @@ const UnitmeasurementForm = () => {
     return (
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading unit measurement details</div>
+          <div className="text-red-500 text-xl">{t('unitMeasurement.form.error')}</div>
           <p className="text-sm text-muted-foreground mb-4">
-            {unitmeasurementError instanceof Error ? unitmeasurementError.message : 'An unknown error occurred'}
+            {unitmeasurementError instanceof Error ? unitmeasurementError.message : t('unitMeasurement.form.unknownError')}
           </p>
           <Button onClick={handleCancel} variant="outline">
-            Back to Unit Measurements
+            {t('unitMeasurement.form.backToList')}
           </Button>
         </div>
       </div>
@@ -142,16 +144,16 @@ const UnitmeasurementForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
-            aria-label="Go back"
+            aria-label={t('common:actions.back')}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Unit Measurement' : 'Create New Unit Measurement'}
+            {isEditMode ? t('unitMeasurement.form.editTitle') : t('unitMeasurement.form.createPageTitle')}
           </h1>
         </div>
       </div>
@@ -165,13 +167,13 @@ const UnitmeasurementForm = () => {
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('basic')}
             >
-              <h2 className="text-lg font-medium">Basic Information</h2>
-              {openSections.basic ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('unitMeasurement.form.sections.basic')}</h2>
+              {openSections.basic ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.basic && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,10 +182,10 @@ const UnitmeasurementForm = () => {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Code<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('unitMeasurement.form.fields.code')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter unit measurement code"
+                          <Input
+                            placeholder={t('unitMeasurement.form.placeholders.code')}
                             {...field}
                             disabled={isEditMode} // Code cannot be changed in edit mode
                           />
@@ -192,16 +194,16 @@ const UnitmeasurementForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={unitmeasurementForm.control}
                     name="symbol"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Symbol<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('unitMeasurement.form.fields.symbol')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter symbol"
+                          <Input
+                            placeholder={t('unitMeasurement.form.placeholders.symbol')}
                             {...field}
                           />
                         </FormControl>
@@ -210,56 +212,56 @@ const UnitmeasurementForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={unitmeasurementForm.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <FormLabel>{t('unitMeasurement.form.fields.type')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={t('unitMeasurement.form.placeholders.selectType')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Area">Area</SelectItem>
-                            <SelectItem value="Packing">Packing</SelectItem>
-                            <SelectItem value="Piece">Piece</SelectItem>
-                            <SelectItem value="Time">Time</SelectItem>
-                            <SelectItem value="Volume">Volume</SelectItem>
-                            <SelectItem value="Weight">Weight</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value="Area">{t('unitMeasurement.types.area')}</SelectItem>
+                            <SelectItem value="Packing">{t('unitMeasurement.types.packing')}</SelectItem>
+                            <SelectItem value="Piece">{t('unitMeasurement.types.piece')}</SelectItem>
+                            <SelectItem value="Time">{t('unitMeasurement.types.time')}</SelectItem>
+                            <SelectItem value="Volume">{t('unitMeasurement.types.volume')}</SelectItem>
+                            <SelectItem value="Weight">{t('unitMeasurement.types.weight')}</SelectItem>
+                            <SelectItem value="Other">{t('unitMeasurement.types.other')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={unitmeasurementForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
+                        <FormLabel>{t('unitMeasurement.form.fields.status')}</FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('unitMeasurement.form.placeholders.selectStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('unitMeasurement.status.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('unitMeasurement.status.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -267,16 +269,16 @@ const UnitmeasurementForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={unitmeasurementForm.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{t('unitMeasurement.form.fields.description')}</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Enter unit measurement description"
+                        <Textarea
+                          placeholder={t('unitMeasurement.form.placeholders.description')}
                           {...field}
                           className="min-h-[120px] resize-y"
                         />
@@ -289,49 +291,27 @@ const UnitmeasurementForm = () => {
             )}
           </div>
 
-          {/* Additional Information Collapsible */}
+          {/* Additional Information Collapsible — commented out in original, preserved */}
           {/* <div className="rounded-md border overflow-hidden">
-            <button
-              type="button"
-              className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
-              onClick={() => toggleSection('additional')}
-            >
-              <h2 className="text-lg font-medium">Additional Information</h2>
-              {openSections.additional ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                <ChevronDown className="h-5 w-5 text-gray-500" />
-              }
-            </button>
-            
-            {openSections.additional && (
-              <div className="p-6 space-y-6 bg-white">
-                <p className="text-sm text-muted-foreground">
-                  Unit measurements are used across the system to standardize how quantities are measured and displayed.
-                  Common examples include kg (Weight), m² (Area), L (Volume), etc.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  The code should be unique and preferably short. The symbol is what will be displayed next to quantity values.
-                </p>
-              </div>
-            )}
+            ...
           </div> */}
 
           <div className="flex justify-end gap-3 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createUnitmeasurementMutation.isPending || updateUnitmeasurementMutation.isPending}
             >
               {(createUnitmeasurementMutation.isPending || updateUnitmeasurementMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Unit Measurement' : 'Create Unit Measurement'}
+              {isEditMode ? t('unitMeasurement.form.update') : t('unitMeasurement.form.create')}
             </Button>
           </div>
         </form>

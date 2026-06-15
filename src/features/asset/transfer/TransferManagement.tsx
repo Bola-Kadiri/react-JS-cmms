@@ -1,8 +1,6 @@
 // src/features/facility/transfers/TransferManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { Helmet } from 'react-helmet-async';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,31 +9,27 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useTransfersQuery, useDeleteTransfer } from '@/hooks/transfer/useTransferQueries';
-import { useList } from '@/hooks/crud/useCrudOperations';
-import { Transfer } from '@/types/transfer';
-import { TransferQueryParams } from '@/services/transfersApi';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { format, parseISO } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const TransferManagement = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transferToDelete, setTransferToDelete] = useState<string | null>(null);
 
   const [searchValue, setSearchValue] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const {canEdit} = useFeatureAccess('transfer_form')
+  const { canEdit } = useFeatureAccess('transfer_form');
 
   const {
     data = { count: 0, results: [] },
-    isLoading,
     isFetching,
     isError,
     refetch
@@ -48,7 +42,7 @@ const TransferManagement = () => {
 
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(transfer => 
+      results = results.filter(transfer =>
         transfer.request_from_detail?.name.toLowerCase().includes(searchLower) ||
         transfer.transfer_to_detail?.name.toLowerCase().includes(searchLower) ||
         `${transfer.requested_by_detail?.first_name} ${transfer.requested_by_detail?.last_name}`.toLowerCase().includes(searchLower)
@@ -56,7 +50,7 @@ const TransferManagement = () => {
     }
 
     if (typeFilter) {
-      results = results.filter(transfer => transfer.type === typeFilter)
+      results = results.filter(transfer => transfer.type === typeFilter);
     }
 
     return results;
@@ -76,7 +70,7 @@ const TransferManagement = () => {
   }, [searchValue, typeFilter]);
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Not set';
+    if (!dateString) return t('transfer.notSet');
     try {
       return format(parseISO(dateString), 'MMM dd, yyyy');
     } catch (e) {
@@ -118,7 +112,7 @@ const TransferManagement = () => {
 
   const handleFilter = (key: string, value: string) => {
     if (key === 'type') {
-      setTypeFilter(value)
+      setTypeFilter(value);
     }
   };
 
@@ -134,10 +128,10 @@ const TransferManagement = () => {
   const filterConfig = [
     {
       key: 'type',
-      label: 'Type',
+      label: t('transfer.filterType'),
       options: [
-        { value: 'transfer', label: 'Transfer' },
-        { value: 'return', label: 'Return' },
+        { value: 'transfer', label: t('transfer.filterOptions.transfer') },
+        { value: 'return', label: t('transfer.filterOptions.return') },
       ]
     }
   ];
@@ -147,7 +141,7 @@ const TransferManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading transfers...</p>
+          <p className="text-sm text-muted-foreground">{t('transfer.loading')}</p>
         </div>
       </div>
     );
@@ -156,9 +150,9 @@ const TransferManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading transfers</div>
+        <div className="text-red-500 text-xl">{t('transfer.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('transfer.tryAgain')}
         </Button>
       </div>
     );
@@ -167,20 +161,20 @@ const TransferManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Transfer Management</h1>
+        <h1 className="text-2xl font-bold">{t('transfer.management')}</h1>
         {canEdit && (
           <Button onClick={handleAddTransfer}>
-          <Plus className="mr-2 h-4 w-4" /> Add Transfer
-        </Button>
+            <Plus className="mr-2 h-4 w-4" /> {t('transfer.addButton')}
+          </Button>
         )}
       </div>
 
       <div className="mb-6">
-        <SearchFilter 
+        <SearchFilter
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search transfers..."
+          placeholder={t('transfer.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -190,19 +184,19 @@ const TransferManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Type</TableHead>
-                <TableHead className="font-medium text-gray-600">Request From</TableHead>
-                <TableHead className="font-medium text-gray-600">Requested By</TableHead>
-                <TableHead className="font-medium text-gray-600">Transfer To</TableHead>
-                <TableHead className="font-medium text-gray-600">Required Date</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('transfer.columns.type')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('transfer.columns.requestFrom')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('transfer.columns.requestedBy')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('transfer.columns.transferTo')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('transfer.columns.requiredDate')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('transfer.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No transfers found.
+                    {t('transfer.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -210,9 +204,9 @@ const TransferManagement = () => {
                   <TableRow key={transfer.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-semibold">
                       <span className={`px-3 py-1 rounded-full text-xs ${
-                        transfer.type === 'transfer' 
+                        transfer.type === 'transfer'
                           ? 'bg-blue-100 text-blue-800 font-bold'
-                          : transfer.type === 'return' 
+                          : transfer.type === 'return'
                           ? 'bg-green-100 text-green-800 font-bold'
                           : 'bg-gray-100 text-gray-800 font-bold'
                       }`}>
@@ -221,7 +215,7 @@ const TransferManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{transfer.request_from_detail?.name || 'N/A'}</span>
+                        <span className="font-medium">{transfer.request_from_detail?.name || t('common:na')}</span>
                         <span className="text-sm text-gray-500">{transfer.request_from_detail?.location || ''}</span>
                       </div>
                     </TableCell>
@@ -235,7 +229,7 @@ const TransferManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{transfer.transfer_to_detail?.name || 'N/A'}</span>
+                        <span className="font-medium">{transfer.transfer_to_detail?.name || t('common:na')}</span>
                         <span className="text-sm text-gray-500">{transfer.transfer_to_detail?.location || ''}</span>
                       </div>
                     </TableCell>
@@ -245,34 +239,34 @@ const TransferManagement = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end">
                         <PermissionGuard feature='transfer_form' permission='view'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleViewTransfer(String(transfer.id))}
-                          className="h-8 w-8"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewTransfer(String(transfer.id))}
+                            className="h-8 w-8"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='transfer_form' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleEditTransfer(String(transfer.id))}
-                          className="h-8 w-8"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditTransfer(String(transfer.id))}
+                            className="h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='transfer_form' permission='edit'>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteTransfer(String(transfer.id))}
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteTransfer(String(transfer.id))}
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </PermissionGuard>
                       </div>
                     </TableCell>
@@ -300,14 +294,12 @@ const TransferManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the transfer.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t('transfer.delete.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('transfer.delete.description')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('transfer.delete.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteTransfer}
               disabled={deleteTransferMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -315,10 +307,10 @@ const TransferManagement = () => {
               {deleteTransferMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('transfer.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('transfer.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

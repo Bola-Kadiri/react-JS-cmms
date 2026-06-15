@@ -6,18 +6,20 @@ import { Separator } from '@/components/ui/separator';
 import { useModel } from '@/hooks/model/useModelQueries';
 import { useAssetSubcategoriesQuery } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
 import { useManufacturers } from '@/hooks/manufacturer/useManufacturerQueries';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
   Package,
   AlertTriangle
 } from 'lucide-react';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 export const ModelDetailView: React.FC = () => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
   const { data: model, isLoading, error } = useModel(id || '');
   const { data: subcategoriesResponse } = useAssetSubcategoriesQuery();
   const { data: manufacturersResponse } = useManufacturers();
@@ -25,7 +27,6 @@ export const ModelDetailView: React.FC = () => {
   const subcategories = subcategoriesResponse?.results || [];
   const manufacturers = manufacturersResponse?.results || [];
 
-  // Get subcategory and manufacturer names
   const getSubcategoryName = (subcategoryId: number) => {
     const subcategory = subcategories.find(s => s.id === subcategoryId);
     return subcategory?.name || 'Unknown';
@@ -41,7 +42,7 @@ export const ModelDetailView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">Loading model details...</p>
+          <p className="text-gray-500">{t('model.detail.loading')}</p>
         </div>
       </div>
     );
@@ -52,13 +53,13 @@ export const ModelDetailView: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Model Not Found</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('model.detail.notFound')}</h2>
           <p className="text-gray-500 mb-4">
-            The model you're looking for doesn't exist or has been deleted.
+            {t('model.detail.notFoundDesc')}
           </p>
           <Button onClick={() => navigate('/dashboard/asset/inventory-reference/models')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Models
+            {t('model.detail.backToList')}
           </Button>
         </div>
       </div>
@@ -75,14 +76,14 @@ export const ModelDetailView: React.FC = () => {
             onClick={() => navigate('/dashboard/asset/inventory-reference/models')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t('model.detail.backButton')}
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center">
               <Package className="h-6 w-6 mr-2" />
               {model.name}
             </h1>
-            <p className="text-gray-500">Model Details</p>
+            <p className="text-gray-500">{t('model.detail.subtitle')}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -90,7 +91,7 @@ export const ModelDetailView: React.FC = () => {
             onClick={() => navigate(`/dashboard/asset/inventory-reference/models/${model.id}/edit`)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            Edit
+            {t('model.detail.editButton')}
           </Button>
         </div>
       </div>
@@ -100,33 +101,33 @@ export const ModelDetailView: React.FC = () => {
         {/* Basic Information */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t('model.detail.cards.basicInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">ID</label>
+                <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.id')}</label>
                 <p className="text-lg font-semibold">{model.id}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Code</label>
+                <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.code')}</label>
                 <p className="text-lg font-semibold">{model.code}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Name</label>
+                <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.name')}</label>
                 <p className="text-lg font-semibold">{model.name}</p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Subcategory</label>
+                <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.subcategory')}</label>
                 <p className="text-lg font-semibold">{getSubcategoryName(model.subcategory)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Manufacturer</label>
+                <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.manufacturer')}</label>
                 <p className="text-lg font-semibold">{getManufacturerName(model.manufacturer)}</p>
               </div>
             </div>
@@ -136,19 +137,19 @@ export const ModelDetailView: React.FC = () => {
         {/* Related Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Related Information</CardTitle>
+            <CardTitle>{t('model.detail.cards.relatedInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-500">Asset Subcategory</label>
+              <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.assetSubcategory')}</label>
               <div className="mt-1 p-2 bg-gray-50 rounded">
                 <p className="font-medium">{getSubcategoryName(model.subcategory)}</p>
                 <p className="text-sm text-gray-600">ID: {model.subcategory}</p>
               </div>
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium text-gray-500">Manufacturer</label>
+              <label className="text-sm font-medium text-gray-500">{t('model.detail.fields.manufacturer')}</label>
               <div className="mt-1 p-2 bg-gray-50 rounded">
                 <p className="font-medium">{getManufacturerName(model.manufacturer)}</p>
                 <p className="text-sm text-gray-600">ID: {model.manufacturer}</p>
@@ -161,7 +162,7 @@ export const ModelDetailView: React.FC = () => {
       {/* Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Actions</CardTitle>
+          <CardTitle>{t('model.detail.cards.actionsCard')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex space-x-2">
@@ -169,18 +170,18 @@ export const ModelDetailView: React.FC = () => {
               onClick={() => navigate(`/dashboard/asset/inventory-reference/models/${model.id}/edit`)}
             >
               <Edit className="h-4 w-4 mr-2" />
-              Edit Model
+              {t('model.detail.actions.edit')}
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/dashboard/asset/inventory-reference/models')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to List
+              {t('model.detail.actions.backToList')}
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-}; 
+};

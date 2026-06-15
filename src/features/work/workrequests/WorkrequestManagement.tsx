@@ -17,8 +17,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WorkrequestManagement = () => {
+  const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -86,9 +88,25 @@ const WorkrequestManagement = () => {
   // Delete workrequest mutation using our custom hook
   const deleteWorkrequestMutation = useDeleteWorkrequest();
 
+  // Isolate records to the current user's assignments (PROCUREMENT is already server-scoped)
+  const userIsolatedResults = useMemo(() => {
+    if (!user || isProcurementUser) return data.results || [];
+    const roleUpper = (user.role || '').toUpperCase();
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return data.results || [];
+    const userId = Number(user.id);
+    return (data.results || []).filter(req => {
+      switch (roleUpper) {
+        case 'REQUESTER': return req.requester === userId;
+        case 'REVIEWER': return req.reviewers?.includes(userId);
+        case 'APPROVER': return req.approver === userId;
+        default: return true;
+      }
+    });
+  }, [data.results, user, isProcurementUser]);
+
   // Client-side filtering logic
   const filteredData = useMemo(() => {
-    let results = [...(data.results || [])];
+    let results = [...userIsolatedResults];
 
     // Apply URL-based filters first
     if (urlApprovalStatus) {
@@ -166,7 +184,7 @@ const WorkrequestManagement = () => {
     }
 
     return results;
-  }, [data.results, searchValue, typeFilter, isProcurementUser, urlApprovalStatus, urlDueStatus, urlIsReviewed, urlApprovalStatusPo]);
+  }, [userIsolatedResults, searchValue, typeFilter, isProcurementUser, urlApprovalStatus, urlDueStatus, urlIsReviewed, urlApprovalStatusPo]);
 
   // Client-side pagination
   const paginatedData = useMemo(() => {
@@ -251,7 +269,7 @@ const WorkrequestManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-muted-foreground">Loading workrequests...</p>
+          <p className="text-sm text-muted-foreground">{t('workRequest.loading')}</p>
         </div>
       </div>
     );
@@ -261,9 +279,9 @@ const WorkrequestManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading workrequests</div>
+        <div className="text-red-500 text-xl">{t('workRequest.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -274,12 +292,12 @@ const WorkrequestManagement = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isProcurementUser ? 'Procurement Work Requests' : 'Work Request Management'}
+            {isProcurementUser ? t('workRequest.procurementTitle') : t('workRequest.management')}
           </h1>
           <p className="text-gray-600 mt-2">
             {isProcurementUser
-              ? 'Manage procurement details for assigned work requests'
-              : 'Manage and track all work requests and procurement orders'
+              ? t('workRequest.procurementDescription')
+              : t('workRequest.description')
             }
           </p>
         </div>
@@ -291,7 +309,7 @@ const WorkrequestManagement = () => {
         <PermissionGuard feature='work_request' permission='view'>
           <Button onClick={handleAddWorkrequest}  className="bg-green-600 hover:bg-green-700 text-white px-6">
             <Plus className="mr-2 h-4 w-4" />
-            Add Workrequest
+            {t('workRequest.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -304,8 +322,8 @@ const WorkrequestManagement = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder={isProcurementUser
-                  ? "Search by work request number, title, description, requester, or status..."
-                  : "Search by type, category, facility, asset, department, or description..."
+                  ? t('workRequest.procurementSearchPlaceholder')
+                  : t('workRequest.searchPlaceholder')
                 }
                 value={searchValue}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -318,12 +336,12 @@ const WorkrequestManagement = () => {
             <div className="flex gap-4">
               <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
                 <SelectTrigger className="w-48 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500">
-                  <SelectValue placeholder="Filter by type" />
+                  <SelectValue placeholder={t('common:filter.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Work">Work</SelectItem>
-                  <SelectItem value="Procurement">Procurement</SelectItem>
+                  <SelectItem value="all">{t('workRequest.types.allTypes')}</SelectItem>
+                  <SelectItem value="Work">{t('workRequest.types.work')}</SelectItem>
+                  <SelectItem value="Procurement">{t('workRequest.types.procurement')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -333,7 +351,7 @@ const WorkrequestManagement = () => {
         {/* Results summary */}
         <div className="flex justify-between items-center">
           <p className="text-sm text-gray-600">
-            Showing {paginatedData.length} of {totalWorkrequests} work requests
+            {t('workRequest.showing', { count: paginatedData.length, total: totalWorkrequests })}
           </p>
 
           {(searchValue || (!isProcurementUser && typeFilter !== 'all')) && (
@@ -348,7 +366,7 @@ const WorkrequestManagement = () => {
               }}
               className="text-green-600 border-green-200 hover:bg-green-50"
             >
-              Clear Filters
+              {t('common:actions.clearFilters')}
             </Button>
           )}
         </div>
@@ -360,14 +378,14 @@ const WorkrequestManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-green-50 border-b border-green-100">
-                <TableHead className="font-semibold text-green-800 py-4">Type</TableHead>
-                <TableHead className="font-semibold text-green-800">Category</TableHead>
-                <TableHead className="font-semibold text-green-800">Facility</TableHead>
-                <TableHead className="font-semibold text-green-800">Asset</TableHead>
-                <TableHead className="font-semibold text-green-800">Status</TableHead>
+                <TableHead className="font-semibold text-green-800 py-4">{t('workRequest.columns.type')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workRequest.columns.category')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workRequest.columns.facility')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workRequest.columns.asset')}</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workRequest.columns.status')}</TableHead>
                 {/* <TableHead className="font-semibold text-green-800">Status</TableHead> */}
-                <TableHead className="font-semibold text-green-800">Due Status</TableHead>
-                <TableHead className="font-semibold text-green-800 text-right">Actions</TableHead>
+                <TableHead className="font-semibold text-green-800">{t('workRequest.columns.dueStatus')}</TableHead>
+                <TableHead className="font-semibold text-green-800 text-right">{t('workRequest.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -376,11 +394,11 @@ const WorkrequestManagement = () => {
                   <TableCell colSpan={7} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <Search className="h-8 w-8 text-gray-400" />
-                      <p className="text-gray-500 font-medium">No work requests found</p>
+                      <p className="text-gray-500 font-medium">{t('workRequest.noItems')}</p>
                       <p className="text-sm text-gray-400">
                         {searchValue || typeFilter !== 'all'
-                          ? 'Try adjusting your search criteria'
-                          : 'Create your first work request to get started'
+                          ? t('common:table.adjustSearch')
+                          : t('common:table.createFirst')
                         }
                       </p>
                     </div>
@@ -396,7 +414,7 @@ const WorkrequestManagement = () => {
                     </TableCell>
                     <TableCell className="font-medium">
                       <div>
-                        <p className="font-medium text-gray-900">{workrequest.category_detail?.code || '-'}</p>
+                        <p className="font-medium text-gray-900">{workrequest.category_detail?.code || t('workRequest.dash')}</p>
                         {workrequest.subcategory_detail?.title && (
                           <p className="text-xs text-gray-500">{workrequest.subcategory_detail.title}</p>
                         )}
@@ -404,7 +422,7 @@ const WorkrequestManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-gray-900">{workrequest.facility_detail?.name || '-'}</p>
+                        <p className="font-medium text-gray-900">{workrequest.facility_detail?.name || t('workRequest.dash')}</p>
                         {workrequest.facility_detail?.code && (
                           <p className="text-xs text-gray-500">{workrequest.facility_detail.code}</p>
                         )}
@@ -412,7 +430,7 @@ const WorkrequestManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-gray-900">{workrequest.asset_detail?.asset_name || '-'}</p>
+                        <p className="font-medium text-gray-900">{workrequest.asset_detail?.asset_name || t('workRequest.dash')}</p>
                         {workrequest.asset_detail?.asset_type && (
                           <p className="text-xs text-gray-500">{workrequest.asset_detail.asset_type}</p>
                         )}
@@ -420,12 +438,12 @@ const WorkrequestManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-gray-900">{workrequest?.approval_status || '-'}</p>
+                        <p className="font-medium text-gray-900">{workrequest?.approval_status || t('workRequest.dash')}</p>
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px]">
                       <p className="font-medium text-gray-900" title={workrequest?.due_status}>
-                        {workrequest?.due_status || 'No due status'}
+                        {workrequest?.due_status || t('workRequest.noDueStatus')}
                       </p>
                     </TableCell>
                     <TableCell className="text-right">
@@ -436,7 +454,7 @@ const WorkrequestManagement = () => {
                             size="icon"
                             onClick={() => handleViewWorkrequest(String(workrequest.slug))}
                             className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100"
-                            title="View details"
+                            title={t('workRequest.tooltips.viewDetails')}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -447,7 +465,7 @@ const WorkrequestManagement = () => {
                             size="icon"
                             onClick={() => handleEditWorkrequest(String(workrequest.slug))}
                             className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                            title="Edit request"
+                            title={t('workRequest.tooltips.editRequest')}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -458,7 +476,7 @@ const WorkrequestManagement = () => {
                             size="icon"
                             onClick={() => handleDeleteWorkrequest(String(workrequest.slug))}
                             className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                            title="Delete request"
+                            title={t('workRequest.tooltips.deleteRequest')}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -491,13 +509,13 @@ const WorkrequestManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">Delete Work Request</AlertDialogTitle>
+            <AlertDialogTitle className="text-red-600">{t('workRequest.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the work request and remove all associated data.
+              {t('workRequest.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-300">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-gray-300">{t('workRequest.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteWorkrequest}
               disabled={deleteWorkrequestMutation.isPending}
@@ -506,10 +524,10 @@ const WorkrequestManagement = () => {
               {deleteWorkrequestMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete Request'
+                t('workRequest.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

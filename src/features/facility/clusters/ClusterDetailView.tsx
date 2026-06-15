@@ -2,39 +2,39 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  MapPin, 
-  Globe, 
-  User, 
-  Calendar, 
-  Clock, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
+  MapPin,
+  Globe,
+  Calendar,
+  Clock,
   Hash,
   Sparkles,
   Crown,
-  Building2,
   Network
 } from 'lucide-react';
 import { useClusterQuery } from '@/hooks/cluster/useClusterQueries';
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { User as UserType } from '@/types/user';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ClusterDetailView = () => {
+  const { t } = useTypedTranslation('facility');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Using our custom hook instead of direct query
-  const { 
-    data: cluster, 
-    isLoading, 
+  const {
+    data: cluster,
+    isLoading,
     isError,
-    error 
+    error
   } = useClusterQuery(id);
 
   // Get users to resolve manager name
-  const { 
+  const {
     data: users = []
   } = useList<UserType>('users', 'accounts/api/users/');
 
@@ -51,7 +51,7 @@ const ClusterDetailView = () => {
   // Get manager name helper function
   const getManagerName = (managerId: number) => {
     const manager = users.find(user => user.id === managerId);
-    return manager ? `${manager.first_name} ${manager.last_name}` : 'Unknown Manager';
+    return manager ? `${manager.first_name} ${manager.last_name}` : t('cluster.unknownManager');
   };
 
   // Get manager initials
@@ -98,8 +98,8 @@ const ClusterDetailView = () => {
             <div className="absolute inset-0 h-12 w-12 animate-pulse bg-primary/10 rounded-full"></div>
           </div>
           <div className="text-center">
-            <p className="text-lg font-medium text-foreground">Loading cluster details</p>
-            <p className="text-sm text-muted-foreground">Please wait while we fetch the information...</p>
+            <p className="text-lg font-medium text-foreground">{t('cluster.detail.loading')}</p>
+            <p className="text-sm text-muted-foreground">{t('cluster.detail.loadingSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -114,14 +114,14 @@ const ClusterDetailView = () => {
             <Network className="h-8 w-8 text-destructive" />
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-destructive mb-2">Error loading cluster</h3>
+            <h3 className="text-xl font-semibold text-destructive mb-2">{t('cluster.detail.error')}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {error instanceof Error ? error.message : 'Something went wrong while loading the cluster details'}
+              {error instanceof Error ? error.message : t('cluster.detail.errorFallback')}
             </p>
           </div>
           <Button onClick={handleBack} variant="outline" className="w-full">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Clusters
+            {t('cluster.detail.backButton')}
           </Button>
         </div>
       </div>
@@ -136,14 +136,14 @@ const ClusterDetailView = () => {
             <Network className="h-8 w-8 text-amber-600" />
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-amber-700 mb-2">Cluster not found</h3>
+            <h3 className="text-xl font-semibold text-amber-700 mb-2">{t('cluster.detail.notFound')}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              The cluster you're looking for doesn't exist or may have been removed.
+              {t('cluster.detail.notFoundMessage')}
             </p>
           </div>
           <Button onClick={handleBack} variant="outline" className="w-full">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Clusters
+            {t('cluster.detail.backButton')}
           </Button>
         </div>
       </div>
@@ -157,9 +157,9 @@ const ClusterDetailView = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleBack}
                 className="h-10 w-10 rounded-full hover:bg-secondary transition-colors"
               >
@@ -167,17 +167,17 @@ const ClusterDetailView = () => {
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">
-                  Cluster Details
+                  {t('cluster.detail.title')}
                 </h1>
-                <p className="text-sm text-muted-foreground">Manage and view cluster information</p>
+                <p className="text-sm text-muted-foreground">{t('cluster.detail.subtitle')}</p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={handleEdit}
               className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              <Edit className="mr-2 h-4 w-4" /> 
-              Edit Cluster
+              <Edit className="mr-2 h-4 w-4" />
+              {t('cluster.detail.editButton')}
             </Button>
           </div>
         </div>
@@ -209,7 +209,7 @@ const ClusterDetailView = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
-                    <span>Cluster ID: {cluster.id}</span>
+                    <span>{t('cluster.detail.clusterId')} {cluster.id}</span>
                   </div>
                 </div>
               </div>
@@ -226,7 +226,7 @@ const ClusterDetailView = () => {
                 <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center border border-blue-200">
                   <Globe className="h-4 w-4 text-blue-600" />
                 </div>
-                Region Info
+                {t('cluster.detail.regionInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -234,7 +234,7 @@ const ClusterDetailView = () => {
                 <p className="text-lg font-semibold text-foreground">{cluster.region_detail?.name}</p>
                 <p className="text-sm text-muted-foreground">{cluster.region_detail?.country}</p>
                 <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full w-fit border border-blue-200">
-                  Region ID: {cluster.region}
+                  {t('cluster.detail.regionId')} {cluster.region}
                 </div>
               </div>
             </CardContent>
@@ -247,7 +247,7 @@ const ClusterDetailView = () => {
                 <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
                   <Crown className="h-4 w-4 text-primary" />
                 </div>
-                Cluster Manager
+                {t('cluster.detail.manager')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -257,7 +257,7 @@ const ClusterDetailView = () => {
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-foreground">{getManagerName(cluster.select_manager)}</p>
-                  <p className="text-sm text-muted-foreground">Cluster Manager</p>
+                  <p className="text-sm text-muted-foreground">{t('cluster.detail.managerRole')}</p>
                 </div>
               </div>
             </CardContent>
@@ -270,7 +270,7 @@ const ClusterDetailView = () => {
                 <div className="h-8 w-8 bg-emerald-100 rounded-lg flex items-center justify-center border border-emerald-200">
                   <Calendar className="h-4 w-4 text-emerald-600" />
                 </div>
-                Created
+                {t('cluster.detail.created')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -279,7 +279,7 @@ const ClusterDetailView = () => {
                 <p className="text-sm text-muted-foreground">{formatTime(cluster.created_at)}</p>
                 <div className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full w-fit border border-emerald-200">
                   <Clock className="h-3 w-3" />
-                  {getDaysSinceCreation(cluster.created_at)} days ago
+                  {getDaysSinceCreation(cluster.created_at)} {t('cluster.detail.daysAgo')}
                 </div>
               </div>
             </CardContent>
@@ -292,7 +292,7 @@ const ClusterDetailView = () => {
                 <div className="h-8 w-8 bg-amber-100 rounded-lg flex items-center justify-center border border-amber-200">
                   <Clock className="h-4 w-4 text-amber-600" />
                 </div>
-                Last Updated
+                {t('cluster.detail.lastUpdated')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -300,7 +300,7 @@ const ClusterDetailView = () => {
                 <p className="text-lg font-semibold text-foreground">{formatDate(cluster.updated_at)}</p>
                 <p className="text-sm text-muted-foreground">{formatTime(cluster.updated_at)}</p>
                 <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full w-fit border border-amber-200">
-                  Recently modified
+                  {t('cluster.detail.recentlyModified')}
                 </div>
               </div>
             </CardContent>
@@ -314,18 +314,20 @@ const ClusterDetailView = () => {
               <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
                 <Network className="h-4 w-4 text-primary" />
               </div>
-              Cluster Overview
+              {t('cluster.detail.overview')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 rounded-xl border border-primary/10">
               <p className="text-lg leading-relaxed text-foreground">
-                <span className="font-bold text-primary">{cluster.name}</span> is a vital cluster operating within the{' '}
-                <span className="font-semibold text-foreground">{cluster.region_detail?.name}</span> region in{' '}
-                <span className="font-semibold text-foreground">{cluster.region_detail?.country}</span>. Under the capable leadership of{' '}
-                <span className="font-semibold text-primary">{getManagerName(cluster.select_manager)}</span>, this cluster 
-                has been operational since <span className="font-medium">{formatDate(cluster.created_at)}</span>. The cluster's information was last updated on{' '}
-                <span className="font-medium">{formatDate(cluster.updated_at)}</span>.
+                {t('cluster.detail.summary', {
+                  name: cluster.name,
+                  region: cluster.region_detail?.name,
+                  country: cluster.region_detail?.country,
+                  manager: getManagerName(cluster.select_manager),
+                  createdAt: formatDate(cluster.created_at),
+                  updatedAt: formatDate(cluster.updated_at),
+                })}
               </p>
             </div>
           </CardContent>

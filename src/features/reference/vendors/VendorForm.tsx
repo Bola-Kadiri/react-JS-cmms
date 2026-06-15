@@ -13,34 +13,34 @@ import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Vendor } from '@/types/vendor';
 import { useVendorQuery, useCreateVendor, useUpdateVendor } from '@/hooks/vendor/useVendorQueries';
 import { toast } from '@/components/ui/use-toast';
-
-// Form schema definition
-const vendorSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.enum(['Individual', 'Company']),
-  phone: z.string().min(1, 'Phone number is required'),
-  email: z.string().email('Invalid email address'),
-  account_name: z.string().min(1, 'Account name is required'),
-  bank: z.string().min(1, 'Bank name is required'),
-  account_number: z.string().min(1, 'Account number is required'),
-  currency: z.enum(['NGN', 'USD', 'EUR', 'GBP']),
-  status: z.enum(['Active', 'Inactive']),
-});
-
-type VendorFormValues = z.infer<typeof vendorSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const VendorForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
-  
-  // Collapsible section states
+
+  // Schema defined inside component so validation messages can use t()
+  const vendorSchema = z.object({
+    name: z.string().min(1, t('vendor.form.validation.nameRequired')),
+    type: z.enum(['Individual', 'Company']),
+    phone: z.string().min(1, t('vendor.form.validation.phoneRequired')),
+    email: z.string().email(t('vendor.form.validation.invalidEmail')),
+    account_name: z.string().min(1, t('vendor.form.validation.accountNameRequired')),
+    bank: z.string().min(1, t('vendor.form.validation.bankRequired')),
+    account_number: z.string().min(1, t('vendor.form.validation.accountNumberRequired')),
+    currency: z.enum(['NGN', 'USD', 'EUR', 'GBP']),
+    status: z.enum(['Active', 'Inactive']),
+  });
+
+  type VendorFormValues = z.infer<typeof vendorSchema>;
+
   const [openSections, setOpenSections] = useState({
     basic: true,
     banking: true
   });
-  
-  // Vendor form setup
+
   const vendorForm = useForm<VendorFormValues>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
@@ -56,30 +56,22 @@ const VendorForm = () => {
     }
   });
 
-  // Fetch vendor data for edit mode using our custom hook
-  const { 
-    data: vendorData, 
-    isLoading: isLoadingVendor, 
+  const {
+    data: vendorData,
+    isLoading: isLoadingVendor,
     isError: isVendorError,
     error: vendorError
   } = useVendorQuery(isEditMode ? slug : undefined);
 
-  // Use our custom mutation hooks
   const createVendorMutation = useCreateVendor();
   const updateVendorMutation = useUpdateVendor(slug);
 
-  // Toggle section visibility
   const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Handle vendor data loading
   useEffect(() => {
     if (vendorData && isEditMode) {
-      // Reset the form with vendor data
       vendorForm.reset({
         name: vendorData.name,
         type: vendorData.type,
@@ -110,16 +102,14 @@ const VendorForm = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem submitting the form",
+        title: t('vendor.form.toast.errorTitle'),
+        description: t('vendor.form.toast.submitError'),
         variant: "destructive",
       });
     }
   };
 
-  const handleCancel = () => {
-    navigate('/dashboard/accounts/vendors');
-  };
+  const handleCancel = () => navigate('/dashboard/accounts/vendors');
 
   if (isEditMode && isLoadingVendor) {
     return (
@@ -127,7 +117,7 @@ const VendorForm = () => {
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading vendor details...</p>
+            <p className="text-sm text-muted-foreground">{t('vendor.form.loading')}</p>
           </div>
         </div>
       </div>
@@ -138,12 +128,12 @@ const VendorForm = () => {
     return (
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="text-red-500 text-xl">Error loading vendor details</div>
+          <div className="text-red-500 text-xl">{t('vendor.form.error')}</div>
           <p className="text-sm text-muted-foreground mb-4">
-            {vendorError instanceof Error ? vendorError.message : 'An unknown error occurred'}
+            {vendorError instanceof Error ? vendorError.message : t('vendor.form.unknownError')}
           </p>
           <Button onClick={handleCancel} variant="outline">
-            Back to Vendors
+            {t('vendor.form.backToList')}
           </Button>
         </div>
       </div>
@@ -154,36 +144,36 @@ const VendorForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
             aria-label="Go back"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Vendor' : 'Create New Vendor'}
+            {isEditMode ? t('vendor.form.editTitle') : t('vendor.form.createPageTitle')}
           </h1>
         </div>
       </div>
 
       <Form {...vendorForm}>
         <form onSubmit={vendorForm.handleSubmit(onSubmitVendor)} className="space-y-6">
-          {/* First Collapsible: Basic Information */}
+          {/* Basic Information */}
           <div className="rounded-md border overflow-hidden">
             <button
               type="button"
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('basic')}
             >
-              <h2 className="text-lg font-medium">Basic Information</h2>
-              {openSections.basic ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('vendor.form.sections.basic')}</h2>
+              {openSections.basic ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.basic && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,10 +182,10 @@ const VendorForm = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.name')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter vendor name"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.name')}
                             {...field}
                           />
                         </FormControl>
@@ -203,25 +193,25 @@ const VendorForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={vendorForm.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <FormLabel>{t('vendor.form.fields.type')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select vendor type" />
+                              <SelectValue placeholder={t('vendor.form.fields.selectType')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Individual">Individual</SelectItem>
-                            <SelectItem value="Company">Company</SelectItem>
+                            <SelectItem value="Individual">{t('vendor.types.individual')}</SelectItem>
+                            <SelectItem value="Company">{t('vendor.types.company')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -229,17 +219,17 @@ const VendorForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={vendorForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.email')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter email address"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.email')}
                             type="email"
                             {...field}
                           />
@@ -248,16 +238,16 @@ const VendorForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={vendorForm.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.phone')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter phone number"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.phone')}
                             {...field}
                           />
                         </FormControl>
@@ -266,25 +256,25 @@ const VendorForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={vendorForm.control}
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select 
+                      <FormLabel>{t('vendor.form.fields.status')}</FormLabel>
+                      <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder={t('vendor.form.fields.selectStatus')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
+                          <SelectItem value="Active">{t('vendor.status.active')}</SelectItem>
+                          <SelectItem value="Inactive">{t('vendor.status.inactive')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -294,21 +284,21 @@ const VendorForm = () => {
               </div>
             )}
           </div>
-          
-          {/* Second Collapsible: Banking Information */}
+
+          {/* Banking Information */}
           <div className="rounded-md border overflow-hidden">
             <button
               type="button"
               className="flex justify-between items-center w-full p-4 bg-gray-50 text-left"
               onClick={() => toggleSection('banking')}
             >
-              <h2 className="text-lg font-medium">Banking Information</h2>
-              {openSections.banking ? 
-                <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+              <h2 className="text-lg font-medium">{t('vendor.form.sections.banking')}</h2>
+              {openSections.banking ?
+                <ChevronUp className="h-5 w-5 text-gray-500" /> :
                 <ChevronDown className="h-5 w-5 text-gray-500" />
               }
             </button>
-            
+
             {openSections.banking && (
               <div className="p-6 space-y-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -317,10 +307,10 @@ const VendorForm = () => {
                     name="account_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Name<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.accountName')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter account name"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.accountName')}
                             {...field}
                           />
                         </FormControl>
@@ -328,16 +318,16 @@ const VendorForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={vendorForm.control}
                     name="bank"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bank<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.bank')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter bank name"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.bank')}
                             {...field}
                           />
                         </FormControl>
@@ -346,17 +336,17 @@ const VendorForm = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={vendorForm.control}
                     name="account_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Number<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormLabel>{t('vendor.form.fields.accountNumber')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Enter account number"
+                          <Input
+                            placeholder={t('vendor.form.placeholders.accountNumber')}
                             {...field}
                           />
                         </FormControl>
@@ -364,27 +354,27 @@ const VendorForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={vendorForm.control}
                     name="currency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Currency<span className="text-red-500 ml-1">*</span></FormLabel>
-                        <Select 
+                        <FormLabel>{t('vendor.form.fields.currency')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select currency" />
+                              <SelectValue placeholder={t('vendor.form.fields.selectCurrency')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="NGN">Nigerian Naira (NGN)</SelectItem>
-                            <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                            <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                            <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+                            <SelectItem value="NGN">{t('vendor.form.currencies.ngn')}</SelectItem>
+                            <SelectItem value="USD">{t('vendor.form.currencies.usd')}</SelectItem>
+                            <SelectItem value="EUR">{t('vendor.form.currencies.eur')}</SelectItem>
+                            <SelectItem value="GBP">{t('vendor.form.currencies.gbp')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -397,27 +387,27 @@ const VendorForm = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               disabled={createVendorMutation.isPending || updateVendorMutation.isPending}
             >
               {(createVendorMutation.isPending || updateVendorMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update Vendor' : 'Create Vendor'}
+              {isEditMode ? t('vendor.form.update') : t('vendor.form.create')}
             </Button>
           </div>
         </form>
       </Form>
     </div>
-  )
-}
+  );
+};
 
 export default VendorForm;

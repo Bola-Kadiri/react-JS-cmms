@@ -17,8 +17,10 @@ import { PersonnelQueryParams } from '@/services/personnelsApi';
 import { Facility } from '@/types/facility';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const PersonnelManagement = () => {
+  const { t } = useTypedTranslation('accounts');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -123,12 +125,10 @@ const PersonnelManagement = () => {
     }
   };
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchValue(value);
   };
 
-  // Handle filter
   const handleFilter = (key: string, value: string) => {
     if (key === 'status') {
       setStatusFilter(value);
@@ -137,14 +137,13 @@ const PersonnelManagement = () => {
     }
   };
 
-  // Handle pagination
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setPage(1); // Reset to first page when changing page size
+    setPage(1);
   };
 
   // Prepare filter options for facilities
@@ -157,15 +156,15 @@ const PersonnelManagement = () => {
   const filterConfig = [
     {
       key: 'status',
-      label: 'Status',
+      label: t('personnel.filters.status'),
       options: [
-        { value: 'Active', label: 'Active' },
-        { value: 'Inactive', label: 'Inactive' }
+        { value: 'Active', label: t('personnel.status.active') },
+        { value: 'Inactive', label: t('personnel.status.inactive') }
       ]
     },
     {
       key: 'facility',
-      label: 'Facility',
+      label: t('personnel.filters.facility'),
       options: facilityOptions
     }
   ];
@@ -176,7 +175,7 @@ const PersonnelManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading personnels...</p>
+          <p className="text-sm text-muted-foreground">{t('personnel.loading')}</p>
         </div>
       </div>
     );
@@ -186,9 +185,9 @@ const PersonnelManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading personnels</div>
+        <div className="text-red-500 text-xl">{t('personnel.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -197,16 +196,11 @@ const PersonnelManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Personnel Management</h1>
-        {/* {canEdit && (
-          <Button onClick={handleAddPersonnel}>
-          <Plus className="mr-2 h-4 w-4" /> Add Personnel
-        </Button>
-        )} */}
+        <h1 className="text-2xl font-bold">{t('personnel.management')}</h1>
         <PermissionGuard feature='reference' permission='view'>
           <Button onClick={handleAddPersonnel}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Personnel
+            {t('personnel.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -217,7 +211,7 @@ const PersonnelManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search personnels..."
+          placeholder={t('personnel.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -228,20 +222,20 @@ const PersonnelManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Staff Number</TableHead>
-                <TableHead className="font-medium text-gray-600">First Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Last Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Email</TableHead>
-                <TableHead className="font-medium text-gray-600">Phone</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.staffNumber')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.firstName')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.lastName')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.email')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.phone')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('personnel.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('personnel.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No personnels found.
+                    {t('personnel.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -330,13 +324,13 @@ const PersonnelManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the personnel.
+              {t('personnel.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeletePersonnel}
               disabled={deletePersonnelMutation.isPending}
@@ -345,10 +339,10 @@ const PersonnelManagement = () => {
               {deletePersonnelMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

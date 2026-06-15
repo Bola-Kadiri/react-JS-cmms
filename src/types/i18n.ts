@@ -4,19 +4,23 @@ import { TFunction } from 'i18next';
 /**
  * Define translation namespaces - must match your JSON file names exactly
  */
-export type TranslationNamespaces = 'common' | 'auth' | 'dashboard' | 'assets' | 'tables' | 'form' | 'sidebar';
+export type TranslationNamespaces = 'common' | 'auth' | 'dashboard' | 'assets' | 'tables' | 'form' | 'sidebar' | 'work' | 'procurement' | 'facility' | 'accounts';
 
 /**
  * Utility type for constructing type-safe translation keys with namespace prefix
  */
-export type TranslationKeys = 
-  | `common:${string}` 
-  | `auth:${string}` 
-  | `dashboard:${string}` 
-  | `assets:${string}` 
-  | `tables:${string}` 
+export type TranslationKeys =
+  | `common:${string}`
+  | `auth:${string}`
+  | `dashboard:${string}`
+  | `assets:${string}`
+  | `tables:${string}`
   | `form:${string}`
-  | `sidebar:${string}`;
+  | `sidebar:${string}`
+  | `work:${string}`
+  | `procurement:${string}`
+  | `facility:${string}`
+  | `accounts:${string}`;
 
 /**
  * Extended TFunction with type safety

@@ -13,11 +13,13 @@ import { Pagination } from '@/components/Pagination';
 import { useBuildingsQuery, useDeleteBuilding } from '@/hooks/building/useBuildingQueries';
 import { Building } from '@/types/building';
 import { BuildingQueryParams } from '@/services/buildingsApi';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 type SortField = 'code' | 'name' | 'facility' | 'zone' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 const BuildingManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -241,20 +243,20 @@ const BuildingManagement = () => {
   const filterConfig = [
     {
       key: 'status',
-      label: 'Status',
+      label: t('building.filter.status'),
       options: [
-        { value: 'Active', label: 'Active' },
-        { value: 'Inactive', label: 'Inactive' }
+        { value: 'Active', label: t('building.filter.statusOptions.active') },
+        { value: 'Inactive', label: t('building.filter.statusOptions.inactive') }
       ]
     },
     {
       key: 'facility',
-      label: 'Facility',
+      label: t('building.filter.facility'),
       options: facilityOptions
     },
     {
       key: 'zone',
-      label: 'Zone',
+      label: t('building.filter.zone'),
       options: zoneOptions
     }
   ];
@@ -273,7 +275,7 @@ const BuildingManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading buildings...</p>
+          <p className="text-sm text-muted-foreground">{t('building.loading')}</p>
         </div>
       </div>
     );
@@ -283,9 +285,9 @@ const BuildingManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading buildings</div>
+        <div className="text-red-500 text-xl">{t('building.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -294,9 +296,9 @@ const BuildingManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Building Management</h1>
+        <h1 className="text-2xl font-bold">{t('building.management')}</h1>
         <Button onClick={handleAddBuilding}>
-          <Plus className="mr-2 h-4 w-4" /> Add Building
+          <Plus className="mr-2 h-4 w-4" /> {t('building.add')}
         </Button>
       </div>
 
@@ -306,7 +308,7 @@ const BuildingManagement = () => {
           onSearch={handleSearch}
           onFilter={handleFilter}
           filters={filterConfig}
-          placeholder="Search buildings..."
+          placeholder={t('building.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -323,7 +325,7 @@ const BuildingManagement = () => {
                     onClick={() => handleSort('code')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Code {renderSortIcon('code')}
+                    {t('building.columns.code')} {renderSortIcon('code')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -332,7 +334,7 @@ const BuildingManagement = () => {
                     onClick={() => handleSort('name')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Name {renderSortIcon('name')}
+                    {t('building.columns.name')} {renderSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -341,7 +343,7 @@ const BuildingManagement = () => {
                     onClick={() => handleSort('facility')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Facility {renderSortIcon('facility')}
+                    {t('building.columns.facility')} {renderSortIcon('facility')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -350,7 +352,7 @@ const BuildingManagement = () => {
                     onClick={() => handleSort('zone')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Zone {renderSortIcon('zone')}
+                    {t('building.columns.zone')} {renderSortIcon('zone')}
                   </Button>
                 </TableHead>
                 <TableHead className="font-medium text-gray-600">
@@ -359,17 +361,17 @@ const BuildingManagement = () => {
                     onClick={() => handleSort('status')}
                     className="h-auto p-0 font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Status {renderSortIcon('status')}
+                    {t('building.columns.status')} {renderSortIcon('status')}
                   </Button>
                 </TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('building.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No buildings found.
+                    {t('building.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -377,8 +379,8 @@ const BuildingManagement = () => {
                   <TableRow key={building.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium text-blue-600">{building.code}</TableCell>
                     <TableCell>{building.name}</TableCell>
-                    <TableCell>{building.facility_detail?.name || 'Unknown Facility'}</TableCell>
-                    <TableCell>{building.zone_detail?.name || 'Unknown Zone'}</TableCell>
+                    <TableCell>{building.facility_detail?.name || t('building.unknownFacility')}</TableCell>
+                    <TableCell>{building.zone_detail?.name || t('building.unknownZone')}</TableCell>
                     <TableCell>
                       <span className={`px-3 py-1 rounded-full text-xs ${
                         building.status === 'Active' 
@@ -442,13 +444,13 @@ const BuildingManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the building.
+              {t('building.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('building.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDeleteBuilding}
               disabled={deleteBuildingMutation.isPending}
@@ -457,10 +459,10 @@ const BuildingManagement = () => {
               {deleteBuildingMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

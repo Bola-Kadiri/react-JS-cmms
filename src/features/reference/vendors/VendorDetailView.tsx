@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Loader2, 
-  AlertTriangle, 
-  Building, 
-  Mail, 
-  Phone, 
-  User, 
+import {
+  ArrowLeft,
+  Edit,
+  Loader2,
+  AlertTriangle,
+  Building,
+  Mail,
+  Phone,
+  User,
   CreditCard,
   Briefcase,
   Building2,
@@ -23,12 +23,13 @@ import {
 import { useVendorQuery } from '@/hooks/vendor/useVendorQueries';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const VendorDetailView = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  
-  // Using our custom hook instead of direct query
+
   const {
     data: vendor,
     isLoading,
@@ -36,17 +37,9 @@ const VendorDetailView = () => {
     error
   } = useVendorQuery(slug);
 
-  // Handle back button click
-  const handleBack = () => {
-    navigate('/dashboard/accounts/vendors');
-  };
+  const handleBack = () => navigate('/dashboard/accounts/vendors');
+  const handleEdit = () => navigate(`/dashboard/accounts/vendors/edit/${slug}`);
 
-  // Handle edit button click
-  const handleEdit = () => {
-    navigate(`/dashboard/accounts/vendors/edit/${slug}`);
-  };
-
-  // Get status badge styles
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Active':
@@ -58,7 +51,6 @@ const VendorDetailView = () => {
     }
   };
 
-  // Get vendor type badge styles
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'Company':
@@ -70,7 +62,6 @@ const VendorDetailView = () => {
     }
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'PPP');
@@ -84,7 +75,7 @@ const VendorDetailView = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading vendor details...</p>
+          <p className="text-sm text-muted-foreground">{t('vendor.detail.loading')}</p>
         </div>
       </div>
     );
@@ -94,12 +85,12 @@ const VendorDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Error loading vendor details</div>
+        <div className="text-red-500 text-xl">{t('vendor.detail.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : 'An unknown error occurred'}
+          {error instanceof Error ? error.message : t('vendor.detail.unknownError')}
         </p>
         <Button onClick={handleBack} variant="outline">
-          Back to Vendors
+          {t('vendor.detail.backToList')}
         </Button>
       </div>
     );
@@ -109,9 +100,9 @@ const VendorDetailView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-12 w-12 text-red-500" />
-        <div className="text-red-500 text-xl">Vendor not found</div>
+        <div className="text-red-500 text-xl">{t('vendor.detail.notFound')}</div>
         <Button onClick={handleBack} variant="outline">
-          Back to Vendors
+          {t('vendor.detail.backToList')}
         </Button>
       </div>
     );
@@ -131,7 +122,7 @@ const VendorDetailView = () => {
           <div>
             <h1 className="text-2xl font-bold">{vendor.name}</h1>
             <p className="text-muted-foreground text-sm">
-              Vendor {getTypeBadge(vendor.type)}
+              {t('vendor.detail.vendorLabel')} {getTypeBadge(vendor.type)}
             </p>
           </div>
         </div>
@@ -142,9 +133,9 @@ const VendorDetailView = () => {
             </div>
           </div>
           <PermissionGuard feature='reference' permission='edit'>
-          <Button onClick={handleEdit} className="bg-green-600 hover:bg-green-700">
-            <Edit className="mr-2 h-4 w-4" /> Edit Vendor
-          </Button>
+            <Button onClick={handleEdit} className="bg-green-600 hover:bg-green-700">
+              <Edit className="mr-2 h-4 w-4" /> {t('vendor.detail.editVendor')}
+            </Button>
           </PermissionGuard>
         </div>
       </div>
@@ -155,7 +146,7 @@ const VendorDetailView = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-xl flex items-center gap-2">
               <Building2 className="h-5 w-5 text-primary" />
-              Vendor Information
+              {t('vendor.detail.vendorInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -174,29 +165,17 @@ const VendorDetailView = () => {
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-gray-500" />
                     <a href={`mailto:${vendor.email}`} className="text-green-600 hover:underline">
-                      {vendor.email || 'No email provided'}
+                      {vendor.email || t('vendor.detail.noEmail')}
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-gray-500" />
                     <a href={`tel:${vendor.phone}`} className="text-green-600 hover:underline">
-                      {vendor.phone || 'No phone provided'}
+                      {vendor.phone || t('vendor.detail.noPhone')}
                     </a>
                   </div>
                 </div>
               </div>
-
-              {/* <div className="mt-6">
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="w-full" size="sm">
-                    <Mail className="h-4 w-4 mr-2" /> Email
-                  </Button>
-                  <Button variant="outline" className="w-full" size="sm">
-                    <Phone className="h-4 w-4 mr-2" /> Call
-                  </Button>
-                </div>
-              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -206,35 +185,35 @@ const VendorDetailView = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-xl flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-primary" />
-              Banking Information
+              {t('vendor.detail.bankingInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Account Name</h3>
-                <p className="text-lg font-medium">{vendor.account_name || 'Not provided'}</p>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('vendor.detail.fields.accountName')}</h3>
+                <p className="text-lg font-medium">{vendor.account_name || t('vendor.detail.notProvided')}</p>
               </div>
-              
+
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Bank</h3>
-                <p className="text-lg">{vendor.bank || 'Not provided'}</p>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('vendor.detail.fields.bank')}</h3>
+                <p className="text-lg">{vendor.bank || t('vendor.detail.notProvided')}</p>
               </div>
-              
+
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Account Number</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('vendor.detail.fields.accountNumber')}</h3>
                 <p className="text-lg font-mono">
-                  {vendor.account_number ? 
-                    <span className="bg-gray-100 px-2 py-1 rounded">{vendor.account_number}</span> : 
-                    'Not provided'}
+                  {vendor.account_number ?
+                    <span className="bg-gray-100 px-2 py-1 rounded">{vendor.account_number}</span> :
+                    t('vendor.detail.notProvided')}
                 </p>
               </div>
-              
+
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Currency</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('vendor.detail.fields.currency')}</h3>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-green-600" />
-                  <p className="text-lg">{vendor.currency || 'Not provided'}</p>
+                  <p className="text-lg">{vendor.currency || t('vendor.detail.notProvided')}</p>
                 </div>
               </div>
             </div>
@@ -245,9 +224,9 @@ const VendorDetailView = () => {
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Verified Account</h3>
+                  <h3 className="font-medium text-gray-900">{t('vendor.detail.verifiedAccount')}</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    This vendor has verified banking information and is ready to receive payments.
+                    {t('vendor.detail.verifiedAccountDesc')}
                   </p>
                 </div>
               </div>
@@ -260,22 +239,19 @@ const VendorDetailView = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-xl flex items-center gap-2">
               <Briefcase className="h-5 w-5 text-primary" />
-              Vendor Activity
+              {t('vendor.detail.activityTitle')}
             </CardTitle>
             <CardDescription>
-              Recent transactions and activities with this vendor
+              {t('vendor.detail.activityDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-8 text-center">
               <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="text-gray-500 font-medium mb-1">No Recent Activity</h3>
+              <h3 className="text-gray-500 font-medium mb-1">{t('vendor.detail.noActivity')}</h3>
               <p className="text-gray-400 text-sm max-w-md mx-auto">
-                This vendor doesn't have any recent activity or transactions in the system.
+                {t('vendor.detail.noActivityDesc')}
               </p>
-              {/* <Button variant="outline" className="mt-4">
-                Create New Transaction
-              </Button> */}
             </div>
           </CardContent>
         </Card>

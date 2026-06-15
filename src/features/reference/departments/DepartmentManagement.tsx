@@ -14,26 +14,28 @@ import { Department } from '@/types/department';
 import { DepartmentQueryParams } from '@/services/departmentsApi';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const DepartmentManagement = () => {
+  const { t } = useTypedTranslation('accounts');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState<string | null>(null);
-  
+
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
+
   const {canEdit} = useFeatureAccess('reference')
-  
+
   // Fetch all departments - we'll filter client-side
-  const { 
-    data = { count: 0, results: [] }, 
-    isFetching, 
-    isError, 
-    refetch 
+  const {
+    data = { count: 0, results: [] },
+    isFetching,
+    isError,
+    refetch
   } = useDepartmentsQuery();
 
   // Delete department mutation using our custom hook
@@ -42,29 +44,29 @@ const DepartmentManagement = () => {
   // Client-side filtering logic
   const filteredData = useMemo(() => {
     let results = [...(data.results || [])];
-    
+
     // Search filter - search by name
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
-      results = results.filter(department => 
+      results = results.filter(department =>
         department.name.toLowerCase().includes(searchLower)
       );
     }
-    
+
     return results;
   }, [data.results, searchValue]);
-  
+
   // Client-side pagination
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, pageSize]);
-  
+
   // Calculate total pages
   const totalDepartments = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalDepartments / pageSize));
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
@@ -120,7 +122,7 @@ const DepartmentManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading departments...</p>
+          <p className="text-sm text-muted-foreground">{t('department.loading')}</p>
         </div>
       </div>
     );
@@ -130,9 +132,9 @@ const DepartmentManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading departments</div>
+        <div className="text-red-500 text-xl">{t('department.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -141,16 +143,16 @@ const DepartmentManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Department Management</h1>
+        <h1 className="text-2xl font-bold">{t('department.management')}</h1>
         {/* {canEdit && (
           <Button onClick={handleAddDepartment}>
             <Plus className="mr-2 h-4 w-4" /> Add Department
           </Button>
         )} */}
-         <PermissionGuard feature='reference' permission='view'>
+        <PermissionGuard feature='reference' permission='view'>
           <Button onClick={handleAddDepartment}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Department
+            {t('department.add')}
           </Button>
         </PermissionGuard>
       </div>
@@ -158,9 +160,9 @@ const DepartmentManagement = () => {
       {/* Search Controls */}
       <div className="mb-6">
         <div className="flex-1 max-w-md">
-          <SearchFilter 
+          <SearchFilter
             onSearch={handleSearch}
-            placeholder="Search by department name..."
+            placeholder={t('department.searchPlaceholder')}
             initialSearchValue={searchValue}
           />
         </div>
@@ -172,15 +174,15 @@ const DepartmentManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Department Name</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('department.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('department.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={2} className="h-24 text-center">
-                    No departments found.
+                    {t('department.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -192,9 +194,9 @@ const DepartmentManagement = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end">
                         <PermissionGuard feature='reference' permission='view'>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleViewDepartment(department.id)}
                             className="h-8 w-8"
                           >
@@ -202,9 +204,9 @@ const DepartmentManagement = () => {
                           </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleEditDepartment(department.id)}
                             className="h-8 w-8"
                           >
@@ -212,9 +214,9 @@ const DepartmentManagement = () => {
                           </Button>
                         </PermissionGuard>
                         <PermissionGuard feature='reference' permission='edit'>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleDeleteDepartment(department.id)}
                             className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                           >
@@ -228,7 +230,7 @@ const DepartmentManagement = () => {
               )}
             </TableBody>
           </Table>
-          
+
           {/* Pagination */}
           {totalDepartments > 0 && (
             <div className="p-4 border-t">
@@ -249,14 +251,14 @@ const DepartmentManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the department.
+              {t('department.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteDepartment}
               disabled={deleteDepartmentMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -264,10 +266,10 @@ const DepartmentManagement = () => {
               {deleteDepartmentMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('common:actions.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -18,31 +18,33 @@ import { User } from '@/types/user';
 import { Facility } from '@/pages/facility/facilities/FacilityManagementPage';
 import { usePersonnelQuery, useCreatePersonnel, useUpdatePersonnel } from '@/hooks/personnel/usePersonnelQueries';
 import { Category } from '@/types/category';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const userEndpoint = 'accounts/api/users/';
 const catEndpoint = 'accounts/api/categories/';
 const facilityEndpoint = 'facility/api/api/facilities/';
 
-// Form schema definition
-const personnelSchema = z.object({
-  user: z.number(),
-  staff_number: z.string().min(1, 'Staff number is required'),
-  facility: z.number(),
-  email: z.string().email('Invalid email address'),
-  phone_number: z.string().optional(),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
-  access_to_all_categories: z.boolean().default(false),
-  categories: z.array(z.number()).default([]),
-  documents: z.array(z.instanceof(File)).default([]),
-});
-
-type PersonnelFormValues = z.infer<typeof personnelSchema>;
-
 const PersonnelForm = () => {
+  const { t } = useTypedTranslation('accounts');
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
-  
+
+  // Schema defined inside component so validation messages can use t()
+  const personnelSchema = z.object({
+    user: z.number(),
+    staff_number: z.string().min(1, t('personnel.form.validation.staffNumberRequired')),
+    facility: z.number(),
+    email: z.string().email(t('personnel.form.validation.invalidEmail')),
+    phone_number: z.string().optional(),
+    status: z.enum(['Active', 'Inactive']).default('Active'),
+    access_to_all_categories: z.boolean().default(false),
+    categories: z.array(z.number()).default([]),
+    documents: z.array(z.instanceof(File)).default([]),
+  });
+
+  type PersonnelFormValues = z.infer<typeof personnelSchema>;
+
   // Personnel form setup
   const personnelForm = useForm<PersonnelFormValues>({
     resolver: zodResolver(personnelSchema),
@@ -65,9 +67,9 @@ const PersonnelForm = () => {
   const { data: facilities = [] } = useList<Facility>('facilities', facilityEndpoint);
 
   // Fetch personnel data for edit mode using our custom hook
-  const { 
-    data: personnelData, 
-    isLoading: isLoadingPersonnel, 
+  const {
+    data: personnelData,
+    isLoading: isLoadingPersonnel,
     isError: isPersonnelError,
     error: personnelError
   } = usePersonnelQuery(isEditMode ? slug : undefined);
@@ -79,7 +81,6 @@ const PersonnelForm = () => {
   // Handle personnel data loading
   useEffect(() => {
     if (personnelData && isEditMode) {
-      // Reset the form with personnel data
       personnelForm.reset({
         user: personnelData.user,
         staff_number: personnelData.staff_number,
@@ -89,14 +90,14 @@ const PersonnelForm = () => {
         status: personnelData.status,
         access_to_all_categories: personnelData.access_to_all_categories,
         categories: personnelData.categories || [],
-        documents: [], // We can't prefill files
+        documents: [],
       });
     }
   }, [personnelData, isEditMode, personnelForm]);
 
   // Handle file selection
   const [fileNames, setFileNames] = useState<string[]>([]);
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
@@ -109,10 +110,8 @@ const PersonnelForm = () => {
   const accessToAllCategories = personnelForm.watch('access_to_all_categories');
 
   const onSubmitPersonnel = (data: PersonnelFormValues) => {
-    // Create FormData object for multipart/form-data submission
     const formData = new FormData();
-    
-    // Append all form fields to FormData
+
     formData.append('user', data.user.toString());
     formData.append('staff_number', data.staff_number);
     formData.append('facility', data.facility.toString());
@@ -120,19 +119,17 @@ const PersonnelForm = () => {
     if (data.phone_number) formData.append('phone_number', data.phone_number);
     formData.append('status', data.status);
     formData.append('access_to_all_categories', data.access_to_all_categories.toString());
-    
-    // Append categories as an array
+
     if (data.categories.length > 0 && !data.access_to_all_categories) {
       data.categories.forEach((categoryId, index) => {
         formData.append(`categories[${index}]`, categoryId.toString());
       });
     }
-    
-    // Append document files
+
     data.documents.forEach(file => {
       formData.append('documents', file);
     });
-    
+
     if (isEditMode && slug) {
       updatePersonnelMutation.mutate(
         { slug, personnel: formData },
@@ -155,7 +152,7 @@ const PersonnelForm = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading personnel details...</p>
+          <p className="text-sm text-muted-foreground">{t('personnel.form.loading')}</p>
         </div>
       </div>
     );
@@ -164,12 +161,12 @@ const PersonnelForm = () => {
   if (isEditMode && isPersonnelError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading personnel details</div>
+        <div className="text-red-500 text-xl">{t('personnel.form.error')}</div>
         <p className="text-sm text-muted-foreground mb-4">
-          {personnelError instanceof Error ? personnelError.message : 'An unknown error occurred'}
+          {personnelError instanceof Error ? personnelError.message : t('personnel.form.unknownError')}
         </p>
         <Button onClick={handleCancel} variant="outline">
-          Back to Personnels
+          {t('personnel.form.backToList')}
         </Button>
       </div>
     );
@@ -179,15 +176,15 @@ const PersonnelForm = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleCancel}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-2xl font-bold">
-            {isEditMode ? 'Edit Personnel' : 'Create New Personnel'}
+            {isEditMode ? t('personnel.form.editTitle') : t('personnel.form.createPageTitle')}
           </h1>
         </div>
       </div>
@@ -198,28 +195,28 @@ const PersonnelForm = () => {
             {/* Personnel Details Section */}
             <Collapsible defaultOpen={true} className="w-full">
               <CollapsibleTrigger className="flex justify-between items-center w-full p-3 bg-gray-200 text-black rounded-t-md">
-                <h2 className="text-lg font-medium">Personnel Details</h2>
+                <h2 className="text-lg font-medium">{t('personnel.form.sections.details')}</h2>
                 <Button variant="ghost" size="sm" className="h-8 text-white bg-gray-500 hover:bg-gray-600 hover:text-white px-3">
-                  Toggle
+                  {t('personnel.form.toggle')}
                 </Button>
               </CollapsibleTrigger>
-              
+
               <CollapsibleContent className="border border-t-0 rounded-b-md p-4 space-y-4 bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">                  
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={personnelForm.control}
                     name="user"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>User</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                        <FormLabel>{t('personnel.form.fields.user')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
                           value={field.value.toString()}
                           defaultValue={field.value.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="--Select User--" />
+                              <SelectValue placeholder={t('personnel.form.fields.selectUser')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -234,15 +231,15 @@ const PersonnelForm = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={personnelForm.control}
                     name="staff_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Staff Number</FormLabel>
+                        <FormLabel>{t('personnel.form.fields.staffNumber')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Staff number" {...field} />
+                          <Input placeholder={t('personnel.form.placeholders.staffNumber')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -254,15 +251,15 @@ const PersonnelForm = () => {
                     name="facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Facility</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                        <FormLabel>{t('personnel.form.fields.facility')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
                           value={field.value.toString()}
                           defaultValue={field.value.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="--Select--" />
+                              <SelectValue placeholder={t('personnel.form.fields.selectFacility')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -285,9 +282,9 @@ const PersonnelForm = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t('personnel.form.fields.email')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Email address" {...field} />
+                          <Input placeholder={t('personnel.form.placeholders.email')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -299,34 +296,34 @@ const PersonnelForm = () => {
                     name="phone_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel>{t('personnel.form.fields.phoneNumber')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Phone number" {...field} />
+                          <Input placeholder={t('personnel.form.placeholders.phoneNumber')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={personnelForm.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
+                        <FormLabel>{t('personnel.form.fields.status')}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
                           value={field.value}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder={t('personnel.form.fields.selectStatus')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Active">{t('personnel.status.active')}</SelectItem>
+                            <SelectItem value="Inactive">{t('personnel.status.inactive')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -337,8 +334,8 @@ const PersonnelForm = () => {
 
                 {/* Categories Section */}
                 <div className="space-y-4">
-                  <h3 className="font-medium">Categories</h3>
-                  
+                  <h3 className="font-medium">{t('personnel.form.fields.categories')}</h3>
+
                   <FormField
                     control={personnelForm.control}
                     name="access_to_all_categories"
@@ -351,12 +348,12 @@ const PersonnelForm = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Access to all categories</FormLabel>
+                          <FormLabel>{t('personnel.form.fields.accessToAllCategories')}</FormLabel>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {categories.map((category) => (
                       <FormField
@@ -395,10 +392,10 @@ const PersonnelForm = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Documents Upload Section */}
                 <div className="space-y-2">
-                  <FormLabel>Documents</FormLabel>
+                  <FormLabel>{t('personnel.form.fields.documents')}</FormLabel>
                   <div className="flex flex-col space-y-2">
                     <Input
                       type="file"
@@ -406,10 +403,10 @@ const PersonnelForm = () => {
                       onChange={handleFileChange}
                       className="mb-2"
                     />
-                    
+
                     {fileNames.length > 0 && (
                       <div className="mt-2">
-                        <h4 className="text-sm font-medium mb-1">Selected files:</h4>
+                        <h4 className="text-sm font-medium mb-1">{t('personnel.form.fields.selectedFiles')}</h4>
                         <ul className="text-sm pl-5 list-disc">
                           {fileNames.map((name, idx) => (
                             <li key={idx}>{name}</li>
@@ -422,25 +419,25 @@ const PersonnelForm = () => {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          
+
           {/* Form submit buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={createPersonnelMutation.isPending || updatePersonnelMutation.isPending}
             >
               {(createPersonnelMutation.isPending || updatePersonnelMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {isEditMode ? 'Update' : 'Save'}
+              {isEditMode ? t('personnel.form.update') : t('personnel.form.save')}
             </Button>
           </div>
         </form>

@@ -1,0 +1,1239 @@
+{
+  "user": {
+    "management": "Gestion des Utilisateurs",
+    "add": "Ajouter un Utilisateur",
+    "loading": "Chargement des utilisateurs...",
+    "error": "Erreur lors du chargement des utilisateurs",
+    "noItems": "Aucun utilisateur trouvé",
+    "deleteTitle": "Supprimer l'Utilisateur",
+    "deleteMessage": "Cette action est irréversible. Ce compte utilisateur sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom, email...",
+    "columns": {
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Email",
+      "role": "Rôle",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filters": {
+      "byStatus": "Filtrer par statut",
+      "byRole": "Filtrer par rôle",
+      "allStatuses": "Tous les statuts",
+      "allGenders": "Tous les genres",
+      "allRoles": "Tous les rôles"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "roles": {
+      "superAdmin": "Super Admin",
+      "facilityAdmin": "Admin Établissement",
+      "facilityProcurement": "Approvisionnement Établissement",
+      "facilityManager": "Gestionnaire Établissement",
+      "facilityOfficer": "Agent Établissement",
+      "facilityAuditor": "Auditeur Établissement",
+      "facilityAccount": "Comptable Établissement",
+      "facilityStore": "Magasin Établissement",
+      "facilityView": "Consultation Établissement"
+    },
+    "detail": {
+      "loading": "Chargement des détails de l'utilisateur...",
+      "error": "Erreur lors du chargement des détails de l'utilisateur",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux utilisateurs",
+      "editUser": "Modifier l'utilisateur",
+      "verified": "Vérifié",
+      "tabs": {
+        "profile": "Profil",
+        "permissions": "Permissions",
+        "facilities": "Établissements",
+        "activity": "Activité"
+      },
+      "summary": {
+        "designation": "Désignation",
+        "approvalLimit": "Limite d'approbation",
+        "accountStatus": "Statut du compte",
+        "teamLead": "Chef d'équipe",
+        "teamMember": "Membre de l'équipe",
+        "canGenerateReports": "Peut générer des rapports",
+        "cannotGenerateReports": "Ne peut pas générer de rapports",
+        "joined": "Rejoint le :"
+      },
+      "personalInfo": {
+        "title": "Informations personnelles",
+        "description": "Détails et coordonnées de l'utilisateur",
+        "fullName": "Nom complet",
+        "gender": "Genre",
+        "email": "Email",
+        "phone": "Téléphone",
+        "dateOfBirth": "Date de naissance",
+        "nationality": "Nationalité",
+        "userId": "ID utilisateur",
+        "passportNo": "N° de passeport",
+        "address": "Adresse"
+      },
+      "accountInfo": {
+        "title": "Informations du compte",
+        "description": "Statut du compte et permissions",
+        "status": "Statut",
+        "emailVerified": "Email vérifié",
+        "accountBlocked": "Compte bloqué",
+        "accountActive": "Compte actif",
+        "dateJoined": "Date d'inscription",
+        "lastLogin": "Dernière connexion",
+        "capabilities": "Capacités de l'utilisateur",
+        "teamLead": "Chef d'équipe",
+        "generateReports": "Générer des rapports"
+      },
+      "permissions": {
+        "title": "Contrôle d'accès",
+        "description": "Permissions d'accès de l'utilisateur dans le système",
+        "allAccess": "Accès total",
+        "limited": "Limité",
+        "facilitiesTitle": "Établissements",
+        "facilitiesCount": "Établissements accessibles : {{count}}",
+        "apartmentsTitle": "Appartements",
+        "apartmentsCount": "Appartements accessibles : {{count}}",
+        "warehousesTitle": "Entrepôts",
+        "warehousesCount": "Entrepôts accessibles : {{count}}",
+        "departmentsTitle": "Départements",
+        "departmentsCount": "Départements accessibles : {{count}}",
+        "clientsTitle": "Clients",
+        "clientsCount": "Clients accessibles : {{count}}"
+      },
+      "facilitiesTab": {
+        "assignedFacilities": "Établissements assignés",
+        "facilitiesDesc": "Établissements auxquels l'utilisateur a accès",
+        "assignedApartments": "Appartements assignés",
+        "apartmentsDesc": "Appartements auxquels l'utilisateur a accès",
+        "noBuilding": "Aucun bâtiment assigné"
+      },
+      "activity": {
+        "title": "Activité récente",
+        "description": "Activité récente de l'utilisateur dans le système",
+        "lastLogin": "Dernière connexion",
+        "lastLoginDesc": "L'utilisateur s'est connecté au système",
+        "accountCreated": "Compte créé",
+        "accountCreatedDesc": "Le compte utilisateur a été créé"
+      }
+    },
+    "form": {
+      "createTitle": "Créer un Utilisateur",
+      "editTitle": "Modifier l'Utilisateur",
+      "createPageTitle": "Créer un Nouvel Utilisateur",
+      "backToList": "Retour aux utilisateurs",
+      "loading": "Chargement des détails de l'utilisateur...",
+      "error": "Erreur lors du chargement des détails de l'utilisateur",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour l'utilisateur",
+      "create": "Créer l'utilisateur",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Email",
+      "phone": "Téléphone",
+      "role": "Rôle",
+      "gender": "Genre",
+      "status": "Statut",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "sections": {
+        "personal": "Informations personnelles",
+        "additional": "Informations complémentaires",
+        "roles": "Rôle et statut",
+        "options": "Options",
+        "accesses": "Permissions d'accès"
+      },
+      "fields": {
+        "designation": "Désignation",
+        "supervisor": "Superviseur",
+        "selectSupervisor": "Sélectionner un superviseur",
+        "dateOfBirth": "Date de naissance",
+        "selectGender": "Sélectionner le genre",
+        "male": "Masculin",
+        "female": "Féminin",
+        "other": "Autre",
+        "nationality": "Nationalité",
+        "passportNumber": "Numéro de passeport",
+        "address": "Adresse",
+        "selectRole": "Sélectionner un rôle",
+        "selectStatus": "Sélectionner un statut",
+        "approvalLimit": "Limite d'approbation"
+      },
+      "placeholders": {
+        "firstName": "Entrez le prénom",
+        "lastName": "Entrez le nom de famille",
+        "email": "Entrez l'adresse email",
+        "phone": "Entrez le numéro de téléphone",
+        "designation": "Entrez la désignation",
+        "nationality": "Entrez la nationalité",
+        "passportNumber": "Entrez le numéro de passeport",
+        "address": "Entrez l'adresse",
+        "approvalLimit": "Entrez le montant limite d'approbation"
+      },
+      "checkboxes": {
+        "teamLead": "Chef d'équipe",
+        "teamLeadDesc": "Cocher si l'utilisateur est chef d'équipe",
+        "generateReports": "Générer des rapports",
+        "generateReportsDesc": "L'utilisateur peut générer des rapports",
+        "verified": "Vérifié",
+        "verifiedDesc": "L'utilisateur est vérifié",
+        "blocked": "Bloqué",
+        "blockedDesc": "L'utilisateur est bloqué",
+        "active": "Actif",
+        "activeDesc": "L'utilisateur est actif"
+      },
+      "access": {
+        "facilitySection": "Accès aux établissements",
+        "flatSection": "Accès zones / bâtiments",
+        "categoriesSection": "Accès aux catégories",
+        "warehousesSection": "Accès aux entrepôts",
+        "departmentsSection": "Accès aux départements",
+        "clientsSection": "Accès aux clients",
+        "allFacilities": "Accès à tous les établissements",
+        "allFacilitiesDesc": "Accorder l'accès à tous les établissements",
+        "allFlats": "Accès à toutes les zones / bâtiments",
+        "allFlatsDesc": "Accorder l'accès à toutes les zones / bâtiments",
+        "allCategories": "Accès à toutes les catégories",
+        "allCategoriesDesc": "Accorder l'accès à toutes les catégories",
+        "allWarehouses": "Accès à tous les entrepôts",
+        "allWarehousesDesc": "Accorder l'accès à tous les entrepôts",
+        "allDepartments": "Accès à tous les départements",
+        "allDepartmentsDesc": "Accorder l'accès à tous les départements",
+        "allClients": "Accès à tous les clients",
+        "allClientsDesc": "Accorder l'accès à tous les clients",
+        "selectFacilities": "Sélectionner les établissements",
+        "selectFlats": "Sélectionner zones / bâtiments",
+        "selectCategories": "Sélectionner les catégories",
+        "selectWarehouses": "Sélectionner les entrepôts",
+        "selectDepartments": "Sélectionner les départements",
+        "selectClients": "Sélectionner les clients"
+      },
+      "validation": {
+        "firstNameRequired": "Le prénom est requis",
+        "lastNameRequired": "Le nom de famille est requis",
+        "invalidEmail": "Adresse email invalide",
+        "phoneRequired": "Le numéro de téléphone est requis"
+      },
+      "toast": {
+        "errorTitle": "Erreur",
+        "submitError": "Un problème est survenu lors de l'envoi du formulaire"
+      }
+    }
+  },
+  "personnel": {
+    "management": "Gestion du Personnel",
+    "add": "Ajouter du Personnel",
+    "loading": "Chargement des personnels...",
+    "error": "Erreur lors du chargement des personnels",
+    "noItems": "Aucun personnel trouvé.",
+    "deleteTitle": "Supprimer le Personnel",
+    "deleteMessage": "Cette action est irréversible. Ce personnel sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher des personnels...",
+    "filters": {
+      "status": "Statut",
+      "facility": "Établissement"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "columns": {
+      "staffNumber": "Numéro de Personnel",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Email",
+      "phone": "Téléphone",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "Créer un Personnel",
+      "editTitle": "Modifier le Personnel",
+      "createPageTitle": "Créer un Nouveau Personnel",
+      "backToList": "Retour aux Personnels",
+      "loading": "Chargement des détails du personnel...",
+      "error": "Erreur lors du chargement des détails du personnel",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "toggle": "Basculer",
+      "sections": {
+        "details": "Détails du Personnel"
+      },
+      "fields": {
+        "user": "Utilisateur",
+        "staffNumber": "Numéro de Personnel",
+        "facility": "Établissement",
+        "email": "Email",
+        "phoneNumber": "Numéro de Téléphone",
+        "status": "Statut",
+        "categories": "Catégories",
+        "accessToAllCategories": "Accès à toutes les catégories",
+        "documents": "Documents",
+        "selectedFiles": "Fichiers sélectionnés :",
+        "selectUser": "--Sélectionner un utilisateur--",
+        "selectFacility": "--Sélectionner--",
+        "selectStatus": "Sélectionner le statut"
+      },
+      "placeholders": {
+        "staffNumber": "Numéro de personnel",
+        "email": "Adresse email",
+        "phoneNumber": "Numéro de téléphone"
+      },
+      "validation": {
+        "staffNumberRequired": "Le numéro de personnel est requis",
+        "invalidEmail": "Adresse email invalide"
+      }
+    }
+  },
+  "client": {
+    "management": "Gestion des Clients",
+    "add": "Ajouter un Client",
+    "loading": "Chargement des clients...",
+    "error": "Erreur lors du chargement des clients",
+    "noItems": "Aucun client trouvé. Cliquez sur \"Ajouter un Client\" pour en créer un.",
+    "deleteMessage": "Cette action est irréversible. Ce client et tous ses contacts associés seront définitivement supprimés.",
+    "searchPlaceholder": "Rechercher par nom, email ou téléphone...",
+    "toast": {
+      "deleteSuccess": "Client supprimé avec succès",
+      "deleteError": "Échec de la suppression du client"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "types": {
+      "individual": "Individuel",
+      "company": "Entreprise"
+    },
+    "detail": {
+      "loading": "Chargement des détails du client...",
+      "error": "Erreur lors du chargement des détails du client",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Clients",
+      "notFound": "Client introuvable",
+      "title": "Détails du Client",
+      "editClient": "Modifier le Client",
+      "clientInfo": "Informations du Client",
+      "notProvided": "Non renseigné",
+      "notAssigned": "Non assigné",
+      "noAddress": "Aucune adresse fournie",
+      "quickStats": "Statistiques Rapides",
+      "contactsTitle": "Contacts",
+      "noContacts": "Aucun contact disponible pour ce client",
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "type": "Type",
+        "status": "Statut",
+        "email": "Email",
+        "phone": "Téléphone",
+        "group": "Groupe",
+        "address": "Adresse"
+      },
+      "stats": {
+        "clientId": "ID Client",
+        "totalContacts": "Total des Contacts",
+        "activeContacts": "Contacts Actifs"
+      },
+      "contactColumns": {
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "status": "Statut"
+      }
+    },
+    "form": {
+      "createPageTitle": "Créer un Nouveau Client",
+      "editTitle": "Modifier le Client",
+      "backToList": "Retour aux Clients",
+      "loading": "Chargement des détails du client...",
+      "error": "Erreur lors du chargement des détails du client",
+      "toggle": "Basculer",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "clientDetails": "Détails du Client",
+        "contactDetails": "Détails du Contact"
+      },
+      "fields": {
+        "type": "Type",
+        "code": "Code",
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "status": "Statut",
+        "address": "Adresse"
+      },
+      "placeholders": {
+        "select": "--Sélectionner--",
+        "code": "Code client",
+        "name": "Nom du client",
+        "email": "Adresse email",
+        "phone": "Numéro de téléphone",
+        "selectStatus": "Sélectionner le statut",
+        "address": "Entrer l'adresse du client"
+      },
+      "contact": {
+        "add": "Ajouter un Contact",
+        "editTitle": "Modifier le Contact",
+        "addTitle": "Ajouter un Contact",
+        "noItems": "Aucun contact ajouté",
+        "update": "Mettre à jour le Contact",
+        "save": "Ajouter le Contact",
+        "columns": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "email": "Email",
+          "phone": "Téléphone",
+          "status": "Statut",
+          "action": "Action"
+        },
+        "fields": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "email": "Email",
+          "phone": "Téléphone",
+          "status": "Statut"
+        },
+        "placeholders": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "email": "Adresse email",
+          "phone": "Numéro de téléphone",
+          "selectStatus": "Sélectionner le statut"
+        }
+      },
+      "validation": {
+        "codeRequired": "Le code est requis",
+        "nameRequired": "Le nom est requis",
+        "invalidEmail": "Adresse email invalide",
+        "contactFirstNameRequired": "Le prénom est requis",
+        "contactLastNameRequired": "Le nom est requis",
+        "contactInvalidEmail": "Adresse email invalide"
+      },
+      "toast": {
+        "loadError": "Échec du chargement des détails du client",
+        "createSuccess": "Client créé avec succès",
+        "createError": "Échec de la création du client",
+        "updateSuccess": "Client mis à jour avec succès",
+        "updateError": "Échec de la mise à jour du client"
+      }
+    }
+  },
+  "vendor": {
+    "management": "Gestion des Fournisseurs",
+    "add": "Ajouter un Fournisseur",
+    "loading": "Chargement des fournisseurs...",
+    "error": "Erreur lors du chargement des fournisseurs",
+    "noItems": "Aucun fournisseur trouvé.",
+    "deleteTitle": "Supprimer le Fournisseur",
+    "deleteMessage": "Cette action est irréversible. Ce fournisseur sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom, email, banque ou nom de compte...",
+    "filters": {
+      "byStatus": "Filtrer par statut",
+      "allStatuses": "Tous les statuts",
+      "byType": "Filtrer par type",
+      "allTypes": "Tous les types"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "types": {
+      "company": "Entreprise",
+      "individual": "Individuel"
+    },
+    "columns": {
+      "name": "Nom",
+      "email": "Email",
+      "bank": "Banque",
+      "accountName": "Nom du Compte",
+      "type": "Type",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Chargement des détails du fournisseur...",
+      "error": "Erreur lors du chargement des détails du fournisseur",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Fournisseurs",
+      "notFound": "Fournisseur introuvable",
+      "vendorLabel": "Fournisseur",
+      "editVendor": "Modifier le Fournisseur",
+      "vendorInfo": "Informations du Fournisseur",
+      "noEmail": "Aucun email fourni",
+      "noPhone": "Aucun téléphone fourni",
+      "bankingInfo": "Informations Bancaires",
+      "notProvided": "Non fourni",
+      "verifiedAccount": "Compte Vérifié",
+      "verifiedAccountDesc": "Ce fournisseur a des informations bancaires vérifiées et est prêt à recevoir des paiements.",
+      "activityTitle": "Activité du Fournisseur",
+      "activityDesc": "Transactions et activités récentes avec ce fournisseur",
+      "noActivity": "Aucune Activité Récente",
+      "noActivityDesc": "Ce fournisseur n'a aucune activité ou transaction récente dans le système.",
+      "fields": {
+        "accountName": "Nom du Compte",
+        "bank": "Banque",
+        "accountNumber": "Numéro de Compte",
+        "currency": "Devise"
+      }
+    },
+    "form": {
+      "createTitle": "Créer un Fournisseur",
+      "editTitle": "Modifier le Fournisseur",
+      "createPageTitle": "Créer un Nouveau Fournisseur",
+      "backToList": "Retour aux Fournisseurs",
+      "loading": "Chargement des détails du fournisseur...",
+      "error": "Erreur lors du chargement des détails du fournisseur",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour le Fournisseur",
+      "create": "Créer le Fournisseur",
+      "sections": {
+        "basic": "Informations de Base",
+        "banking": "Informations Bancaires"
+      },
+      "fields": {
+        "name": "Nom",
+        "type": "Type",
+        "email": "Email",
+        "phone": "Numéro de Téléphone",
+        "status": "Statut",
+        "accountName": "Nom du Compte",
+        "bank": "Banque",
+        "accountNumber": "Numéro de Compte",
+        "currency": "Devise",
+        "selectType": "Sélectionner le type de fournisseur",
+        "selectStatus": "Sélectionner le statut",
+        "selectCurrency": "Sélectionner la devise"
+      },
+      "placeholders": {
+        "name": "Entrer le nom du fournisseur",
+        "email": "Entrer l'adresse email",
+        "phone": "Entrer le numéro de téléphone",
+        "accountName": "Entrer le nom du compte",
+        "bank": "Entrer le nom de la banque",
+        "accountNumber": "Entrer le numéro de compte"
+      },
+      "currencies": {
+        "ngn": "Naira Nigérian (NGN)",
+        "usd": "Dollar Américain (USD)",
+        "eur": "Euro (EUR)",
+        "gbp": "Livre Sterling (GBP)"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "phoneRequired": "Le numéro de téléphone est requis",
+        "invalidEmail": "Adresse email invalide",
+        "accountNameRequired": "Le nom du compte est requis",
+        "bankRequired": "Le nom de la banque est requis",
+        "accountNumberRequired": "Le numéro de compte est requis"
+      },
+      "toast": {
+        "errorTitle": "Erreur",
+        "submitError": "Un problème est survenu lors de l'envoi du formulaire"
+      }
+    }
+  },
+  "department": {
+    "management": "Gestion des Départements",
+    "add": "Ajouter un Département",
+    "loading": "Chargement des départements...",
+    "error": "Erreur lors du chargement des départements",
+    "noItems": "Aucun département trouvé.",
+    "deleteMessage": "Cette action est irréversible. Ce département sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom de département...",
+    "columns": {
+      "name": "Nom du Département",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Chargement des détails du département...",
+      "error": "Erreur lors du chargement des détails du département",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Départements",
+      "notFound": "Département introuvable",
+      "editDepartment": "Modifier le Département",
+      "label": "Département",
+      "cardTitle": "Informations sur le Département",
+      "idLabel": "ID du Département : {{id}}",
+      "fields": {
+        "name": "Nom du Département",
+        "id": "ID du Département"
+      }
+    },
+    "form": {
+      "createPageTitle": "Créer un Nouveau Département",
+      "editTitle": "Modifier le Département",
+      "backToList": "Retour aux Départements",
+      "loading": "Chargement des détails du département...",
+      "error": "Erreur lors du chargement des détails du département",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour le Département",
+      "create": "Créer le Département",
+      "sections": {
+        "info": "Informations sur le Département"
+      },
+      "fields": {
+        "name": "Nom du Département"
+      },
+      "placeholders": {
+        "name": "Saisir le nom du département"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis"
+      },
+      "toast": {
+        "errorTitle": "Erreur",
+        "submitError": "Un problème est survenu lors de la soumission du formulaire"
+      }
+    }
+  },
+  "category": {
+    "management": "Gestion des Catégories",
+    "add": "Ajouter une Catégorie",
+    "loading": "Chargement des catégories...",
+    "error": "Erreur lors du chargement des catégories",
+    "noItems": "Aucune catégorie trouvée.",
+    "deleteMessage": "Cette action est irréversible. Cette catégorie sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher des catégories...",
+    "yes": "Oui",
+    "no": "Non",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "allowed": "Autorisé",
+    "notAllowed": "Non Autorisé",
+    "blocked": "Bloqué",
+    "notSpecified": "Non spécifié",
+    "filters": {
+      "status": "Statut",
+      "workRequest": "Demande de Travail"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "workRequestOptions": {
+      "none": "Aucun",
+      "createWorkOrder": "Créer un bon de travail",
+      "closeWorkRequest": "Fermer la demande de travail"
+    },
+    "columns": {
+      "code": "Code",
+      "title": "Titre",
+      "workRequestApproved": "Demande de Travail Approuvée",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Chargement des détails de la catégorie...",
+      "error": "Erreur lors du chargement des détails de la catégorie",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Catégories",
+      "notFound": "Catégorie introuvable",
+      "title": "Détails de la Catégorie",
+      "editCategory": "Modifier la Catégorie",
+      "cardTitle": "Gestion des Catégories",
+      "tabs": {
+        "details": "Détails de la Catégorie",
+        "subcategories": "Sous-catégories"
+      },
+      "sections": {
+        "basicInfo": "Informations de Base",
+        "workRequestConfig": "Configuration des Demandes de Travail",
+        "systemPermissions": "Permissions Système",
+        "description": "Description"
+      },
+      "fields": {
+        "code": "Code",
+        "title": "Titre",
+        "status": "Statut",
+        "problemType": "Type de Problème",
+        "workRequestApproved": "Demande de Travail Approuvée",
+        "excludeCostingLimit": "Exclure la Limite de Coût",
+        "power": "Alimentation",
+        "createPaymentRequisition": "Créer une Réquisition de Paiement"
+      },
+      "subcategories": {
+        "title": "Sous-catégories",
+        "found": "{{count}} sous-catégories trouvées",
+        "empty": "Aucune sous-catégorie",
+        "emptyDesc": "Cette catégorie n'a pas encore de sous-catégories.",
+        "noTitle": "Sans Titre",
+        "noDescription": "Sans Description",
+        "columns": {
+          "id": "ID",
+          "title": "Titre",
+          "description": "Description",
+          "excludeCostingLimit": "Exclure la Limite de Coût",
+          "status": "Statut"
+        }
+      },
+      "quickActions": {
+        "title": "Actions Rapides",
+        "addSubcategory": "Ajouter une Sous-catégorie"
+      },
+      "statusSidebar": {
+        "title": "Statut de la Catégorie",
+        "activeStatus": "Statut Actif",
+        "powerEnabled": "Alimentation Activée",
+        "paymentCreation": "Création de Paiement"
+      },
+      "subcategoryForm": {
+        "title": "Créer une Nouvelle Sous-catégorie",
+        "submit": "Créer la Sous-catégorie",
+        "fields": {
+          "title": "Titre",
+          "code": "Code",
+          "workRequestApproved": "Demande de Travail Approuvée",
+          "status": "Statut"
+        },
+        "placeholders": {
+          "title": "Titre de la sous-catégorie",
+          "code": "Code de la sous-catégorie",
+          "selectApprovalType": "Sélectionner le type d'approbation",
+          "selectStatus": "Sélectionner le statut"
+        },
+        "sections": {
+          "permissions": "Permissions Système"
+        },
+        "switches": {
+          "excludeCostingLimit": "Exclure la Limite de Coût",
+          "excludeCostingLimitDesc": "Activer pour exclure les limites de coût pour cette sous-catégorie",
+          "power": "Alimentation",
+          "powerDesc": "Activer la fonctionnalité d'alimentation pour cette sous-catégorie",
+          "createPaymentRequisition": "Créer une Réquisition de Paiement",
+          "createPaymentRequisitionDesc": "Autoriser la création de réquisitions de paiement"
+        },
+        "validation": {
+          "titleRequired": "Le titre est requis",
+          "codeRequired": "Le code est requis"
+        }
+      }
+    },
+    "form": {
+      "createPageTitle": "Créer une Nouvelle Catégorie",
+      "editTitle": "Modifier la Catégorie",
+      "backToList": "Retour aux Catégories",
+      "loading": "Chargement des détails de la catégorie...",
+      "error": "Erreur lors du chargement des détails de la catégorie",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "categoryDetails": "Détails de la Catégorie"
+      },
+      "fields": {
+        "code": "Code",
+        "title": "Titre",
+        "problemType": "Type de Problème",
+        "workRequestApproved": "Demande de Travail Approuvée",
+        "status": "Statut",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Code de la catégorie",
+        "title": "Titre de la catégorie",
+        "problemType": "Type de problème de la catégorie",
+        "selectWorkRequestApproved": "Sélectionner le type d'approbation",
+        "selectStatus": "Sélectionner le statut",
+        "description": "Entrer la description de la catégorie"
+      },
+      "checkboxes": {
+        "excludeCostingLimit": "Exclure la limite de coût",
+        "power": "Alimentation",
+        "createPaymentRequisition": "Créer une réquisition de paiement"
+      },
+      "validation": {
+        "codeRequired": "Le code est requis",
+        "titleRequired": "Le titre est requis",
+        "descriptionRequired": "La description est requise",
+        "problemTypeRequired": "Le type de problème est requis"
+      }
+    }
+  },
+  "subcategory": {
+    "management": "Gestion des Sous-Catégories",
+    "add": "Ajouter une Sous-Catégorie",
+    "loading": "Chargement des sous-catégories...",
+    "error": "Erreur lors du chargement des sous-catégories",
+    "noItems": "Aucune sous-catégorie trouvée.",
+    "deleteMessage": "Cette action est irréversible. Cette sous-catégorie sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher des sous-catégories...",
+    "filters": {
+      "status": "Statut"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "columns": {
+      "title": "Titre",
+      "description": "Description",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Chargement des détails de la sous-catégorie...",
+      "error": "Erreur lors du chargement des détails de la sous-catégorie",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Sous-Catégories",
+      "notFound": "Sous-catégorie introuvable",
+      "title": "Détails de la Sous-Catégorie",
+      "editSubcategory": "Modifier la Sous-Catégorie",
+      "cardTitle": "Informations sur la Sous-Catégorie",
+      "fields": {
+        "title": "Titre",
+        "status": "Statut",
+        "excludeCostLimit": "Exclure la Limite de Coût",
+        "category": "Catégorie",
+        "description": "Description"
+      },
+      "notProvided": "Non renseigné",
+      "noDescription": "Aucune description fournie"
+    },
+    "form": {
+      "createPageTitle": "Créer une Nouvelle Sous-Catégorie",
+      "editTitle": "Modifier la Sous-Catégorie",
+      "backToList": "Retour aux Sous-Catégories",
+      "loading": "Chargement des détails de la sous-catégorie...",
+      "error": "Erreur lors du chargement des détails de la sous-catégorie",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "details": "Détails de la Sous-Catégorie"
+      },
+      "fields": {
+        "title": "Titre",
+        "category": "Catégorie",
+        "status": "Statut",
+        "excludeCostingLimit": "Exclure la limite de coût",
+        "description": "Description"
+      },
+      "placeholders": {
+        "title": "Titre de la sous-catégorie",
+        "selectCategory": "Sélectionner une Catégorie",
+        "selectStatus": "Sélectionner un statut",
+        "description": "Saisir la description de la sous-catégorie"
+      },
+      "validation": {
+        "titleRequired": "Le titre est requis"
+      }
+    }
+  },
+  "bankAccount": {
+    "management": "Gestion des Comptes Bancaires",
+    "add": "Ajouter un Compte Bancaire",
+    "loading": "Chargement des comptes bancaires...",
+    "error": "Erreur lors du chargement des comptes bancaires",
+    "noItems": "Aucun compte bancaire trouvé.",
+    "deleteMessage": "Cette action est irréversible. Ce compte bancaire sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par banque, intitulé ou numéro de compte...",
+    "filters": {
+      "statusPlaceholder": "Filtrer par statut",
+      "allStatuses": "Tous les statuts"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "columns": {
+      "bank": "Banque",
+      "accountName": "Intitulé du compte",
+      "accountNumber": "Numéro de compte",
+      "currency": "Devise",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "detail": {
+      "loading": "Chargement des détails du compte bancaire...",
+      "error": "Erreur lors du chargement des détails du compte bancaire",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Comptes Bancaires",
+      "notFound": "Compte bancaire introuvable",
+      "editAccount": "Modifier le Compte",
+      "accountNumberLabel": "Numéro de compte : {{number}}",
+      "cardTitle": "Informations sur le Compte Bancaire",
+      "additionalSection": "Informations Complémentaires",
+      "accountStatus": "Statut du Compte",
+      "activeAccount": "Compte Actif",
+      "activeAccountDesc": "Ce compte bancaire est actuellement actif et peut être utilisé pour des transactions.",
+      "accountDetails": "Détails du Compte",
+      "noAddress": "Aucune adresse fournie",
+      "fields": {
+        "accountName": "Intitulé du compte",
+        "accountNumber": "Numéro de compte",
+        "bankName": "Nom de la banque",
+        "currency": "Devise",
+        "address": "Adresse"
+      }
+    },
+    "form": {
+      "createPageTitle": "Créer un Nouveau Compte Bancaire",
+      "editTitle": "Modifier le Compte Bancaire",
+      "backToList": "Retour aux Comptes Bancaires",
+      "loading": "Chargement des détails du compte bancaire...",
+      "error": "Erreur lors du chargement des détails du compte bancaire",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour le Compte Bancaire",
+      "create": "Créer le Compte Bancaire",
+      "sections": {
+        "basic": "Informations de Base",
+        "additional": "Informations Complémentaires"
+      },
+      "fields": {
+        "bank": "Banque",
+        "status": "Statut",
+        "accountName": "Intitulé du compte",
+        "accountNumber": "Numéro de compte",
+        "currency": "Devise",
+        "address": "Adresse",
+        "additionalDetails": "Informations Complémentaires"
+      },
+      "placeholders": {
+        "bank": "Saisir le nom de la banque",
+        "selectStatus": "Sélectionner un statut",
+        "accountName": "Saisir l'intitulé du compte",
+        "accountNumber": "Saisir le numéro de compte",
+        "selectCurrency": "Sélectionner une devise",
+        "address": "Saisir l'adresse de la banque",
+        "details": "Saisir des informations ou notes supplémentaires sur ce compte"
+      },
+      "currencies": {
+        "ngn": "Naira Nigérian (NGN)",
+        "usd": "Dollar Américain (USD)",
+        "eur": "Euro (EUR)",
+        "gbp": "Livre Sterling (GBP)"
+      },
+      "toast": {
+        "errorTitle": "Erreur",
+        "submitError": "Un problème est survenu lors de la soumission du formulaire"
+      }
+    }
+  },
+  "unitMeasurement": {
+    "management": "Gestion des Unités de Mesure",
+    "add": "Ajouter une Unité de Mesure",
+    "loading": "Chargement des unités de mesure...",
+    "error": "Erreur lors du chargement des unités de mesure",
+    "noItems": "Aucune unité de mesure trouvée.",
+    "deleteMessage": "Cette action est irréversible. Cette unité de mesure sera définitivement supprimée.",
+    "searchPlaceholder": "Rechercher par code...",
+    "filters": {
+      "typePlaceholder": "Filtrer par type",
+      "allTypes": "Tous les types",
+      "statusPlaceholder": "Filtrer par statut",
+      "allStatuses": "Tous les statuts"
+    },
+    "columns": {
+      "code": "Code",
+      "symbol": "Symbole",
+      "type": "Type",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "types": {
+      "area": "Surface",
+      "packing": "Emballage",
+      "piece": "Pièce",
+      "time": "Temps",
+      "volume": "Volume",
+      "weight": "Poids",
+      "other": "Autre"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "detail": {
+      "loading": "Chargement des détails de l'unité de mesure...",
+      "error": "Erreur lors du chargement des détails de l'unité de mesure",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Unités de Mesure",
+      "notFound": "Unité de mesure introuvable",
+      "titleWithCode": "Unité de Mesure : {{code}}",
+      "cardTitle": "Détails de l'Unité de Mesure",
+      "usageCardTitle": "Informations d'Utilisation",
+      "noDescription": "Aucune description fournie",
+      "fields": {
+        "code": "Code",
+        "symbol": "Symbole",
+        "type": "Type",
+        "status": "Statut",
+        "description": "Description"
+      },
+      "sidebar": {
+        "symbol": "Symbole",
+        "availability": "Disponibilité",
+        "available": "Disponible pour utilisation",
+        "notAvailable": "Non disponible pour utilisation",
+        "exampleUsage": "Exemple d'utilisation"
+      }
+    },
+    "form": {
+      "createPageTitle": "Créer une Nouvelle Unité de Mesure",
+      "editTitle": "Modifier l'Unité de Mesure",
+      "backToList": "Retour aux Unités de Mesure",
+      "loading": "Chargement des détails de l'unité de mesure...",
+      "error": "Erreur lors du chargement des détails de l'unité de mesure",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "update": "Mettre à jour l'Unité de Mesure",
+      "create": "Créer l'Unité de Mesure",
+      "sections": {
+        "basic": "Informations de Base"
+      },
+      "fields": {
+        "code": "Code",
+        "symbol": "Symbole",
+        "type": "Type",
+        "status": "Statut",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Saisir le code de l'unité de mesure",
+        "symbol": "Saisir le symbole",
+        "selectType": "Sélectionner un type",
+        "selectStatus": "Sélectionner un statut",
+        "description": "Saisir la description de l'unité de mesure"
+      },
+      "toast": {
+        "errorTitle": "Erreur",
+        "submitError": "Un problème est survenu lors de la soumission du formulaire"
+      }
+    }
+  },
+  "warehouse": {
+    "management": "Gestion des Entrepôts",
+    "add": "Ajouter un Entrepôt",
+    "loading": "Chargement des entrepôts...",
+    "error": "Erreur lors du chargement des entrepôts",
+    "noItems": "Aucun entrepôt trouvé",
+    "deleteTitle": "Supprimer l'Entrepôt",
+    "deleteMessage": "Cette action est irréversible. Cet entrepôt sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom ou emplacement...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "location": "Emplacement",
+      "manager": "Gestionnaire",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer un Entrepôt",
+      "editTitle": "Modifier l'Entrepôt",
+      "name": "Nom",
+      "code": "Code",
+      "location": "Emplacement",
+      "manager": "Gestionnaire",
+      "description": "Description"
+    }
+  },
+  "store": {
+    "management": "Gestion des Magasins",
+    "add": "Ajouter un Magasin",
+    "loading": "Chargement des magasins...",
+    "error": "Erreur lors du chargement des magasins",
+    "noItems": "Aucun magasin trouvé",
+    "deleteTitle": "Supprimer le Magasin",
+    "deleteMessage": "Cette action est irréversible. Ce magasin sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom ou entrepôt...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "warehouse": "Entrepôt",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer un Magasin",
+      "editTitle": "Modifier le Magasin",
+      "name": "Nom",
+      "code": "Code",
+      "warehouse": "Entrepôt",
+      "description": "Description"
+    }
+  },
+  "item": {
+    "management": "Gestion des Articles",
+    "add": "Ajouter un Article",
+    "loading": "Chargement des articles...",
+    "error": "Erreur lors du chargement des articles",
+    "noItems": "Aucun article trouvé",
+    "deleteTitle": "Supprimer l'Article",
+    "deleteMessage": "Cette action est irréversible. Cet article sera définitivement supprimé.",
+    "searchPlaceholder": "Rechercher par nom, code ou catégorie...",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "category": "Catégorie",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer un Article",
+      "editTitle": "Modifier l'Article",
+      "name": "Nom",
+      "code": "Code",
+      "category": "Catégorie",
+      "unit": "Unité",
+      "quantity": "Quantité",
+      "description": "Description"
+    }
+  },
+  "itemRequest": {
+    "management": "Gestion des Demandes d'Articles",
+    "add": "Ajouter une Demande d'Article",
+    "loading": "Chargement des demandes d'articles...",
+    "error": "Erreur lors du chargement des demandes d'articles",
+    "noItems": "Aucune demande d'article trouvée",
+    "deleteTitle": "Supprimer la Demande d'Article",
+    "deleteMessage": "Cette action est irréversible.",
+    "searchPlaceholder": "Rechercher par article ou demandeur...",
+    "columns": {
+      "item": "Article",
+      "quantity": "Quantité",
+      "requestedBy": "Demandé par",
+      "status": "Statut",
+      "date": "Date"
+    }
+  },
+  "inventory": {
+    "management": "Gestion de l'Inventaire",
+    "add": "Ajouter un Inventaire",
+    "loading": "Chargement de l'inventaire...",
+    "error": "Erreur lors du chargement de l'inventaire",
+    "noItems": "Aucun article d'inventaire trouvé",
+    "deleteTitle": "Supprimer l'Enregistrement d'Inventaire",
+    "deleteMessage": "Cette action est irréversible.",
+    "searchPlaceholder": "Rechercher par nom, catégorie ou magasin...",
+    "columns": {
+      "name": "Nom",
+      "category": "Catégorie",
+      "quantity": "Quantité",
+      "store": "Magasin",
+      "status": "Statut"
+    }
+  },
+  "transfer": {
+    "management": "Gestion des Transferts",
+    "add": "Ajouter un Transfert",
+    "loading": "Chargement des transferts...",
+    "error": "Erreur lors du chargement des transferts",
+    "noItems": "Aucun transfert trouvé",
+    "deleteTitle": "Supprimer le Transfert",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "item": "Article",
+      "fromStore": "Magasin source",
+      "toStore": "Magasin destination",
+      "quantity": "Quantité",
+      "status": "Statut",
+      "date": "Date"
+    }
+  },
+  "assetCategory": {
+    "management": "Gestion des Catégories d'Actifs",
+    "add": "Ajouter une Catégorie d'Actif",
+    "loading": "Chargement des catégories d'actifs...",
+    "error": "Erreur lors du chargement des catégories d'actifs",
+    "noItems": "Aucune catégorie d'actif trouvée",
+    "deleteTitle": "Supprimer la Catégorie d'Actif",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "status": "Statut"
+    },
+    "form": {
+      "createTitle": "Créer une Catégorie d'Actif",
+      "editTitle": "Modifier la Catégorie d'Actif",
+      "name": "Nom",
+      "code": "Code",
+      "description": "Description"
+    }
+  },
+  "assetSubcategory": {
+    "management": "Gestion des Sous-Catégories d'Actifs",
+    "add": "Ajouter une Sous-Catégorie d'Actif",
+    "loading": "Chargement des sous-catégories d'actifs...",
+    "error": "Erreur lors du chargement des sous-catégories d'actifs",
+    "noItems": "Aucune sous-catégorie d'actif trouvée",
+    "deleteTitle": "Supprimer la Sous-Catégorie d'Actif",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "category": "Catégorie",
+      "status": "Statut"
+    }
+  },
+  "inventoryType": {
+    "management": "Gestion des Types d'Inventaire",
+    "add": "Ajouter un Type d'Inventaire",
+    "loading": "Chargement des types d'inventaire...",
+    "error": "Erreur lors du chargement des types d'inventaire",
+    "noItems": "Aucun type d'inventaire trouvé",
+    "deleteTitle": "Supprimer le Type d'Inventaire",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "status": "Statut"
+    }
+  },
+  "manufacturer": {
+    "management": "Gestion des Fabricants",
+    "add": "Ajouter un Fabricant",
+    "loading": "Chargement des fabricants...",
+    "error": "Erreur lors du chargement des fabricants",
+    "noItems": "Aucun fabricant trouvé",
+    "deleteTitle": "Supprimer le Fabricant",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "country": "Pays",
+      "status": "Statut"
+    }
+  },
+  "model": {
+    "management": "Gestion des Modèles",
+    "add": "Ajouter un Modèle",
+    "loading": "Chargement des modèles...",
+    "error": "Erreur lors du chargement des modèles",
+    "noItems": "Aucun modèle trouvé",
+    "deleteTitle": "Supprimer le Modèle",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "manufacturer": "Fabricant",
+      "status": "Statut"
+    }
+  },
+  "inventoryReference": {
+    "management": "Gestion des Références d'Inventaire",
+    "add": "Ajouter une Référence d'Inventaire",
+    "loading": "Chargement des références d'inventaire...",
+    "error": "Erreur lors du chargement des références d'inventaire",
+    "noItems": "Aucune référence d'inventaire trouvée",
+    "deleteTitle": "Supprimer la Référence d'Inventaire",
+    "deleteMessage": "Cette action est irréversible.",
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "category": "Catégorie",
+      "status": "Statut"
+    }
+  }
+}

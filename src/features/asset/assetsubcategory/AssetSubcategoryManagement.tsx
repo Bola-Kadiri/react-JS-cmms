@@ -12,6 +12,7 @@ import { useAssetSubcategoriesQuery, useDeleteAssetSubcategory } from '@/hooks/a
 import { useDebounce } from '@/hooks/useDebounce';
 import { AssetSubcategory } from '@/types/assetsubcategory';
 import { toast } from 'sonner';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 // Type definitions for sorting
 type SortField = 'code' | 'name' | 'type' | 'asset_category' | 'is_active';
@@ -22,6 +23,7 @@ interface AssetSubcategoryManagementProps {
 }
 
 const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({ className }) => {
+  const { t } = useTypedTranslation('assets');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -88,18 +90,18 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
-      
+
       if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? (aValue === bValue ? 0 : aValue ? 1 : -1)
           : (aValue === bValue ? 0 : aValue ? -1 : 1);
       }
 
-      return sortDirection === 'asc' 
+      return sortDirection === 'asc'
         ? (aValue < bValue ? -1 : aValue > bValue ? 1 : 0)
         : (aValue > bValue ? -1 : aValue < bValue ? 1 : 0);
     });
@@ -165,8 +167,8 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading asset subcategories</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <p className="text-red-500 mb-2">{t('assetSubcategory.error')}</p>
+          <Button onClick={() => window.location.reload()}>{t('assetSubcategory.retry')}</Button>
         </div>
       </div>
     );
@@ -175,16 +177,16 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Asset Subcategories</h1>
+        <h1 className="text-2xl font-bold">{t('assetSubcategory.management')}</h1>
         <Button onClick={handleCreate} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Add Asset Subcategory
+          {t('assetSubcategory.addButton')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Asset Subcategories List</CardTitle>
+          <CardTitle>{t('assetSubcategory.listTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Search and Filter Controls */}
@@ -192,7 +194,7 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by name or code..."
+                placeholder={t('assetSubcategory.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -200,12 +202,12 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
             </div>
             <Select value={activeFilter} onValueChange={setActiveFilter}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t('assetSubcategory.filterPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="all">{t('assetSubcategory.statusOptions.all')}</SelectItem>
+                <SelectItem value="active">{t('assetSubcategory.statusOptions.active')}</SelectItem>
+                <SelectItem value="inactive">{t('assetSubcategory.statusOptions.inactive')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -215,52 +217,52 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('code')}
                   >
                     <div className="flex items-center gap-2">
-                      Code
+                      {t('assetSubcategory.columns.code')}
                       {getSortIcon('code')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center gap-2">
-                      Name
+                      {t('assetSubcategory.columns.name')}
                       {getSortIcon('name')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('type')}
                   >
                     <div className="flex items-center gap-2">
-                      Type
+                      {t('assetSubcategory.columns.type')}
                       {getSortIcon('type')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('asset_category')}
                   >
                     <div className="flex items-center gap-2">
-                      Asset Category
+                      {t('assetSubcategory.columns.assetCategory')}
                       {getSortIcon('asset_category')}
                     </div>
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('is_active')}
                   >
                     <div className="flex items-center gap-2">
-                      Status
+                      {t('assetSubcategory.columns.status')}
                       {getSortIcon('is_active')}
                     </div>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">{t('assetSubcategory.columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,9 +270,9 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
                       <div className="text-gray-500">
-                        {debouncedSearchTerm || activeFilter !== 'all' 
-                          ? 'No asset subcategories found matching your criteria.'
-                          : 'No asset subcategories found.'}
+                        {debouncedSearchTerm || activeFilter !== 'all'
+                          ? t('assetSubcategory.noItemsFiltered')
+                          : t('assetSubcategory.noItems')}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -283,7 +285,7 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
                       <TableCell>{item.asset_category_detail?.name || '-'}</TableCell>
                       <TableCell>
                         <Badge variant={item.is_active ? 'default' : 'secondary'}>
-                          {item.is_active ? 'Active' : 'Inactive'}
+                          {item.is_active ? t('assetSubcategory.badge.active') : t('assetSubcategory.badge.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -314,18 +316,18 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete the asset subcategory "{item.name}".
+                                  {t('assetSubcategory.delete.description', { name: item.name })}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(item.id.toString())}
                                   className="bg-red-500 hover:bg-red-600"
                                 >
-                                  Delete
+                                  {t('assetSubcategory.delete.confirm')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -343,7 +345,11 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-gray-500">
-                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} results
+                {t('assetSubcategory.pagination.showing', {
+                  from: (currentPage - 1) * pageSize + 1,
+                  to: Math.min(currentPage * pageSize, filteredData.length),
+                  total: filteredData.length,
+                })}
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -351,17 +357,17 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
-                  Previous
+                  {t('assetSubcategory.pagination.previous')}
                 </Button>
                 <span className="text-sm">
-                  Page {currentPage} of {totalPages}
+                  {t('assetSubcategory.pagination.page', { page: currentPage, pages: totalPages })}
                 </span>
                 <Button
                   variant="outline"
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                 >
-                  Next
+                  {t('assetSubcategory.pagination.next')}
                 </Button>
               </div>
             </div>
@@ -372,4 +378,4 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
   );
 };
 
-export default AssetSubcategoryManagement; 
+export default AssetSubcategoryManagement;

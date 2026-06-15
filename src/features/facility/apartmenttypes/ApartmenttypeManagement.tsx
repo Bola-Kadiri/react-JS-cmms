@@ -15,8 +15,10 @@ import { Apartmenttype } from '@/types/apartmenttype';
 import { ApartmenttypeQueryParams } from '@/services/apartmenttypesApi';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const ApartmenttypeManagement = () => {
+  const { t } = useTypedTranslation('facility');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -142,7 +144,7 @@ const ApartmenttypeManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading apartmenttypes...</p>
+          <p className="text-sm text-muted-foreground">{t('apartmentType.loading')}</p>
         </div>
       </div>
     );
@@ -152,9 +154,9 @@ const ApartmenttypeManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading apartmenttypes</div>
+        <div className="text-red-500 text-xl">{t('apartmentType.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -163,9 +165,9 @@ const ApartmenttypeManagement = () => {
   return (
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Apartmenttype Management</h1>
+        <h1 className="text-2xl font-bold">{t('apartmentType.management')}</h1>
         <Button onClick={handleAddApartmenttype}>
-          <Plus className="mr-2 h-4 w-4" /> Add Apartmenttype
+          <Plus className="mr-2 h-4 w-4" /> {t('apartmentType.add')}
         </Button>
       </div>
 
@@ -174,7 +176,7 @@ const ApartmenttypeManagement = () => {
         <div className="flex-1">
           <SearchFilter 
             onSearch={handleSearch}
-            placeholder="Search by name..."
+            placeholder={t('apartmentType.searchPlaceholder')}
             initialSearchValue={searchValue}
           />
         </div>
@@ -182,18 +184,18 @@ const ApartmenttypeManagement = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Status: {statusFilter}
+              {t('apartmentType.filter.status')}: {statusFilter}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleStatusFilter('All')}>
-              All
+              {t('apartmentType.filter.all')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleStatusFilter('Active')}>
-              Active
+              {t('apartmentType.filter.active')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleStatusFilter('Inactive')}>
-              Inactive
+              {t('apartmentType.filter.inactive')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -205,16 +207,16 @@ const ApartmenttypeManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-medium text-gray-600">Name</TableHead>
-                <TableHead className="font-medium text-gray-600">Status</TableHead>
-                <TableHead className="font-medium text-gray-600 text-right">Actions</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartmentType.columns.name')}</TableHead>
+                <TableHead className="font-medium text-gray-600">{t('apartmentType.columns.status')}</TableHead>
+                <TableHead className="font-medium text-gray-600 text-right">{t('apartmentType.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} className="h-24 text-center">
-                    No apartmenttypes found.
+                    {t('apartmentType.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -280,14 +282,14 @@ const ApartmenttypeManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('apartmentType.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the apartmenttype.
+              {t('apartmentType.delete.message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDeleteApartmenttype}
               disabled={deleteApartmenttypeMutation.isPending}
               className="bg-red-500 hover:bg-red-600"
@@ -295,10 +297,10 @@ const ApartmenttypeManagement = () => {
               {deleteApartmenttypeMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('apartmentType.delete.deleting')}
                 </>
               ) : (
-                'Delete'
+                t('apartmentType.delete.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

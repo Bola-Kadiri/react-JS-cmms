@@ -9,46 +9,46 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Loader2, Upload, X, FileText, Image } from 'lucide-react';
-import { WorkOrderCompletion } from '@/types/workordercompletion';
-import { 
-  useWorkOrderCompletionQuery, 
-  useCreateWorkOrderCompletionMutation, 
+import {
+  useWorkOrderCompletionQuery,
+  useCreateWorkOrderCompletionMutation,
   useUpdateWorkOrderCompletionMutation,
   useAvailableWorkOrdersQuery
 } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
 import { useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { toast } from '@/components/ui/use-toast';
-
-// Form schema definition matching WorkOrderData interface
-const workOrderCompletionSchema = z.object({
-  work_order: z.number().min(1, 'Please select a work order'),
-  reviewers: z.array(z.number()).min(1, 'Please select at least one reviewer'),
-  approver: z.number().min(1, 'Please select an approver'),
-  start_date: z.string().min(1, 'Please select a start date'),
-  due_date: z.string().min(1, 'Please select a due date'),
-  resources: z.array(z.any()).default([]),
-});
-
-type WorkOrderCompletionFormValues = z.infer<typeof workOrderCompletionSchema>;
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const WorkordercompletionForm = () => {
+  const { t } = useTypedTranslation('work');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  
+
+  const workOrderCompletionSchema = z.object({
+    work_order: z.number().min(1, t('wcc.form.validation.workOrderRequired')),
+    reviewers: z.array(z.number()).min(1, t('wcc.form.validation.reviewersRequired')),
+    approver: z.number().min(1, t('wcc.form.validation.approverRequired')),
+    start_date: z.string().min(1, t('wcc.form.validation.startDateRequired')),
+    due_date: z.string().min(1, t('wcc.form.validation.dueDateRequired')),
+    resources: z.array(z.any()).default([]),
+  });
+
+  type WorkOrderCompletionFormValues = z.infer<typeof workOrderCompletionSchema>;
+
   // File handling
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  
+
   // Queries and mutations
-  const { data: workOrderCompletion, isLoading: isLoadingCompletion } = useWorkOrderCompletionQuery(Number(id));
+  const { isLoading: isLoadingCompletion } = useWorkOrderCompletionQuery(Number(id));
   const { data: availableWorkOrders, isLoading: isLoadingWorkOrders } = useAvailableWorkOrdersQuery();
   const { data: reviewers = [], isLoading: isLoadingReviewers } = useReviewersQuery();
   const { data: approvers = [], isLoading: isLoadingApprovers } = useApproversQuery();
-  
+
   const createMutation = useCreateWorkOrderCompletionMutation();
   const updateMutation = useUpdateWorkOrderCompletionMutation();
-  
+
   const isLoading = isLoadingCompletion || isLoadingWorkOrders || isLoadingReviewers || isLoadingApprovers;
 
   // Form setup
@@ -80,16 +80,16 @@ const WorkordercompletionForm = () => {
     const validFiles = files.filter(file => {
       if (!allowedTypes.includes(file.type)) {
         toast({
-          title: "Invalid file type",
-          description: `${file.name} is not a supported file type. Please upload PDF, DOCX, or image files.`,
+          title: t('wcc.form.toast.invalidFileType'),
+          description: t('wcc.form.toast.invalidFileTypeDesc', { name: file.name }),
           variant: "destructive",
         });
         return false;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast({
-          title: "File too large",
-          description: `${file.name} is larger than 10MB. Please choose a smaller file.`,
+          title: t('wcc.form.toast.fileTooLarge'),
+          description: t('wcc.form.toast.fileTooLargeDesc', { name: file.name }),
           variant: "destructive",
         });
         return false;
@@ -98,8 +98,7 @@ const WorkordercompletionForm = () => {
     });
 
     setSelectedFiles(prev => [...prev, ...validFiles]);
-    
-    // Reset the input
+
     if (event.target) {
       event.target.value = '';
     }
@@ -122,19 +121,16 @@ const WorkordercompletionForm = () => {
   const onSubmit = async (values: WorkOrderCompletionFormValues) => {
     try {
       const formData = new FormData();
-      
-      // Append form fields
+
       formData.append('work_order', values.work_order.toString());
       formData.append('approver', values.approver.toString());
       formData.append('start_date', values.start_date);
       formData.append('due_date', values.due_date);
-      
-      // Append reviewers as array
+
       values.reviewers.forEach((reviewerId) => {
         formData.append('reviewers', reviewerId.toString());
       });
-      
-      // Append files
+
       selectedFiles.forEach((file) => {
         formData.append('resources', file);
       });
@@ -142,23 +138,23 @@ const WorkordercompletionForm = () => {
       if (isEditMode && id) {
         await updateMutation.mutateAsync({ id: Number(id), data: formData });
         toast({
-          title: "Success",
-          description: "Work order completion updated successfully",
+          title: t('wcc.form.toast.successTitle'),
+          description: t('wcc.form.toast.updateSuccess'),
         });
       } else {
         await createMutation.mutateAsync(formData);
         toast({
-          title: "Success", 
-          description: "Work order completion created successfully",
+          title: t('wcc.form.toast.successTitle'),
+          description: t('wcc.form.toast.createSuccess'),
         });
       }
-      
+
       navigate('/dashboard/work/work-order-completions');
     } catch (error: any) {
       console.error('Form submission error:', error);
       toast({
-        title: "Error",
-        description: error?.response?.data?.message || "Failed to save work order completion",
+        title: t('wcc.form.toast.errorTitle'),
+        description: error?.response?.data?.message || t('wcc.form.toast.saveError'),
         variant: "destructive",
       });
     }
@@ -183,17 +179,17 @@ const WorkordercompletionForm = () => {
           className="text-green-700 hover:text-green-800 hover:bg-green-50"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Work Order Completions
+          {t('wcc.form.backToList')}
         </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-gray-900">
-            {isEditMode ? 'Edit Work Order Completion' : 'Create Work Order Completion'}
+            {isEditMode ? t('wcc.form.editTitle') : t('wcc.form.createTitle')}
           </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Fill in the details below to {isEditMode ? 'update' : 'create'} a work order completion.
+            {isEditMode ? t('wcc.form.editSubtitle') : t('wcc.form.createSubtitle')}
           </p>
         </div>
 
@@ -207,12 +203,12 @@ const WorkordercompletionForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Work Order <span className="text-red-500">*</span>
+                      {t('wcc.form.workOrder')} <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Select work order" />
+                          <SelectValue placeholder={t('wcc.form.selectWorkOrder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -229,7 +225,7 @@ const WorkordercompletionForm = () => {
                           ))
                         ) : (
                           <SelectItem value="no-work-orders" disabled>
-                            No work orders available
+                            {t('wcc.form.noWorkOrders')}
                           </SelectItem>
                         )}
                       </SelectContent>
@@ -246,12 +242,12 @@ const WorkordercompletionForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Approver <span className="text-red-500">*</span>
+                      {t('wcc.form.approver')} <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Select approver" />
+                          <SelectValue placeholder={t('wcc.form.selectApprover')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -270,7 +266,7 @@ const WorkordercompletionForm = () => {
                           ))
                         ) : (
                           <SelectItem value="no-approvers" disabled>
-                            No approvers available
+                            {t('wcc.form.noApprovers')}
                           </SelectItem>
                         )}
                       </SelectContent>
@@ -287,12 +283,12 @@ const WorkordercompletionForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Start Date <span className="text-red-500">*</span>
+                      {t('wcc.form.startDate')} <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="date" 
-                        {...field} 
+                      <Input
+                        type="date"
+                        {...field}
                         className="h-10"
                       />
                     </FormControl>
@@ -308,12 +304,12 @@ const WorkordercompletionForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Due Date <span className="text-red-500">*</span>
+                      {t('wcc.form.dueDate')} <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="date" 
-                        {...field} 
+                      <Input
+                        type="date"
+                        {...field}
                         className="h-10"
                       />
                     </FormControl>
@@ -331,9 +327,9 @@ const WorkordercompletionForm = () => {
                 <FormItem>
                   <div className="mb-4">
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Reviewers <span className="text-red-500">*</span>
+                      {t('wcc.form.reviewers')} <span className="text-red-500">*</span>
                     </FormLabel>
-                    <p className="text-xs text-gray-500 mt-1">Select at least one reviewer</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('wcc.form.reviewersHint')}</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto border rounded-lg p-4">
                     {reviewers && reviewers.length > 0 ? (
@@ -380,7 +376,7 @@ const WorkordercompletionForm = () => {
                         />
                       ))
                     ) : (
-                      <p className="text-sm text-gray-500">No reviewers available</p>
+                      <p className="text-sm text-gray-500">{t('wcc.form.noReviewers')}</p>
                     )}
                   </div>
                   <FormMessage />
@@ -392,7 +388,7 @@ const WorkordercompletionForm = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
-                  Resources (Documents/Images)
+                  {t('wcc.form.resources')}
                 </label>
                 <div className="flex items-center gap-2">
                   <Button
@@ -403,10 +399,10 @@ const WorkordercompletionForm = () => {
                     className="text-green-700 border-green-300 hover:bg-green-50"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Files
+                    {t('wcc.form.uploadFiles')}
                   </Button>
                   <span className="text-xs text-gray-500">
-                    Supported: PDF, DOCX, Images (Max 10MB each)
+                    {t('wcc.form.uploadHint')}
                   </span>
                 </div>
                 <input
@@ -422,7 +418,7 @@ const WorkordercompletionForm = () => {
               {/* Selected Files Display */}
               {selectedFiles.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700">Selected Files:</p>
+                  <p className="text-sm font-medium text-gray-700">{t('wcc.form.selectedFiles')}</p>
                   <div className="space-y-2">
                     {selectedFiles.map((file, index) => (
                       <div
@@ -462,7 +458,7 @@ const WorkordercompletionForm = () => {
                 onClick={() => navigate('/dashboard/work/work-order-completions')}
                 className="px-6"
               >
-                Cancel
+                {t('wcc.form.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -472,7 +468,7 @@ const WorkordercompletionForm = () => {
                 {(createMutation.isPending || updateMutation.isPending) && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 )}
-                {isEditMode ? 'Update' : 'Create'} Work Order Completion
+                {isEditMode ? t('wcc.form.update') : t('wcc.form.create')}
               </Button>
             </div>
           </form>
@@ -482,4 +478,4 @@ const WorkordercompletionForm = () => {
   );
 };
 
-export default WorkordercompletionForm; 
+export default WorkordercompletionForm;

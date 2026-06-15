@@ -40,14 +40,14 @@
   "placeholders": {
     "selectType": "Sélectionner le type",
     "assetModel": "Modèle d'actif",
-    "selectCategory": "Sélectionner la catégorie",
-    "selectSubcategory": "Sélectionner la sous-catégorie",
+    "selectCategory": "Sélectionner la catégorie d'actif",
+    "selectSubcategory": "Sélectionner la sous-catégorie d'actif",
     "partNumber": "Numéro de pièce",
-    "assetTag": "Étiquette d'actif",
-    "serialNumber": "Numéro de série",
+    "assetTag": "Saisir l'étiquette d'actif",
+    "serialNumber": "Saisir le numéro de série",
     "quantity": "Quantité",
     "unitPrice": "Prix unitaire",
-    "amount": "Montant",
+    "amount": "Saisir le montant",
     "reorderLevel": "Niveau de réapprovisionnement",
     "minStockLevel": "Niveau de stock minimum",
     "maxStockLevel": "Niveau de stock maximum",
@@ -55,7 +55,7 @@
     "flags": "Indicateurs",
     "selectStatus": "Sélectionner le statut",
     "ownerID": "ID du propriétaire",
-    "searchAssets": "Rechercher des actifs..."
+    "searchAssets": "Rechercher par nom d'actif..."
   },
   "messages": {
     "loading": "Chargement des actifs...",
@@ -78,5 +78,1503 @@
     "viewDetails": "Voir les Détails",
     "tryAgain": "Réessayer",
     "backToList": "Retour à la Liste"
+  },
+  "noItems": "Aucun actif trouvé",
+  "filter": {
+    "condition": "État",
+    "assetType": "Type d'Actif",
+    "category": "Catégorie d'Actif",
+    "subcategory": "Sous-catégorie d'Actif",
+    "conditionOptions": {
+      "used": "Utilisé",
+      "brandNew": "Neuf"
+    }
+  },
+  "columns": {
+    "assetName": "Nom de l'Actif",
+    "facility": "Installation",
+    "assetType": "Type d'Actif",
+    "condition": "État",
+    "purchasedAmount": "Montant d'Achat",
+    "purchaseDate": "Date d'Achat",
+    "actions": "Actions"
+  },
+  "form": {
+    "sections": {
+      "location": "Informations de Localisation",
+      "category": "Informations de Catégorie",
+      "basic": "Informations de Base",
+      "procurement": "Informations d'Approvisionnement"
+    },
+    "fields": {
+      "assetName": "Nom de l'Actif *",
+      "assetType": "Type d'Actif *",
+      "condition": "État *",
+      "assetTag": "Étiquette d'Actif *",
+      "serialNumber": "Numéro de Série",
+      "registerBy": "Enregistré Par *",
+      "facility": "Installation *",
+      "zone": "Zone *",
+      "building": "Bâtiment *",
+      "subsystem": "Sous-système *",
+      "assetCategory": "Catégorie d'Actif *",
+      "assetSubcategory": "Sous-catégorie d'Actif *",
+      "purchaseDate": "Date d'Achat *",
+      "purchasedAmount": "Montant d'Achat *",
+      "lifespan": "Durée de Vie",
+      "oemWarranty": "Garantie OEM"
+    },
+    "placeholders": {
+      "assetName": "Saisir le nom de l'actif",
+      "selectFacility": "Sélectionner une installation",
+      "selectFacilityFirst": "Sélectionner une installation d'abord",
+      "selectZone": "Sélectionner une zone",
+      "selectZoneFirst": "Sélectionner une installation d'abord",
+      "selectBuilding": "Sélectionner un bâtiment",
+      "selectBuildingFirst": "Sélectionner une zone d'abord",
+      "selectSubsystem": "Sélectionner un sous-système",
+      "selectSubsystemFirst": "Sélectionner un bâtiment d'abord",
+      "selectCondition": "Sélectionner l'état",
+      "selectRegistrar": "Sélectionner le registraire",
+      "enterLifespan": "Saisir la durée de vie",
+      "enterOemWarranty": "Saisir les détails de la garantie OEM",
+      "selectAssetCategoryFirst": "Sélectionner une catégorie d'actif d'abord"
+    },
+    "warnings": {
+      "noZones": "Aucune zone disponible pour l'installation sélectionnée.",
+      "noBuildings": "Aucun bâtiment disponible pour la zone sélectionnée.",
+      "noSubsystems": "Aucun sous-système disponible pour le bâtiment sélectionné.",
+      "noSubcategories": "Aucune sous-catégorie d'actif disponible pour la catégorie sélectionnée."
+    },
+    "validation": {
+      "assetNameRequired": "Le nom de l'actif est requis",
+      "purchaseDateRequired": "La date d'achat est requise",
+      "purchasedAmountRequired": "Le montant d'achat est requis",
+      "assetTagRequired": "L'étiquette d'actif est requise",
+      "ownerRequired": "Le propriétaire est requis",
+      "facilityRequired": "L'installation est requise",
+      "zoneRequired": "La zone est requise",
+      "buildingRequired": "Le bâtiment est requis",
+      "subsystemRequired": "Le sous-système est requis",
+      "categoryRequired": "La catégorie est requise",
+      "subcategoryRequired": "La sous-catégorie est requise"
+    },
+    "cancel": "Annuler",
+    "createAsset": "Créer un Actif",
+    "updateAsset": "Mettre à jour l'Actif",
+    "error": "Erreur lors du chargement des détails de l'actif",
+    "errorFallback": "Une erreur inconnue s'est produite",
+    "backToAssets": "Retour aux Actifs"
+  },
+  "detail": {
+    "backToAssets": "Retour aux Actifs",
+    "tabs": {
+      "details": "Détails de l'Actif",
+      "location": "Localisation",
+      "category": "Catégorie"
+    },
+    "basicInfo": "Informations de Base",
+    "assetName": "Nom de l'Actif",
+    "assetType": "Type d'Actif",
+    "condition": "État",
+    "assetTag": "Étiquette d'Actif",
+    "serialNumber": "Numéro de Série",
+    "notProvided": "Non fourni",
+    "ownerLabel": "Propriétaire",
+    "ownerId": "ID du Propriétaire : {{id}}",
+    "purchaseDate": "Date d'Achat",
+    "purchasedAmount": "Montant d'Achat",
+    "financial": "Résumé Financier",
+    "purchaseValue": "Valeur d'Achat",
+    "purchasedOn": "Acheté le {{date}}",
+    "lifespan": "Durée de Vie",
+    "oemWarranty": "Garantie OEM",
+    "notSpecified": "Non spécifié",
+    "locationTitle": "Hiérarchie de Localisation",
+    "locationDescription": "Localisation de l'actif dans la structure des installations",
+    "facilityLabel": "Installation",
+    "zoneLabel": "Zone",
+    "buildingLabel": "Bâtiment",
+    "subsystemLabel": "Sous-système",
+    "locationPath": "Chemin de Localisation",
+    "idLabel": "ID : {{id}}",
+    "locationPathValue": "Installation {{facility}} → Zone {{zone}} → Bâtiment {{building}} → Sous-système {{subsystem}}",
+    "categoryTitle": "Informations de Catégorie d'Actif",
+    "categoryLabel": "Catégorie",
+    "typeLabel": "Type",
+    "statusLabel": "Statut",
+    "activeStatus": "Actif",
+    "inactiveStatus": "Inactif",
+    "categoryNotAvailable": "Informations de catégorie non disponibles",
+    "categoryIdLabel": "ID de Catégorie : {{id}}",
+    "subcategoryTitle": "Informations de Sous-catégorie d'Actif",
+    "subcategoryLabel": "Sous-catégorie",
+    "parentCategoryLabel": "Catégorie Parente",
+    "subcategoryNotAvailable": "Informations de sous-catégorie non disponibles",
+    "subcategoryIdLabel": "ID de Sous-catégorie : {{id}}",
+    "relatedSubcategoriesTitle": "Sous-catégories d'Actifs Connexes",
+    "relatedSubcategoriesDesc": "Autres sous-catégories sous la catégorie \"{{category}}\"",
+    "currentBadge": "Actuel",
+    "error": "Erreur lors du chargement des détails de l'actif",
+    "errorFallback": "Une erreur inconnue s'est produite"
+  },
+  "assetCategory": {
+    "management": "Gestion des Catégories d'Actifs",
+    "addButton": "Ajouter une Catégorie d'Actif",
+    "searchPlaceholder": "Rechercher par nom ou code...",
+    "columns": {
+      "type": "Type",
+      "code": "Code",
+      "name": "Nom",
+      "salvageValue": "Valeur Résiduelle %",
+      "usefulLife": "Durée de Vie Utile (Années)",
+      "actions": "Actions"
+    },
+    "noItems": "Aucune catégorie d'actif trouvée.",
+    "loading": "Chargement des catégories d'actifs...",
+    "error": "Erreur lors du chargement des catégories d'actifs",
+    "tryAgain": "Réessayer",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement la catégorie d'actif.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer une Catégorie d'Actif",
+      "editTitle": "Modifier la Catégorie d'Actif",
+      "createSubtitle": "Remplissez les détails pour créer une nouvelle catégorie d'actif",
+      "editSubtitle": "Mettre à jour les informations de la catégorie d'actif",
+      "fields": {
+        "type": "Type *",
+        "code": "Code *",
+        "name": "Nom *",
+        "salvageValuePercent": "Valeur Résiduelle (%) *",
+        "usefulLifeYear": "Durée de Vie Utile (Années) *",
+        "description": "Description *"
+      },
+      "placeholders": {
+        "type": "Entrez le type de catégorie d'actif",
+        "code": "Entrez le code de la catégorie d'actif",
+        "name": "Entrez le nom de la catégorie d'actif",
+        "salvageValuePercent": "Entrez le pourcentage de valeur résiduelle",
+        "usefulLifeYear": "Entrez la durée de vie utile en années",
+        "description": "Entrez la description de la catégorie d'actif"
+      },
+      "loading": "Chargement des détails de la catégorie d'actif...",
+      "error": "Erreur lors du chargement des détails de la catégorie d'actif",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Catégories d'Actifs",
+      "cancel": "Annuler",
+      "updating": "Mise à jour...",
+      "creating": "Création...",
+      "update": "Mettre à jour la Catégorie d'Actif",
+      "create": "Créer la Catégorie d'Actif"
+    },
+    "detail": {
+      "notFound": "Catégorie d'actif non trouvée",
+      "loading": "Chargement des détails de la catégorie d'actif...",
+      "error": "Erreur lors du chargement des détails de la catégorie d'actif",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Catégories d'Actifs",
+      "editButton": "Modifier la Catégorie d'Actif",
+      "cards": {
+        "basicInfo": "Informations de Base",
+        "financialLifecycle": "Financier & Cycle de Vie",
+        "description": "Description"
+      },
+      "fields": {
+        "type": "Type",
+        "code": "Code",
+        "name": "Nom",
+        "salvageValuePercent": "Pourcentage de Valeur Résiduelle",
+        "usefulLife": "Durée de Vie Utile"
+      },
+      "summaryStats": {
+        "yearsUsefulLife": "Années de Vie Utile",
+        "salvageValue": "Valeur Résiduelle",
+        "categoryType": "Type de Catégorie"
+      }
+    }
+  },
+  "assetSubcategory": {
+    "management": "Sous-catégories d'Actifs",
+    "addButton": "Ajouter une Sous-catégorie d'Actif",
+    "listTitle": "Liste des Sous-catégories d'Actifs",
+    "searchPlaceholder": "Rechercher par nom ou code...",
+    "filterPlaceholder": "Filtrer par statut",
+    "statusOptions": {
+      "all": "Tous les Statuts",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "type": "Type",
+      "assetCategory": "Catégorie d'Actif",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "badge": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "noItemsFiltered": "Aucune sous-catégorie d'actif trouvée correspondant à vos critères.",
+    "noItems": "Aucune sous-catégorie d'actif trouvée.",
+    "loading": "Chargement...",
+    "error": "Erreur lors du chargement des sous-catégories d'actifs",
+    "retry": "Réessayer",
+    "pagination": {
+      "showing": "Affichage de {{from}} à {{to}} sur {{total}} résultats",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "page": "Page {{page}} sur {{pages}}"
+    },
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement la sous-catégorie d'actif \"{{name}}\".",
+      "confirm": "Supprimer"
+    },
+    "form": {
+      "createTitle": "Créer une Sous-catégorie d'Actif",
+      "editTitle": "Modifier la Sous-catégorie d'Actif",
+      "loading": "Chargement...",
+      "backToList": "Retour aux Sous-catégories d'Actifs",
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "type": "Type",
+        "assetCategory": "Catégorie d'Actif",
+        "description": "Description",
+        "activeStatus": "Statut Actif",
+        "activeStatusDesc": "Activer ou désactiver cette sous-catégorie d'actif"
+      },
+      "placeholders": {
+        "code": "Entrez le code",
+        "name": "Entrez le nom",
+        "type": "Entrez le type",
+        "selectAssetCategory": "Sélectionner la catégorie d'actif",
+        "description": "Entrez la description"
+      },
+      "cancel": "Annuler",
+      "update": "Mettre à jour la Sous-catégorie d'Actif",
+      "create": "Créer la Sous-catégorie d'Actif",
+      "updating": "Mise à jour...",
+      "creating": "Création..."
+    },
+    "detail": {
+      "loading": "Chargement...",
+      "error": "Erreur lors du chargement des détails de la sous-catégorie d'actif",
+      "backToList": "Retour aux Sous-catégories d'Actifs",
+      "backToListShort": "Retour à la Liste",
+      "editButton": "Modifier",
+      "subtitle": "Détails de la Sous-catégorie d'Actif",
+      "badge": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "cards": {
+        "basicInfo": "Informations de Base",
+        "assetCategory": "Catégorie d'Actif",
+        "description": "Description",
+        "summary": "Résumé"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "type": "Type",
+        "status": "Statut",
+        "categoryName": "Nom de la Catégorie",
+        "categoryCode": "Code de la Catégorie",
+        "categoryType": "Type de Catégorie",
+        "salvageValuePercent": "Valeur Résiduelle %",
+        "usefulLife": "Durée de Vie Utile",
+        "subcategoryCode": "Code de la Sous-catégorie",
+        "assetCategory": "Catégorie d'Actif"
+      },
+      "noDescription": "Aucune description fournie.",
+      "noCategoryInfo": "Aucune information de catégorie d'actif disponible",
+      "years": "ans",
+      "na": "N/A"
+    }
+  },
+  "inventoryType": {
+    "management": "Types d'Inventaire",
+    "addButton": "Ajouter un Type d'Inventaire",
+    "listTitle": "Liste des Types d'Inventaire",
+    "searchPlaceholder": "Rechercher par code ou type...",
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "unitOfMeasurement": "Unité de Mesure",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "Aucun type d'inventaire trouvé correspondant à vos critères.",
+    "noItems": "Aucun type d'inventaire trouvé.",
+    "error": "Erreur lors du chargement des types d'inventaire",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement le type d'inventaire \"{{name}}\".",
+      "confirm": "Supprimer"
+    },
+    "form": {
+      "editTitle": "Modifier le Type d'Inventaire",
+      "createTitle": "Créer un Type d'Inventaire",
+      "loading": "Chargement...",
+      "backToList": "Retour aux Types d'Inventaire",
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "unitOfMeasurement": "Unité de Mesure"
+      },
+      "placeholders": {
+        "code": "Entrez le code",
+        "type": "Entrez le type",
+        "unitOfMeasurement": "Entrez l'unité de mesure"
+      },
+      "cancel": "Annuler",
+      "update": "Mettre à jour le Type d'Inventaire",
+      "create": "Créer le Type d'Inventaire"
+    },
+    "detail": {
+      "loading": "Chargement...",
+      "error": "Erreur lors du chargement des détails du type d'inventaire",
+      "backToList": "Retour aux Types d'Inventaire",
+      "backToListShort": "Retour à la Liste",
+      "editButton": "Modifier",
+      "subtitle": "Détails du Type d'Inventaire",
+      "cards": {
+        "basicInfo": "Informations de Base",
+        "summary": "Résumé",
+        "details": "Détails"
+      },
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "unitOfMeasurement": "Unité de Mesure",
+        "id": "ID",
+        "measurementUnit": "Unité de Mesure"
+      }
+    }
+  },
+  "inventoryRef": {
+    "management": "Références d'Inventaire",
+    "managementDesc": "Gérer les entrées de référence d'inventaire",
+    "listTitle": "Liste des Références d'Inventaire",
+    "searchPlaceholder": "Rechercher des références d'inventaire...",
+    "addButton": "Ajouter",
+    "loading": "Chargement des références d'inventaire...",
+    "error": "Erreur lors du chargement des références d'inventaire",
+    "tryAgain": "Réessayer",
+    "columns": {
+      "id": "ID",
+      "inventoryType": "Type d'Inventaire",
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "model": "Modèle",
+      "manufacturer": "Fabricant",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "Aucune référence d'inventaire ne correspond à votre recherche.",
+    "noItems": "Aucune référence d'inventaire trouvée.",
+    "rowActions": {
+      "view": "Voir",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement la référence d'inventaire.",
+      "confirm": "Supprimer"
+    },
+    "form": {
+      "createTitle": "Créer une Nouvelle Référence d'Inventaire",
+      "editTitle": "Modifier la Référence d'Inventaire",
+      "createSubtitle": "Créer une nouvelle entrée de référence d'inventaire",
+      "editSubtitle": "Mettre à jour les informations de la référence d'inventaire",
+      "loading": "Chargement...",
+      "backToList": "Retour aux Références d'Inventaire",
+      "cardTitle": "Détails de la Référence d'Inventaire",
+      "cardDesc": "Entrez les détails de la référence d'inventaire",
+      "fields": {
+        "inventoryType": "Type d'Inventaire *",
+        "category": "Catégorie *",
+        "subcategory": "Sous-catégorie *",
+        "modelReference": "Référence de Modèle *",
+        "manufacturer": "Fabricant *"
+      },
+      "placeholders": {
+        "selectInventoryType": "Sélectionner le type d'inventaire",
+        "selectCategory": "Sélectionner la catégorie",
+        "selectSubcategory": "Sélectionner la sous-catégorie",
+        "selectModelReference": "Sélectionner la référence de modèle",
+        "selectManufacturer": "Sélectionner le fabricant"
+      },
+      "saving": "Enregistrement...",
+      "create": "Créer la Référence d'Inventaire",
+      "update": "Mettre à jour la Référence d'Inventaire",
+      "cancel": "Annuler"
+    },
+    "detail": {
+      "loading": "Chargement de la référence d'inventaire...",
+      "error": "Erreur lors du chargement de la référence d'inventaire",
+      "tryAgain": "Réessayer",
+      "backToList": "Retour aux Références d'Inventaire",
+      "heading": "Référence d'Inventaire #{{id}}",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "delete": {
+        "description": "Cette action est irréversible. Cela supprimera définitivement la référence d'inventaire.",
+        "confirm": "Supprimer"
+      },
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "details": "Détails"
+      },
+      "overviewCards": {
+        "inventoryType": "Type d'Inventaire",
+        "category": "Catégorie",
+        "subcategory": "Sous-catégorie"
+      },
+      "referenceInfo": {
+        "title": "Informations de Référence",
+        "desc": "Détails de base de la référence d'inventaire",
+        "modelReference": "Référence de Modèle",
+        "manufacturer": "Fabricant"
+      },
+      "detailedInfo": {
+        "title": "Informations Détaillées",
+        "desc": "Détails complets de la référence d'inventaire",
+        "refDetails": "Détails de Référence",
+        "id": "ID",
+        "inventoryType": "Type d'Inventaire",
+        "modelReference": "Référence de Modèle",
+        "manufacturer": "Fabricant",
+        "categoryInfo": "Informations de Catégorie",
+        "category": "Catégorie",
+        "subcategory": "Sous-catégorie"
+      }
+    }
+  },
+  "inventoryForm": {
+    "loading": "Chargement des détails de l'inventaire...",
+    "error": "Erreur lors du chargement des détails de l'inventaire",
+    "errorFallback": "Une erreur inconnue s'est produite",
+    "backToList": "Retour aux Inventaires",
+    "createTitle": "Créer un Nouvel Inventaire",
+    "editTitle": "Modifier l'Inventaire",
+    "sections": {
+      "basicInfo": "Informations de Base",
+      "categoryVendor": "Informations de Catégorie & Fournisseur",
+      "financialQuantity": "Informations Financières & Quantité",
+      "dateInfo": "Informations de Date",
+      "financial": "Informations Financières et Quantité",
+      "dates": "Informations sur les Dates"
+    },
+    "fields": {
+      "type": "Type",
+      "model": "Modèle",
+      "partNumber": "Numéro de Pièce",
+      "tag": "Étiquette",
+      "serialNumber": "Numéro de Série",
+      "purchaseNumber": "Numéro d'Achat",
+      "status": "Statut",
+      "assetCategory": "Catégorie d'Actif",
+      "assetSubcategory": "Sous-catégorie d'Actif",
+      "vendor": "Fournisseur",
+      "facility": "Installation",
+      "quantity": "Quantité",
+      "unitPrice": "Prix Unitaire",
+      "totalValue": "Valeur Totale",
+      "logValue": "Valeur Enregistrée",
+      "reorderLevel": "Niveau de Réapprovisionnement",
+      "minimumStock": "Stock Minimum",
+      "maximumStock": "Stock Maximum",
+      "purchaseDate": "Date d'Achat",
+      "manufactureDate": "Date de Fabrication",
+      "expiryDate": "Date d'Expiration",
+      "warrantyEndDate": "Date de Fin de Garantie",
+      "flags": "Indicateurs",
+      "partNo": "Numéro de Pièce"
+    },
+    "placeholders": {
+      "selectInventoryType": "Sélectionner le type d'inventaire",
+      "selectModel": "Sélectionner le modèle",
+      "selectStatus": "Sélectionner le statut",
+      "selectAssetCategory": "Sélectionner la catégorie d'actif",
+      "selectAssetCategoryFirst": "Sélectionnez d'abord une catégorie d'actif",
+      "selectAssetSubcategory": "Sélectionner la sous-catégorie d'actif",
+      "noSubcategoriesAvailable": "Aucune sous-catégorie d'actif disponible pour la catégorie sélectionnée.",
+      "selectVendor": "Sélectionner le fournisseur",
+      "selectFacility": "Sélectionner l'installation",
+      "selectType": "Sélectionner le type d'inventaire",
+      "partNo": "Entrer le numéro de pièce",
+      "tag": "Entrer l'étiquette",
+      "serialNumber": "Entrer le numéro de série",
+      "purchaseNumber": "Entrer le numéro d'achat",
+      "selectCategory": "Sélectionner la catégorie d'actifs",
+      "selectCategoryFirst": "Sélectionner d'abord une catégorie d'actifs",
+      "selectSubcategory": "Sélectionner la sous-catégorie d'actifs",
+      "quantity": "Entrer la quantité",
+      "unitPrice": "Entrer le prix unitaire",
+      "autoCalculated": "Calculé automatiquement",
+      "logValue": "Entrer la valeur du journal",
+      "reorderLevel": "Entrer le niveau de réapprovisionnement",
+      "minimumStock": "Entrer le stock minimum",
+      "maximumStock": "Entrer le stock maximum",
+      "flags": "Entrer les indicateurs ou notes"
+    },
+    "statusOptions": {
+      "available": "Disponible",
+      "lowStock": "Stock Faible",
+      "outOfStock": "En Rupture de Stock",
+      "discontinued": "Discontinué"
+    },
+    "cancel": "Annuler",
+    "update": "Mettre à jour l'Inventaire",
+    "create": "Créer l'Inventaire",
+    "updating": "Mise à jour...",
+    "creating": "Création...",
+    "management": "Registre des Inventaires",
+    "add": "Ajouter un Inventaire",
+    "searchPlaceholder": "Rechercher des inventaires...",
+    "columns": {
+      "type": "Type",
+      "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "vendor": "Fournisseur",
+      "model": "Modèle",
+      "unitPrice": "Prix Unitaire",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "noItems": "Aucun inventaire trouvé.",
+    "delete": {
+      "message": "Cette action est irréversible. Cela supprimera définitivement l'inventaire."
+    },
+    "filter": {
+      "status": "Statut",
+      "category": "Catégorie d'Actifs",
+      "vendor": "Fournisseur"
+    },
+    "filterLabels": {
+      "available": "Disponible",
+      "lowStock": "Stock Faible",
+      "outOfStock": "Rupture de Stock",
+      "discontinued": "Discontinué"
+    },
+    "subcategoryFallback": "Sous-catégorie {{id}}",
+    "validation": {
+      "typeRequired": "Le type est obligatoire",
+      "categoryRequired": "La catégorie d'actifs est obligatoire",
+      "subcategoryRequired": "La sous-catégorie d'actifs est obligatoire",
+      "modelRequired": "Le modèle est obligatoire",
+      "partNoRequired": "Le numéro de pièce est obligatoire",
+      "tagRequired": "L'étiquette est obligatoire",
+      "serialNumberRequired": "Le numéro de série est obligatoire",
+      "quantityMin": "La quantité doit être d'au moins 1",
+      "unitPriceRequired": "Le prix unitaire est obligatoire",
+      "vendorRequired": "Le fournisseur est obligatoire",
+      "purchaseNumberRequired": "Le numéro d'achat est obligatoire",
+      "purchaseDateRequired": "La date d'achat est obligatoire",
+      "facilityRequired": "L'installation est obligatoire",
+      "reorderLevelMin": "Le niveau de réapprovisionnement doit être 0 ou plus",
+      "minimumStockMin": "Le stock minimum doit être 0 ou plus",
+      "maxStockMin": "Le stock maximum doit être 0 ou plus"
+    },
+    "noSubcategoriesWarning": "Aucune sous-catégorie d'actifs disponible pour la catégorie sélectionnée.",
+    "errorLoading": "Erreur lors du chargement des détails d'inventaire",
+    "unknownError": "Une erreur inconnue est survenue"
+  },
+  "inventoryDetail": {
+    "loading": "Chargement des détails de l'inventaire...",
+    "error": "Erreur lors du chargement des détails de l'inventaire",
+    "errorFallback": "Une erreur inconnue s'est produite",
+    "notFound": "Inventaire non trouvé",
+    "backToList": "Retour aux Inventaires",
+    "editButton": "Modifier l'Inventaire",
+    "tabs": {
+      "details": "Détails de l'Article",
+      "inventory": "Stock & Niveaux",
+      "financial": "Financier",
+      "category": "Catégorie",
+      "vendor": "Fournisseur",
+      "facility": "Installation"
+    },
+    "cards": {
+      "itemInfo": "Informations de l'Article",
+      "importantDates": "Dates Importantes",
+      "currentStockLevel": "Niveau de Stock Actuel",
+      "stockThresholds": "Seuils de Stock",
+      "financialInfo": "Informations Financières",
+      "assetCategory": "Catégorie d'Actif",
+      "assetSubcategory": "Sous-catégorie d'Actif",
+      "vendorInfo": "Informations du Fournisseur",
+      "facilityInfo": "Informations de l'Installation"
+    },
+    "fields": {
+      "type": "Type",
+      "model": "Modèle",
+      "partNumber": "Numéro de Pièce",
+      "tag": "Étiquette",
+      "serialNumber": "Numéro de Série",
+      "purchaseNumber": "Numéro d'Achat",
+      "logValue": "Valeur Enregistrée",
+      "status": "Statut",
+      "flags": "Indicateurs",
+      "notSpecified": "Non spécifié",
+      "expired": "Expiré",
+      "purchaseDate": "Date d'Achat",
+      "manufactureDate": "Date de Fabrication",
+      "expiryDate": "Date d'Expiration",
+      "warrantyEndDate": "Date de Fin de Garantie",
+      "created": "Créé",
+      "lastUpdated": "Dernière Mise à Jour"
+    },
+    "stock": {
+      "currentQuantity": "Quantité Actuelle",
+      "minimumStock": "Stock Minimum",
+      "reorderLevel": "Niveau de Réapprovisionnement",
+      "maximumStock": "Stock Maximum",
+      "criticalMessage": "Niveau de stock critique - réapprovisionnement immédiat requis",
+      "level": "Niveau",
+      "levels": {
+        "critical": "Critique",
+        "low": "Faible",
+        "overstock": "Surstock",
+        "normal": "Normal"
+      },
+      "levelLabel": "Niveau {{level}}",
+      "managementTitle": "Gestion du Stock :",
+      "managementText": "Commander à nouveau lorsque la quantité atteint {{reorder}} unités. Maintenir entre {{min}} et {{max}} unités."
+    },
+    "financial": {
+      "unitPrice": "Prix Unitaire",
+      "currentQuantity": "Quantité Actuelle",
+      "totalValue": "Valeur Totale",
+      "valueCalculation": "Calcul de la Valeur",
+      "valueFormula": "{{unitPrice}} × {{quantity}} unités = {{totalValue}}"
+    },
+    "category": {
+      "type": "Type",
+      "usefulLife": "Durée de Vie Utile",
+      "years": "ans",
+      "notAvailable": "Informations de catégorie non disponibles",
+      "subcategory": "Sous-catégorie",
+      "subcategoryStatus": "Statut",
+      "parentCategory": "Catégorie Parente",
+      "subcategoryNotAvailable": "Informations de sous-catégorie non disponibles",
+      "category": "Catégorie",
+      "categoryId": "ID Catégorie : {{id}}",
+      "subcategoryId": "ID Sous-catégorie : {{id}}",
+      "activeStatus": "Actif",
+      "inactiveStatus": "Inactif"
+    },
+    "vendor": {
+      "vendor": "Fournisseur",
+      "status": "Statut",
+      "bankInfo": "Informations Bancaires",
+      "accountName": "Nom du Compte",
+      "bankName": "Nom de la Banque",
+      "accountNumber": "Numéro de Compte",
+      "currency": "Devise",
+      "notAvailable": "Informations du fournisseur non disponibles",
+      "vendorId": "ID Fournisseur : {{id}}"
+    },
+    "facility": {
+      "facility": "Installation",
+      "location": "Emplacement",
+      "clusterInfo": "Informations de Cluster",
+      "manager": "Responsable",
+      "locationNotSpecified": "Emplacement non spécifié",
+      "notAvailable": "Informations de l'installation non disponibles",
+      "regionId": "ID Région : {{id}}",
+      "managerId": "ID Gestionnaire : {{id}}",
+      "facilityId": "ID Installation : {{id}}"
+    },
+    "subtitle": "N/S : {{serialNumber}} • Étiquette : {{tag}}"
+  },
+  "manufacturer": {
+    "management": "Fabricants",
+    "addButton": "Ajouter un Fabricant",
+    "searchTitle": "Rechercher des Fabricants",
+    "searchPlaceholder": "Rechercher des fabricants par nom...",
+    "columns": {
+      "id": "ID",
+      "name": "Nom",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "loading": "Chargement des fabricants...",
+    "noItems": "Aucun fabricant trouvé",
+    "badge": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "delete": {
+      "description": "Cela supprimera définitivement \"{{name}}\".",
+      "confirm": "Supprimer"
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Fabricant",
+      "editTitle": "Modifier le Fabricant",
+      "createDesc": "Entrez les détails du fabricant ci-dessous.",
+      "editDesc": "Mettez à jour les informations du fabricant ci-dessous.",
+      "fields": {
+        "name": "Nom",
+        "active": "Actif"
+      },
+      "placeholders": {
+        "name": "Entrez le nom du fabricant"
+      },
+      "cancel": "Annuler",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "create": "Créer",
+      "update": "Mettre à jour"
+    },
+    "detail": {
+      "loading": "Chargement des détails du fabricant...",
+      "notFound": "Fabricant Non Trouvé",
+      "notFoundDesc": "Le fabricant que vous recherchez n'existe pas ou a été supprimé.",
+      "backToList": "Retour aux Fabricants",
+      "backButton": "Retour",
+      "subtitle": "Détails du Fabricant",
+      "editButton": "Modifier",
+      "activeDesc": "Ce fabricant est actuellement actif et disponible pour utilisation.",
+      "inactiveDesc": "Ce fabricant est inactif et non disponible pour utilisation.",
+      "cards": {
+        "basicInfo": "Informations de Base",
+        "statusInfo": "Informations de Statut",
+        "actions": "Actions"
+      },
+      "fields": {
+        "id": "ID",
+        "name": "Nom",
+        "status": "Statut"
+      },
+      "actions": {
+        "edit": "Modifier le Fabricant",
+        "backToList": "Retour à la Liste"
+      }
+    }
+  },
+  "model": {
+    "management": "Modèles",
+    "addButton": "Ajouter un Modèle",
+    "searchTitle": "Rechercher & Filtrer les Modèles",
+    "searchPlaceholder": "Rechercher par code ou nom...",
+    "filterBySubcategory": "Filtrer par sous-catégorie",
+    "filterByManufacturer": "Filtrer par fabricant",
+    "allSubcategories": "Toutes les Sous-catégories",
+    "allManufacturers": "Tous les Fabricants",
+    "clearFilters": "Effacer les Filtres",
+    "columns": {
+      "id": "ID",
+      "code": "Code",
+      "name": "Nom",
+      "subcategory": "Sous-catégorie",
+      "manufacturer": "Fabricant",
+      "actions": "Actions"
+    },
+    "loading": "Chargement des modèles...",
+    "noItems": "Aucun modèle trouvé",
+    "delete": {
+      "description": "Cela supprimera définitivement le modèle \"{{name}}\".",
+      "confirm": "Supprimer"
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Modèle",
+      "editTitle": "Modifier le Modèle",
+      "createDesc": "Entrez les détails du modèle ci-dessous.",
+      "editDesc": "Mettez à jour les informations du modèle ci-dessous.",
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "subcategory": "Sous-catégorie d'Actif",
+        "manufacturer": "Fabricant"
+      },
+      "placeholders": {
+        "code": "Entrez le code du modèle",
+        "name": "Entrez le nom du modèle",
+        "selectSubcategory": "Sélectionner la sous-catégorie",
+        "selectManufacturer": "Sélectionner le fabricant"
+      },
+      "cancel": "Annuler",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "create": "Créer",
+      "update": "Mettre à jour"
+    },
+    "detail": {
+      "loading": "Chargement des détails du modèle...",
+      "notFound": "Modèle Non Trouvé",
+      "notFoundDesc": "Le modèle que vous recherchez n'existe pas ou a été supprimé.",
+      "backToList": "Retour aux Modèles",
+      "backButton": "Retour",
+      "subtitle": "Détails du Modèle",
+      "editButton": "Modifier",
+      "cards": {
+        "basicInfo": "Informations de Base",
+        "relatedInfo": "Informations Connexes",
+        "actionsCard": "Actions"
+      },
+      "fields": {
+        "id": "ID",
+        "code": "Code",
+        "name": "Nom",
+        "subcategory": "Sous-catégorie",
+        "manufacturer": "Fabricant",
+        "assetSubcategory": "Sous-catégorie d'Actif"
+      },
+      "actions": {
+        "edit": "Modifier le Modèle",
+        "backToList": "Retour à la Liste"
+      }
+    }
+  },
+  "store": {
+    "management": "Gestion des Magasins",
+    "addButton": "Ajouter un Magasin",
+    "searchPlaceholder": "Rechercher par nom ou code...",
+    "facilityFilter": "Toutes les Installations",
+    "warehouseFilter": "Tous les Entrepôts",
+    "statusOptions": {
+      "all": "Tous",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "columns": {
+      "name": "Nom",
+      "code": "Code",
+      "capacity": "Capacité",
+      "facility": "Installation",
+      "warehouse": "Entrepôt",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "loading": "Chargement des magasins...",
+    "error": "Erreur lors du chargement des magasins",
+    "noItems": "Aucun magasin trouvé.",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement le magasin.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Magasin",
+      "editTitle": "Modifier le Magasin",
+      "loading": "Chargement des détails du magasin...",
+      "error": "Erreur lors du chargement des détails du magasin",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Magasins",
+      "cancel": "Annuler",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "storeDetails": "Détails du Magasin"
+      },
+      "fields": {
+        "facility": "Installation",
+        "warehouse": "Entrepôt",
+        "name": "Nom",
+        "code": "Code",
+        "capacity": "Capacité",
+        "location": "Emplacement",
+        "status": "Statut"
+      },
+      "placeholders": {
+        "selectFacility": "Sélectionner l'installation",
+        "loadingFacilities": "Chargement des installations...",
+        "noFacilities": "Aucune installation disponible",
+        "selectWarehouse": "Sélectionner l'entrepôt",
+        "loadingWarehouses": "Chargement des entrepôts...",
+        "noWarehouses": "Aucun entrepôt disponible",
+        "storeName": "Nom du magasin",
+        "storeCode": "Code du magasin (ex. JXF-20)",
+        "capacity": "Entrez la capacité",
+        "location": "Emplacement du magasin",
+        "selectStatus": "Sélectionner le statut"
+      },
+      "statusOptions": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "validation": {
+        "facilityRequired": "L'installation est requise",
+        "warehouseRequired": "L'entrepôt est requis",
+        "nameRequired": "Le nom est requis",
+        "codeRequired": "Le code est requis",
+        "capacityPositive": "La capacité doit être un nombre positif",
+        "locationRequired": "L'emplacement est requis",
+        "statusRequired": "Le statut est requis"
+      }
+    },
+    "detail": {
+      "title": "Détails du Magasin",
+      "editButton": "Modifier le Magasin",
+      "backToList": "Retour aux Magasins",
+      "loading": "Chargement des détails du magasin...",
+      "error": "Erreur lors du chargement des détails du magasin",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Magasin non trouvé",
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "facility": "Installation",
+        "warehouse": "Entrepôt",
+        "history": "Historique"
+      },
+      "overview": {
+        "storeId": "ID du Magasin",
+        "code": "Code",
+        "location": "Emplacement",
+        "capacity": "Capacité",
+        "status": "Statut",
+        "notSpecified": "Non spécifié"
+      },
+      "facilityTab": {
+        "title": "Informations de l'Installation",
+        "facilityName": "Nom de l'Installation",
+        "facilityCode": "Code de l'Installation",
+        "addressGps": "Adresse/GPS",
+        "type": "Type",
+        "cluster": "Cluster",
+        "noDetails": "Aucun détail d'installation disponible"
+      },
+      "warehouseTab": {
+        "title": "Informations de l'Entrepôt",
+        "warehouseName": "Nom de l'Entrepôt",
+        "warehouseCode": "Code de l'Entrepôt",
+        "warehouseCapacity": "Capacité de l'Entrepôt",
+        "address": "Adresse",
+        "description": "Description",
+        "noDetails": "Aucun détail d'entrepôt disponible"
+      },
+      "history": {
+        "title": "Chronologie",
+        "created": "Créé",
+        "lastUpdated": "Dernière Mise à Jour"
+      },
+      "storeId": "ID Magasin : {{id}}"
+    },
+    "facilityLabel": "Installation",
+    "warehouseLabel": "Entrepôt",
+    "statusLabel": "Statut",
+    "filterAll": "Tous"
+  },
+  "transfer": {
+    "management": "Gestion des Transferts",
+    "addButton": "Ajouter un Transfert",
+    "searchPlaceholder": "Rechercher des transferts...",
+    "filterType": "Type",
+    "filterOptions": {
+      "transfer": "Transfert",
+      "return": "Retour"
+    },
+    "loading": "Chargement des transferts...",
+    "error": "Erreur lors du chargement des transferts",
+    "tryAgain": "Réessayer",
+    "columns": {
+      "type": "Type",
+      "requestFrom": "Demande de",
+      "requestedBy": "Demandé Par",
+      "transferTo": "Transférer À",
+      "requiredDate": "Date Requise",
+      "actions": "Actions"
+    },
+    "noItems": "Aucun transfert trouvé.",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement le transfert.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression...",
+      "title": "Etes-vous sur(e) ?",
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer un Nouveau Transfert",
+      "editTitle": "Modifier le Transfert",
+      "loading": "Chargement des détails du transfert...",
+      "error": "Erreur lors du chargement des détails du transfert",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Transferts",
+      "cancel": "Annuler",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "transferDetails": "Détails du Transfert"
+      },
+      "fields": {
+        "type": "Type de Transfert",
+        "requestFrom": "Demande De (Magasin)",
+        "transferTo": "Transférer À (Magasin)",
+        "requestedBy": "Demandé Par",
+        "requiredDate": "Date Requise",
+        "category": "Catégorie d'Actif",
+        "subcategory": "Sous-catégorie d'Actif",
+        "items": "Articles à Transférer",
+        "confirmationFrom": "Confirmation Requise De"
+      },
+      "placeholders": {
+        "selectType": "Sélectionner le type",
+        "selectSourceStore": "Sélectionner le magasin source",
+        "selectDestinationStore": "Sélectionner le magasin destination",
+        "pickDate": "Choisir une date",
+        "selectCategory": "Sélectionner la catégorie",
+        "selectCategoryFirst": "Veuillez d'abord sélectionner une catégorie",
+        "selectSubcategory": "Sélectionner la sous-catégorie",
+        "currentUser": "Utilisateur Actuel"
+      },
+      "typeOptions": {
+        "transfer": "Transfert",
+        "return": "Retour"
+      },
+      "validation": {
+        "requestFromRequired": "Veuillez selectionner un magasin",
+        "requiredDateRequired": "Veuillez selectionner une date requise",
+        "requestedByRequired": "Le demandeur est obligatoire",
+        "transferToRequired": "Veuillez selectionner une destination de transfert",
+        "categoryRequired": "Veuillez selectionner une categorie",
+        "subcategoryRequired": "Veuillez selectionner une sous-categorie",
+        "itemsRequired": "Veuillez selectionner au moins un article",
+        "confirmationRequired": "Veuillez selectionner au moins un utilisateur pour la confirmation"
+      }
+    },
+    "detail": {
+      "loading": "Chargement des détails du transfert...",
+      "error": "Erreur lors du chargement des détails du transfert",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Transfert non trouvé",
+      "backToList": "Retour aux Transferts",
+      "editButton": "Modifier le Transfert",
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "items": "Articles",
+        "approvals": "Approbations",
+        "category": "Catégorie"
+      },
+      "flow": {
+        "title": "Flux de Transfert",
+        "from": "De",
+        "to": "À"
+      },
+      "requestInfo": {
+        "title": "Informations de la Demande",
+        "requestedBy": "Demandé Par",
+        "requiredDate": "Date Requise"
+      },
+      "timestamps": {
+        "title": "Horodatages",
+        "createdAt": "Créé Le",
+        "lastUpdated": "Dernière Mise à Jour"
+      },
+      "itemsTab": {
+        "title": "Articles à Transférer",
+        "noItems": "Aucun article sélectionné pour ce transfert"
+      },
+      "approvalsTab": {
+        "title": "Confirmation Requise De",
+        "noConfirmations": "Aucune confirmation requise pour ce transfert"
+      },
+      "category": {
+        "categoryTitle": "Catégorie d'Actif",
+        "subcategoryTitle": "Sous-catégorie d'Actif",
+        "fields": {
+          "category": "Catégorie",
+          "type": "Type",
+          "usefulLife": "Durée de Vie Utile",
+          "years": "ans",
+          "na": "N/A",
+          "subcategory": "Sous-catégorie",
+          "subcategoryStatus": "Statut de la Sous-catégorie",
+          "subcategoryType": "Type de Sous-catégorie"
+        }
+      }
+    },
+    "notSet": "N/A",
+    "typeOptions": {
+      "transfer": "Transfert",
+      "return": "Retour"
+    }
+  },
+  "warehouse": {
+    "management": "Gestion des Entrepôts",
+    "addButton": "Ajouter un Entrepôt",
+    "searchPlaceholder": "Rechercher par code ou nom...",
+    "filterFacility": "Installation",
+    "filterStatus": "Statut",
+    "statusOptions": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "loading": "Chargement des entrepôts...",
+    "error": "Erreur lors du chargement des entrepôts",
+    "tryAgain": "Réessayer",
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "capacity": "Capacité",
+      "facility": "Installation",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "badge": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "noItems": "Aucun entrepôt trouvé.",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement l'entrepôt.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression..."
+    },
+    "form": {
+      "createTitle": "Créer un Nouvel Entrepôt",
+      "editTitle": "Modifier l'Entrepôt",
+      "loading": "Chargement des détails de l'entrepôt...",
+      "error": "Erreur lors du chargement des détails de l'entrepôt",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Entrepôts",
+      "cancel": "Annuler",
+      "update": "Mettre à jour l'Entrepôt",
+      "create": "Créer l'Entrepôt",
+      "sections": {
+        "warehouseInfo": "Informations de l'Entrepôt"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "capacity": "Capacité",
+        "facility": "Installation",
+        "isActive": "Est Actif",
+        "address": "Adresse",
+        "description": "Description"
+      },
+      "placeholders": {
+        "code": "Entrez le code de l'entrepôt",
+        "name": "Entrez le nom de l'entrepôt",
+        "capacity": "Entrez la capacité de l'entrepôt",
+        "selectFacility": "Sélectionner l'installation",
+        "address": "Entrez l'adresse de l'entrepôt",
+        "description": "Entrez la description de l'entrepôt"
+      },
+      "validation": {
+        "codeRequired": "Le code est requis",
+        "nameRequired": "Le nom est requis",
+        "descriptionRequired": "La description est requise",
+        "addressRequired": "L'adresse est requise",
+        "capacityRequired": "La capacité est requise",
+        "facilityRequired": "L'installation est requise"
+      }
+    },
+    "detail": {
+      "loading": "Chargement des détails de l'entrepôt...",
+      "error": "Erreur lors du chargement des détails de l'entrepôt",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Entrepôt non trouvé",
+      "requestedNotFound": "L'entrepôt demandé est introuvable.",
+      "backToList": "Retour aux Entrepôts",
+      "editButton": "Modifier l'Entrepôt",
+      "noDescription": "Aucune description fournie",
+      "cards": {
+        "warehouseInfo": "Informations de l'Entrepôt",
+        "facilityInfo": "Informations de l'Installation",
+        "warehouseSummary": "Résumé de l'Entrepôt"
+      },
+      "cardDescs": {
+        "warehouseInfo": "Détails et spécifications essentiels de cet entrepôt",
+        "facilityInfo": "Détails de l'installation associée"
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Nom",
+        "capacity": "Capacité",
+        "address": "Adresse",
+        "status": "Statut",
+        "warehouseId": "ID de l'Entrepôt",
+        "facilityName": "Nom de l'Installation",
+        "facilityCode": "Code de l'Installation",
+        "type": "Type",
+        "location": "Emplacement",
+        "cluster": "Cluster",
+        "manager": "Responsable"
+      },
+      "badge": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "facilityNotAvailable": "Informations de l'installation non disponibles",
+      "summary": {
+        "totalCapacity": "Capacité Totale",
+        "capacityUnits": "unités",
+        "status": "Statut",
+        "statusActive": "Prêt pour utilisation",
+        "statusInactive": "Non opérationnel",
+        "facility": "Installation",
+        "facilityDesc": "Installation parente",
+        "warehouseId": "ID de l'Entrepôt",
+        "warehouseIdDesc": "Identifiant système",
+        "statusOperational": "Opérationnel"
+      },
+      "codeAndId": "{{code}} • ID : {{id}}",
+      "regionId": "ID Région : {{region}}",
+      "managerId": "ID : {{id}}",
+      "locationNotSpecified": "Emplacement non spécifié",
+      "facilityIdLabel": "ID Installation : {{id}}"
+    },
+    "add": "Ajouter un Entrepôt",
+    "filter": {
+      "facility": "Installation",
+      "status": "Statut"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    }
+  },
+  "item": {
+    "management": "Gestion des Articles",
+    "addButton": "Ajouter un Article",
+    "searchPlaceholder": "Rechercher des articles...",
+    "loading": "Chargement des articles...",
+    "error": "Erreur lors du chargement des articles",
+    "tryAgain": "Réessayer",
+    "columns": {
+      "name": "Nom",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "noItems": "Aucun article trouvé.",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement l'article.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression...",
+      "message": "Cette action est irréversible. Cela supprimera définitivement l'élément."
+    },
+    "form": {
+      "createTitle": "Créer un Nouvel Article",
+      "editTitle": "Modifier l'Article",
+      "loading": "Chargement des détails de l'article...",
+      "error": "Erreur lors du chargement des détails de l'article",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Articles",
+      "cancel": "Annuler",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "sections": {
+        "itemDetails": "Détails de l'Article"
+      },
+      "fields": {
+        "name": "Nom",
+        "description": "Description"
+      },
+      "placeholders": {
+        "name": "Nom de l'article",
+        "description": "Entrez la description de l'article"
+      },
+      "validation": {
+        "nameRequired": "Le nom est obligatoire"
+      }
+    },
+    "detail": {
+      "title": "Détails de l'Article",
+      "editButton": "Modifier l'Article",
+      "backToList": "Retour aux Articles",
+      "loading": "Chargement des détails de l'article...",
+      "error": "Erreur lors du chargement des détails de l'article",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Article non trouvé",
+      "cards": {
+        "itemInfo": "Informations de l'Article"
+      },
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "notProvided": "Non fourni"
+      }
+    },
+    "add": "Ajouter un Élément"
+  },
+  "itemRequest": {
+    "management": "Demandes d'Articles",
+    "managementDesc": "Gérer les demandes d'articles et suivre leur statut",
+    "addButton": "Ajouter une Demande d'Article",
+    "searchPlaceholder": "Rechercher par nom, description, magasin ou demandeur...",
+    "loading": "Chargement des demandes d'articles...",
+    "error": "Erreur lors du chargement des demandes d'articles",
+    "tryAgain": "Réessayer",
+    "filters": {
+      "title": "Filtres & Recherche",
+      "filterByType": "Filtrer par type",
+      "filterByStore": "Filtrer par magasin",
+      "allTypes": "Tous les Types",
+      "allStores": "Tous les Magasins"
+    },
+    "typeOptions": {
+      "for_use": "Pour Utilisation",
+      "for_store": "Pour Magasin"
+    },
+    "columns": {
+      "name": "Nom",
+      "type": "Type",
+      "requestFrom": "Demande De",
+      "requestedBy": "Demandé Par",
+      "requiredDate": "Date Requise",
+      "actions": "Actions"
+    },
+    "noItemsFiltered": "Aucune demande d'article trouvée correspondant à vos critères.",
+    "noItems": "Aucune demande d'article disponible.",
+    "delete": {
+      "description": "Cette action est irréversible. Cela supprimera définitivement la demande d'article et la retirera de nos serveurs.",
+      "confirm": "Supprimer",
+      "deleting": "Suppression...",
+      "title": "Etes-vous sur(e) ?",
+      "cancel": "Annuler"
+    },
+    "form": {
+      "createTitle": "Créer une Demande d'Article",
+      "editTitle": "Modifier la Demande d'Article",
+      "createSubtitle": "Remplissez les détails pour créer une nouvelle demande d'article",
+      "editSubtitle": "Mettre à jour les informations de la demande d'article",
+      "loading": "Chargement des détails de la demande d'article...",
+      "error": "Erreur lors du chargement des détails de la demande d'article",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "backToList": "Retour aux Demandes d'Articles",
+      "cancel": "Annuler",
+      "update": "Mettre à jour la Demande",
+      "create": "Créer la Demande",
+      "updating": "Mise à jour...",
+      "creating": "Création...",
+      "sections": {
+        "basicInfo": "Informations de Base",
+        "comments": "Commentaires Supplémentaires",
+        "items": "Articles Demandés"
+      },
+      "fields": {
+        "name": "Nom",
+        "requestFrom": "Demande De",
+        "requestedBy": "Demandé Par",
+        "requiredDate": "Date Requise",
+        "department": "Département",
+        "type": "Type",
+        "facility": "Installation",
+        "building": "Bâtiment",
+        "approvedBy": "Approuvé Par",
+        "description": "Description",
+        "comment": "Commentaire",
+        "item": "Article",
+        "quantity": "Quantité",
+        "category": "Catégorie",
+        "subcategory": "Sous-catégorie",
+        "model": "Modèle",
+        "itemDescription": "Description de l'Article",
+        "itemLabel": "Article {{index}}"
+      },
+      "placeholders": {
+        "selectStore": "Sélectionner le magasin",
+        "loadingStores": "Chargement des magasins...",
+        "loadingDepartments": "Chargement des départements...",
+        "selectDepartment": "Sélectionner le département",
+        "selectType": "Sélectionner le type",
+        "selectFacility": "Sélectionner l'installation",
+        "loadingFacilities": "Chargement des installations...",
+        "selectBuilding": "Sélectionner le bâtiment",
+        "loadingBuildings": "Chargement des bâtiments...",
+        "selectApprover": "Sélectionner l'approbateur",
+        "loadingUsers": "Chargement des utilisateurs...",
+        "selectItem": "Sélectionner l'article",
+        "loadingItems": "Chargement des articles...",
+        "selectCategory": "Sélectionner la catégorie",
+        "loadingCategories": "Chargement des catégories...",
+        "selectSubcategory": "Sélectionner la sous-catégorie",
+        "loadingSubcategories": "Chargement des sous-catégories...",
+        "selectModel": "Sélectionner le modèle",
+        "loadingModels": "Chargement des modèles...",
+        "requestName": "Entrer le nom de la demande",
+        "requestDescription": "Entrer la description de la demande",
+        "additionalComments": "Entrer des commentaires supplementaires ou instructions speciales",
+        "itemDescription": "Decrire les exigences specifiques de l'article"
+      },
+      "typeOptions": {
+        "for_use": "Pour Utilisation",
+        "for_store": "Pour Magasin"
+      },
+      "addItemButton": "Ajouter un Article",
+      "validation": {
+        "nameRequired": "Le nom est obligatoire",
+        "requestFromRequired": "La source de la demande est obligatoire",
+        "requestedByRequired": "Le demandeur est obligatoire",
+        "requiredDateRequired": "La date requise est obligatoire",
+        "typeRequired": "Le type est obligatoire",
+        "approvedByRequired": "L'approbateur est obligatoire",
+        "descriptionRequired": "La description est obligatoire",
+        "commentRequired": "Le commentaire est obligatoire",
+        "itemsRequired": "Au moins un article est requis",
+        "itemRequired": "L'article est obligatoire",
+        "quantityMin": "La quantite doit etre d'au moins 1",
+        "categoryRequired": "La categorie est obligatoire",
+        "subcategoryRequired": "La sous-categorie est obligatoire",
+        "modelRequired": "Le modele est obligatoire"
+      }
+    },
+    "detail": {
+      "loading": "Chargement des détails de la demande d'article...",
+      "error": "Erreur lors du chargement des détails de la demande d'article",
+      "errorFallback": "Une erreur inconnue s'est produite",
+      "notFound": "Demande d'article non trouvée",
+      "backToList": "Retour aux Demandes d'Articles",
+      "editButton": "Modifier la Demande",
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "people": "Personnes & Localisation",
+        "items": "Articles",
+        "comments": "Détails & Commentaires"
+      },
+      "overview": {
+        "basicInfo": "Informations de Base",
+        "quickStats": "Statistiques Rapides",
+        "requestSummary": "Résumé de la Demande",
+        "fields": {
+          "requestName": "Nom de la Demande",
+          "requestType": "Type de Demande",
+          "requiredDate": "Date Requise",
+          "requestFrom": "Demande De",
+          "requestId": "ID de la Demande",
+          "totalItems": "Total des Articles",
+          "totalQuantity": "Quantité Totale"
+        },
+        "store": "Magasin :",
+        "department": "Département :",
+        "requester": "Demandeur :",
+        "approver": "Approbateur :"
+      },
+      "people": {
+        "title": "Personnes Impliquées",
+        "requestedBy": "Demandé Par",
+        "approvedBy": "Approuvé Par",
+        "location": "Détails de Localisation",
+        "department": "Département",
+        "facility": "Installation",
+        "building": "Bâtiment"
+      },
+      "itemsTab": {
+        "itemLabel": "Article {{index}}",
+        "fields": {
+          "itemId": "ID de l'Article",
+          "category": "Catégorie",
+          "subcategory": "Sous-catégorie",
+          "model": "Modèle",
+          "description": "Description"
+        },
+        "noItems": "Aucun article spécifié pour cette demande."
+      },
+      "comments": {
+        "descriptionTitle": "Description",
+        "commentsTitle": "Commentaires"
+      }
+    },
+    "storeIdFallback": "ID Magasin : {{id}}",
+    "userIdFallback": "ID Utilisateur : {{id}}",
+    "noLocation": "Aucun emplacement"
+  },
+  "movement": {
+    "title": "Historique des Mouvements",
+    "placeholder": "Le contenu de l'historique des mouvements sera ici"
   }
 }

@@ -14,8 +14,10 @@ import { useRequestquotationsQuery, useDeleteRequestquotation } from '@/hooks/re
 import { Requestquotation } from '@/types/requestquotation';
 import { RequestquotationQueryParams } from '@/services/requestquotationsApi';
 import { format } from 'date-fns';
+import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
 const RequestquotationManagement = () => {
+  const { t } = useTypedTranslation('procurement');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -133,7 +135,7 @@ const RequestquotationManagement = () => {
       <div className="flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading request quotations...</p>
+          <p className="text-sm text-muted-foreground">{t('requestQuotation.loading')}</p>
         </div>
       </div>
     );
@@ -143,9 +145,9 @@ const RequestquotationManagement = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-xl">Error loading request quotations</div>
+        <div className="text-red-500 text-xl">{t('requestQuotation.error')}</div>
         <Button onClick={() => refetch()} variant="outline">
-          Try Again
+          {t('common:actions.tryAgain')}
         </Button>
       </div>
     );
@@ -158,9 +160,9 @@ const RequestquotationManagement = () => {
       </Helmet> */}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Request Quotation Management</h1>
+        <h1 className="text-2xl font-bold">{t('requestQuotation.management')}</h1>
         <Button onClick={handleAddRequestquotation}>
-          <Plus className="mr-2 h-4 w-4" /> Add Request Quotation
+          <Plus className="mr-2 h-4 w-4" /> {t('requestQuotation.add')}
         </Button>
       </div>
 
@@ -168,7 +170,7 @@ const RequestquotationManagement = () => {
       <div className="mb-6">
         <SearchFilter 
           onSearch={handleSearch}
-          placeholder="Search by type, title, facility, or requester..."
+          placeholder={t('requestQuotation.searchPlaceholder')}
           initialSearchValue={searchValue}
         />
       </div>
@@ -192,7 +194,7 @@ const RequestquotationManagement = () => {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No request quotations found.
+                    {t('requestQuotation.noItems')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -268,9 +270,9 @@ const RequestquotationManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the request quotation.
+              {t('requestQuotation.deleteMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -283,7 +285,7 @@ const RequestquotationManagement = () => {
               {deleteRequestquotationMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('common:status.deleting')}
                 </>
               ) : (
                 'Delete'

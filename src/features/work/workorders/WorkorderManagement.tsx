@@ -1,6 +1,6 @@
 // src/features/work/workorders/WorkorderManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,8 +19,11 @@ const WorkorderManagement = () => {
   const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workorderToDelete, setWorkorderToDelete] = useState<string | null>(null);
+
+  const urlIsReviewed = searchParams.get('is_reviewed');
 
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState('');
@@ -61,6 +64,18 @@ const WorkorderManagement = () => {
   const filteredData = useMemo(() => {
     let results = [...userIsolatedResults];
 
+    if (urlIsReviewed !== null) {
+      const isReviewed = urlIsReviewed === 'true';
+      results = results.filter(workorder => {
+        const hasReviewers = (workorder.reviewers ?? []).length > 0;
+        if (hasReviewers) {
+          // Use the dedicated is_reviewed boolean — approval_status may stay 'Pending' after review
+          return isReviewed ? workorder.is_reviewed === true : workorder.is_reviewed === false;
+        }
+        return !isReviewed;
+      });
+    }
+
     // Approval status filter
     if (statusFilter && statusFilter !== 'all') {
       results = results.filter(workorder => workorder.approval_status === statusFilter);
@@ -88,7 +103,7 @@ const WorkorderManagement = () => {
     }
 
     return results;
-  }, [userIsolatedResults, searchValue, typeFilter, priorityFilter, statusFilter]);
+  }, [userIsolatedResults, searchValue, typeFilter, priorityFilter, statusFilter, urlIsReviewed]);
 
   // Client-side pagination
   const paginatedData = useMemo(() => {

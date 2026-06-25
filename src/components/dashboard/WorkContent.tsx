@@ -1,7 +1,7 @@
-import { 
-  Mail, 
-  Clock, 
-  AlertCircle, 
+import {
+  Mail,
+  Clock,
+  AlertCircle,
   FilePlus,
   FolderOpen,
   DollarSign,
@@ -14,13 +14,16 @@ import {
   Banknote,
   ClipboardList,
   ShoppingCart,
-  Wrench
+  Wrench,
+  ClipboardCheck
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import { useDashboardQuery } from "@/hooks/dashboard/useDashboardQueries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Icon mapping for different data types
 const getIconForLabel = (label: string, section: string) => {
@@ -150,6 +153,9 @@ const DashboardCardSkeleton = () => (
 const WorkContent = () => {
   const { t } = useTypedTranslation('dashboard');
   const { data, isLoading } = useDashboardQuery();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isReviewer = (user?.role || '').toUpperCase() === 'REVIEWER';
 
   if (isLoading) {
     return (
@@ -226,6 +232,51 @@ const WorkContent = () => {
           </div>
         </div>
       </div>
+
+      {isReviewer && (
+        <div>
+          <h2 className="text-lg font-semibold mb-4">MY REVIEWED ITEMS:</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                label: 'Work Requests Reviewed',
+                description: 'Work requests you have reviewed',
+                path: '/dashboard/work/requests?is_reviewed=true',
+                icon: <FileText className="h-8 w-8 text-blue-500" />,
+                bg: 'bg-blue-50',
+              },
+              {
+                label: 'Work Orders Reviewed',
+                description: 'Work orders you have reviewed',
+                path: '/dashboard/work/orders?is_reviewed=true',
+                icon: <ShoppingCart className="h-8 w-8 text-green-500" />,
+                bg: 'bg-green-50',
+              },
+              {
+                label: 'Work Completions Reviewed',
+                description: 'Work completion certificates you have reviewed',
+                path: '/dashboard/work/work-order-completions?is_reviewed=true',
+                icon: <ClipboardCheck className="h-8 w-8 text-purple-500" />,
+                bg: 'bg-purple-50',
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                onClick={() => navigate(item.path)}
+                className={`${item.bg} rounded-lg p-6 border border-gray-100 cursor-pointer hover:shadow-md transition-shadow`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-800">{item.label}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                  </div>
+                  <div className="rounded-full p-2">{item.icon}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="workRequest" className="space-y-4">
         <TabsList>

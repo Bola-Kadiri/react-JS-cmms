@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -52,7 +52,10 @@ const WorkordercompletionManagement = () => {
   const { t } = useTypedTranslation('work');
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const [searchParams] = useSearchParams();
+
+  const urlIsReviewed = searchParams.get('is_reviewed');
+
   // State for pagination, search, and filtering
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,6 +110,18 @@ const WorkordercompletionManagement = () => {
 
     let filteredResults = [...userIsolatedResults];
 
+    if (urlIsReviewed !== null) {
+      const isReviewed = urlIsReviewed === 'true';
+      filteredResults = filteredResults.filter(completion => {
+        const hasReviewers = (completion.reviewers ?? []).length > 0;
+        if (hasReviewers) {
+          // Use the dedicated is_reviewed boolean — approval_status may stay 'Pending' after review
+          return isReviewed ? completion.is_reviewed === true : completion.is_reviewed === false;
+        }
+        return !isReviewed;
+      });
+    }
+
     // Apply search filter
     if (debouncedSearchQuery.trim()) {
       const query = debouncedSearchQuery.toLowerCase().trim();
@@ -149,7 +164,7 @@ const WorkordercompletionManagement = () => {
       startItem,
       endItem
     };
-  }, [userIsolatedResults, isLoading, debouncedSearchQuery, approvalStatusFilter, currentPage, pageSize]);
+  }, [userIsolatedResults, isLoading, debouncedSearchQuery, approvalStatusFilter, currentPage, pageSize, urlIsReviewed]);
 
   // Handle search
   const handleSearch = (value: string) => {

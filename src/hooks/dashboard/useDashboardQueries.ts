@@ -13,26 +13,25 @@ export const dashboardKeys = {
 // Default/placeholder dashboard data
 const defaultDashboardData: DashboardData = {
   workspace_title: "Dashboard",
+  current_date: "",
   user_info: {
     name: "User",
     role: "Loading..."
   },
-  navigation_tabs: ["WORK REQUEST", "WORK ORDER", "WORK COMPLETION", "INVOICES", "PAYMENTS REQUISITION"],
+  navigation_tabs: ["WORK REQUEST", "WORK ORDER", "WORK COMPLETION", "INVOICES", "PAYMENT REQUISITION"],
   summary_cards: {
     work_request: [],
-    work_order: []
+    work_order: [],
+    work_completion: [],
+    invoices: [],
+    payment_requisition: [],
   },
   chart_data: {
     labels: [],
-    datasets: []
+    datasets: [],
+    current_year: new Date().getFullYear(),
+    available_years: [new Date().getFullYear()],
   },
-  status_categories: {
-    work_request: [],
-    work_order: [],
-    work_completion_certificate: [],
-    payment_invoice: [],
-    payment_requisition: []
-  }
 };
 
 // Hook for fetching dashboard data
@@ -40,7 +39,7 @@ export const useDashboardQuery = () => {
   return useQuery({
     queryKey: dashboardKeys.all,
     queryFn: fetchDashboardData,
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 0, // Always fetch fresh data so counts update immediately after any action
     placeholderData: defaultDashboardData, // Provide fallback data
     retry: 3, // Retry failed requests
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff

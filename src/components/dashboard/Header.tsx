@@ -1,6 +1,7 @@
 // src/components/dashboard/Header.tsx
 import { useState } from "react";
 import { Bell, MessageSquare } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -131,34 +132,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-          {/* <Button variant="ghost" size="icon" className="relative text-white hover:bg-green-700">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-amber-500 text-white" variant="destructive">
-                {notificationItems.length}
-              </Badge>
-            </Button> */}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>{t('common:notifications')}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="max-h-96 overflow-auto">
-              {notificationItems.map((item) => (
-                <DropdownMenuItem key={item} className="flex flex-col items-start py-2">
-                  <div className="font-medium">{t('dashboard:cards.title.new')} {t('dashboard:navigation.work')} {t('dashboard:cards.subtitle.request')}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('dashboard:cards.subtitle.request')} #{43 + item} {t('common:requiresAttention')}
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-green-700 font-medium">
-              {t('common:viewAll')} {t('common:notifications')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

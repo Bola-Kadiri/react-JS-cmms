@@ -30,147 +30,68 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
         <head>
           <title>Work Request - ${workrequest.work_request_number}</title>
           <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              padding: 40px;
-              color: #333;
-            }
-            .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              margin-bottom: 30px;
-              padding-bottom: 20px;
-              border-bottom: 2px solid #333;
-            }
-            .logo {
-              font-size: 24px;
-              font-weight: bold;
-              color: #2d6a4f;
-            }
-            .company-info {
-              text-align: right;
-              font-size: 12px;
-              line-height: 1.6;
-            }
-            .company-info strong {
-              font-size: 14px;
-              display: block;
-              margin-bottom: 5px;
-            }
-            .title {
-              text-align: center;
-              font-size: 20px;
-              font-weight: bold;
-              margin: 30px 0;
-              text-transform: uppercase;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 30px;
-            }
-            table.details-table td {
-              padding: 12px;
-              border: 1px solid #ddd;
-              vertical-align: top;
-            }
-            table.details-table td:first-child {
-              font-weight: bold;
-              background-color: #f8f9fa;
-              width: 180px;
-            }
-            .approvals-section {
-              margin-top: 40px;
-            }
-            .approvals-title {
-              font-size: 16px;
-              font-weight: bold;
-              margin-bottom: 20px;
-              text-transform: uppercase;
-            }
-            table.approvals-table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            table.approvals-table th {
-              background-color: #f8f9fa;
-              padding: 12px;
-              text-align: left;
-              border: 1px solid #ddd;
-              font-weight: bold;
-            }
-            table.approvals-table td {
-              padding: 12px;
-              border: 1px solid #ddd;
-            }
-            .signature-section {
-              margin-top: 60px;
-              display: flex;
-              justify-content: space-between;
-            }
-            .signature-box {
-              width: 30%;
-            }
-            .signature-box strong {
-              display: block;
-              margin-bottom: 40px;
-            }
-            .signature-line {
-              border-top: 1px solid #333;
-              padding-top: 5px;
-              font-size: 12px;
-            }
-            @media print {
-              body {
-                padding: 20px;
-              }
-              .no-print {
-                display: none;
-              }
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; padding: 40px; color: #1a1a1a; font-size: 13px; }
+            .doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 3px solid #16a34a; }
+            .doc-logo { font-size: 22px; font-weight: 800; color: #15803d; letter-spacing: -0.5px; }
+            .doc-logo span { display: block; font-size: 11px; font-weight: 400; color: #6b7280; margin-top: 2px; letter-spacing: 0; }
+            .doc-meta { text-align: right; font-size: 11px; line-height: 1.7; color: #4b5563; }
+            .doc-meta strong { font-size: 13px; color: #111827; display: block; margin-bottom: 2px; }
+            .doc-title { text-align: center; font-size: 18px; font-weight: 700; margin: 24px 0 6px; text-transform: uppercase; letter-spacing: 1px; color: #111827; }
+            .doc-ref { text-align: center; font-size: 13px; color: #6b7280; margin-bottom: 24px; }
+            .section-header { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 8px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #15803d; margin: 24px 0 0; }
+            table.details-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+            table.details-table td { padding: 10px 14px; border: 1px solid #e5e7eb; vertical-align: top; font-size: 13px; }
+            table.details-table td:first-child { font-weight: 600; background-color: #f9fafb; width: 200px; color: #374151; }
+            table.details-table td:last-child { color: #111827; }
+            .po-section table.details-table td:first-child { background-color: #f0fdf4; }
+            table.approvals-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+            table.approvals-table th { background-color: #f9fafb; padding: 10px 14px; text-align: left; border: 1px solid #e5e7eb; font-weight: 700; font-size: 12px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+            table.approvals-table td { padding: 10px 14px; border: 1px solid #e5e7eb; font-size: 13px; }
+            .badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+            .badge-approved { background: #dcfce7; color: #15803d; }
+            .badge-pending { background: #fef9c3; color: #92400e; }
+            .badge-rejected { background: #fee2e2; color: #991b1b; }
+            .signature-section { margin-top: 56px; display: flex; justify-content: space-between; gap: 20px; }
+            .signature-box { flex: 1; }
+            .signature-box strong { display: block; margin-bottom: 36px; font-size: 12px; color: #374151; }
+            .signature-line { border-top: 1px solid #9ca3af; padding-top: 6px; font-size: 11px; color: #6b7280; }
+            .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 10px; color: #9ca3af; }
+            @media print { body { padding: 20px; } .no-print { display: none; } }
           </style>
         </head>
-        <body>
-          ${printContent.innerHTML}
-        </body>
+        <body>${printContent.innerHTML}</body>
       </html>
     `);
 
     printWindow.document.close();
     printWindow.focus();
-
-    // Wait for content to load before printing
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
   };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    try {
-      return format(new Date(dateString), 'MMM dd, yyyy');
-    } catch (e) {
-      return 'Invalid date';
-    }
+    try { return format(new Date(dateString), 'MMM dd, yyyy'); }
+    catch { return 'Invalid date'; }
   };
 
-  const formatCurrency = (cost: string, currency: string) => {
-    const symbols = {
-      'USD': '$',
-      'EUR': '€',
-      'NGN': '₦'
-    };
-    
-    const symbol = symbols[currency as keyof typeof symbols] || '';
-    return `${symbol}${cost}`;
+  const formatCurrency = (cost: string | null, currency: string) => {
+    if (!cost) return 'N/A';
+    const symbols: Record<string, string> = { USD: '$', EUR: '€', NGN: '₦' };
+    const symbol = symbols[currency] || '';
+    const num = parseFloat(cost);
+    return `${symbol}${isNaN(num) ? cost : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
+
+  const getStatusBadgeStyle = (status: string) => {
+    if (!status) return { background: '#f3f4f6', color: '#374151', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 };
+    const s = status.toLowerCase();
+    if (s.includes('approved') || s.includes('fully')) return { background: '#dcfce7', color: '#15803d', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 };
+    if (s.includes('rejected')) return { background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 };
+    return { background: '#fef9c3', color: '#92400e', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 };
+  };
+
+  const hasPO = !!workrequest.po_number;
 
   return (
     <Dialog>
@@ -184,29 +105,27 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
         <DialogHeader>
           <DialogTitle>Work Request Print Preview</DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex justify-end gap-2 mb-4 no-print">
           <Button onClick={handlePrint} className="bg-green-600 hover:bg-green-700">
-            <Printer className="mr-2 h-4 w-4" />
-            Print
+            <Printer className="mr-2 h-4 w-4" /> Print
           </Button>
           <Button onClick={handlePrint} variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
+            <Download className="mr-2 h-4 w-4" /> Download PDF
           </Button>
         </div>
 
         {/* Printable Content */}
-        <div ref={printRef} className="bg-white p-8">
+        <div ref={printRef} style={{ background: '#fff', padding: '32px', fontFamily: 'Arial, sans-serif', fontSize: '13px', color: '#1a1a1a' }}>
+
           {/* Header */}
-          <div className="header">
-            <div className="logo">
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2d6a4f' }}>
-                Alpha Mead Group
-              </div>
+          <div className="doc-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', paddingBottom: '20px', borderBottom: '3px solid #16a34a' }}>
+            <div className="doc-logo" style={{ fontSize: '22px', fontWeight: 800, color: '#15803d' }}>
+              Alpha Mead Group
+              <span style={{ display: 'block', fontSize: '11px', fontWeight: 400, color: '#6b7280', marginTop: '2px' }}>Facility Management Services</span>
             </div>
-            <div className="company-info">
-              <strong>Alpha Mead Group</strong>
+            <div className="doc-meta" style={{ textAlign: 'right', fontSize: '11px', lineHeight: '1.7', color: '#4b5563' }}>
+              <strong style={{ fontSize: '13px', color: '#111827', display: 'block', marginBottom: '2px' }}>Alpha Mead Group</strong>
               <div>6 Mobolaji Johnson Ave, Ikoyi, Lagos</div>
               <div>https://alphamead.com/</div>
               <div>0700 ALPHA MEAD, +234700257426323</div>
@@ -214,96 +133,137 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
           </div>
 
           {/* Title */}
-          <div className="title">WORK REQUEST DETAILS</div>
+          <div className="doc-title" style={{ textAlign: 'center', fontSize: '18px', fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '1px', color: '#111827' }}>
+            Work Request Details
+          </div>
+          <div className="doc-ref" style={{ textAlign: 'center', fontSize: '13px', color: '#6b7280', marginBottom: '24px' }}>
+            Ref: {workrequest.work_request_number} &nbsp;|&nbsp; Generated: {format(new Date(), 'MMM dd, yyyy')}
+          </div>
 
-          {/* Details Table */}
-          <table className="details-table">
+          {/* Request Details */}
+          <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginBottom: '0' }}>
+            Request Information
+          </div>
+          <table className="details-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '0' }}>
             <tbody>
               <tr>
-                <td>Request Number</td>
-                <td>{workrequest.work_request_number}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', width: '200px', color: '#374151' }}>Request Number</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.work_request_number}</td>
               </tr>
               <tr>
-                <td>Type</td>
-                <td>{workrequest.type}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Type</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.type}</td>
               </tr>
               <tr>
-                <td>Priority</td>
-                <td>{workrequest.priority}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Priority</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.priority}</td>
               </tr>
               <tr>
-                <td>Category</td>
-                <td>{workrequest.category_detail?.title || 'N/A'}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Category</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.category_detail?.name || 'N/A'}</td>
               </tr>
               <tr>
-                <td>Subcategory</td>
-                <td>{workrequest.subcategory_detail?.title || 'N/A'}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Subcategory</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.subcategory_detail?.title || 'N/A'}</td>
               </tr>
               <tr>
-                <td>Department</td>
-                <td>{workrequest.department_detail?.name || 'N/A'}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Department</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.department_detail?.name || 'N/A'}</td>
               </tr>
               <tr>
-                <td>Facility</td>
-                <td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Facility</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>
                   {workrequest.facility_detail?.name || 'N/A'}
                   {workrequest.facility_detail?.code && ` (${workrequest.facility_detail.code})`}
                 </td>
               </tr>
               <tr>
-                <td>Description</td>
-                <td>{workrequest.description || 'No description provided'}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Description</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.description || 'No description provided'}</td>
               </tr>
               <tr>
-                <td>Cost</td>
-                <td>{formatCurrency(workrequest.cost, workrequest.currency)}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Estimated Cost</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{formatCurrency(workrequest.cost, workrequest.currency)}</td>
               </tr>
               <tr>
-                <td>Currency</td>
-                <td>{workrequest.currency}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Currency</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.currency}</td>
               </tr>
               <tr>
-                <td>Approval Status</td>
-                <td>{workrequest.approval_status}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Approval Status</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>
+                  <span style={getStatusBadgeStyle(workrequest.approval_status)}>{workrequest.approval_status}</span>
+                </td>
               </tr>
               <tr>
-                <td>Created Date</td>
-                <td>{formatDate(workrequest.created_at)}</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Created Date</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{formatDate(workrequest.created_at)}</td>
               </tr>
               {workrequest.follow_up_notes && (
                 <tr>
-                  <td>Follow-up Notes</td>
-                  <td>{workrequest.follow_up_notes}</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Follow-up Notes</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.follow_up_notes}</td>
                 </tr>
               )}
             </tbody>
           </table>
 
+          {/* Purchase Order Section — only shown when procurement has approved */}
+          {hasPO && (
+            <div className="po-section">
+              <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginTop: '24px', marginBottom: '0' }}>
+                Purchase Order (PO)
+              </div>
+              <table className="details-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f0fdf4', width: '200px', color: '#374151' }}>PO Number</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827', fontWeight: 600 }}>{workrequest.po_number}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f0fdf4', color: '#374151' }}>PO Amount</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#15803d', fontWeight: 700, fontSize: '14px' }}>
+                      {formatCurrency(workrequest.po_amount, workrequest.currency)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f0fdf4', color: '#374151' }}>PO Vendor</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>
+                      {workrequest.po_vendor_detail?.name || workrequest.vendor_detail?.name || 'N/A'}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
           {/* Asset Information */}
           {workrequest.asset_detail && (
             <>
-              <div className="approvals-title">ASSET INFORMATION</div>
-              <table className="details-table">
+              <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginTop: '24px', marginBottom: '0' }}>
+                Asset Information
+              </div>
+              <table className="details-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   <tr>
-                    <td>Asset Name</td>
-                    <td>{workrequest.asset_detail.asset_name || 'N/A'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', width: '200px', color: '#374151' }}>Asset Name</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.asset_detail.asset_name || 'N/A'}</td>
                   </tr>
                   <tr>
-                    <td>Asset Type</td>
-                    <td>{workrequest.asset_detail.asset_type || 'N/A'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Asset Type</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.asset_detail.asset_type || 'N/A'}</td>
                   </tr>
                   <tr>
-                    <td>Asset Tag</td>
-                    <td>{workrequest.asset_detail.asset_tag || 'N/A'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Asset Tag</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.asset_detail.asset_tag || 'N/A'}</td>
                   </tr>
                   <tr>
-                    <td>Serial Number</td>
-                    <td>{workrequest.asset_detail.serial_number || 'N/A'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Serial Number</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.asset_detail.serial_number || 'N/A'}</td>
                   </tr>
                   <tr>
-                    <td>Condition</td>
-                    <td>{workrequest.asset_detail.condition || 'N/A'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Condition</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.asset_detail.condition || 'N/A'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -311,31 +271,27 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
           )}
 
           {/* Vendor Information */}
-          {workrequest.suggested_vendor_detail && (
+          {workrequest.vendor_detail && (
             <>
-              <div className="approvals-title">VENDOR INFORMATION</div>
-              <table className="details-table">
+              <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginTop: '24px', marginBottom: '0' }}>
+                Vendor Information
+              </div>
+              <table className="details-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   <tr>
-                    <td>Vendor Name</td>
-                    <td>{workrequest.suggested_vendor_detail.name}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', width: '200px', color: '#374151' }}>Vendor Name</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.vendor_detail.name}</td>
                   </tr>
-                  {workrequest.suggested_vendor_detail.email && (
+                  {workrequest.vendor_detail.email && (
                     <tr>
-                      <td>Email</td>
-                      <td>{workrequest.suggested_vendor_detail.email}</td>
+                      <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Email</td>
+                      <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.vendor_detail.email}</td>
                     </tr>
                   )}
-                  {workrequest.suggested_vendor_detail.phone && (
+                  {workrequest.vendor_detail.phone && (
                     <tr>
-                      <td>Phone</td>
-                      <td>{workrequest.suggested_vendor_detail.phone}</td>
-                    </tr>
-                  )}
-                  {workrequest.vendor_description && (
-                    <tr>
-                      <td>Description</td>
-                      <td>{workrequest.vendor_description}</td>
+                      <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Phone</td>
+                      <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.vendor_detail.phone}</td>
                     </tr>
                   )}
                 </tbody>
@@ -343,125 +299,110 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
             </>
           )}
 
-          {/* Approvals Section */}
-          <div className="approvals-section">
-            <div className="approvals-title">APPROVALS & ASSIGNMENTS</div>
-            
-            <table className="approvals-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Role</th>
-                  <th>Name</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Requester */}
-                {workrequest.requester_detail && (
-                  <tr>
-                    <td>1</td>
-                    <td>Requester</td>
-                    <td>
-                      {workrequest.requester_detail.first_name} {workrequest.requester_detail.last_name}
-                    </td>
-                    <td>Submitted</td>
-                  </tr>
-                )}
-                
-                {/* Reviewers */}
-                {workrequest.reviewers_detail && workrequest.reviewers_detail.length > 0 ? (
-                  workrequest.reviewers_detail.map((reviewer, index) => (
-                    <tr key={reviewer.id}>
-                      <td>{workrequest.requester_detail ? index + 2 : index + 1}</td>
-                      <td>Reviewer</td>
-                      <td>
-                        {reviewer.first_name} {reviewer.last_name}
-                      </td>
-                      <td>Assigned</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td>{workrequest.requester_detail ? '2' : '1'}</td>
-                    <td>Reviewer</td>
-                    <td>No reviewers assigned</td>
-                    <td>-</td>
-                  </tr>
-                )}
-
-                {/* Approver */}
-                {workrequest.approver_detail && (
-                  <tr>
-                    <td>{(workrequest.requester_detail ? 1 : 0) + (workrequest.reviewers_detail?.length || 0) + 1}</td>
-                    <td>Approver</td>
-                    <td>
-                      {workrequest.approver_detail.first_name} {workrequest.approver_detail.last_name}
-                    </td>
-                    <td>Assigned</td>
-                  </tr>
-                )}
-
-                {/* Approval Status Row */}
-                <tr>
-                  <td colSpan={3} style={{ fontWeight: 'bold', textAlign: 'right' }}>
-                    Approval Status:
-                  </td>
-                  <td style={{ fontWeight: 'bold' }}>
-                    {workrequest.approval_status || 'Pending'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          {/* Approvals */}
+          <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginTop: '24px', marginBottom: '0' }}>
+            Approvals &amp; Assignments
           </div>
+          <table className="approvals-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {['#', 'Role', 'Name', 'Status'].map((h) => (
+                  <th key={h} style={{ background: '#f9fafb', padding: '10px 14px', textAlign: 'left', border: '1px solid #e5e7eb', fontWeight: 700, fontSize: '12px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {workrequest.requester_detail && (
+                <tr>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>1</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>Requester</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{workrequest.requester_detail.first_name} {workrequest.requester_detail.last_name}</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}><span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 }}>Submitted</span></td>
+                </tr>
+              )}
+              {workrequest.reviewers_detail && workrequest.reviewers_detail.length > 0
+                ? workrequest.reviewers_detail.map((reviewer, index) => (
+                  <tr key={reviewer.id}>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{workrequest.requester_detail ? index + 2 : index + 1}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>Reviewer</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{reviewer.first_name} {reviewer.last_name}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}><span style={{ background: '#fef9c3', color: '#92400e', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 }}>Assigned</span></td>
+                  </tr>
+                ))
+                : (
+                  <tr>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{workrequest.requester_detail ? '2' : '1'}</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>Reviewer</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#9ca3af', fontStyle: 'italic' }}>No reviewers assigned</td>
+                    <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>—</td>
+                  </tr>
+                )
+              }
+              {workrequest.approver_detail && (
+                <tr>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{(workrequest.requester_detail ? 1 : 0) + (workrequest.reviewers_detail?.length || 0) + 1}</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>Approver</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>{workrequest.approver_detail.first_name} {workrequest.approver_detail.last_name}</td>
+                  <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}><span style={{ background: '#fef9c3', color: '#92400e', padding: '2px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 600 }}>Assigned</span></td>
+                </tr>
+              )}
+              <tr>
+                <td colSpan={3} style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 700, textAlign: 'right', background: '#f9fafb' }}>Overall Approval Status</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb' }}>
+                  <span style={getStatusBadgeStyle(workrequest.approval_status)}>{workrequest.approval_status || 'Pending'}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           {/* Request Options */}
-          <div className="approvals-section">
-            <div className="approvals-title">REQUEST OPTIONS</div>
-            <table className="details-table">
-              <tbody>
-                <tr>
-                  <td>Mobilization Fee Required</td>
-                  <td>{workrequest.require_mobilization_fee ? 'Yes' : 'No'}</td>
-                </tr>
-                <tr>
-                  <td>Quotation Required</td>
-                  <td>{workrequest.require_quotation ? 'Yes' : 'No'}</td>
-                </tr>
-                <tr>
-                  <td>Payment Requisition</td>
-                  <td>{workrequest.payment_requisition ? 'Yes' : 'No'}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="section-header" style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', padding: '8px 14px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#15803d', marginTop: '24px', marginBottom: '0' }}>
+            Request Options
           </div>
+          <table className="details-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', width: '200px', color: '#374151' }}>Mobilization Fee Required</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.require_mobilization_fee ? 'Yes' : 'No'}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Quotation Required</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.require_quotation ? 'Yes' : 'No'}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Payment Requisition</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.payment_requisition ? 'Yes' : 'No'}</td>
+              </tr>
+            </tbody>
+          </table>
 
           {/* Signature Section */}
-          <div className="signature-section">
-            <div className="signature-box">
-              <strong>Requested By:</strong>
-              <div className="signature-line">
-                {workrequest.requester_detail 
-                  ? `${workrequest.requester_detail.first_name} ${workrequest.requester_detail.last_name}`
-                  : ''}
+          <div className="signature-section" style={{ marginTop: '56px', display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+            <div className="signature-box" style={{ flex: 1 }}>
+              <strong style={{ display: 'block', marginBottom: '36px', fontSize: '12px', color: '#374151' }}>Requested By:</strong>
+              <div className="signature-line" style={{ borderTop: '1px solid #9ca3af', paddingTop: '6px', fontSize: '11px', color: '#6b7280' }}>
+                {workrequest.requester_detail ? `${workrequest.requester_detail.first_name} ${workrequest.requester_detail.last_name}` : ''}
               </div>
             </div>
-            <div className="signature-box">
-              <strong>Reviewed By:</strong>
-              <div className="signature-line">
+            <div className="signature-box" style={{ flex: 1 }}>
+              <strong style={{ display: 'block', marginBottom: '36px', fontSize: '12px', color: '#374151' }}>Reviewed By:</strong>
+              <div className="signature-line" style={{ borderTop: '1px solid #9ca3af', paddingTop: '6px', fontSize: '11px', color: '#6b7280' }}>
                 {workrequest.reviewers_detail && workrequest.reviewers_detail.length > 0
                   ? workrequest.reviewers_detail.map(r => `${r.first_name} ${r.last_name}`).join(', ')
                   : ''}
               </div>
             </div>
-            <div className="signature-box">
-              <strong>Approved By:</strong>
-              <div className="signature-line">
-                {workrequest.approver_detail 
-                  ? `${workrequest.approver_detail.first_name} ${workrequest.approver_detail.last_name}`
-                  : ''}
+            <div className="signature-box" style={{ flex: 1 }}>
+              <strong style={{ display: 'block', marginBottom: '36px', fontSize: '12px', color: '#374151' }}>Approved By:</strong>
+              <div className="signature-line" style={{ borderTop: '1px solid #9ca3af', paddingTop: '6px', fontSize: '11px', color: '#6b7280' }}>
+                {workrequest.approver_detail ? `${workrequest.approver_detail.first_name} ${workrequest.approver_detail.last_name}` : ''}
               </div>
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className="footer" style={{ marginTop: '40px', paddingTop: '16px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '10px', color: '#9ca3af' }}>
+            This document was generated from AlphaCMMS on {format(new Date(), 'MMM dd, yyyy HH:mm')}. For internal use only.
           </div>
         </div>
       </DialogContent>
@@ -470,4 +411,3 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
 };
 
 export default WorkrequestPrintView;
-

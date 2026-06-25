@@ -140,11 +140,12 @@ const WorkrequestManagement = () => {
     if (urlIsReviewed !== null) {
       const isReviewed = urlIsReviewed === 'true';
       results = results.filter(workrequest => {
-        // Check if workrequest has reviewers_detail and if all have reviewed
-        if (workrequest.reviewers_detail && workrequest.reviewers_detail.length > 0) {
-          // If is_reviewed param is true, check if reviewed
-          // If is_reviewed param is false, check if not reviewed
-          return isReviewed ? workrequest.approval_status !== 'Pending' : workrequest.approval_status === 'Pending';
+        const hasReviewers = (workrequest.reviewers ?? []).length > 0;
+        if (hasReviewers) {
+          // Work requests use 'Pending Review' as the unreviewed status (not 'Pending')
+          return isReviewed
+            ? workrequest.approval_status !== 'Pending Review'
+            : workrequest.approval_status === 'Pending Review';
         }
         return !isReviewed;
       });

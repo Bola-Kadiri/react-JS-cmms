@@ -23,12 +23,12 @@ export const paymentitemKeys = {
 };
 
 // Hook for fetching paymentitems list
-export const usePaymentitemsQuery = () => {
+export const usePaymentitemsQuery = (params?: PaymentitemQueryParams) => {
   return useQuery({
-    queryKey: paymentitemKeys.all,
-    queryFn: fetchPaymentitems,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    placeholderData: { count: 0, next: null, previous: null, results: [] }, // Provide fallback data
+    queryKey: paymentitemKeys.list(params || {}),
+    queryFn: () => fetchPaymentitems(params),
+    staleTime: 5 * 60 * 1000,
+    placeholderData: { count: 0, next: null, previous: null, results: [] },
   });
 };
 

@@ -31,12 +31,12 @@ export const workorderKeys = {
 };
 
 // Hook for fetching workorders list
-export const useWorkordersQuery = () => {
+export const useWorkordersQuery = (params?: WorkorderQueryParams) => {
   return useQuery({
-    queryKey: workorderKeys.all,
-    queryFn: fetchWorkorders,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    placeholderData: { count: 0, next: null, previous: null, results: [] }, // Provide fallback data
+    queryKey: workorderKeys.list(params || {}),
+    queryFn: () => fetchWorkorders(params),
+    staleTime: 5 * 60 * 1000,
+    placeholderData: { count: 0, next: null, previous: null, results: [] },
   });
 };
 

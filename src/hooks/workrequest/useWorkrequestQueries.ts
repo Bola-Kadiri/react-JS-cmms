@@ -44,19 +44,21 @@ export const workrequestKeys = {
   approved: () => [...workrequestKeys.all, 'approved'] as const,
 };
 
-export const useWorkrequestsQuery = () =>
+export const useWorkrequestsQuery = (params?: WorkrequestQueryParams, enabled = true) =>
   useQuery({
-    queryKey: workrequestKeys.all,
-    queryFn: fetchWorkrequests,
-    staleTime: 30000,
+    queryKey: workrequestKeys.list(params || {}),
+    queryFn: () => fetchWorkrequests(params),
+    staleTime: 5 * 60 * 1000,
+    enabled,
     placeholderData: { count: 0, next: null, previous: null, results: [] },
   });
 
-export const useProcurementWorkrequestsQuery = () =>
+export const useProcurementWorkrequestsQuery = (enabled = true) =>
   useQuery({
     queryKey: workrequestKeys.procurementAssigned(),
     queryFn: fetchProcurementWorkrequests,
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
+    enabled,
     placeholderData: { count: 0, results: [] },
   });
 

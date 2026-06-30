@@ -49,6 +49,12 @@ const WorkrequestDetailView = () => {
   const isOwner = !!(user && workrequest && workrequest.requester === (user as any).id);
   const isRejected = workrequest ? REJECTED_STATUSES.includes(workrequest.approval_status) : false;
 
+  const userId = (user as any)?.id;
+  const isMyCpStep = !isAdmin && !!(workrequest?.request_to?.some((id: any) => String(id) === String(userId)));
+  const isMyReviewStep = !isAdmin && !!(workrequest?.reviewers?.some((id: any) => String(id) === String(userId)));
+  const isMyApproveStep = !isAdmin && !!(workrequest && String(workrequest.approver) === String(userId));
+  const stepHighlight = [false, isMyCpStep, isMyReviewStep, isMyApproveStep];
+
   const handleBack = () => navigate('/dashboard/work/requests');
   const handleEdit = (s: string) => navigate(`/dashboard/work/requests/edit/${s}`);
   const handleResubmit = () => { if (slug) resubmitMutation.mutate(slug); };
@@ -213,17 +219,25 @@ const WorkrequestDetailView = () => {
         </div>
       </div>
 
-      {/* Pipeline stepper — visible to Requester (owner) and Admin only */}
-      {(isOwner || isAdmin) && <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+      {/* Pipeline stepper — visible to all roles; assigned step highlighted per viewer */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+        {(isMyCpStep || isMyReviewStep || isMyApproveStep) && (
+          <p className="text-xs text-blue-600 font-medium mb-3 flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-300 ring-offset-1" />
+            Your assigned step is highlighted
+          </p>
+        )}
         <div className="flex items-center justify-between">
           {PIPELINE_STEPS.map((step, idx) => {
             const isActive = workrequest.approval_status === step.status;
             const isPast = !isRejected && currentStep > idx;
             const isFullyApproved = workrequest.approval_status === 'Fully Approved';
+            const isMyStep = stepHighlight[idx];
             return (
               <div key={step.status} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
+                    ${isMyStep ? 'ring-2 ring-blue-400 ring-offset-2' : ''}
                     ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
                       isActive ? 'bg-blue-600 text-white' :
                       isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
@@ -231,9 +245,13 @@ const WorkrequestDetailView = () => {
                     {(isFullyApproved && idx < 4) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                   </div>
                   <span className={`text-xs mt-1 text-center font-medium
-                    ${isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                    ${isMyStep ? 'text-blue-700' :
+                      isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
                     {step.label}
                   </span>
+                  {isMyStep && (
+                    <span className="text-xs text-blue-500 font-medium mt-0.5">Your step</span>
+                  )}
                 </div>
                 {idx < PIPELINE_STEPS.length - 1 && (
                   <div className={`h-0.5 flex-1 mx-2 ${isPast || isFullyApproved ? 'bg-green-400' : 'bg-gray-200'}`} />
@@ -247,7 +265,7 @@ const WorkrequestDetailView = () => {
             Pipeline paused — {workrequest.approval_status}
           </p>
         )}
-      </div>}
+      </div>
 
       {/* Rejection banner */}
       {isRejected && (

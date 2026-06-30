@@ -1,6 +1,7 @@
 // src/features/asset/paymentitems/PaymentitemManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -31,15 +32,17 @@ const PaymentitemManagement = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const debouncedSearch = useDebounce(searchValue, 400);
+
   const {canEdit} = useFeatureAccess('requisition')
-  
-  // Fetch all paymentitems - we'll filter client-side
-  const { 
-    data = { count: 0, results: [] }, 
-    isFetching, 
-    isError, 
-    refetch 
-  } = usePaymentitemsQuery();
+
+  // Fetch paymentitems — search sent to server, client applies remaining filters
+  const {
+    data = { count: 0, results: [] },
+    isFetching,
+    isError,
+    refetch
+  } = usePaymentitemsQuery({ search: debouncedSearch || undefined });
 
   // Delete paymentitem mutation using our custom hook
   const deletePaymentitemMutation = useDeletePaymentitem();

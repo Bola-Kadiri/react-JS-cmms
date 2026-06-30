@@ -1,16 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header, { ActiveTab } from "@/components/dashboard/Header";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import InventoryContent from "@/components/dashboard/InventoryContent";
-import ProcurementContent from "@/components/dashboard/ProcurementContent";
-import WorkContent from "@/components/dashboard/WorkContent";
 import Dashboard from "@/pages/dashboard/index";
+
+const preloadCommonPages = () => {
+  // Silently preload the most-visited page chunks in the background
+  // so the first sidebar click feels instant instead of waiting for the download
+  setTimeout(() => {
+    import('@/pages/work/workrequests/workrequestManagementPage').catch(() => {});
+    import('@/pages/work/workorders/workorderManagementPage').catch(() => {});
+    import('@/pages/work/work-order-completions/WorkOrderCompletionManagementPage').catch(() => {});
+    import('@/pages/work/ppms/ppmManagementPage').catch(() => {});
+    import('@/pages/facility/facilities/FacilityManagementPage').catch(() => {});
+  }, 2000); // 2s delay so it doesn't compete with the initial dashboard render
+};
 
 const DashboardLayout = () => {
     const [activeTab, setActiveTab] = useState<ActiveTab>("WORK");
     const {pathname} = useLocation()
+
+    useEffect(() => {
+      preloadCommonPages();
+    }, []);
   
     const renderTabContent = () => {
       // Render specific tab content if on the main /dashboard path, otherwise render nested routes via Outlet

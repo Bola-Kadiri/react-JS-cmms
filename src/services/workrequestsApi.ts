@@ -49,8 +49,8 @@ export interface FinalRejectData {
 
 // --- List & detail ---
 
-export const fetchWorkrequests = async (): Promise<WorkrequestsResponse> => {
-  const response = await api.get(`${BASE}/`);
+export const fetchWorkrequests = async (params?: WorkrequestQueryParams): Promise<WorkrequestsResponse> => {
+  const response = await api.get(`${BASE}/`, { params });
   if (response.data && typeof response.data === 'object') {
     if (Array.isArray(response.data)) {
       return { count: response.data.length, next: null, previous: null, results: response.data };

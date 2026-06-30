@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -59,24 +60,22 @@ const WorkordercompletionManagement = () => {
   // State for pagination, search, and filtering
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [approvalStatusFilter, setApprovalStatusFilter] = useState<string>('all');
   const [deleteItem, setDeleteItem] = useState<WorkOrderCompletion | null>(null);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1); // Reset to first page when search changes
-    }, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-  
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
+
   const pageSize = 10;
 
-  // Fetch all data without server-side filtering
-  const { data: rawData, isLoading, error } = useWorkOrderCompletionsQuery();
+  // Fetch data — search sent to server, other filters applied client-side
+  const { data: rawData, isLoading, error } = useWorkOrderCompletionsQuery(
+    { search: debouncedSearchQuery || undefined }
+  );
   const deleteMutation = useDeleteWorkOrderCompletionMutation();
 
   // Isolate records to the current user's assignments

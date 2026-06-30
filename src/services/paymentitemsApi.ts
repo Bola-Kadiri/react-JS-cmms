@@ -17,10 +17,10 @@ export interface PaymentitemQueryParams {
   search?: string;
 }
 
-// Fetch all paymentitems without filtering parameters
-export const fetchPaymentitems = async (): Promise<PaymentitemsResponse> => {
+// Fetch paymentitems with optional filtering parameters
+export const fetchPaymentitems = async (params?: PaymentitemQueryParams): Promise<PaymentitemsResponse> => {
   try {
-    const response = await api.get(`${PAYMENTITEMS_API_BASE}/`);
+    const response = await api.get(`${PAYMENTITEMS_API_BASE}/`, { params });
     
     // Check if the response has pagination data
     if (response.data && typeof response.data === 'object') {

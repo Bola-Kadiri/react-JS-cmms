@@ -1,5 +1,6 @@
 // src/features/work/workorders/WorkorderManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -33,13 +34,15 @@ const WorkorderManagement = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Fetch all workorders - we'll filter client-side
+  const debouncedSearch = useDebounce(searchValue, 400);
+
+  // Fetch workorders — search sent to server, other filters applied client-side
   const {
     data = { count: 0, results: [] },
     isFetching,
     isError,
     refetch
-  } = useWorkordersQuery();
+  } = useWorkordersQuery({ search: debouncedSearch || undefined });
 
   // Delete workorder mutation using our custom hook
   const deleteWorkorderMutation = useDeleteWorkorder();

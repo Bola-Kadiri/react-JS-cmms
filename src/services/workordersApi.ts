@@ -30,10 +30,10 @@ export interface ApproverUserResponse {
 }
 
 
-// Fetch all workorders without filtering parameters
-export const fetchWorkorders = async (): Promise<WorkordersResponse> => {
+// Fetch workorders with optional filtering parameters
+export const fetchWorkorders = async (params?: WorkorderQueryParams): Promise<WorkordersResponse> => {
   try {
-    const response = await api.get(`${WORKORDERS_API_BASE}/`);
+    const response = await api.get(`${WORKORDERS_API_BASE}/`, { params });
     
     // Check if the response has pagination data
     if (response.data && typeof response.data === 'object') {

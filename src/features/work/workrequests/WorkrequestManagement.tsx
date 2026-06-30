@@ -1,6 +1,7 @@
 // src/features/work/workrequests/WorkrequestManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -46,21 +47,26 @@ const WorkrequestManagement = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Fetch all workrequests - we'll filter client-side
+  const debouncedSearch = useDebounce(searchValue, 400);
+
+  // Fetch workrequests — only fire the query relevant to the current user's role
   const {
     data: allWorkrequests = { count: 0, results: [] },
     isFetching: isFetchingAll,
     isError: isErrorAll,
     refetch: refetchAll
-  } = useWorkrequestsQuery();
+  } = useWorkrequestsQuery(
+    { search: debouncedSearch || undefined },
+    !isProcurementUser
+  );
 
-  // Fetch procurement assigned workrequests
+  // Fetch procurement assigned workrequests — only fires for PROCUREMENT AND STORE role
   const {
     data: procurementWorkrequests = { count: 0, results: [] },
     isFetching: isFetchingProcurement,
     isError: isErrorProcurement,
     refetch: refetchProcurement
-  } = useProcurementWorkrequestsQuery();
+  } = useProcurementWorkrequestsQuery(isProcurementUser);
 
   // Use conditional data based on user role
   const data = isProcurementUser ?

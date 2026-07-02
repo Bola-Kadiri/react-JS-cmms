@@ -17,6 +17,8 @@ import WorkCalendar from "@/pages/work-calendar";
 // import UserManagement from "@/pages/reference/user-management";
 // import UserForm from "@/pages/reference/user-management/UserForm";
 import Login from "./pages/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import AlphaCMMSLanding from "./pages/AlphaCMMSLanding";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -215,22 +217,18 @@ const authRoutes: RouteObject[] = [
     path: '/login',
     element: <Login />
   },
-  // { // commented out register and forgot-password
-  //   path: '/register',
-  //   element: (
-  //     <Suspense fallback={<LoadingComponent />}>
-  //       <Register />
-  //     </Suspense>
-  //   )
-  // },
-  // { // commented out register and forgot-password
-  //   path: '/forgot-password',
-  //   element: (
-  //     <Suspense fallback={<LoadingComponent />}>
-  //       <ForgotPassword />
-  //     </Suspense>
-  //   )
-  // }
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />
+  },
+  {
+    path: '/reset-password/:uid/:token',
+    element: <ResetPassword />
+  },
+  {
+    path: '/reset-password/:uid/:token/',
+    element: <ResetPassword />
+  },
 ];
 
 // Protected routes - require authentication

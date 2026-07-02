@@ -139,9 +139,9 @@ const SignInForm = () => {
               <span className="text-slate-600 text-sm">Remember Me</span>
             </label>
             
-            <a href="#" className="text-slate-500 text-sm hover:text-slate-700 transition-colors">
+            <Link to="/forgot-password" className="text-slate-500 text-sm hover:text-slate-700 transition-colors">
               Forgot Password?
-            </a>
+            </Link>
           </div>
           
           <Button 

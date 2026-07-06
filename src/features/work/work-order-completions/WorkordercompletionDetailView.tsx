@@ -394,14 +394,13 @@ const WorkordercompletionDetailView = () => {
                   <div key={step.status} className="flex items-center flex-1">
                     <div className="flex flex-col items-center flex-1">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                        ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
-                          isActive ? 'bg-blue-600 text-white' :
+                        ${isFullyApproved || isPast || isActive ? 'bg-green-600 text-white' :
                           isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
                           'bg-gray-200 text-gray-500'}`}>
                         {(isFullyApproved && idx < 3) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                       </div>
                       <span className={`text-xs mt-1 text-center font-medium
-                        ${isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                        ${isActive || isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
                         {step.label}
                       </span>
                     </div>

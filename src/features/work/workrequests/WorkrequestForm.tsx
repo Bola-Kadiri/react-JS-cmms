@@ -68,7 +68,7 @@ const WorkrequestForm = () => {
 
   const [openSections, setOpenSections] = useState({
     basic: true,
-    details: false,
+    details: true,
     invoice: true,
     approval: true,
     additional: false,

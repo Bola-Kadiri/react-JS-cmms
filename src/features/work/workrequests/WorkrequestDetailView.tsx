@@ -12,6 +12,8 @@ import {
 import {
   useWorkrequestQuery,
   useResubmitWorkrequest,
+  useReviewerApprove,
+  useFinalApprove,
 } from '@/hooks/workrequest/useWorkrequestQueries';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
@@ -45,6 +47,8 @@ const WorkrequestDetailView = () => {
 
   const { data: workrequest, isLoading, isError, error } = useWorkrequestQuery(slug);
   const resubmitMutation = useResubmitWorkrequest();
+  const reviewerApproveMutation = useReviewerApprove();
+  const finalApproveMutation = useFinalApprove();
 
   const isOwner = !!(user && workrequest && workrequest.requester === (user as any).id);
   const isRejected = workrequest ? REJECTED_STATUSES.includes(workrequest.approval_status) : false;
@@ -174,7 +178,12 @@ const WorkrequestDetailView = () => {
           {/* Reviewer actions — CP Approved */}
           {workrequest.approval_status === 'CP Approved' && (isReviewer || isAdmin) && (
             <>
-              <Button onClick={() => setApprovalAction('reviewer-approve')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button
+                onClick={() => reviewerApproveMutation.mutate(workrequest.slug)}
+                disabled={reviewerApproveMutation.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {reviewerApproveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <CheckCircle className="mr-2 h-4 w-4" /> Approve
               </Button>
               <Button onClick={() => setApprovalAction('reviewer-reject')} variant="destructive">
@@ -186,7 +195,12 @@ const WorkrequestDetailView = () => {
           {/* Approver actions — Reviewed */}
           {workrequest.approval_status === 'Reviewed' && (isApprover || isAdmin) && (
             <>
-              <Button onClick={() => setApprovalAction('final-approve')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button
+                onClick={() => finalApproveMutation.mutate({ slug: workrequest.slug, data: { digital_signature: '' } })}
+                disabled={finalApproveMutation.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {finalApproveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <ShieldCheck className="mr-2 h-4 w-4" /> Final Approval
               </Button>
               <Button onClick={() => setApprovalAction('final-reject')} variant="destructive">
@@ -237,16 +251,15 @@ const WorkrequestDetailView = () => {
               <div key={step.status} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
-                    ${isMyStep ? 'ring-2 ring-blue-400 ring-offset-2' : ''}
-                    ${isFullyApproved || isPast ? 'bg-green-600 text-white' :
-                      isActive ? 'bg-blue-600 text-white' :
+                    ${isMyStep ? 'ring-2 ring-green-400 ring-offset-2' : ''}
+                    ${isFullyApproved || isPast || isActive ? 'bg-green-600 text-white' :
                       isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
                       'bg-gray-200 text-gray-500'}`}>
                     {(isFullyApproved && idx < 4) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                   </div>
                   <span className={`text-xs mt-1 text-center font-medium
-                    ${isMyStep ? 'text-blue-700' :
-                      isActive ? 'text-blue-700' : isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
+                    ${isMyStep || isActive ? 'text-green-700' :
+                      isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
                     {step.label}
                   </span>
                   {isMyStep && (
@@ -265,6 +278,95 @@ const WorkrequestDetailView = () => {
             Pipeline paused — {workrequest.approval_status}
           </p>
         )}
+      </div>
+
+      {/* Approval Metrics — at-a-glance who approved / is pending */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+          <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> Approval Chain
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Procurement & Store */}
+          <div>
+            <p className="text-xs text-gray-400 font-medium mb-2">Procurement &amp; Store</p>
+            {workrequest.request_to_detail?.length > 0 ? (
+              <div className="space-y-2">
+                {workrequest.request_to_detail.map((u: any) => {
+                  const done = ['CP Approved', 'Reviewed', 'Fully Approved'].includes(workrequest.approval_status) && !isRejected;
+                  const initials = `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`;
+                  return (
+                    <div key={u.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={u.avatar} />
+                        <AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{u.first_name} {u.last_name}</p>
+                        <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                      </div>
+                      {done
+                        ? <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        : <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : <p className="text-xs text-gray-400">Not assigned</p>}
+          </div>
+
+          {/* Reviewer(s) */}
+          <div>
+            <p className="text-xs text-gray-400 font-medium mb-2">Reviewer(s)</p>
+            {workrequest.reviewers_detail?.length > 0 ? (
+              <div className="space-y-2">
+                {workrequest.reviewers_detail.map((u: any) => {
+                  const done = ['Reviewed', 'Fully Approved'].includes(workrequest.approval_status) && !isRejected;
+                  const initials = `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`;
+                  return (
+                    <div key={u.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={u.avatar} />
+                        <AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{u.first_name} {u.last_name}</p>
+                        <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                      </div>
+                      {done
+                        ? <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        : <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : <p className="text-xs text-gray-400">Not assigned</p>}
+          </div>
+
+          {/* Final Approver */}
+          <div>
+            <p className="text-xs text-gray-400 font-medium mb-2">Final Approver</p>
+            {workrequest.approver_detail ? (() => {
+              const u: any = workrequest.approver_detail;
+              const done = workrequest.approval_status === 'Fully Approved';
+              const initials = `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`;
+              return (
+                <div className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
+                    <AvatarImage src={u.avatar} />
+                    <AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{u.first_name} {u.last_name}</p>
+                    <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                  </div>
+                  {done
+                    ? <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    : <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                </div>
+              );
+            })() : <p className="text-xs text-gray-400">Not assigned</p>}
+          </div>
+        </div>
       </div>
 
       {/* Rejection banner */}

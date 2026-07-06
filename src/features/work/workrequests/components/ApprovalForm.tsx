@@ -118,9 +118,9 @@ export const ApprovalForm = ({
     }
   };
 
-  const handleFinalApprove = async (data: SignatureValues) => {
+  const handleFinalApprove = async () => {
     try {
-      await finalApproveMutation.mutateAsync({ slug: workrequestSlug, data: { digital_signature: data.digital_signature } });
+      await finalApproveMutation.mutateAsync({ slug: workrequestSlug, data: { digital_signature: '' } });
       handleClose();
     } catch (error: any) {
       toast({ title: 'Error', description: error?.response?.data?.error || 'Failed to approve', variant: 'destructive' });
@@ -194,33 +194,20 @@ export const ApprovalForm = ({
           </Form>
         )}
 
-        {/* Final Approve — requires digital signature */}
+        {/* Final Approve — one-click confirm */}
         {action === 'final-approve' && (
-          <Form {...signatureForm}>
-            <form onSubmit={signatureForm.handleSubmit(handleFinalApprove)} className="space-y-4">
-              <FormField control={signatureForm.control} name="digital_signature" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">
-                    Digital Signature (Full Name)<span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Type your full name to sign" {...field} className="h-10" />
-                  </FormControl>
-                  <p className="text-xs text-gray-500">
-                    By typing your name you are electronically signing this approval. This is permanent and irreversible.
-                  </p>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <DialogFooter className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
-                <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
-                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {meta.confirmLabel}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <div className="py-4">
+            <p className="text-sm text-gray-700 bg-green-50 border border-green-200 rounded-lg p-4">
+              You are giving final approval for request #{workrequestNumber}. This commits the request to the ledger permanently and is irreversible.
+            </p>
+            <DialogFooter className="flex gap-3 pt-6">
+              <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
+              <Button onClick={handleFinalApprove} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Approve
+              </Button>
+            </DialogFooter>
+          </div>
         )}
 
         {/* Final Reject — requires reason */}

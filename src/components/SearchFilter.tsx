@@ -1,7 +1,6 @@
 // src/components/ui/search-filter.tsx
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -47,23 +46,25 @@ export function SearchFilter({
 
   return (
     <div className="flex flex-col md:flex-row gap-2 w-full">
-      <div className="relative flex-1">
+      <div className="relative flex-1 group">
+        <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors duration-200" />
+        </div>
         <Input
           ref={inputRef}
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           placeholder={placeholder}
-          className="pr-9"
+          className="pl-11 pr-10 h-11 rounded-xl border-gray-200 bg-white shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200 placeholder:text-gray-400"
         />
         {searchValue && (
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={handleClear}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            type="button"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </div>
 

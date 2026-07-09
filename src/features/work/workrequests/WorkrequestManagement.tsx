@@ -34,6 +34,7 @@ const WorkrequestManagement = () => {
   // Check if user is PROCUREMENT AND STORE
   const isProcurementUser = (user?.role || '').toUpperCase() === 'PROCUREMENT AND STORE';
   const isSuperAdmin = (user?.role || '').toUpperCase() === 'SUPER ADMIN';
+  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
 
   // Get filters from URL params
   const urlApprovalStatus = searchParams.get('approval_status');
@@ -98,7 +99,7 @@ const WorkrequestManagement = () => {
   const userIsolatedResults = useMemo(() => {
     if (!user || isProcurementUser) return data.results || [];
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return data.results || [];
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(req => {
       switch (roleUpper) {
@@ -175,6 +176,7 @@ const WorkrequestManagement = () => {
 
         // For regular users, use the existing search logic
         return (
+          workrequest.work_request_number?.toLowerCase().includes(searchLower) ||
           workrequest.type?.toLowerCase().includes(searchLower) ||
           workrequest.category_detail?.title?.toLowerCase().includes(searchLower) ||
           workrequest.facility_detail?.name?.toLowerCase().includes(searchLower) ||
@@ -313,20 +315,24 @@ const WorkrequestManagement = () => {
             <Plus className="mr-2 h-4 w-4" /> Add Workrequest
           </Button>
         )} */}
-        <PermissionGuard feature='work_request' permission='view'>
-          <Button onClick={handleAddWorkrequest}  className="bg-green-600 hover:bg-green-700 text-white px-6">
-            <Plus className="mr-2 h-4 w-4" />
-            {t('workRequest.add')}
-          </Button>
-        </PermissionGuard>
+        {!isFinanceUser && (
+          <PermissionGuard feature='work_request' permission='view'>
+            <Button onClick={handleAddWorkrequest}  className="bg-green-600 hover:bg-green-700 text-white px-6">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('workRequest.add')}
+            </Button>
+          </PermissionGuard>
+        )}
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6 space-y-4">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors duration-200" />
+              </div>
               <Input
                 placeholder={isProcurementUser
                   ? t('workRequest.procurementSearchPlaceholder')
@@ -334,8 +340,19 @@ const WorkrequestManagement = () => {
                 }
                 value={searchValue}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
+                className="pl-11 pr-10 h-11 rounded-xl border-gray-200 bg-white shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200 placeholder:text-gray-400"
               />
+              {searchValue && (
+                <button
+                  onClick={() => handleSearch('')}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  type="button"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 

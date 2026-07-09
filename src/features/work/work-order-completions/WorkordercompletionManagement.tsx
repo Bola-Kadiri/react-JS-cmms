@@ -78,12 +78,14 @@ const WorkordercompletionManagement = () => {
   );
   const deleteMutation = useDeleteWorkOrderCompletionMutation();
 
+  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
+
   // Isolate records to the current user's assignments
   const userIsolatedResults = useMemo(() => {
     if (!rawData?.results) return [];
     if (!user) return rawData.results;
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return rawData.results;
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return rawData.results;
     const userId = Number(user.id);
     return rawData.results.filter(wcc => {
       switch (roleUpper) {
@@ -257,13 +259,15 @@ const WorkordercompletionManagement = () => {
             {t('wcc.description')}
           </p>
         </div>
-        <Button 
-          onClick={() => navigate('/dashboard/work/work-order-completions/new')}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {t('wcc.add')}
-        </Button>
+        {!isFinanceUser && (
+          <Button
+            onClick={() => navigate('/dashboard/work/work-order-completions/new')}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {t('wcc.add')}
+          </Button>
+        )}
       </div>
 
       {/* Filters and Search */}
@@ -271,17 +275,19 @@ const WorkordercompletionManagement = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors duration-200" />
+              </div>
               <Input
                 placeholder={t('wcc.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-11 pr-10 h-11 rounded-xl border-gray-200 bg-white shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200 placeholder:text-gray-400"
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 {searchQuery !== debouncedSearchQuery && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent"></div>
                 )}
                 {searchQuery && searchQuery === debouncedSearchQuery && (
                   <button

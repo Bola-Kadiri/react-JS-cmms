@@ -208,33 +208,29 @@ const InvoiceitemManagement = () => {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder={t('invoiceItem.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 pr-10"
-              />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                {searchQuery !== debouncedSearchQuery && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
-                )}
-                {searchQuery && searchQuery === debouncedSearchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    type="button"
-                  >
-                    <XCircle className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors duration-200" />
+        </div>
+        <Input
+          placeholder={t('invoiceItem.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="pl-11 pr-10 h-11 rounded-xl border-gray-200 bg-white shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200 placeholder:text-gray-400"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          {searchQuery !== debouncedSearchQuery && (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent"></div>
+          )}
+          {searchQuery && searchQuery === debouncedSearchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              type="button"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

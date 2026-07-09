@@ -20,16 +20,17 @@ export type Feature =
   | 'comment'
   | 'vendor_contract';
 
-export type Role = 
-  | 'SUPER ADMIN' 
-  | 'ADMIN' 
-  | 'REQUESTER' 
-  | 'REVIEWER' 
-  | 'APPROVER' 
-  | 'PROCUREMENT AND STORE' 
-  | 'Facility Account' 
-  | 'Facility Store' 
-  | 'Facility View';
+export type Role =
+  | 'SUPER ADMIN'
+  | 'ADMIN'
+  | 'REQUESTER'
+  | 'REVIEWER'
+  | 'APPROVER'
+  | 'PROCUREMENT AND STORE'
+  | 'Facility Account'
+  | 'Facility Store'
+  | 'Facility View'
+  | 'FINANCE';
 
 export type RolePermissions = {
   [key in Role]: {
@@ -160,6 +161,14 @@ export const ROLE_FEATURES: RolePermissions = {
     'movement_history': ['view'],
     'report': ['view'],
     'reference': ['view'],
+    'comment': ['view'],
+  },
+  'FINANCE': {
+    'work_request': ['view'],
+    'work_order': ['view'],
+    'requisition': ['view'],
+    'pending_ppm': ['view'],
+    'report': ['view'],
     'comment': ['view'],
   },
 };

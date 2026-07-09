@@ -46,7 +46,7 @@ const PaymentrequisitionManagement = () => {
     if (!data?.results) return [];
     if (!user) return data.results;
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return data.results;
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results;
     const userId = Number(user.id);
     return data.results.filter((pr) => {
       switch (roleUpper) {
@@ -64,6 +64,7 @@ const PaymentrequisitionManagement = () => {
     if (searchValue) {
       const searchLower = searchValue.toLowerCase();
       results = results.filter(pr =>
+        (pr.requisition_number && pr.requisition_number.toLowerCase().includes(searchLower)) ||
         (pr.remark && pr.remark.toLowerCase().includes(searchLower)) ||
         (pr.comment && pr.comment.toLowerCase().includes(searchLower)) ||
         pr.expected_payment_amount.toString().includes(searchLower)

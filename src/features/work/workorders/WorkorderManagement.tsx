@@ -47,11 +47,13 @@ const WorkorderManagement = () => {
   // Delete workorder mutation using our custom hook
   const deleteWorkorderMutation = useDeleteWorkorder();
 
+  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
+
   // Isolate records to the current user's assignments
   const userIsolatedResults = useMemo(() => {
     if (!user) return data.results || [];
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN') return data.results || [];
+    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(wo => {
       switch (roleUpper) {
@@ -233,26 +235,41 @@ const WorkorderManagement = () => {
           <Plus className="mr-2 h-4 w-4" /> Add Workorder
         </Button>
         )} */}
-        <PermissionGuard feature='work_order' permission='view'>
-          <Button onClick={handleAddWorkorder} className="bg-green-600 hover:bg-green-700">
-            <Plus className="mr-2 h-4 w-4" />
-            {t('workOrder.add')}
-          </Button>
-        </PermissionGuard>
+        {!isFinanceUser && (
+          <PermissionGuard feature='work_order' permission='view'>
+            <Button onClick={handleAddWorkorder} className="bg-green-600 hover:bg-green-700">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('workOrder.add')}
+            </Button>
+          </PermissionGuard>
+        )}
       </div>
 
       {/* Search and Filter Controls */}
       <div className="mb-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors duration-200" />
+              </div>
               <Input
                 placeholder={t('workOrder.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
+                className="pl-11 pr-10 h-11 rounded-xl border-gray-200 bg-white shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200 placeholder:text-gray-400"
               />
+              {searchValue && (
+                <button
+                  onClick={() => handleSearch('')}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  type="button"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -12,7 +12,8 @@ export type Role =
   | 'REQUESTER'
   | 'REVIEWER'
   | 'APPROVER'
-  | 'PROCUREMENT AND STORE';
+  | 'PROCUREMENT AND STORE'
+  | 'FINANCE';
 
 export type Gender = 'Male' | 'Female' | 'Other';
 

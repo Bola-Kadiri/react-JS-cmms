@@ -51,7 +51,8 @@ const UserForm = () => {
       'REQUESTER',
       'REVIEWER',
       'APPROVAL',
-      'PROCUREMENT AND STORE'
+      'PROCUREMENT AND STORE',
+      'FINANCE'
     ]),
     email: z.string().email(t('user.form.validation.invalidEmail')),
     phone: z.string().min(1, t('user.form.validation.phoneRequired')),
@@ -585,6 +586,7 @@ const UserForm = () => {
                             <SelectItem value="REVIEWER">REVIEWER</SelectItem>
                             <SelectItem value="APPROVAL">APPROVAL</SelectItem>
                             <SelectItem value="PROCUREMENT AND STORE">PROCUREMENT AND STORE</SelectItem>
+                            <SelectItem value="FINANCE">FINANCE</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

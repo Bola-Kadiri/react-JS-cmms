@@ -6,7 +6,6 @@ export const useVerifyToken = () => {
       mutationFn: async () => {
         const token = tokenManager.getAccessToken();
         if (!token) throw new Error('No token found');
-        console.log('UseVerifyToken Hooooooooooook', token);
         const { data } = await api.post('auth/token/verify/', { token });
         return data;
       }

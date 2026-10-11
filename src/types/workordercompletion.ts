@@ -3,6 +3,7 @@ import { Workorder } from "./workorder";
 
 export interface WorkOrderCompletion {
   id: number;
+  wcc_number: string;
   work_order_detail: Workorder;
   approved_by_detail: User;
   reviewers_detail: User[];

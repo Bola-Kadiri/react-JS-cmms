@@ -3,12 +3,15 @@ import { Building } from "./building";
 import { Category, SubCat } from "./category";
 import { Facility } from "./facility";
 import { User } from "./user";
+import { Vendor } from "./vendor";
+import { WorkrequestQuotationItem } from "./workrequest";
 
 export type Status = 'Active' | 'Inactive';
 export type WorkOrderType = 'Unplanned' | 'Planned';
 export type Priority = 'Low' | 'Medium' | 'High';
 export type PpmType = 'Scheduled' | 'Unscheduled';
 export type ApprovalStatus = 'Pending' | 'Reviewed' | 'Approved' | 'Reviewer Rejected' | 'Approver Rejected' | 'Rejected'
+export type WorkStatus = 'pending' | 'closed' | 'rejected'
 export type Currency = 'USD' | 'EUR' | 'NGN'
 
 export interface ResourceData {
@@ -76,6 +79,7 @@ export interface ResourceData {
   requester_detail: User;
   request_to_detail: User;
   reviewers_detail: User[];
+  approver_detail: User | null;
   category_detail: Category;
   subcategory_detail: SubCat | null;
   facility_detail: Facility;
@@ -118,10 +122,39 @@ export interface ResourceData {
   reviewer_reason: string | null;
   approver_reason: string | null;
   digital_signature: string | null;
+  // Quotation/PO/invoice/attachments are never re-entered on the Work
+  // Order — this carries forward the same data the source Work Request's
+  // own page shows (see backend WorkOrderSerializer.get_source_work_request_detail).
+  // unit_cost_vendor/total_cost_vendor/margin are absent for a Requester,
+  // same masking as on the Work Request itself.
   source_work_request_detail: {
     id: number;
     work_request_number: string;
     po_number: string | null;
     po_document: string | null;
+    vendor_invoice: string | null;
+    attachment: string | null;
+    invoice_no: string | null;
+    quotation_items: WorkrequestQuotationItem[];
+    total_cost_vendor?: string;
+    total_cost_client: string;
+    margin?: string;
   } | null;
+  // Closed/Pending/Rejected tracking of the physical work, separate from
+  // approval_status — managed exclusively via the set-status action.
+  work_status: WorkStatus;
+  // Closure fields — set via set-status, gated on an Approved
+  // WorkOrderCompletion existing for this work order (see backend).
+  vendor: number | null;
+  vendor_detail: Vendor | null;
+  technician: number | null;
+  technician_detail: User | null;
+  rating: number | null;
+  started_at: string | null;
+  completed_at: string | null;
+  // The WCC submitted against this work order, and the Payment Requisition
+  // raised from it — both null until they exist (see backend
+  // WorkOrderSerializer.get_latest_completion / get_linked_payment_requisition).
+  latest_completion: { id: number; wcc_number: string; approval_status: string } | null;
+  linked_payment_requisition: { id: number; requisition_number: string; approval_status: 'request' | 'approve' | 'reject' } | null;
 }

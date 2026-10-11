@@ -85,47 +85,55 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Shared refresh promise — prevents multiple simultaneous refresh calls when
+// several requests fail with 401 at the same time (e.g. on page load).
+let refreshingPromise: Promise<string> | null = null;
+
 // Add an interceptor to handle token expiration
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
-      
-      // If error is 401 and we haven't tried to refresh token yet
+
       // Skip refresh attempt for auth endpoints (login, token refresh) — no token exists yet
       const isAuthEndpoint = originalRequest.url?.includes('auth/token');
       if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
         originalRequest._retry = true;
-        
+
         try {
-          // Get refresh token from memory
           const refreshToken = tokenManager.getRefreshToken();
-          
+
           if (!refreshToken) {
             throw new Error('No refresh token available');
           }
-          
-          // Call the refresh token endpoint
-          const { data } = await api.post('auth/token/refresh/', {
-            refresh: refreshToken
-          });
-          
-          // Get new access token
-          const { access } = data;
-          
-          // Update tokens
-          tokenManager.setTokens(access, refreshToken);
-          
-          // Retry the original request with new token
-          originalRequest.headers['Authorization'] = `Bearer ${access}`;
+
+          // If a refresh is already in-flight, wait for it instead of firing another
+          if (!refreshingPromise) {
+            refreshingPromise = api
+              .post('auth/token/refresh/', { refresh: refreshToken })
+              .then(({ data }) => {
+                tokenManager.setTokens(data.access, refreshToken);
+                return data.access;
+              })
+              .finally(() => {
+                refreshingPromise = null;
+              });
+          }
+
+          const newAccessToken = await refreshingPromise;
+
+          // Retry the original request with the new token
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return api(originalRequest);
         } catch (refreshError) {
-          // If refresh token is invalid, log user out
+          // Refresh token is expired or invalid — clear session and send to login
+          refreshingPromise = null;
           tokenManager.clearTokens();
+          window.location.href = '/login';
           return Promise.reject(refreshError);
         }
       }
-      
+
       return Promise.reject(error);
     }
 );

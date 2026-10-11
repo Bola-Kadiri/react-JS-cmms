@@ -10,7 +10,6 @@ import { lazy, Suspense } from 'react';
 // import ItemRequest from "@/pages/asset/item-request";
 // import TransferForm from "@/pages/asset/transfer-form";
 import MovementHistory from "@/pages/asset/movement-history";
-import Reports from "@/pages/reports";
 import Reference from "@/pages/reference";
 import NotFound from "@/pages/NotFound";
 import WorkCalendar from "@/pages/work-calendar";
@@ -195,6 +194,8 @@ const ItemRequestForm = lazy(() => import('@/features/asset/itemrequest/ItemRequ
 const ItemRequestDetailView = lazy(() => import('@/features/asset/itemrequest/ItemRequestDetailView'))
 const ItemRequestManagementPage = lazy(() => import('@/pages/asset/item-requests/ItemRequestManagementPage'))
 const LandingPage = lazy(() => import('./pages/LandingPage')); // Import new LandingPage
+const UserFacilityReportPage = lazy(() => import('@/pages/reports/UserFacilityReportPage'));
+const ReportsDashboardPage = lazy(() => import('@/pages/reports/ReportsDashboardPage'));
 
 // Loading component for Suspense fallback
 const LoadingComponent = () => (
@@ -1491,7 +1492,24 @@ const protectedRoutes: RouteObject[] = [
           {
             path: "reports",
             element: <FeatureRoute feature="report" />,
-            children: [{ index: true, element: <Reports /> }],
+            children: [
+              {
+                index: true,
+                element: (
+                  <Suspense fallback={<LoadingComponent />}>
+                    <ReportsDashboardPage />
+                  </Suspense>
+                )
+              },
+              {
+                path: 'user-facility',
+                element: (
+                  <Suspense fallback={<LoadingComponent />}>
+                    <UserFacilityReportPage />
+                  </Suspense>
+                )
+              },
+            ],
           },
           {
             path: "accounts",

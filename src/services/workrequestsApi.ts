@@ -2,6 +2,8 @@ import { api } from './apiClient';
 import { Workrequest, ShortUser } from '@/types/workrequest';
 import { Asset } from '@/types/asset';
 import { Building } from '@/types/building';
+import { Zone } from '@/types/zone';
+import { Subsystem } from '@/types/subsystem';
 
 const BASE = '/work/api/work-requests';
 
@@ -23,11 +25,25 @@ export interface WorkrequestQueryParams {
   search?: string;
 }
 
+export interface QuotationItemInput {
+  description: string;
+  quantity: string;
+  // Reference only — never feeds total_cost_vendor/margin.
+  unit_cost_estimate?: string;
+  unit_cost_vendor: string;
+  unit_cost_client: string;
+  add_vat: boolean;
+}
+
 export interface CpApproveData {
-  po_number: string;
+  // Optional now: in the normal flow this was already saved via
+  // saveQuotation from the Quotation accordion, so cp-approve just needs it
+  // to already be on record. Still accepted here for the one-shot flow.
+  po_number?: string;
   po_vendor?: number;
   po_document?: File;
   po_amount?: string;
+  items?: QuotationItemInput[];
 }
 
 export interface CpRejectData {
@@ -112,6 +128,24 @@ export const getBuildingsByFacility = async (facility_id: number): Promise<Build
   return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
+export const getZonesByFacility = async (facility_id: number): Promise<Zone[]> => {
+  if (!facility_id) return [];
+  const response = await api.get(`${BASE}/zones-by-facility/${facility_id}/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
+};
+
+export const getSubsystemsByZone = async (zone_id: number): Promise<Subsystem[]> => {
+  if (!zone_id) return [];
+  const response = await api.get(`${BASE}/subsystems-by-zone/${zone_id}/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
+};
+
+export const getAssetsBySubsystem = async (subsystem_id: number): Promise<Asset[]> => {
+  if (!subsystem_id) return [];
+  const response = await api.get(`${BASE}/assets-by-subsystem/${subsystem_id}/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
+};
+
 export const getProcurementUsers = async (): Promise<ShortUser[]> => {
   const response = await api.get(`${BASE}/procurement-users/`);
   return Array.isArray(response.data) ? response.data : response.data.results || [];
@@ -140,6 +174,32 @@ export const fetchApprovedWorkrequests = async (): Promise<Workrequest[]> => {
 
 // --- Step 2: Procurement & Store actions ---
 
+const buildQuotationFormData = (data: CpApproveData): FormData => {
+  const fd = new FormData();
+  if (data.po_number) fd.append('po_number', data.po_number);
+  if (data.po_vendor) fd.append('po_vendor', String(data.po_vendor));
+  if (data.po_document) fd.append('po_document', data.po_document);
+  if (data.po_amount) fd.append('po_amount', data.po_amount);
+  // Backend's _parse_quotation_items accepts a JSON string here — this is a
+  // multipart request (po_document), so a nested array can't go through as-is.
+  if (data.items && data.items.length > 0) fd.append('items', JSON.stringify(data.items));
+  return fd;
+};
+
+// Saves Quotation/PO/Vendor as its own step, from the Quotation accordion —
+// re-callable any number of times while the request is still Pending
+// Review, without formally approving it. See cpApprove for that.
+export const saveQuotation = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: CpApproveData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/save-quotation/`, buildQuotationFormData(data));
+  return response.data;
+};
+
 export const cpApprove = async ({
   slug,
   data,
@@ -147,12 +207,7 @@ export const cpApprove = async ({
   slug: string;
   data: CpApproveData;
 }): Promise<Workrequest> => {
-  const fd = new FormData();
-  fd.append('po_number', data.po_number);
-  if (data.po_vendor) fd.append('po_vendor', String(data.po_vendor));
-  if (data.po_document) fd.append('po_document', data.po_document);
-  if (data.po_amount) fd.append('po_amount', data.po_amount);
-  const response = await api.post(`${BASE}/${slug}/cp-approve/`, fd);
+  const response = await api.post(`${BASE}/${slug}/cp-approve/`, buildQuotationFormData(data));
   return response.data;
 };
 
@@ -207,6 +262,37 @@ export const finalReject = async ({
 }): Promise<Workrequest> => {
   const response = await api.post(`${BASE}/${slug}/final-reject/`, data);
   return response.data;
+};
+
+// --- Requester: assign resources + approver (after cost is imputed) ---
+
+export interface AssignResourcesData {
+  vendor?: number | null;
+  technician?: number | null;
+  approver?: number;
+}
+
+export interface EligibleApprover {
+  id: number;
+  name: string;
+  email: string;
+  approval_limit: string | null;
+}
+
+export const assignResources = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: AssignResourcesData;
+}): Promise<Workrequest> => {
+  const response = await api.post(`${BASE}/${slug}/assign-resources/`, data);
+  return response.data;
+};
+
+export const getEligibleApprovers = async (slug: string): Promise<EligibleApprover[]> => {
+  const response = await api.get(`${BASE}/${slug}/eligible-approvers/`);
+  return Array.isArray(response.data) ? response.data : response.data.results || [];
 };
 
 // --- Resubmit after rejection ---

@@ -184,3 +184,65 @@ export const unlockWorkorderResubmission = async (slug: string): Promise<Workord
   const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/unlock-resubmission/`);
   return response.data;
 };
+
+export interface SetStatusData {
+  work_status: 'closed' | 'pending' | 'rejected';
+  reason?: string;
+  vendor?: number;
+  technician?: number;
+  rating?: number;
+  started_at?: string;
+  completed_at?: string;
+  expected_payment_date?: string;
+}
+
+// set-status's response body overwrites the serialized Workorder's
+// `payment_requisition` key (normally a boolean flag) with a reference
+// object to the auto-created/reused requisition — see backend
+// WorkOrderViewSet.set_status.
+export type SetStatusResponse = Omit<Workorder, 'payment_requisition'> & {
+  payment_requisition: { id: number; requisition_number: string } | null;
+};
+
+// Closed/Pending/Rejected tracking, separate from approval_status. Closing
+// requires an approved Work Completion Certificate to already exist (backend
+// enforced) and auto-creates the linked Payment Requisition.
+export const setWorkorderStatus = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: SetStatusData;
+}): Promise<SetStatusResponse> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/set-status/`, data);
+  return response.data;
+};
+
+// Manually raise the Payment Requisition once an Approved WCC exists — lets
+// the Requester do this before closing the Work Order, instead of only at
+// close time. Idempotent on the backend: calling this again after the Work
+// Order is later closed just returns the same requisition.
+export const createPaymentRequisitionFromWorkorder = async (
+  slug: string
+): Promise<{ id: number; requisition_number: string }> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/create-payment-requisition/`);
+  return response.data;
+};
+
+export interface AssignRoutingData {
+  reviewers?: number[];
+  approver?: number;
+}
+
+// Requester assigns this Work Order's own Reviewer(s)/Approver — separate
+// from the Work Request's routing. Notifies the newly-assigned people.
+export const assignWorkorderRouting = async ({
+  slug,
+  data,
+}: {
+  slug: string;
+  data: AssignRoutingData;
+}): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/assign-routing/`, data);
+  return response.data;
+};

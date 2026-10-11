@@ -86,3 +86,29 @@ export const updatePaymentrequisition = async ({ id, paymentrequisition }: { id:
 export const deletePaymentrequisition = async (id: string): Promise<void> => {
   await api.delete(`${PAYMENTREQUISITIONS_API_BASE}/${id}/`);
 };
+
+// Approve a payment requisition — role- and approval-limit-checked on the
+// backend (FINANCE/ADMIN/SUPER ADMIN bypass; APPROVER checked against their
+// own approval_limit against expected_payment_amount).
+export const approvePaymentrequisitionAction = async (id: string): Promise<Paymentrequisition> => {
+  const response = await api.post(`${PAYMENTREQUISITIONS_API_BASE}/${id}/approve/`);
+  return response.data;
+};
+
+// Reject a payment requisition — comment is mandatory on the backend.
+export const rejectPaymentrequisitionAction = async ({ id, comment }: { id: string; comment: string }): Promise<Paymentrequisition> => {
+  const response = await api.post(`${PAYMENTREQUISITIONS_API_BASE}/${id}/reject/`, { comment });
+  return response.data;
+};
+
+// Finance's final step — permanently locks the record against further edits.
+export const disbursePaymentrequisitionAction = async (id: string): Promise<Paymentrequisition> => {
+  const response = await api.post(`${PAYMENTREQUISITIONS_API_BASE}/${id}/disburse/`);
+  return response.data;
+};
+
+// The Requester's own final step — only possible once Finance has disbursed.
+export const closePaymentrequisitionAction = async (id: string): Promise<Paymentrequisition> => {
+  const response = await api.post(`${PAYMENTREQUISITIONS_API_BASE}/${id}/close/`);
+  return response.data;
+};

@@ -37,7 +37,9 @@
       "category": "Catégorie",
       "subcategory": "Sous-catégorie",
       "facility": "Installation",
+      "zone": "Zone",
       "building": "Bâtiment",
+      "subsystem": "Sous-zone",
       "asset": "Actif",
       "department": "Département",
       "priority": "Priorité",
@@ -51,13 +53,19 @@
       "selectCategory": "Sélectionner la catégorie",
       "selectCategoryFirst": "Sélectionner d'abord la catégorie",
       "selectSubcategory": "Sélectionner la sous-catégorie",
+      "categoryAutoFilled": "La catégorie et la sous-catégorie sont renseignées automatiquement à partir de l'actif sélectionné.",
       "descriptionPlaceholder": "Entrer la description de la demande de travail",
       "selectPriority": "Sélectionner la priorité",
       "selectFacility": "Sélectionner l'installation",
       "selectFacilityFirst": "Sélectionner d'abord l'installation",
+      "selectZone": "Sélectionner la zone",
+      "selectZoneFirst": "Sélectionner d'abord la zone",
       "selectBuilding": "Sélectionner le bâtiment",
+      "selectSubsystem": "Sélectionner la sous-zone",
+      "selectSubsystemFirst": "Sélectionner d'abord la zone",
       "selectDepartment": "Sélectionner le département",
       "selectAsset": "Sélectionner l'actif",
+      "selectAssetFirst": "Sélectionner d'abord la sous-zone",
       "vendorInvoice": "Facture du fournisseur",
       "viewUploadedInvoice": "Voir la facture téléchargée",
       "replaceInvoice": "Téléchargez un nouveau fichier pour le remplacer.",
@@ -66,13 +74,15 @@
       "selectVendor": "Sélectionner le fournisseur",
       "invoiceNumber": "Numéro de facture",
       "invoicePlaceholder": "ex. FACT-2026-001",
-      "approvalChainInfo": "Sélectionner dans l'ordre : Approvisionnement & Stock d'abord → Réviseur → Approbateur. Les trois sont requis.",
+      "approvalChainInfo": "Aucun routage requis pour l'instant — Approvisionnement & Stock sera notifié dès l'envoi de cette demande. Revenez ici pour ajouter un Réviseur et un Approbateur une fois le prix fixé.",
+      "approvalChainWaitingInfo": "En attente qu'Approvisionnement & Stock fixe le prix de cette demande. Vous pourrez ajouter un Réviseur et un Approbateur ici une fois cela fait.",
+      "approvalChainRoutingInfo": "Approvisionnement & Stock a fixé le prix de cette demande — ajoutez un Réviseur et un Approbateur pour la faire avancer.",
       "step1Label": "Étape 1 — Approvisionnement & Stock",
       "noProcurementUsers": "Aucun utilisateur d'approvisionnement & stock disponible",
-      "step2Label": "Étape 2 — Réviseur",
+      "step2Label": "Réviseur",
       "selectProcurementFirst": "Sélectionner d'abord l'approvisionnement & stock",
       "noReviewers": "Aucun réviseur disponible",
-      "step3Label": "Étape 3 — Approbateur",
+      "step3Label": "Approbateur",
       "selectReviewerFirst": "Sélectionner d'abord le réviseur",
       "selectApprover": "Sélectionner l'approbateur",
       "cancel": "Annuler",
@@ -83,7 +93,7 @@
       "errorFallback": "Une erreur inconnue s'est produite",
       "backToRequests": "Retour aux demandes de travail",
       "requestLocked": "Demande verrouillée",
-      "lockedDescription": "Cette demande de travail est actuellement dans le pipeline d'approbation et ne peut pas être modifiée. Elle ne sera modifiable qu'après avoir été rejetée.",
+      "lockedDescription": "Cette demande de travail est actuellement dans le pipeline d'approbation et ne peut pas être modifiée. Elle redevient modifiable une fois le prix fixé par Approvisionnement & Stock (pour ajouter un Réviseur et un Approbateur) ou si elle vous est rejetée.",
       "viewRequest": "Voir la demande",
       "priorityOptions": {
         "low": "Basse",
@@ -92,10 +102,15 @@
       },
       "validation": {
         "facilityRequired": "Veuillez sélectionner une installation",
+        "zoneRequired": "Veuillez sélectionner une zone",
+        "subsystemRequired": "Veuillez sélectionner une sous-zone",
+        "categoryRequired": "Veuillez sélectionner une catégorie",
+        "subcategoryRequired": "Veuillez sélectionner une sous-catégorie",
+        "assetRequired": "Veuillez sélectionner un actif",
         "descriptionRequired": "La description est requise",
         "procurementRequired": "Sélectionnez au moins un responsable Approvisionnement & Stock",
-        "reviewerRequired": "Sélectionnez au moins un réviseur",
-        "approverRequired": "Veuillez sélectionner un approbateur"
+        "reviewerRequired": "Sélectionnez au moins un réviseur avant d'enregistrer",
+        "approverRequired": "Veuillez sélectionner un approbateur avant d'enregistrer"
       },
       "toast": {
         "errorTitle": "Erreur",
@@ -514,7 +529,8 @@
     },
     "approvalStatusLabels": {
       "request": "En attente",
-      "approve": "Approuvé"
+      "approve": "Approuvé",
+      "reject": "Rejeté"
     },
     "statusOptions": {
       "active": "Actif",
@@ -612,11 +628,27 @@
         "approvalLimit": "Limite d'approbation : {{amount}}"
       },
       "approveButton": "Approuver",
+      "rejectButton": "Rejeter",
+      "disburseButton": "Décaisser",
       "approveDialog": {
         "title": "Approuver la réquisition de paiement",
         "description": "Êtes-vous sûr de vouloir approuver cette réquisition de paiement ? Cette action est irréversible.",
+        "confirmingWithAmount": "Vous approuvez cette réquisition de paiement pour {{amount}}. Elle sera transmise aux Finances pour décaissement.",
         "confirm": "Approuver",
         "approving": "Approbation..."
+      },
+      "rejectDialog": {
+        "title": "Rejeter la réquisition de paiement",
+        "reasonLabel": "Motif du rejet",
+        "reasonPlaceholder": "Expliquez pourquoi cette réquisition est rejetée...",
+        "confirm": "Rejeter",
+        "rejecting": "Rejet en cours..."
+      },
+      "disburseDialog": {
+        "title": "Décaisser le paiement",
+        "description": "Vous êtes sur le point de verser {{amount}} au bénéficiaire. Cette action est définitive — une fois décaissée, cette réquisition est verrouillée de façon permanente et ne peut plus être modifiée.",
+        "confirm": "Confirmer le décaissement",
+        "disbursing": "Décaissement en cours..."
       },
       "pipeline": {
         "title": "Progression de l'approbation",
@@ -629,7 +661,15 @@
         "noApproversAssigned": "Aucun approbateur assigné",
         "underReview": "En cours d'examen",
         "reviewerLabel": "Réviseur",
-        "approverLabel": "Approbateur"
+        "approverLabel": "Approbateur",
+        "rejectedBannerTitle": "Réquisition de paiement rejetée",
+        "disbursedBannerTitle": "Paiement décaissé — dossier verrouillé",
+        "disbursedByReleased": "Décaissé par {{name}}",
+        "disbursedNotPaid": "Cette réquisition a été payée.",
+        "disbursedOn": " le {{date}}",
+        "disbursedLockNotice": "Aucune autre modification ou action n'est possible sur ce dossier.",
+        "disbursedBadge": "Décaissé",
+        "lockedTooltip": "Cette réquisition a été décaissée et est verrouillée"
       }
     }
   },

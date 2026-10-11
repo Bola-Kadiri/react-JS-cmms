@@ -178,6 +178,14 @@ const WorkrequestPrintView: React.FC<WorkrequestPrintViewProps> = ({ workrequest
                 </td>
               </tr>
               <tr>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Zone</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.zone_detail?.name || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Subzone</td>
+                <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.subsystem_detail?.name || 'N/A'}</td>
+              </tr>
+              <tr>
                 <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', fontWeight: 600, background: '#f9fafb', color: '#374151' }}>Description</td>
                 <td style={{ padding: '10px 14px', border: '1px solid #e5e7eb', color: '#111827' }}>{workrequest.description || 'No description provided'}</td>
               </tr>

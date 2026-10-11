@@ -37,7 +37,6 @@ const SignInForm = () => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setLoginError(null);
-    console.log('[SignInForm] onSubmit: Form submitted with values', values);
     mutate({
       email: values.email,
       password: values.password
@@ -47,7 +46,8 @@ const SignInForm = () => {
         // Removed navigation from here, AuthContext will handle it.
       },
       onError: (error: any) => {
-        console.error('[SignInForm] onError: Login failed.', error);
+        // Log only the status: the full Axios error carries the request body (password).
+        console.error('[SignInForm] onError: Login failed.', error?.response?.status);
         setLoginError(error.response?.data?.detail || 
                       error.response?.data?.message || 
                       t('auth:messages.loginFailed'));

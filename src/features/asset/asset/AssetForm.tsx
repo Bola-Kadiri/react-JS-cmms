@@ -50,7 +50,7 @@ const AssetForm = () => {
     owner: z.number().min(1, t('form.validation.ownerRequired')),
     facility: z.number().min(1, t('form.validation.facilityRequired')),
     zone: z.number().min(1, t('form.validation.zoneRequired')),
-    building: z.number().min(1, t('form.validation.buildingRequired')),
+    building: z.number().nullable().optional(),
     subsystem: z.number().min(1, t('form.validation.subsystemRequired')),
     category: z.number().min(1, t('form.validation.categoryRequired')),
     subcategory: z.number().min(1, t('form.validation.subcategoryRequired')),
@@ -155,16 +155,23 @@ const AssetForm = () => {
     }
   }, [selectedZone, buildings, assetForm]);
 
-  // Update subsystems when building changes
+  // Update subsystems when building or zone changes. Some sites (e.g.
+  // zone-only sites with no buildings defined) link subsystems directly to
+  // a zone instead of a building, so match on whichever is set — a
+  // building-scoped subsystem never has `zone` set (and vice versa), so
+  // matching on both never cross-contaminates results.
   useEffect(() => {
-    if (selectedBuilding && subsystems.length > 0) {
-      const filtered = subsystems.filter(subsystem => subsystem.building === selectedBuilding);
+    if ((selectedBuilding || selectedZone) && subsystems.length > 0) {
+      const filtered = subsystems.filter(subsystem =>
+        (!!selectedBuilding && subsystem.building === selectedBuilding) ||
+        (!!selectedZone && subsystem.zone === selectedZone)
+      );
       setFilteredSubsystems(filtered);
       assetForm.setValue('subsystem', 0);
     } else {
       setFilteredSubsystems([]);
     }
-  }, [selectedBuilding, subsystems, assetForm]);
+  }, [selectedBuilding, selectedZone, subsystems, assetForm]);
 
   // Handle asset data loading
   useEffect(() => {
@@ -191,14 +198,20 @@ const AssetForm = () => {
   }, [assetData, isEditMode, assetForm]);
 
   const onSubmitAsset = (data: AssetFormValues) => {
+    // building is optional — some sites (e.g. zone-only sites with no
+    // buildings defined) never have one to pick, so 0/unset must be sent
+    // as null rather than a literal 0 (which the backend would reject as
+    // a non-existent Building id).
+    const payload = { ...data, building: data.building ? data.building : null };
+
     if (isEditMode && id) {
       updateAssetMutation.mutate(
-        { id, asset: data },
+        { id, asset: payload },
         { onSuccess: () => navigate('/dashboard/asset/assets') }
       );
     } else {
       createAssetMutation.mutate(
-        data as Omit<Asset, 'id'>,
+        payload as Omit<Asset, 'id'>,
         { onSuccess: () => navigate('/dashboard/asset/assets') }
       );
     }
@@ -392,12 +405,12 @@ const AssetForm = () => {
                     {t('form.warnings.noZones')}
                   </div>
                 )}
-                {filteredBuildings.length === 0 && selectedZone > 0 && (
+                {filteredBuildings.length === 0 && selectedZone > 0 && filteredSubsystems.length === 0 && (
                   <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
                     {t('form.warnings.noBuildings')}
                   </div>
                 )}
-                {filteredSubsystems.length === 0 && selectedBuilding > 0 && (
+                {filteredSubsystems.length === 0 && (selectedBuilding > 0 || selectedZone > 0) && (
                   <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
                     {t('form.warnings.noSubsystems')}
                   </div>

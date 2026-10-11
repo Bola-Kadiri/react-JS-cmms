@@ -37,7 +37,9 @@
       "category": "Category",
       "subcategory": "Subcategory",
       "facility": "Facility",
+      "zone": "Zone",
       "building": "Building",
+      "subsystem": "Subzone",
       "asset": "Asset",
       "department": "Department",
       "priority": "Priority",
@@ -51,13 +53,19 @@
       "selectCategory": "Select category",
       "selectCategoryFirst": "Select category first",
       "selectSubcategory": "Select subcategory",
+      "categoryAutoFilled": "Category and subcategory are filled in automatically from the selected asset.",
       "descriptionPlaceholder": "Enter work request description",
       "selectPriority": "Select priority",
       "selectFacility": "Select facility",
       "selectFacilityFirst": "Select facility first",
+      "selectZone": "Select zone",
+      "selectZoneFirst": "Select zone first",
       "selectBuilding": "Select building",
+      "selectSubsystem": "Select subzone",
+      "selectSubsystemFirst": "Select zone first",
       "selectDepartment": "Select department",
       "selectAsset": "Select asset",
+      "selectAssetFirst": "Select subzone first",
       "vendorInvoice": "Vendor Invoice",
       "viewUploadedInvoice": "View uploaded invoice",
       "replaceInvoice": "Upload a new file to replace it.",
@@ -66,13 +74,15 @@
       "selectVendor": "Select vendor",
       "invoiceNumber": "Invoice Number",
       "invoicePlaceholder": "e.g. INV-2026-001",
-      "approvalChainInfo": "Select in order: Procurement & Store first → Reviewer → Approver. All three are required.",
+      "approvalChainInfo": "No routing needed yet — Procurement & Store will be notified once you submit this request. Come back here to add a Reviewer and Approver once they've priced it.",
+      "approvalChainWaitingInfo": "Waiting on Procurement & Store to price this request. You'll be able to add a Reviewer and Approver here once they have.",
+      "approvalChainRoutingInfo": "Procurement & Store has priced this request — add a Reviewer and Approver to send it on.",
       "step1Label": "Step 1 — Procurement & Store",
       "noProcurementUsers": "No Procurement & Store users available",
-      "step2Label": "Step 2 — Reviewer",
+      "step2Label": "Reviewer",
       "selectProcurementFirst": "Select Procurement & Store first",
       "noReviewers": "No reviewers available",
-      "step3Label": "Step 3 — Approver",
+      "step3Label": "Approver",
       "selectReviewerFirst": "Select Reviewer first",
       "selectApprover": "Select approver",
       "cancel": "Cancel",
@@ -83,7 +93,7 @@
       "errorFallback": "An unknown error occurred",
       "backToRequests": "Back to Work Requests",
       "requestLocked": "Request is locked",
-      "lockedDescription": "This work request is currently in the approval pipeline and cannot be edited. It will become editable only after it is rejected back to you.",
+      "lockedDescription": "This work request is currently in the approval pipeline and cannot be edited. It becomes editable again once Procurement & Store prices it (to add a Reviewer and Approver) or if it's rejected back to you.",
       "viewRequest": "View Request",
       "priorityOptions": {
         "low": "Low",
@@ -92,10 +102,15 @@
       },
       "validation": {
         "facilityRequired": "Please select a facility",
+        "zoneRequired": "Please select a zone",
+        "subsystemRequired": "Please select a subzone",
+        "categoryRequired": "Please select a category",
+        "subcategoryRequired": "Please select a subcategory",
+        "assetRequired": "Please select an asset",
         "descriptionRequired": "Description is required",
         "procurementRequired": "Select at least one Procurement & Store handler",
-        "reviewerRequired": "Select at least one Reviewer",
-        "approverRequired": "Please select an Approver"
+        "reviewerRequired": "Select at least one Reviewer before saving",
+        "approverRequired": "Please select an Approver before saving"
       },
       "toast": {
         "errorTitle": "Error",
@@ -514,7 +529,8 @@
     },
     "approvalStatusLabels": {
       "request": "Pending",
-      "approve": "Approved"
+      "approve": "Approved",
+      "reject": "Rejected"
     },
     "statusOptions": {
       "active": "Active",
@@ -612,11 +628,27 @@
         "approvalLimit": "Approval limit: {{amount}}"
       },
       "approveButton": "Approve",
+      "rejectButton": "Reject",
+      "disburseButton": "Disburse",
       "approveDialog": {
         "title": "Approve Payment Requisition",
         "description": "Are you sure you want to approve this payment requisition? This action cannot be undone.",
+        "confirmingWithAmount": "You are approving this payment requisition for {{amount}}. This moves it to Finance for disbursement.",
         "confirm": "Approve",
         "approving": "Approving..."
+      },
+      "rejectDialog": {
+        "title": "Reject Payment Requisition",
+        "reasonLabel": "Reason for Rejection",
+        "reasonPlaceholder": "Explain why this requisition is being rejected...",
+        "confirm": "Reject",
+        "rejecting": "Rejecting..."
+      },
+      "disburseDialog": {
+        "title": "Disburse Payment",
+        "description": "You are releasing {{amount}} to the payee. This is final — once disbursed, this requisition is permanently locked and cannot be edited.",
+        "confirm": "Confirm Disbursement",
+        "disbursing": "Disbursing..."
       },
       "pipeline": {
         "title": "Approval Progress",
@@ -629,7 +661,15 @@
         "noApproversAssigned": "No approvers assigned",
         "underReview": "Under Review",
         "reviewerLabel": "Reviewer",
-        "approverLabel": "Approver"
+        "approverLabel": "Approver",
+        "rejectedBannerTitle": "Payment Requisition Rejected",
+        "disbursedBannerTitle": "Payment Disbursed — Record Locked",
+        "disbursedByReleased": "Released by {{name}}",
+        "disbursedNotPaid": "This requisition has been paid out.",
+        "disbursedOn": " on {{date}}",
+        "disbursedLockNotice": "No further edits or actions are possible on this record.",
+        "disbursedBadge": "Disbursed",
+        "lockedTooltip": "This requisition has been disbursed and is locked"
       }
     }
   },

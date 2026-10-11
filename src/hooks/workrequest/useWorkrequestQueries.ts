@@ -11,18 +11,24 @@ import {
   deleteWorkrequest,
   getAssetsByFacility,
   getBuildingsByFacility,
+  getZonesByFacility,
+  getSubsystemsByZone,
+  getAssetsBySubsystem,
   getProcurementUsers,
   getWorkrequestReviewers,
   getWorkrequestApprovers,
   fetchProcurementWorkrequests,
   fetchApprovedWorkrequests,
   cpApprove,
+  saveQuotation,
   cpReject,
   reviewerApprove,
   reviewerReject,
   finalApprove,
   finalReject,
   resubmitWorkrequest,
+  assignResources,
+  getEligibleApprovers,
   WorkrequestQueryParams,
 } from '@/services/workrequestsApi';
 
@@ -37,11 +43,15 @@ export const workrequestKeys = {
   detail: (slug: string) => [...workrequestKeys.details(), slug] as const,
   assetsByFacility: (facility_id: number) => [...workrequestKeys.all, 'assets-by-facility', facility_id] as const,
   buildingsByFacility: (facility_id: number) => [...workrequestKeys.all, 'buildings-by-facility', facility_id] as const,
+  zonesByFacility: (facility_id: number) => [...workrequestKeys.all, 'zones-by-facility', facility_id] as const,
+  subsystemsByZone: (zone_id: number) => [...workrequestKeys.all, 'subsystems-by-zone', zone_id] as const,
+  assetsBySubsystem: (subsystem_id: number) => [...workrequestKeys.all, 'assets-by-subsystem', subsystem_id] as const,
   procurementUsers: () => [...workrequestKeys.all, 'procurement-users'] as const,
   reviewers: () => [...workrequestKeys.all, 'reviewers'] as const,
   approvers: () => [...workrequestKeys.all, 'approvers'] as const,
   procurementAssigned: () => [...workrequestKeys.all, 'procurement-assigned'] as const,
   approved: () => [...workrequestKeys.all, 'approved'] as const,
+  eligibleApprovers: (slug: string) => [...workrequestKeys.all, 'eligible-approvers', slug] as const,
 };
 
 export const useWorkrequestsQuery = (params?: WorkrequestQueryParams, enabled = true) =>
@@ -131,6 +141,30 @@ export const useBuildingsByFacilityQuery = (facility_id: number | undefined) =>
     staleTime: 30000,
   });
 
+export const useZonesByFacilityQuery = (facility_id: number | undefined) =>
+  useQuery({
+    queryKey: workrequestKeys.zonesByFacility(facility_id as number),
+    queryFn: () => getZonesByFacility(facility_id as number),
+    enabled: !!facility_id,
+    staleTime: 30000,
+  });
+
+export const useSubsystemsByZoneQuery = (zone_id: number | undefined) =>
+  useQuery({
+    queryKey: workrequestKeys.subsystemsByZone(zone_id as number),
+    queryFn: () => getSubsystemsByZone(zone_id as number),
+    enabled: !!zone_id,
+    staleTime: 30000,
+  });
+
+export const useAssetsBySubsystemQuery = (subsystem_id: number | undefined) =>
+  useQuery({
+    queryKey: workrequestKeys.assetsBySubsystem(subsystem_id as number),
+    queryFn: () => getAssetsBySubsystem(subsystem_id as number),
+    enabled: !!subsystem_id,
+    staleTime: 30000,
+  });
+
 export const useProcurementUsersQuery = () =>
   useQuery({ queryKey: workrequestKeys.procurementUsers(), queryFn: getProcurementUsers, staleTime: 30000 });
 
@@ -151,13 +185,30 @@ const invalidateAll = (queryClient: ReturnType<typeof useQueryClient>, slug: str
   queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
 };
 
+// Saves Quotation/PO/Vendor from the Quotation accordion, as its own step —
+// doesn't advance the request's status. See useCpApprove for that.
+export const useSaveQuotation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: saveQuotation,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Quotation saved', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to save quotation';
+      toast.error(msg, { duration: 5000, icon: err });
+    },
+  });
+};
+
 export const useCpApprove = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: cpApprove,
     onSuccess: (data) => {
       invalidateAll(queryClient, data.slug);
-      toast.success('PO generated — status updated to CP Approved', { duration: 3000, icon: ok });
+      toast.success('Approved — status updated to CP Approved', { duration: 3000, icon: ok });
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.error || 'Failed to approve';
@@ -240,6 +291,33 @@ export const useFinalReject = () => {
     },
   });
 };
+
+// Requester (or Admin): assign vendor/technician/approver once Procurement &
+// Store has imputed a cost. Blocked by the backend until that's true.
+export const useAssignResources = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: assignResources,
+    onSuccess: (data) => {
+      invalidateAll(queryClient, data.slug);
+      toast.success('Resources updated', { duration: 3000, icon: ok });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.error || 'Failed to update resources';
+      toast.error(msg, { duration: 6000, icon: err });
+    },
+  });
+};
+
+// The "approval matrix" picker — approvers whose limit can cover this
+// request's current cost. Only meaningful once cost has been imputed.
+export const useEligibleApprovers = (slug: string | undefined) =>
+  useQuery({
+    queryKey: workrequestKeys.eligibleApprovers(slug as string),
+    queryFn: () => getEligibleApprovers(slug as string),
+    enabled: !!slug,
+    staleTime: 30000,
+  });
 
 export const useResubmitWorkrequest = () => {
   const queryClient = useQueryClient();

@@ -14,6 +14,11 @@ import {
   rejectWorkorderByReviewer,
   rejectWorkorderByApprover,
   unlockWorkorderResubmission,
+  setWorkorderStatus,
+  createPaymentRequisitionFromWorkorder,
+  assignWorkorderRouting,
+  SetStatusData,
+  AssignRoutingData,
   WorkorderQueryParams
 } from '@/services/workordersApi';
 import { Workorder } from '@/types/workorder';
@@ -202,6 +207,83 @@ export const useRejectByApprover = (slug: string | undefined) => {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.error || 'Failed to reject work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Hook for closing (or otherwise setting the work_status of) a work order.
+// Closing requires an approved WCC to already exist — if the backend 400s,
+// its exact message (e.g. "An approved Work Completion Certificate is
+// required...") is surfaced as the error toast.
+export const useSetWorkorderStatus = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: SetStatusData) => setWorkorderStatus({ slug: slug as string, data }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      if (result.work_status === 'closed') {
+        toast.success(
+          result.payment_requisition
+            ? `Work order closed. Payment Requisition ${result.payment_requisition.requisition_number} created.`
+            : 'Work order closed.',
+          { duration: 5000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) },
+        );
+      } else {
+        toast.success('Work order status updated', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to update work order status', { duration: 6000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Manually raise the Payment Requisition once an Approved WCC exists —
+// lets the Requester do this before closing, instead of only at close time.
+// Idempotent on the backend (returns the same requisition if one already
+// exists), so this is safe to call even if closing later would also create one.
+export const useCreatePaymentRequisitionFromWorkorder = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => createPaymentRequisitionFromWorkorder(slug as string),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success(`Payment Requisition ${result.requisition_number} created`, {
+        duration: 4000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to create payment requisition', {
+        duration: 6000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
+    },
+  });
+};
+
+// Requester assigns this Work Order's own Reviewer(s)/Approver — a separate
+// routing decision from the Work Request's. Notifies the newly-assigned
+// people (email + in-app) on the backend.
+export const useAssignWorkorderRouting = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: AssignRoutingData) => assignWorkorderRouting({ slug: slug as string, data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Routing updated — the assigned reviewer(s)/approver have been notified', {
+        duration: 4000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to assign routing', {
+        duration: 6000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
     },
   });
 };

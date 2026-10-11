@@ -28,8 +28,11 @@ export interface Asset {
   owner: number;
   facility: number;
   zone: number;
-  building: number;
+  building?: number | null;
   subsystem: number;
   category: number;
   subcategory: number;
+  location?: string | null;
+  qr_code?: string | null;
+  status?: 'IN_SERVICE' | 'OUT_OF_SERVICE' | 'UNDER_MAINTENANCE' | 'DECOMMISSIONED';
 }

@@ -6,55 +6,55 @@ import {
   Edit,
   Loader2,
   Calendar,
-  DollarSign,
+  CalendarDays,
+  Banknote,
   FileText,
+  FileBox,
   Clock,
-  User,
+  Briefcase,
   ClipboardList,
+  CheckCircle,
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Receipt,
-  BriefcaseBusiness,
   Landmark,
-  Tag,
   Hash,
-  Package,
-  FileSpreadsheet,
-  BadgePercent
+  Lock
 } from 'lucide-react';
-import { usePaymentrequisitionQuery, useApprovePaymentrequisition } from '@/hooks/paymentrequisition/usePaymentrequisitionQueries';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { usePaymentrequisitionQuery, useClosePaymentrequisition } from '@/hooks/paymentrequisition/usePaymentrequisitionQueries';
+import { PaymentrequisitionApprovalForm, PaymentrequisitionApprovalAction } from './PaymentrequisitionApprovalForm';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 import { usePermissions } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
-const PaymentRequisitionDetailView = () => {
+interface PaymentRequisitionDetailViewProps {
+  // Lets this same component render nested inside another entity's page
+  // (e.g. a WCC's "Payment Requisition" accordion section) instead of only
+  // as its own routed page. When omitted, falls back to the route param —
+  // the standalone page keeps working exactly as before.
+  idProp?: string;
+  embedded?: boolean;
+}
+
+const PaymentRequisitionDetailView = ({ idProp, embedded = false }: PaymentRequisitionDetailViewProps = {}) => {
   const { t } = useTypedTranslation('work');
-  const { id } = useParams<{ id: string }>();
+  const { id: idParam } = useParams<{ id: string }>();
+  const id = idProp ?? idParam;
   const navigate = useNavigate();
   const { userRole } = usePermissions();
   const { user } = useAuth();
 
-  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  // Single dialog, three modes — mirrors WorkorderApprovalForm's action-driven pattern.
+  const [activeAction, setActiveAction] = useState<PaymentrequisitionApprovalAction | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const {
     data: paymentRequisition,
@@ -62,26 +62,22 @@ const PaymentRequisitionDetailView = () => {
     isError,
     error
   } = usePaymentrequisitionQuery(id);
-
-  const approvePaymentrequisitionMutation = useApprovePaymentrequisition();
+  const closeMutation = useClosePaymentrequisition(id);
 
   const userId = Number(user?.id);
   const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
+  const isFinance = userRole === 'FINANCE';
   // Owner is the requester who created the requisition
   const isOwner = paymentRequisition?.owner === userId;
   // A person in request_to is the designated approver — but the requester (owner) must never approve their own
   const isAttachedApprover = (paymentRequisition?.request_to?.includes(userId) ?? false) && !isOwner;
-  const canApprove = (isAttachedApprover || isAdmin) && paymentRequisition?.approval_status === 'request';
-
-  const handleApprove = async () => {
-    if (!id) return;
-    try {
-      await approvePaymentrequisitionMutation.mutateAsync(id);
-      setShowApproveDialog(false);
-    } catch {
-      // error handled by mutation's onError toast
-    }
-  };
+  const isDisbursed = paymentRequisition?.is_disbursed ?? false;
+  const canApprove = (isAttachedApprover || isAdmin) && paymentRequisition?.approval_status === 'request' && !isDisbursed;
+  const canReject = (isAttachedApprover || isAdmin) && paymentRequisition?.approval_status === 'request' && !isDisbursed;
+  const canDisburse = (isFinance || isAdmin) && paymentRequisition?.approval_status === 'approve' && !isDisbursed;
+  // The Requester's own final step — only once Finance has already disbursed.
+  const isClosed = paymentRequisition?.is_closed ?? false;
+  const canClose = (isOwner || isAdmin) && isDisbursed && !isClosed;
 
   const handleBack = () => navigate('/dashboard/work/payment-requisitions');
   const handleEdit = (editId: string) => navigate(`/dashboard/work/payment-requisitions/edit/${editId}`);
@@ -92,6 +88,7 @@ const PaymentRequisitionDetailView = () => {
       case 'inactive': return t('paymentRequisition.statusLabels.inactive');
       case 'request':  return t('paymentRequisition.approvalStatusLabels.request');
       case 'approve':  return t('paymentRequisition.approvalStatusLabels.approve');
+      case 'reject':   return t('paymentRequisition.approvalStatusLabels.reject', { defaultValue: 'Rejected' } as any);
       default:         return status;
     }
   };
@@ -120,6 +117,10 @@ const PaymentRequisitionDetailView = () => {
       case 'request':
         variant = 'secondary';
         icon = <ClipboardList className="h-3 w-3 mr-1" />;
+        break;
+      case 'reject':
+        variant = 'destructive';
+        icon = <XCircle className="h-3 w-3 mr-1" />;
         break;
       default:
         variant = 'default';
@@ -195,13 +196,15 @@ const PaymentRequisitionDetailView = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className={embedded ? 'space-y-6' : 'container mx-auto p-6 space-y-6'}>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button onClick={handleBack} variant="ghost" size="icon" className="h-8 w-8">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          {!embedded && (
+            <Button onClick={handleBack} variant="ghost" size="icon" className="h-8 w-8">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{t('paymentRequisition.detail.pageTitle')}</h1>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -215,20 +218,63 @@ const PaymentRequisitionDetailView = () => {
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge status={paymentRequisition.approval_status} />
+          {isDisbursed && (
+            <Badge variant="outline" className="flex items-center gap-1 border-green-300 text-green-700 bg-green-50">
+              <Lock className="h-3 w-3" />
+              {t('paymentRequisition.detail.pipeline.disbursedBadge')}
+            </Badge>
+          )}
+          {isClosed && (
+            <Badge variant="outline" className="flex items-center gap-1 border-green-300 text-green-700 bg-green-50">
+              <CheckCircle2 className="h-3 w-3" />
+              Closed
+            </Badge>
+          )}
+          {canClose && (
+            <Button
+              onClick={() => setShowCloseConfirm(true)}
+              className="gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Close
+            </Button>
+          )}
+          {canDisburse && (
+            <Button
+              onClick={() => setActiveAction('disburse')}
+              className="gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <Landmark className="h-4 w-4" />
+              {t('paymentRequisition.detail.disburseButton')}
+            </Button>
+          )}
           {canApprove && (
             <Button
-              onClick={() => setShowApproveDialog(true)}
+              onClick={() => setActiveAction('approve')}
               className="gap-2 bg-green-600 hover:bg-green-700"
-              disabled={approvePaymentrequisitionMutation.isPending}
             >
-              {approvePaymentrequisitionMutation.isPending
-                ? <Loader2 className="h-4 w-4 animate-spin" />
-                : <CheckCircle2 className="h-4 w-4" />}
+              <CheckCircle2 className="h-4 w-4" />
               {t('paymentRequisition.detail.approveButton')}
             </Button>
           )}
+          {canReject && (
+            <Button
+              onClick={() => setActiveAction('reject')}
+              variant="destructive"
+              className="gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              {t('paymentRequisition.detail.rejectButton')}
+            </Button>
+          )}
           <PermissionGuard feature='requisition' permission='edit'>
-            <Button onClick={() => handleEdit(id!)} variant="outline" className="gap-2">
+            <Button
+              onClick={() => handleEdit(id!)}
+              variant="outline"
+              className="gap-2"
+              disabled={isDisbursed}
+              title={isDisbursed ? t('paymentRequisition.detail.pipeline.lockedTooltip') : undefined}
+            >
               <Edit className="h-4 w-4" />
               {t('paymentRequisition.detail.editButton')}
             </Button>
@@ -256,13 +302,13 @@ const PaymentRequisitionDetailView = () => {
             {/* Step 2: Under Review */}
             <div className="flex flex-col items-center flex-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                ${paymentRequisition.approval_status === 'approve' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
+                ${paymentRequisition.approval_status === 'approve' ? 'bg-green-600 text-white' : 'bg-green-400 text-white'}`}>
                 {paymentRequisition.approval_status === 'approve'
                   ? <CheckCircle2 className="h-4 w-4" />
                   : <Clock className="h-4 w-4" />}
               </div>
               <span className={`text-xs mt-1 text-center font-medium ${
-                paymentRequisition.approval_status === 'approve' ? 'text-green-700' : 'text-blue-700'
+                paymentRequisition.approval_status === 'approve' ? 'text-green-700' : 'text-green-600'
               }`}>
                 {t('paymentRequisition.detail.pipeline.underReview')}
               </span>
@@ -311,7 +357,37 @@ const PaymentRequisitionDetailView = () => {
       )}
 
       {/* Approval status banners */}
-      {paymentRequisition.approval_status === 'approve' && (
+      {isDisbursed && (
+        <div className="bg-green-50 border border-green-300 rounded-lg p-4 mb-6 flex items-center gap-3">
+          <Lock className="h-5 w-5 text-green-700 shrink-0" />
+          <div>
+            <p className="text-green-800 font-semibold text-sm">{t('paymentRequisition.detail.pipeline.disbursedBannerTitle')}</p>
+            <p className="text-green-700 text-xs mt-0.5">
+              {paymentRequisition.disbursed_by_detail
+                ? t('paymentRequisition.detail.pipeline.disbursedByReleased', {
+                    name: `${paymentRequisition.disbursed_by_detail.first_name} ${paymentRequisition.disbursed_by_detail.last_name}`,
+                  })
+                : t('paymentRequisition.detail.pipeline.disbursedNotPaid')}
+              {paymentRequisition.disbursed_at
+                ? t('paymentRequisition.detail.pipeline.disbursedOn', { date: formatDate(paymentRequisition.disbursed_at) })
+                : ''}
+              . {t('paymentRequisition.detail.pipeline.disbursedLockNotice')}
+            </p>
+          </div>
+        </div>
+      )}
+      {paymentRequisition.approval_status === 'reject' && (
+        <div className="bg-red-50 border border-red-300 rounded-lg p-4 mb-6 flex items-center gap-3">
+          <XCircle className="h-5 w-5 text-red-700 shrink-0" />
+          <div>
+            <p className="text-red-800 font-semibold text-sm">{t('paymentRequisition.detail.pipeline.rejectedBannerTitle')}</p>
+            {paymentRequisition.comment && (
+              <p className="text-red-700 text-xs mt-0.5">{paymentRequisition.comment}</p>
+            )}
+          </div>
+        </div>
+      )}
+      {!isDisbursed && paymentRequisition.approval_status === 'approve' && (
         <div className="bg-green-50 border border-green-300 rounded-lg p-4 mb-6 flex items-center gap-3">
           <CheckCircle2 className="h-5 w-5 text-green-700 shrink-0" />
           <div>
@@ -348,539 +424,287 @@ const PaymentRequisitionDetailView = () => {
         </div>
       )}
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6">
-          <TabsTrigger value="overview">{t('paymentRequisition.detail.tabs.overview')}</TabsTrigger>
-          <TabsTrigger value="items">
-            {t('paymentRequisition.detail.tabs.items', { count: paymentRequisition.items.length })}
-          </TabsTrigger>
-          <TabsTrigger value="workorders">
-            {t('paymentRequisition.detail.tabs.workOrders', { count: paymentRequisition.work_orders.length })}
-          </TabsTrigger>
-          <TabsTrigger value="approvals">
-            {t('paymentRequisition.detail.tabs.approvals', { count: paymentRequisition.request_to.length })}
-          </TabsTrigger>
-        </TabsList>
+      <Accordion type="multiple" defaultValue={['detail']} className="w-full space-y-3">
+        {/* ── Detail ─────────────────────────────────────────────────── */}
+        <AccordionItem value="detail" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <FileText className="h-5 w-5" />Detail (1)
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Remark</p>
+              <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line bg-gray-50 rounded-lg p-4 border">
+                {paymentRequisition.remark || 'No remark provided'}
+              </p>
+            </div>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-primary/5">
-              <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">About</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">Requisition Number</p><p className="font-mono font-semibold text-gray-900">{paymentRequisition.requisition_number}</p></div>
+                  <div><p className="text-sm text-gray-500">Approval Status</p><StatusBadge status={paymentRequisition.approval_status} /></div>
+                  <div><p className="text-sm text-gray-500">Requisition Date</p><p className="font-medium text-gray-900">{formatDate(paymentRequisition.requisition_date)}</p></div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Payment</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">Expected Amount</p><p className="font-semibold text-gray-900">{formatCurrency(paymentRequisition.expected_payment_amount, paymentRequisition.pay_to_detail?.currency)}</p></div>
+                  <div><p className="text-sm text-gray-500">Expected Payment Date</p><p className="font-medium text-gray-900">{formatDate(paymentRequisition.expected_payment_date)}</p></div>
+                  <div><p className="text-sm text-gray-500">Withholding Tax</p><p className="font-medium text-gray-900">{formatCurrency(paymentRequisition.withholding_tax, paymentRequisition.pay_to_detail?.currency)}</p></div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Status</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">Disbursed</p>{isDisbursed ? <Badge variant="outline" className="border-green-300 text-green-700 bg-green-50">Yes — {formatDate(paymentRequisition.disbursed_at || '')}</Badge> : <p className="text-sm text-gray-400">Not yet</p>}</div>
+                  <div><p className="text-sm text-gray-500">Closed</p>{isClosed ? <Badge variant="outline" className="border-green-300 text-green-700 bg-green-50">Yes — {formatDate(paymentRequisition.closed_at || '')}</Badge> : <p className="text-sm text-gray-400">Not yet</p>}</div>
+                  <div><p className="text-sm text-gray-500">Requires Retirement</p><p className="font-medium text-gray-900">{paymentRequisition.retirement ? 'Yes' : 'No'}</p></div>
+                </div>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Resource ───────────────────────────────────────────────── */}
+        {/* Who this payment is made to — the vendor, personnel, or owner. */}
+        <AccordionItem value="resource" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <Briefcase className="h-5 w-5" />Resource ({paymentRequisition.pay_to_detail || paymentRequisition.payee_personnel_detail || paymentRequisition.payee_owner_detail ? 1 : 0})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-2">
+            {paymentRequisition.pay_to_detail ? (
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t('paymentRequisition.detail.summary.expectedPayment')}
-                    </span>
-                    <span className="text-2xl font-bold mt-1">
-                      {formatCurrency(paymentRequisition.expected_payment_amount, paymentRequisition.pay_to_detail.currency)}
-                    </span>
-                  </div>
-                  <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-primary" />
-                  </div>
+                  <p className="font-semibold text-gray-900">{paymentRequisition.pay_to_detail.name}</p>
+                  <Badge variant="outline">{paymentRequisition.pay_to_detail.type}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('paymentRequisition.detail.summary.dueOn', { date: formatDate(paymentRequisition.expected_payment_date) })}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-secondary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t('paymentRequisition.detail.summary.withholdingTax')}
-                    </span>
-                    <span className="text-2xl font-bold mt-1">
-                      {formatCurrency(paymentRequisition.withholding_tax, paymentRequisition.pay_to_detail.currency)}
-                    </span>
-                  </div>
-                  <div className="h-12 w-12 bg-secondary/10 rounded-full flex items-center justify-center">
-                    <BadgePercent className="h-6 w-6 text-secondary" />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div><p className="text-gray-500">Email</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.email}</p></div>
+                  <div><p className="text-gray-500">Phone</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.phone}</p></div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('paymentRequisition.detail.summary.taxDeduction')}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-muted">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t('paymentRequisition.detail.summary.status')}
-                    </span>
-                    <span className="text-xl font-bold mt-1 flex items-center">
-                      <StatusBadge status={paymentRequisition.status} />
-                      <span className="ml-2">•</span>
-                      <StatusBadge status={paymentRequisition.approval_status} />
-                    </span>
-                  </div>
-                  <div className="h-12 w-12 bg-background rounded-full flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-foreground" />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('paymentRequisition.detail.summary.createdOn', { date: formatDate(paymentRequisition.created_at) })}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Payee */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <BriefcaseBusiness className="h-5 w-5 mr-2 text-primary" />
-                  {t('paymentRequisition.detail.payee.title')}
-                </CardTitle>
-                <CardDescription>{t('paymentRequisition.detail.payee.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{paymentRequisition.pay_to_detail.name}</span>
-                    <Badge>{paymentRequisition.pay_to_detail.type}</Badge>
-                  </div>
-                  <Separator />
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{t('paymentRequisition.detail.payee.contact')}</span>
-                      <span className="text-sm">{paymentRequisition.pay_to_detail.email}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{t('paymentRequisition.detail.payee.phone')}</span>
-                      <span className="text-sm">{paymentRequisition.pay_to_detail.phone}</span>
-                    </div>
-                  </div>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium mb-2 flex items-center">
-                      <Landmark className="h-4 w-4 mr-1 text-muted-foreground" />
-                      {t('paymentRequisition.detail.payee.bankDetails')}
-                    </h4>
-                    <div className="grid grid-cols-1 gap-2 bg-muted/20 p-3 rounded-md">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">{t('paymentRequisition.detail.payee.bank')}</span>
-                        <span className="text-sm font-medium">{paymentRequisition.pay_to_detail.bank}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">{t('paymentRequisition.detail.payee.accountName')}</span>
-                        <span className="text-sm font-medium">{paymentRequisition.pay_to_detail.account_name}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">{t('paymentRequisition.detail.payee.accountNumber')}</span>
-                        <span className="text-sm font-medium">{paymentRequisition.pay_to_detail.account_number}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">{t('paymentRequisition.detail.payee.currency')}</span>
-                        <span className="text-sm font-medium">{paymentRequisition.pay_to_detail.currency}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Requisition Details */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <FileSpreadsheet className="h-5 w-5 mr-2 text-primary" />
-                  {t('paymentRequisition.detail.requisitionInfo.title')}
-                </CardTitle>
-                <CardDescription>{t('paymentRequisition.detail.requisitionInfo.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm text-muted-foreground mb-1">{t('paymentRequisition.detail.requisitionInfo.number')}</h4>
-                      <p className="text-sm font-medium">{paymentRequisition.requisition_number}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm text-muted-foreground mb-1">{t('paymentRequisition.detail.requisitionInfo.dateCreated')}</h4>
-                      <p className="text-sm font-medium">{formatDate(paymentRequisition.requisition_date)}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm text-muted-foreground mb-1">{t('paymentRequisition.detail.requisitionInfo.paymentDue')}</h4>
-                      <p className="text-sm font-medium">{formatDate(paymentRequisition.expected_payment_date)}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm text-muted-foreground mb-1">{t('paymentRequisition.detail.requisitionInfo.requiresRetirement')}</h4>
-                      <p className="text-sm font-medium">
-                        {paymentRequisition.retirement
-                          ? t('paymentRequisition.detail.requisitionInfo.yes')
-                          : t('paymentRequisition.detail.requisitionInfo.no')}
-                      </p>
-                    </div>
-                  </div>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">{t('paymentRequisition.detail.requisitionInfo.remarks')}</h4>
-                    <div className="bg-muted/20 p-3 rounded-md">
-                      <p className="text-sm">{paymentRequisition.remark}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">{t('paymentRequisition.detail.requisitionInfo.comments')}</h4>
-                    <div className="bg-muted/20 p-3 rounded-md">
-                      <p className="text-sm">{paymentRequisition.comment}</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Request Recipients */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <User className="h-5 w-5 mr-2 text-primary" />
-                {t('paymentRequisition.detail.recipients.title')}
-              </CardTitle>
-              <CardDescription>{t('paymentRequisition.detail.recipients.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {paymentRequisition.request_to_detail.map((u) => (
-                  <Card key={u.id} className="bg-muted/20">
-                    <CardContent className="pt-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={u.avatar} alt={`${u.first_name} ${u.last_name}`} />
-                          <AvatarFallback>{u.first_name.charAt(0)}{u.last_name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{u.first_name} {u.last_name}</p>
-                          <p className="text-xs text-muted-foreground">{u.email}</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge variant="outline" className="text-xs">{u.roles}</Badge>
-                            <StatusBadge status={u.status} />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Payment Items Tab */}
-        <TabsContent value="items" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Receipt className="h-5 w-5 mr-2 text-primary" />
-                {t('paymentRequisition.detail.itemsTab.title', { count: paymentRequisition.items.length })}
-              </CardTitle>
-              <CardDescription>{t('paymentRequisition.detail.itemsTab.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentRequisition.items_detail.map((item) => (
-                  <Card key={item.id} className="bg-muted/10">
-                    <CardContent className="pt-6">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="text-lg font-medium">{item.item_name}</h3>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                            <Tag className="h-3 w-3" />
-                            {t('paymentRequisition.detail.itemsTab.workOrderRef', { id: item.work_order })}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground">{t('paymentRequisition.detail.itemsTab.amount')}</p>
-                          <p className="text-xl font-bold">
-                            {formatCurrency(item.amount, paymentRequisition.pay_to_detail.currency)}
-                          </p>
-                        </div>
-                      </div>
-                      <Separator className="my-3" />
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">{t('paymentRequisition.detail.itemsTab.itemDescription')}</p>
-                        <p className="text-sm">{item.description}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-            <CardFooter className="border-t pt-6 flex justify-end">
-              <div className="space-y-2 w-full max-w-xs">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium">{t('paymentRequisition.detail.itemsTab.subtotal')}</span>
-                  <span className="text-sm">
-                    {formatCurrency(
-                      paymentRequisition.items_detail.reduce((sum, item) => sum + parseFloat(item.amount), 0).toString(),
-                      paymentRequisition.pay_to_detail.currency
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium">{t('paymentRequisition.detail.itemsTab.withholdingTax')}</span>
-                  <span className="text-sm">
-                    {formatCurrency(paymentRequisition.withholding_tax, paymentRequisition.pay_to_detail.currency)}
-                  </span>
-                </div>
-                <Separator />
-                <div className="flex justify-between">
-                  <span className="text-base font-medium">{t('paymentRequisition.detail.itemsTab.totalPayment')}</span>
-                  <span className="text-base font-bold">
-                    {formatCurrency(paymentRequisition.expected_payment_amount, paymentRequisition.pay_to_detail.currency)}
-                  </span>
+                <div className="bg-gray-50 border rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div><p className="text-gray-500">Bank</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.bank}</p></div>
+                  <div><p className="text-gray-500">Account Name</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.account_name}</p></div>
+                  <div><p className="text-gray-500">Account Number</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.account_number}</p></div>
+                  <div><p className="text-gray-500">Currency</p><p className="font-medium text-gray-900">{paymentRequisition.pay_to_detail.currency}</p></div>
                 </div>
               </div>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+            ) : paymentRequisition.payee_personnel_detail ? (
+              <div><p className="font-semibold text-gray-900">{paymentRequisition.payee_personnel_detail.first_name} {paymentRequisition.payee_personnel_detail.last_name}</p><p className="text-sm text-gray-500">{paymentRequisition.payee_personnel_detail.email}</p></div>
+            ) : paymentRequisition.payee_owner_detail ? (
+              <div><p className="font-semibold text-gray-900">{paymentRequisition.payee_owner_detail.first_name} {paymentRequisition.payee_owner_detail.last_name}</p><p className="text-sm text-gray-500">{paymentRequisition.payee_owner_detail.email}</p></div>
+            ) : (
+              <p className="text-sm text-gray-400">No payee selected yet.</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
 
-        {/* Work Orders Tab */}
-        <TabsContent value="workorders" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <ClipboardList className="h-5 w-5 mr-2 text-primary" />
-                {t('paymentRequisition.detail.workOrdersTab.title', { count: paymentRequisition.work_orders.length })}
-              </CardTitle>
-              <CardDescription>{t('paymentRequisition.detail.workOrdersTab.description')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentRequisition.work_orders_detail.map((workOrder) => (
-                  <Card key={workOrder.id} className="overflow-hidden">
-                    <CardHeader className="bg-muted/20 pb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{workOrder.title}</CardTitle>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Hash className="h-3 w-3" />
-                            {workOrder.work_order_number}
-                            <span className="h-1 w-1 rounded-full bg-muted-foreground inline-block" />
-                            <Tag className="h-3 w-3" />
-                            {workOrder.type}
-                          </CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                          <StatusBadge status={workOrder.status} />
-                          <Badge variant={
-                            workOrder.priority === 'High' ? 'destructive' :
-                            workOrder.priority === 'Medium' ? 'secondary' : 'default'
-                          }>
-                            {workOrder.priority}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="text-sm font-medium mb-1">{t('paymentRequisition.detail.workOrdersTab.itemDescription')}</h4>
-                          <p className="text-sm">{workOrder.description}</p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.facility')}</p>
-                            <p className="text-sm font-medium">{workOrder.facility_detail.name}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.building')}</p>
-                            <p className="text-sm font-medium">{workOrder.building_detail?.name}</p>
-                          </div>
-                        </div>
-                        <Separator />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.category')}</p>
-                            <p className="text-sm font-medium">{workOrder.category_detail.name}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.subcategory')}</p>
-                            <p className="text-sm font-medium">{workOrder.subcategory_detail?.name ?? ''}</p>
-                          </div>
-                        </div>
-                        {workOrder.asset_detail && (
-                          <>
-                            <Separator />
-                            <div>
-                              <h4 className="text-sm font-medium mb-2 flex items-center">
-                                <Package className="h-4 w-4 mr-1 text-muted-foreground" />
-                                {t('paymentRequisition.detail.workOrdersTab.assetInfo')}
-                              </h4>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/20 p-3 rounded-md">
-                                <div>
-                                  <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.asset')}</p>
-                                  <p className="text-sm font-medium">{workOrder.asset_detail.asset_name} ({workOrder.asset_detail.asset_type})</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.serialNumber')}</p>
-                                  <p className="text-sm font-medium">{workOrder.asset_detail.serial_number}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-muted-foreground">{t('paymentRequisition.detail.workOrdersTab.status')}</p>
-                                  <p className="text-sm font-medium">{workOrder.asset_detail.condition}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="border-t py-3 flex justify-between bg-muted/10">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">
-                          {workOrder.cost
-                            ? formatCurrency(workOrder.cost, workOrder.currency)
-                            : t('paymentRequisition.detail.workOrdersTab.na')}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          {workOrder.expected_start_date
-                            ? formatDate(workOrder.expected_start_date)
-                            : t('paymentRequisition.detail.workOrdersTab.noStartDate')}
-                        </span>
-                      </div>
-                    </CardFooter>
-                  </Card>
-                ))}
+        {/* ── Approval ───────────────────────────────────────────────── */}
+        <AccordionItem value="approval" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <CheckCircle className="h-5 w-5" />Approval ({paymentRequisition.approval_status === 'request' ? 0 : 1})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            {paymentRequisition.approval_status === 'request' ? (
+              <p className="text-sm text-gray-400">No approvals yet.</p>
+            ) : (
+              <div className="p-3 rounded-lg bg-gray-50 border">
+                <StatusBadge status={paymentRequisition.approval_status} />
+                {paymentRequisition.comment && <p className="text-sm text-gray-600 mt-2">{paymentRequisition.comment}</p>}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Approvals Tab */}
-        <TabsContent value="approvals" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircle2 className="h-5 w-5 mr-2 text-primary" />
-                {t('paymentRequisition.detail.approvalsTab.title')}
-              </CardTitle>
-              <CardDescription>
-                <Badge>{getStatusLabel(paymentRequisition.approval_status)}</Badge>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert className={
-                paymentRequisition.approval_status === 'approve'
-                  ? 'bg-green-50 border-green-200 text-green-800'
-                  : 'bg-yellow-50 border-yellow-200 text-yellow-800'
-              }>
-                <AlertTitle className="flex items-center gap-2">
-                  {paymentRequisition.approval_status === 'approve'
-                    ? <CheckCircle2 className="h-4 w-4" />
-                    : <AlertCircle className="h-4 w-4" />}
-                  {paymentRequisition.approval_status === 'approve'
-                    ? t('paymentRequisition.detail.approvalsTab.approvedMessage')
-                    : t('paymentRequisition.detail.approvalsTab.pendingMessage')}
-                </AlertTitle>
-                <AlertDescription>{paymentRequisition.comment}</AlertDescription>
-              </Alert>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-4">{t('paymentRequisition.detail.approvalsTab.recipients')}</h3>
-                <div className="space-y-4">
+            )}
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Approver(s)</p>
+              {paymentRequisition.request_to_detail && paymentRequisition.request_to_detail.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {paymentRequisition.request_to_detail.map((u) => (
-                    <div key={u.id} className="flex items-start p-4 border rounded-md bg-muted/10">
-                      <Avatar className="mr-3">
-                        <AvatarImage src={u.avatar} alt={`${u.first_name} ${u.last_name}`} />
-                        <AvatarFallback>{u.first_name.charAt(0)}{u.last_name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium">{u.first_name} {u.last_name}</p>
-                            <p className="text-sm text-muted-foreground">{u.email}</p>
-                          </div>
-                          <StatusBadge status={u.status} />
-                        </div>
-                        <div className="mt-2">
-                          <Badge variant="outline" className="mr-2">{u.roles}</Badge>
-                          {u.team_lead && <Badge variant="secondary">Team Lead</Badge>}
-                        </div>
-                        {u.approval_limit && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {t('paymentRequisition.detail.approvalsTab.approvalLimit', {
-                              amount: formatCurrency(u.approval_limit, paymentRequisition.pay_to_detail.currency)
-                            })}
-                          </p>
-                        )}
-                      </div>
+                    <div key={u.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border">
+                      <Avatar className="h-8 w-8"><AvatarImage src={u.avatar} /><AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{`${(u.first_name || '').charAt(0)}${(u.last_name || '').charAt(0)}`}</AvatarFallback></Avatar>
+                      <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{u.first_name} {u.last_name}</p><p className="text-xs text-gray-500 truncate">{u.email}</p></div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="border-t flex justify-between py-4">
-              <Button variant="outline" onClick={handleBack} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                {t('paymentRequisition.detail.back')}
-              </Button>
-              <div className="flex gap-2">
-                <PermissionGuard feature='requisition' permission='edit'>
-                  <Button variant="outline" onClick={() => handleEdit(id!)} className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    {t('paymentRequisition.detail.edit')}
-                  </Button>
-                </PermissionGuard>
-                {canApprove && (
-                  <Button
-                    onClick={() => setShowApproveDialog(true)}
-                    className="gap-2 bg-green-600 hover:bg-green-700"
-                    disabled={approvePaymentrequisitionMutation.isPending}
+              ) : <p className="text-sm text-gray-400">Not assigned</p>}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Quotation ──────────────────────────────────────────────── */}
+        {/* This requisition's own priced line items. */}
+        <AccordionItem value="quotation" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <Banknote className="h-5 w-5" />Quotation ({paymentRequisition.items_detail?.length ?? 0})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            {paymentRequisition.items_detail && paymentRequisition.items_detail.length > 0 ? (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="pb-2 pr-4">Item</th>
+                        <th className="pb-2 pr-4">Description</th>
+                        <th className="pb-2">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentRequisition.items_detail.map((item) => (
+                        <tr key={item.id} className="border-b last:border-0">
+                          <td className="py-2 pr-4">{item.item_name}</td>
+                          <td className="py-2 pr-4 text-gray-500">{item.description}</td>
+                          <td className="py-2">{formatCurrency(item.amount, paymentRequisition.pay_to_detail?.currency)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex flex-wrap justify-end gap-6 pt-4 border-t text-sm">
+                  <div><span className="text-gray-500">Withholding Tax: </span><span className="font-semibold">{formatCurrency(paymentRequisition.withholding_tax, paymentRequisition.pay_to_detail?.currency)}</span></div>
+                  <div><span className="text-gray-500">Total: </span><span className="font-semibold text-green-700">{formatCurrency(paymentRequisition.expected_payment_amount, paymentRequisition.pay_to_detail?.currency)}</span></div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400">No line items added yet.</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Comments ───────────────────────────────────────────────── */}
+        <AccordionItem value="comments" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold"><FileText className="h-5 w-5" />Comments (0)</span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <p className="text-sm text-gray-400">No comments on this requisition yet.</p>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── File attachments ──────────────────────────────────────── */}
+        <AccordionItem value="attachments" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <FileBox className="h-5 w-5" />File attachments ({paymentRequisition.attachment_data?.length ?? 0})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            {paymentRequisition.attachment_data && paymentRequisition.attachment_data.length > 0 ? (
+              <div className="space-y-2">
+                {paymentRequisition.attachment_data.map((a, i) => (
+                  <a
+                    key={i}
+                    href={a.file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-green-700 underline font-medium p-2 rounded-lg hover:bg-green-50"
                   >
-                    {approvePaymentrequisitionMutation.isPending
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <CheckCircle2 className="h-4 w-4" />}
-                    {t('paymentRequisition.detail.approveButton')}
-                  </Button>
-                )}
+                    <FileText className="h-4 w-4" /> {a.file.split('/').pop()}
+                  </a>
+                ))}
               </div>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            ) : <p className="text-sm text-gray-400">No files attached.</p>}
+          </AccordionContent>
+        </AccordionItem>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={handleBack} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t('paymentRequisition.detail.backToList')}
-        </Button>
-      </div>
+        {/* ── History ────────────────────────────────────────────────── */}
+        <AccordionItem value="history" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <CalendarDays className="h-5 w-5" />History (3)
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <div className="space-y-6">
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
+                  <div className="w-px h-12 bg-gray-300 mt-2" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Raised</h3>
+                  <time className="text-sm text-gray-500">{formatDate(paymentRequisition.created_at)}</time>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100"><Clock className="h-5 w-5 text-green-600" /></div>
+                  <div className="w-px h-12 bg-gray-300 mt-2" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Last Updated</h3>
+                  <time className="text-sm text-gray-500">{formatDate(paymentRequisition.updated_at)}</time>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    isClosed ? 'bg-green-100' : paymentRequisition.approval_status === 'reject' ? 'bg-red-100' : 'bg-yellow-100'
+                  }`}>
+                    {isClosed
+                      ? <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      : paymentRequisition.approval_status === 'reject' ? <XCircle className="h-5 w-5 text-red-600" />
+                      : <Clock className="h-5 w-5 text-yellow-600" />}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Current Status</h3>
+                  <div className="mt-1"><StatusBadge status={paymentRequisition.approval_status} /></div>
+                </div>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+      {!embedded && (
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={handleBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t('paymentRequisition.detail.backToList')}
+          </Button>
+        </div>
+      )}
+
+      {activeAction && (
+        <PaymentrequisitionApprovalForm
+          isOpen={!!activeAction}
+          onClose={() => setActiveAction(null)}
+          requisitionId={id!}
+          requisitionNumber={paymentRequisition.requisition_number}
+          action={activeAction}
+          amount={paymentRequisition.expected_payment_amount}
+          currency={paymentRequisition.pay_to_detail.currency}
+        />
+      )}
+
+      <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('paymentRequisition.detail.approveDialog.title')}</AlertDialogTitle>
+            <AlertDialogTitle>Close Payment Requisition {paymentRequisition.requisition_number}?</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('paymentRequisition.detail.approveDialog.description')}
+              This confirms the payment has been received and archives the record. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={approvePaymentrequisitionMutation.isPending}>
-              {t('common:actions.cancel')}
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleApprove}
-              disabled={approvePaymentrequisitionMutation.isPending}
+              onClick={() => closeMutation.mutate(undefined, { onSuccess: () => setShowCloseConfirm(false) })}
+              disabled={closeMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
             >
-              {approvePaymentrequisitionMutation.isPending
-                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('paymentRequisition.detail.approveDialog.approving')}</>
-                : t('paymentRequisition.detail.approveDialog.confirm')}
+              {closeMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm Close
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

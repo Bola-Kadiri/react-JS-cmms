@@ -8,9 +8,12 @@ import {
   createPaymentrequisition,
   updatePaymentrequisition,
   deletePaymentrequisition,
+  approvePaymentrequisitionAction,
+  rejectPaymentrequisitionAction,
+  disbursePaymentrequisitionAction,
+  closePaymentrequisitionAction,
   PaymentrequisitionQueryParams
 } from '@/services/paymentrequisitionsApi'
-import { Paymentrequisition } from '@/types/paymentrequisition';
 import React from 'react';
 
 // Key factory for consistent query keys
@@ -116,27 +119,99 @@ export const useDeletePaymentrequisition = () => {
   });
 };
 
-// Hook for approving a paymentrequisition
-export const useApprovePaymentrequisition = () => {
+// Hook for approving a paymentrequisition — calls the real backend `approve`
+// action (role- and approval-limit-checked), not a generic PUT. Replaces the
+// previous implementation, which set approval_status via a raw PUT and never
+// actually enforced the approval matrix.
+export const useApprovePaymentrequisition = (id: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) =>
-      updatePaymentrequisition({ id, paymentrequisition: { approval_status: 'approve' } as Partial<Paymentrequisition> }),
-    onSuccess: (_, id) => {
+    mutationFn: () => approvePaymentrequisitionAction(id as string),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.all });
-      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id as string) });
       toast.success('Payment requisition approved successfully', {
         duration: 3000,
         icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
       });
     },
-    onError: (error) => {
-      toast.error('Failed to approve payment requisition', {
-        duration: 5000,
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to approve payment requisition', {
+        duration: 6000,
         icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
       });
-      console.error('Approve paymentrequisition error:', error);
+    },
+  });
+};
+
+// Hook for rejecting a paymentrequisition — comment is mandatory.
+export const useRejectPaymentrequisition = (id: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (comment: string) => rejectPaymentrequisitionAction({ id: id as string, comment }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.all });
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id as string) });
+      toast.success('Payment requisition rejected', {
+        duration: 3000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to reject payment requisition', {
+        duration: 6000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
+    },
+  });
+};
+
+// Hook for Finance to disburse a paymentrequisition — permanently locks the
+// record against further edits once this succeeds.
+export const useDisbursePaymentrequisition = (id: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => disbursePaymentrequisitionAction(id as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.all });
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id as string) });
+      toast.success('Payment disbursed. This record is now locked.', {
+        duration: 5000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to disburse payment', {
+        duration: 6000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
+    },
+  });
+};
+
+// Hook for the Requester to close a paymentrequisition out — only possible
+// once Finance has already disbursed it.
+export const useClosePaymentrequisition = (id: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => closePaymentrequisitionAction(id as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.all });
+      queryClient.invalidateQueries({ queryKey: paymentrequisitionKeys.detail(id as string) });
+      toast.success('Payment requisition closed.', {
+        duration: 5000,
+        icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }),
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to close payment requisition', {
+        duration: 6000,
+        icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }),
+      });
     },
   });
 };

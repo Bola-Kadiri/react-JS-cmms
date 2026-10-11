@@ -4,7 +4,7 @@ import { Vendor } from "./vendor";
 import { Workorder } from "./workorder";
 
 export type Status = 'Active' | 'Inactive';
-export type ApprovalStatus = 'request' | 'approve';
+export type ApprovalStatus = 'request' | 'approve' | 'reject';
 
 export interface ResourceData {
     content_type: number;
@@ -38,4 +38,19 @@ export interface Paymentrequisition {
     work_orders: number[];
     request_to: number[];
     items: number[];
+    // Finance disbursement — set exclusively via the disburse action, which
+    // permanently locks the record against further edits.
+    is_disbursed: boolean;
+    disbursed_at: string | null;
+    disbursed_by: number | null;
+    disbursed_by_detail: User | null;
+    // Requester close-out — set exclusively via the close action, only once
+    // is_disbursed is already true.
+    is_closed: boolean;
+    closed_at: string | null;
+    closed_by: number | null;
+    closed_by_detail: User | null;
+    payee_type?: 'vendor' | 'personnel' | 'owner' | null;
+    payee_personnel_detail?: { id: number; first_name?: string; last_name?: string; email?: string } | null;
+    payee_owner_detail?: User | null;
   }

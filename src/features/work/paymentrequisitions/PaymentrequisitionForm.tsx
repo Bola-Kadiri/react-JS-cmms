@@ -39,7 +39,7 @@ const PaymentrequisitionForm = () => {
     expected_payment_date: z.string().min(1, t('paymentRequisition.form.validation.expectedPaymentDateRequired')),
     retirement: z.boolean(),
     remark: z.string().optional(),
-    approval_status: z.enum(['request', 'approve']),
+    approval_status: z.enum(['request', 'approve', 'reject']),
     comment: z.string().optional(),
     withholding_tax: z.string().optional(),
     expected_payment_amount: z.string().min(1, t('paymentRequisition.form.validation.expectedPaymentAmountRequired')),

@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,8 +23,16 @@ const WorkordercompletionForm = () => {
   const { t } = useTypedTranslation('work');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditMode = !!id;
+  // Arriving from a specific Work Order's "Add WCC" button pre-selects it —
+  // see WorkorderDetailView.tsx.
+  const preselectedWorkOrder = Number(searchParams.get('work_order')) || 0;
 
+  // The Requester picks reviewer(s) and an approver for the WCC itself here
+  // — a separate routing decision from the Work Order's own, since the same
+  // people don't always review/approve both. The only other thing genuinely
+  // new at this stage is the proof of work done (evidence) plus the dates.
   const workOrderCompletionSchema = z.object({
     work_order: z.number().min(1, t('wcc.form.validation.workOrderRequired')),
     reviewers: z.array(z.number()).min(1, t('wcc.form.validation.reviewersRequired')),
@@ -55,7 +63,7 @@ const WorkordercompletionForm = () => {
   const form = useForm<WorkOrderCompletionFormValues>({
     resolver: zodResolver(workOrderCompletionSchema),
     defaultValues: {
-      work_order: 0,
+      work_order: preselectedWorkOrder,
       reviewers: [],
       approver: 0,
       start_date: '',
@@ -63,6 +71,18 @@ const WorkordercompletionForm = () => {
       resources: [],
     },
   });
+
+  // availableWorkOrders loads asynchronously, so the preselect above (which
+  // runs before that data exists) is reinforced once it's ready — matters
+  // when arriving via ?work_order=<id> from a specific Work Order's page.
+  useEffect(() => {
+    if (!isEditMode && preselectedWorkOrder && !form.getValues('work_order')) {
+      form.setValue('work_order', preselectedWorkOrder);
+    }
+  }, [preselectedWorkOrder, isEditMode, form]);
+
+  const selectedWorkOrderId = form.watch('work_order');
+  const selectedWorkOrder = availableWorkOrders?.results?.find((wo) => wo.id === selectedWorkOrderId);
 
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,44 +216,54 @@ const WorkordercompletionForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Work Order Selection */}
-              <FormField
-                control={form.control}
-                name="work_order"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      {t('wcc.form.workOrder')} <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder={t('wcc.form.selectWorkOrder')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableWorkOrders?.results && availableWorkOrders.results.length > 0 ? (
-                          availableWorkOrders.results.map((workOrder) => (
-                            <SelectItem key={workOrder.id} value={workOrder.id.toString()}>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium">WO-{workOrder.work_order_number}</span>
-                                {workOrder.title && (
-                                  <span className="text-xs text-gray-500">{workOrder.title}</span>
-                                )}
-                              </div>
+              {/* Work Order Selection — hidden once it arrives pre-fixed from
+                  a specific Work Order's "Add WCC" button; nothing to add here. */}
+              {preselectedWorkOrder ? (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">{t('wcc.form.workOrder')}</label>
+                  <p className="text-sm font-semibold text-gray-900 h-10 flex items-center px-3 bg-gray-50 rounded-md border">
+                    {selectedWorkOrder ? `WO-${selectedWorkOrder.work_order_number}` : `#${preselectedWorkOrder}`}
+                  </p>
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="work_order"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        {t('wcc.form.workOrder')} <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder={t('wcc.form.selectWorkOrder')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableWorkOrders?.results && availableWorkOrders.results.length > 0 ? (
+                            availableWorkOrders.results.map((workOrder) => (
+                              <SelectItem key={workOrder.id} value={workOrder.id.toString()}>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">WO-{workOrder.work_order_number}</span>
+                                  {workOrder.title && (
+                                    <span className="text-xs text-gray-500">{workOrder.title}</span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-work-orders" disabled>
+                              {t('wcc.form.noWorkOrders')}
                             </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-work-orders" disabled>
-                            {t('wcc.form.noWorkOrders')}
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               {/* Approver Selection */}
               <FormField

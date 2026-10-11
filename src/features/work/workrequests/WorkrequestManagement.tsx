@@ -403,6 +403,8 @@ const WorkrequestManagement = () => {
             <TableHeader>
               <TableRow className="bg-green-50 border-b border-green-100">
                 <TableHead className="font-semibold text-green-800 py-4">{t('workRequest.columns.type')}</TableHead>
+                <TableHead className="font-semibold text-green-800">Ref. Number</TableHead>
+                <TableHead className="font-semibold text-green-800">Description</TableHead>
                 <TableHead className="font-semibold text-green-800">{t('workRequest.columns.category')}</TableHead>
                 <TableHead className="font-semibold text-green-800">{t('workRequest.columns.facility')}</TableHead>
                 <TableHead className="font-semibold text-green-800">{t('workRequest.columns.asset')}</TableHead>
@@ -415,7 +417,7 @@ const WorkrequestManagement = () => {
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center">
+                  <TableCell colSpan={9} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <Search className="h-8 w-8 text-gray-400" />
                       <p className="text-gray-500 font-medium">{t('workRequest.noItems')}</p>
@@ -435,6 +437,14 @@ const WorkrequestManagement = () => {
                       <Badge variant="outline" className={getTypeBadgeStyles(workrequest.type)}>
                         {workrequest.type}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm text-gray-700 whitespace-nowrap">
+                      {workrequest.work_request_number || t('workRequest.dash')}
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <p className="text-sm text-gray-700 truncate" title={workrequest.description}>
+                        {workrequest.description || t('workRequest.dash')}
+                      </p>
                     </TableCell>
                     <TableCell className="font-medium">
                       <div>

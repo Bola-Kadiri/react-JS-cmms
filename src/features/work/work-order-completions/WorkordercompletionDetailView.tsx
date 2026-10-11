@@ -2,27 +2,27 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowLeft,
   Edit,
-  Eye,
-  Download,
   FileText,
-  Image,
-  Calendar,
-  User,
-  Building,
+  FileBox,
+  CalendarDays,
+  Briefcase,
+  Banknote,
   CheckCircle,
   CheckCircle2,
   XCircle,
   Clock,
-  Loader2
+  Loader2,
+  Receipt,
 } from 'lucide-react';
-import { 
+import PaymentRequisitionDetailView from '@/features/work/paymentrequisitions/PaymentrequisitionDetailView';
+import {
   useWorkOrderCompletionQuery,
   useApproveByApproverMutation,
   useRejectByApproverMutation,
@@ -30,7 +30,6 @@ import {
   useRejectByReviewerMutation
 } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
 import { formatDate } from '@/utils/formatters';
-import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/contexts/PermissionsContext';
 import {
@@ -60,12 +59,19 @@ const PIPELINE_STEPS = [
 
 const WCC_REJECTED_STATUSES = ['Reviewer Rejected', 'Approver Rejected'];
 
-const WorkordercompletionDetailView = () => {
-  const { id } = useParams<{ id: string }>();
+interface WorkordercompletionDetailViewProps {
+  // Lets this same component render nested inside a Work Order's "Work
+  // Completion Certificate" accordion section instead of only as its own
+  // routed page. Falls back to the route param when omitted.
+  idProp?: string;
+  embedded?: boolean;
+}
+
+const WorkordercompletionDetailView = ({ idProp, embedded = false }: WorkordercompletionDetailViewProps = {}) => {
+  const { id: idParam } = useParams<{ id: string }>();
+  const id = idProp ?? idParam;
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  
   // Dialog states
   const [showApproverConfirm, setShowApproverConfirm] = useState(false);
   const [showApproverReject, setShowApproverReject] = useState(false);
@@ -83,7 +89,7 @@ const WorkordercompletionDetailView = () => {
   const { userRole } = usePermissions();
   const isReviewer = userRole === 'REVIEWER' || userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
   const isApprover = userRole === 'APPROVER' || userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
-  const isOwner = completion?.owner === user?.id;
+  const isOwner = completion?.owner === Number(user?.id);
   const isRequester = userRole === 'REQUESTER';
 
   // Handle approve by approver
@@ -182,64 +188,6 @@ const WorkordercompletionDetailView = () => {
     }
   };
 
-  // Get file icon based on URL
-  const getFileIcon = (fileUrl: string) => {
-    const fileName = getFileName(fileUrl);
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
-      return <Image className="h-5 w-5 text-blue-500" />;
-    }
-    if (['pdf'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-red-500" />;
-    }
-    if (['doc', 'docx'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-blue-600" />;
-    }
-    return <FileText className="h-5 w-5 text-gray-500" />;
-  };
-
-  // Get file type description
-  const getFileType = (fileUrl: string) => {
-    const fileName = getFileName(fileUrl);
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    
-    switch (extension) {
-      case 'pdf':
-        return 'PDF Document';
-      case 'doc':
-      case 'docx':
-        return 'Word Document';
-      case 'jpg':
-      case 'jpeg':
-        return 'JPEG Image';
-      case 'png':
-        return 'PNG Image';
-      case 'gif':
-        return 'GIF Image';
-      case 'webp':
-        return 'WebP Image';
-      default:
-        return 'File';
-    }
-  };
-
-  // View file in new tab
-  const handleViewFile = (fileUrl: string) => {
-    window.open(fileUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  // Download file
-  const handleDownloadFile = (fileUrl: string, fileName: string) => {
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // Get file name from URL
   const getFileName = (fileUrl: string) => {
     try {
@@ -264,9 +212,9 @@ const WorkordercompletionDetailView = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <p className="text-red-600 mb-2">Failed to load work order completion</p>
-          <Button 
-            onClick={() => navigate('/dashboard/work/work-order-completions')} 
-            variant="outline" 
+          <Button
+            onClick={() => navigate('/dashboard/work/work-order-completions')}
+            variant="outline"
             size="sm"
           >
             Back to List
@@ -276,30 +224,73 @@ const WorkordercompletionDetailView = () => {
     );
   }
 
+  const formatCurrency = (cost: string, currency: string) => {
+    if (!cost) return 'N/A';
+    const amount = parseFloat(cost);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD', minimumFractionDigits: 2 }).format(amount);
+  };
+
+  // Count of approval STEPS actually completed on THIS WCC's own chain
+  // (separate from the Work Order's own Approval section one level up) —
+  // 0 until its Reviewer actually acts, even if routing was assigned
+  // earlier.
+  const APPROVAL_STEPS_DONE: Record<string, number> = {
+    'Pending': 0,
+    'Reviewer Rejected': 1,
+    'Reviewed': 1,
+    'Approver Rejected': 2,
+    'Approved': 2,
+  };
+  const approvalCount = APPROVAL_STEPS_DONE[completion.approval_status] ?? 0;
+
+  const workOrder = completion.work_order_detail;
+  const sourceWr = workOrder?.source_work_request_detail;
+  const quotationItems = sourceWr?.quotation_items ?? [];
+
+  // WCC's own uploaded files, plus everything already inherited at the Work
+  // Order level (which itself already carries the source Work Request's PO/
+  // invoice/attachment) — so nothing here looks empty just because a file
+  // lives one or two levels up the chain.
+  const attachments = [
+    ...(completion.resources_data || []).map((r, i) => ({
+      label: getFileName(r.file) || `attachment-${i + 1}`,
+      url: r.file,
+    })),
+    ...(sourceWr?.po_document ? [{ label: 'PO Document', url: sourceWr.po_document }] : []),
+    ...(sourceWr?.vendor_invoice ? [{ label: 'Vendor Invoice', url: sourceWr.vendor_invoice }] : []),
+    ...(sourceWr?.attachment ? [{ label: 'Attachment', url: sourceWr.attachment }] : []),
+    ...(workOrder?.resources_data || []).map((r, i) => ({
+      label: r.file.split('/').pop() || `wo-attachment-${i + 1}`,
+      url: r.file,
+    })),
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/dashboard/work/work-order-completions')}
-            className="text-green-700 hover:text-green-800 hover:bg-green-50"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Work Order Completions
-          </Button>
+          {!embedded && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard/work/work-order-completions')}
+              className="text-green-700 hover:text-green-800 hover:bg-green-50"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Work Order Completions
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {/* Reviewer buttons - only visible to reviewers */}
-          {(isReviewer || completion.reviewers?.includes(user?.id ?? -1)) && completion.approval_status === 'Pending' && (
+          {(isReviewer || completion.reviewers?.includes(Number(user?.id))) && completion.approval_status === 'Pending' && (
             <>
               <Button
                 onClick={() => setShowReviewerConfirm(true)}
                 disabled={approveByReviewerMutation.isPending || completion?.is_reviewed}
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
               >
                 {approveByReviewerMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -320,7 +311,7 @@ const WorkordercompletionDetailView = () => {
           )}
           
           {/* Approver buttons - only visible to approvers and only if reviewed */}
-          {(isApprover || completion.approver === user?.id) && completion.approval_status === 'Reviewed' && (
+          {(isApprover || completion.approver === Number(user?.id)) && completion.approval_status === 'Reviewed' && (
             <>
               <Button
                 onClick={() => setShowApproverConfirm(true)}
@@ -420,315 +411,310 @@ const WorkordercompletionDetailView = () => {
         );
       })()}
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
-          <TabsTrigger value="work-order" className="text-sm">Work Order Details</TabsTrigger>
-          <TabsTrigger value="resources" className="text-sm">Resources</TabsTrigger>
-        </TabsList>
+      <Accordion type="multiple" defaultValue={['detail']} className="w-full space-y-3">
+        {/* ── Detail ─────────────────────────────────────────────────── */}
+        <AccordionItem value="detail" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <FileText className="h-5 w-5" />Detail (1)
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Description</p>
+              <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line bg-gray-50 rounded-lg p-4 border">
+                {workOrder?.description || 'No description provided'}
+              </p>
+            </div>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-900">Basic Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">ID</label>
-                  <p className="text-sm text-gray-900 mt-1">#{completion.id}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">About</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">WCC Number</p><p className="font-mono font-semibold text-gray-900">WCC-{completion.wcc_number || completion.id}</p></div>
+                  <div><p className="text-sm text-gray-500">Approval Status</p>{getApprovalStatusBadge(completion.approval_status)}</div>
+                  <div><p className="text-sm text-gray-500">Due Status</p>{getDueStatusBadge(completion.due_status)}</div>
                 </div>
-                <Separator />
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Work Order</label>
-                  <p className="text-sm text-gray-900 mt-1">
-                    {completion.work_order_detail 
-                      ? `WO-${completion.work_order_detail.work_order_number || completion.work_order_detail.id}`
-                      : `WO-${completion.work_order}`}
-                  </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Timeline</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">Start Date</p><p className="font-medium text-gray-900">{completion.start_date ? formatDate(completion.start_date) : 'Not set'}</p></div>
+                  <div><p className="text-sm text-gray-500">Due Date</p><p className="font-medium text-gray-900">{completion.due_date ? formatDate(completion.due_date) : 'Not set'}</p></div>
                 </div>
-                <Separator />
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Work Order</p>
+                <div className="space-y-3">
+                  <div><p className="text-sm text-gray-500">Number</p><p className="font-mono font-medium text-gray-900">{workOrder?.work_order_number ? `WO-${workOrder.work_order_number}` : 'N/A'}</p></div>
+                  <div><p className="text-sm text-gray-500">Category</p><p className="font-medium text-gray-900">{workOrder?.category_detail?.name || 'N/A'}</p></div>
+                  <div><p className="text-sm text-gray-500">Facility</p><p className="font-medium text-gray-900">{workOrder?.facility_detail?.name || 'N/A'}</p></div>
+                </div>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Resource ───────────────────────────────────────────────── */}
+        {/* The Work Order's own vendor/technician — who actually did the
+            work this certificate is certifying. */}
+        <AccordionItem value="resource" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <Briefcase className="h-5 w-5" />Resource ({(workOrder?.vendor_detail ? 1 : 0) + (workOrder?.technician_detail ? 1 : 0)})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-2">Vendor</p>
+                {workOrder?.vendor_detail ? (
+                  <div>
+                    <p className="font-semibold text-gray-900">{workOrder.vendor_detail.name}</p>
+                    {workOrder.vendor_detail.email && <p className="text-sm text-gray-500">{workOrder.vendor_detail.email}</p>}
+                  </div>
+                ) : <p className="text-sm text-gray-500">No vendor selected</p>}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-2">Technician</p>
+                {workOrder?.technician_detail ? (
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={(workOrder.technician_detail as any).avatar} />
+                      <AvatarFallback className="bg-green-100 text-green-700 font-semibold text-xs">
+                        {`${(workOrder.technician_detail.first_name || '').charAt(0)}${(workOrder.technician_detail.last_name || '').charAt(0)}`}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-gray-900">{`${workOrder.technician_detail.first_name} ${workOrder.technician_detail.last_name}`}</p>
+                      <p className="text-sm text-gray-600">{workOrder.technician_detail.email}</p>
+                    </div>
+                  </div>
+                ) : <p className="text-sm text-gray-500">No technician assigned</p>}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Approval ───────────────────────────────────────────────── */}
+        {/* This WCC's own Reviewer/Approver chain — separate from the Work
+            Order's own Approval section one level up. */}
+        <AccordionItem value="approval" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <CheckCircle className="h-5 w-5" />Approval ({approvalCount})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            {approvalCount === 0 ? (
+              <p className="text-sm text-gray-400">No approvals yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {approvalCount >= 1 && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Reviewer(s)</p>
+                    {completion.reviewers_detail && completion.reviewers_detail.length > 0 ? (
+                      <div className="space-y-2">
+                        {completion.reviewers_detail.map((u: any) => (
+                          <div key={u.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border">
+                            <Avatar className="h-8 w-8"><AvatarImage src={u.avatar} /><AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{`${(u.first_name || '').charAt(0)}${(u.last_name || '').charAt(0)}`}</AvatarFallback></Avatar>
+                            <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{u.first_name} {u.last_name}</p><p className="text-xs text-gray-500 truncate">{u.email}</p></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-gray-400">Not assigned</p>}
+                  </div>
+                )}
+                {approvalCount >= 2 && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Approver</p>
+                    {completion.approver_detail ? (
+                      <div className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border">
+                        <Avatar className="h-8 w-8"><AvatarImage src={(completion.approver_detail as any).avatar} /><AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{`${(completion.approver_detail.first_name || '').charAt(0)}${(completion.approver_detail.last_name || '').charAt(0)}`}</AvatarFallback></Avatar>
+                        <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{completion.approver_detail.first_name} {completion.approver_detail.last_name}</p><p className="text-xs text-gray-500 truncate">{completion.approver_detail.email}</p></div>
+                      </div>
+                    ) : <p className="text-sm text-gray-400">Not assigned</p>}
+                  </div>
+                )}
+              </div>
+            )}
+            {completion.approved_by_detail && completion.approved_by !== completion.approver && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Approved By</p>
+                <div className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 border max-w-sm">
+                  <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-green-100 text-green-700 font-semibold">{`${(completion.approved_by_detail.first_name || '').charAt(0)}${(completion.approved_by_detail.last_name || '').charAt(0)}`}</AvatarFallback></Avatar>
+                  <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{completion.approved_by_detail.first_name} {completion.approved_by_detail.last_name}</p><p className="text-xs text-gray-500 truncate">{completion.approved_by_detail.email}</p></div>
+                </div>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Quotation ──────────────────────────────────────────────── */}
+        {/* Carried forward from the Work Order's own Quotation — which
+            itself already carries it from the source Work Request. */}
+        <AccordionItem value="quotation" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <Banknote className="h-5 w-5" />Quotation ({quotationItems.length})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-6 pt-2">
+            {sourceWr?.po_number && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-xs font-semibold text-green-700 mb-2 uppercase">Purchase Order</p>
+                <p className="text-lg font-bold text-gray-900 font-mono">{sourceWr.po_number}</p>
+              </div>
+            )}
+            {quotationItems.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-gray-500 border-b">
+                      <th className="pb-2 pr-4">Description</th>
+                      <th className="pb-2 pr-4">Qty</th>
+                      {!isRequester && <th className="pb-2 pr-4">Cost to Alphamead</th>}
+                      <th className="pb-2 pr-4">Cost to Client</th>
+                      <th className="pb-2">VAT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {quotationItems.map((item) => (
+                      <tr key={item.id} className="border-b last:border-0">
+                        <td className="py-2 pr-4">{item.description}</td>
+                        <td className="py-2 pr-4">{item.quantity}</td>
+                        {!isRequester && (
+                          <td className="py-2 pr-4">
+                            {item.unit_cost_vendor != null ? formatCurrency(item.unit_cost_vendor, workOrder?.currency || 'NGN') : '—'}
+                          </td>
+                        )}
+                        <td className="py-2 pr-4">{formatCurrency(item.unit_cost_client, workOrder?.currency || 'NGN')}</td>
+                        <td className="py-2">{item.add_vat ? 'Yes' : 'No'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">No quotation lines on the source Work Request.</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Comments ───────────────────────────────────────────────── */}
+        <AccordionItem value="comments" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold"><FileText className="h-5 w-5" />Comments (0)</span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <p className="text-sm text-gray-400">No comments on this WCC yet.</p>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── WCC File attachments ──────────────────────────────────── */}
+        <AccordionItem value="attachments" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <FileBox className="h-5 w-5" />WCC File attachments ({attachments.length})
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            {attachments.length > 0 ? (
+              <div className="space-y-2">
+                {attachments.map((a, i) => (
+                  <a
+                    key={`${a.label}-${i}`}
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-green-700 underline font-medium p-2 rounded-lg hover:bg-green-50"
+                  >
+                    <FileText className="h-4 w-4" /> {a.label}
+                  </a>
+                ))}
+              </div>
+            ) : <p className="text-sm text-gray-400">No files attached.</p>}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── History ────────────────────────────────────────────────── */}
+        <AccordionItem value="history" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <CalendarDays className="h-5 w-5" />History (3)
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            <div className="space-y-6">
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
+                  <div className="w-px h-12 bg-gray-300 mt-2" />
+                </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Approval Status</label>
+                  <h3 className="text-base font-semibold text-gray-900">Submitted</h3>
+                  <time className="text-sm text-gray-500">{formatDate(completion.created_at)}</time>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100"><Clock className="h-5 w-5 text-green-600" /></div>
+                  <div className="w-px h-12 bg-gray-300 mt-2" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Last Updated</h3>
+                  <time className="text-sm text-gray-500">{formatDate(completion.updated_at)}</time>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex flex-col items-center mr-4">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    completion.approval_status === 'Approved' ? 'bg-green-100' :
+                    WCC_REJECTED_STATUSES.includes(completion.approval_status) ? 'bg-red-100' : 'bg-yellow-100'
+                  }`}>
+                    {completion.approval_status === 'Approved'
+                      ? <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      : WCC_REJECTED_STATUSES.includes(completion.approval_status) ? <XCircle className="h-5 w-5 text-red-600" />
+                      : <Clock className="h-5 w-5 text-yellow-600" />}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Current Status</h3>
                   <div className="mt-1">{getApprovalStatusBadge(completion.approval_status)}</div>
                 </div>
-                <Separator />
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Due Status</label>
-                  <div className="mt-1">{getDueStatusBadge(completion.due_status)}</div>
-                </div>
-                <Separator />
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Owner</label>
-                  <p className="text-sm text-gray-900 mt-1">User ID: {completion.owner}</p>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* Approver Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-900 flex items-center">
-                  <User className="h-5 w-5 mr-2 text-green-600" />
-                  Approver
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {completion.approver_detail ? (
-                  <>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Name</label>
-                      <p className="text-sm text-gray-900 mt-1">
-                        {`${completion.approver_detail.first_name} ${completion.approver_detail.last_name}`.trim()}
-                      </p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Role</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.approver_detail.roles || 'N/A'}</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Email</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.approver_detail.email}</p>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-gray-500">No approver assigned</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Reviewers Information */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-900 flex items-center">
-                  <User className="h-5 w-5 mr-2 text-green-600" />
-                  Reviewers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {completion.reviewers_detail && completion.reviewers_detail.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {completion.reviewers_detail.map((reviewer) => (
-                      <div 
-                        key={reviewer.id} 
-                        className="p-4 border rounded-lg bg-gray-50 hover:shadow-sm transition-shadow"
-                      >
-                        <p className="text-sm font-medium text-gray-900 mb-1">
-                          {`${reviewer.first_name} ${reviewer.last_name}`.trim()}
-                        </p>
-                        <p className="text-xs text-gray-600 mb-2">{reviewer.roles || 'No role assigned'}</p>
-                        <p className="text-xs text-gray-500">{reviewer.email}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No reviewers assigned</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Timeline & Dates */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-900 flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-green-600" />
-                  Timeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Start Date</label>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {completion.start_date ? formatDate(completion.start_date) : 'Not set'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Due Date</label>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {completion.due_date ? formatDate(completion.due_date) : 'Not set'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Created At</label>
-                    <p className="text-sm text-gray-900 mt-1">{formatDate(completion.created_at)}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Last Updated</label>
-                    <p className="text-sm text-gray-900 mt-1">{formatDate(completion.updated_at)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Approved By (if different from approver) */}
-            {completion.approved_by_detail && completion.approved_by !== completion.approver && (
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-lg text-gray-900 flex items-center">
-                    <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
-                    Approved By
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Name</label>
-                      <p className="text-sm text-gray-900 mt-1">
-                        {`${completion.approved_by_detail.first_name} ${completion.approved_by_detail.last_name}`.trim()}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Role</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.approved_by_detail.roles || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Email</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.approved_by_detail.email}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* ── Payment Requisition ────────────────────────────────────── */}
+        {/* A real extension of this WCC once it's Approved: nests the full
+            Payment Requisition page inline instead of linking away,
+            matching how this WCC itself nests inside its Work Order. */}
+        <AccordionItem value="payment-requisition" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="flex items-center gap-2 text-green-800 font-semibold">
+              <Receipt className="h-5 w-5" />
+              Payment Requisition
+              {workOrder?.linked_payment_requisition
+                ? <span className="font-mono">— {workOrder.linked_payment_requisition.requisition_number}</span>
+                : ' (0)'}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2">
+            {completion.approval_status === 'Approved' && workOrder?.linked_payment_requisition ? (
+              <PaymentRequisitionDetailView
+                idProp={String(workOrder.linked_payment_requisition.id)}
+                embedded
+              />
+            ) : (
+              <p className="text-sm text-gray-400">No Payment Requisition raised yet.</p>
             )}
-          </div>
-        </TabsContent>
-
-        {/* Work Order Details Tab */}
-        <TabsContent value="work-order" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-900 flex items-center">
-                <Building className="h-5 w-5 mr-2 text-green-600" />
-                Work Order Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {completion.work_order_detail ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Work Order ID</label>
-                    <p className="text-sm text-gray-900 mt-1">
-                      WO-{completion.work_order_detail.work_order_number || completion.work_order_detail.id}
-                    </p>
-                  </div>
-                  {completion.work_order_detail.title && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Title</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.work_order_detail.title}</p>
-                    </div>
-                  )}
-                  <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-700">Description</label>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {completion.work_order_detail.description || 'No description available'}
-                    </p>
-                  </div>
-                  {completion.work_order_detail.priority && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Priority</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.work_order_detail.priority}</p>
-                    </div>
-                  )}
-                  {completion.work_order_detail.status && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Work Order Status</label>
-                      <p className="text-sm text-gray-900 mt-1">{completion.work_order_detail.status}</p>
-                    </div>
-                  )}
-                  {completion.work_order_detail.cost && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Cost</label>
-                      <p className="text-sm text-gray-900 mt-1">
-                        {completion.work_order_detail.currency || ''} {completion.work_order_detail.cost}
-                      </p>
-                    </div>
-                  )}
-                  {completion.work_order_detail.asset && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Asset</label>
-                      <p className="text-sm text-gray-900 mt-1">Asset ID: {completion.work_order_detail.asset}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">Work order details not available</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Resources Tab */}
-        <TabsContent value="resources" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-900">Attached Resources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {completion.resources_data && completion.resources_data.length > 0 ? (
-                <div className="space-y-4">
-                  {completion.resources_data.map((resource, index) => {
-                    const fileName = getFileName(resource.file);
-                    const fileType = getFileType(resource.file);
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex items-center gap-4">
-                          {getFileIcon(resource.file)}
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900 mb-1">
-                              {fileName}
-                            </p>
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span>{fileType}</span>
-                              <span>•</span>
-                              <span>Content Type: {resource.content_type}</span>
-                              <span>•</span>
-                              <span>Object ID: {resource.object_id}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewFile(resource.file)}
-                            className="text-blue-700 border-blue-300 hover:bg-blue-50"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDownloadFile(resource.file, fileName)}
-                            className="text-green-700 border-green-300 hover:bg-green-50"
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No resources attached</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Approver Confirmation Modal */}
       <AlertDialog open={showApproverConfirm} onOpenChange={setShowApproverConfirm}>
@@ -804,7 +790,7 @@ const WorkordercompletionDetailView = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleApproveByReviewer}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-green-600 hover:bg-green-700"
             >
               Confirm Review
             </AlertDialogAction>

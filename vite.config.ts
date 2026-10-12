@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
+  // Production builds ship with no console output; `npm run dev` keeps the logs.
+  esbuild: mode === 'production' ? { drop: ['console', 'debugger'] } : {},
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { AssetCategory } from '@/types/assetcategory';
 import { useAssetCategoryQuery, useCreateAssetCategory, useUpdateAssetCategory } from '@/hooks/assetcategory/useAssetCategoryQueries';
@@ -23,9 +24,20 @@ const AssetCategoryForm = () => {
     type: z.string().min(1, 'Type is required'),
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
-    salvage_value_percent: z.string().min(1, 'Salvage value percent is required'),
-    useful_life_year: z.number().min(1, 'Useful life year must be at least 1'),
+    salvage_value_percent: z.string(),
+    useful_life_year: z.number(),
     description: z.string().min(1, 'Description is required'),
+    // Known-cost bill categories (EKEDC, waste…) — usable on known-cost payment work orders.
+    is_known_cost: z.boolean().default(false),
+  }).superRefine((data, ctx) => {
+    // Salvage value / useful life only apply to physical assets, not to bill categories.
+    if (data.is_known_cost) return;
+    if (!data.salvage_value_percent) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Salvage value percent is required', path: ['salvage_value_percent'] });
+    }
+    if (!(data.useful_life_year >= 1)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Useful life year must be at least 1', path: ['useful_life_year'] });
+    }
   });
 
   type AssetCategoryFormValues = z.infer<typeof assetCategorySchema>;
@@ -40,6 +52,7 @@ const AssetCategoryForm = () => {
       salvage_value_percent: '',
       useful_life_year: 1,
       description: '',
+      is_known_cost: false,
     }
   });
 
@@ -63,14 +76,21 @@ const AssetCategoryForm = () => {
         type: assetCategoryData.type,
         code: assetCategoryData.code,
         name: assetCategoryData.name,
-        salvage_value_percent: assetCategoryData.salvage_value_percent,
-        useful_life_year: assetCategoryData.useful_life_year,
+        salvage_value_percent: assetCategoryData.salvage_value_percent ?? '',
+        useful_life_year: assetCategoryData.useful_life_year ?? 0,
         description: assetCategoryData.description,
+        is_known_cost: !!assetCategoryData.is_known_cost,
       });
     }
   }, [assetCategoryData, isEditMode, assetCategoryForm]);
 
-  const onSubmitAssetCategory = (data: AssetCategoryFormValues) => {
+  const onSubmitAssetCategory = (formValues: AssetCategoryFormValues) => {
+    // Bill categories may leave the asset-only fields empty; send them as null.
+    const data: any = {
+      ...formValues,
+      salvage_value_percent: formValues.salvage_value_percent || null,
+      useful_life_year: formValues.useful_life_year >= 1 ? formValues.useful_life_year : null,
+    };
     if (isEditMode && id) {
       updateAssetCategoryMutation.mutate(
         { id, assetCategory: data },
@@ -232,6 +252,23 @@ const AssetCategoryForm = () => {
                   )}
                 />
               </div>
+
+              {/* Known-cost flag */}
+              <FormField
+                control={assetCategoryForm.control}
+                name="is_known_cost"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0 rounded-lg border border-green-200 bg-green-50 p-4">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-green-800">{t('assetCategory.form.fields.isKnownCost')}</FormLabel>
+                      <p className="text-sm text-green-700">{t('assetCategory.form.fields.isKnownCostHint')}</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
 
               {/* Description Field */}
               <FormField

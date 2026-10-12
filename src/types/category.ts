@@ -10,6 +10,8 @@ export interface Category {
     create_payment_requisition: boolean;
     status: 'Active' | 'Inactive'; // Adjust as needed
     subcategories: SubCat[]; // If this will be an array later, change to: string[]
+    // Admin-managed: allowed on known-cost payment work orders (EKEDC, waste…).
+    is_known_cost?: boolean;
   }
   
   export interface SubCat {

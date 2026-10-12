@@ -7,6 +7,7 @@ import { useAssetSubcategoryQuery } from '@/hooks/assetsubcategory/useAssetSubca
 import { ArrowLeft, Edit, Building, Tag, FileText, Shield, User } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 interface AssetSubcategoryDetailViewProps {
   className?: string;
@@ -58,10 +59,12 @@ const AssetSubcategoryDetailView: React.FC<AssetSubcategoryDetailViewProps> = ({
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleEdit} className="flex items-center gap-2">
-            <Edit className="h-4 w-4" />
-            {t('assetSubcategory.detail.editButton')}
-          </Button>
+          <SuperAdminOnly>
+            <Button onClick={handleEdit} className="flex items-center gap-2">
+              <Edit className="h-4 w-4" />
+              {t('assetSubcategory.detail.editButton')}
+            </Button>
+          </SuperAdminOnly>
         </div>
       </div>
 

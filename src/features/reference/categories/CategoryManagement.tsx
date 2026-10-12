@@ -16,6 +16,7 @@ import { CategoryQueryParams } from '@/services/categoriesApi';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 const CategoryManagement = () => {
   const { t } = useTypedTranslation('accounts');
@@ -193,12 +194,12 @@ const CategoryManagement = () => {
           <Plus className="mr-2 h-4 w-4" /> Add Category
         </Button>
         )} */}
-        <PermissionGuard feature='reference' permission='view'>
+        <SuperAdminOnly>
           <Button onClick={handleAddCategory}>
             <Plus className="mr-2 h-4 w-4" />
             {t('category.add')}
           </Button>
-        </PermissionGuard>
+        </SuperAdminOnly>
       </div>
 
       {/* Search and Filter Controls */}
@@ -259,7 +260,7 @@ const CategoryManagement = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </PermissionGuard>
-                        <PermissionGuard feature='reference' permission='edit'>
+                        <SuperAdminOnly>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -268,8 +269,8 @@ const CategoryManagement = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                        </PermissionGuard>
-                        <PermissionGuard feature='reference' permission='edit'>
+                        </SuperAdminOnly>
+                        <SuperAdminOnly>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -278,7 +279,7 @@ const CategoryManagement = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </PermissionGuard>
+                        </SuperAdminOnly>
                       </div>
                     </TableCell>
                   </TableRow>

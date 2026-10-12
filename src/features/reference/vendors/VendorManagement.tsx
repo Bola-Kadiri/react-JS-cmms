@@ -9,7 +9,8 @@ import { Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
-import { useVendorsQuery, useDeleteVendor } from '@/hooks/vendor/useVendorQueries';
+import { useVendorsQuery, useDeleteVendor, vendorKeys } from '@/hooks/vendor/useVendorQueries';
+import BulkUploadDialog from '@/components/BulkUploadDialog';
 import { Vendor } from '@/types/vendor';
 import { VendorQueryParams } from '@/services/vendorsApi';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 const VendorManagement = () => {
   const { t } = useTypedTranslation('accounts');
@@ -148,12 +150,22 @@ const VendorManagement = () => {
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{t('vendor.management')}</h1>
-        <PermissionGuard feature='reference' permission='view'>
-          <Button onClick={handleAddVendor}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('vendor.add')}
-          </Button>
-        </PermissionGuard>
+        <div className="flex items-center gap-2">
+          {/* Super Admin only (the dialog hides itself for other roles). */}
+          <BulkUploadDialog
+            title="Bulk Upload Vendors"
+            description="One row per vendor / payee (e.g. EKEDC, LAWMA) with bank details. Vendors whose account number already exists are skipped."
+            baseUrl="/accounts/api/vendors"
+            templateFilename="vendors_template.csv"
+            refreshKeys={[vendorKeys.all]}
+          />
+          <SuperAdminOnly>
+            <Button onClick={handleAddVendor}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('vendor.add')}
+            </Button>
+          </SuperAdminOnly>
+        </div>
       </div>
 
       {/* Search and Filter Controls */}
@@ -246,7 +258,7 @@ const VendorManagement = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </PermissionGuard>
-                        <PermissionGuard feature='reference' permission='edit'>
+                        <SuperAdminOnly>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -255,8 +267,8 @@ const VendorManagement = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                        </PermissionGuard>
-                        <PermissionGuard feature='reference' permission='edit'>
+                        </SuperAdminOnly>
+                        <SuperAdminOnly>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -265,7 +277,7 @@ const VendorManagement = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </PermissionGuard>
+                        </SuperAdminOnly>
                       </div>
                     </TableCell>
                   </TableRow>

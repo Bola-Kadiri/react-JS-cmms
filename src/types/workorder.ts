@@ -156,5 +156,19 @@ export interface ResourceData {
   // raised from it — both null until they exist (see backend
   // WorkOrderSerializer.get_latest_completion / get_linked_payment_requisition).
   latest_completion: { id: number; wcc_number: string; approval_status: string } | null;
-  linked_payment_requisition: { id: number; requisition_number: string; approval_status: 'request' | 'approve' | 'reject' } | null;
+  linked_payment_requisition: {
+    id: number;
+    requisition_number: string;
+    approval_status: 'request' | 'approve' | 'reject';
+    is_disbursed?: boolean;
+    disbursed_at?: string | null;
+    is_closed?: boolean;
+  } | null;
+  // Raise Payment (known-cost bill — EKEDC, waste…): raised directly, no work
+  // request / PO / WCC. The amount is `cost`; final approval creates the
+  // payment requisition already approved. Old Raise Payments have no payee.
+  payee?: number | null;
+  payee_detail?: Vendor | null;
+  expected_payment_date?: string | null;
+  withholding_tax?: string | null;
 }

@@ -10,6 +10,7 @@ import { SearchFilter } from '@/components/SearchFilter';
 import { Pagination } from '@/components/Pagination';
 import { useAssetCategoriesQuery, useDeleteAssetCategory } from '@/hooks/assetcategory/useAssetCategoryQueries';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 type SortField = 'type' | 'code' | 'name' | 'salvage_value_percent' | 'useful_life_year';
 type SortDirection = 'asc' | 'desc';
@@ -204,9 +205,11 @@ const AssetCategoryManagement = () => {
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{t('assetCategory.management')}</h1>
-        <Button onClick={handleAddAssetCategory}>
-          <Plus className="mr-2 h-4 w-4" /> {t('assetCategory.addButton')}
-        </Button>
+        <SuperAdminOnly>
+          <Button onClick={handleAddAssetCategory}>
+            <Plus className="mr-2 h-4 w-4" /> {t('assetCategory.addButton')}
+          </Button>
+        </SuperAdminOnly>
       </div>
 
       {/* Search Controls */}
@@ -297,22 +300,24 @@ const AssetCategoryManagement = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditAssetCategory(String(assetCategory.id))}
-                          className="h-8 w-8"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteAssetCategory(String(assetCategory.id))}
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <SuperAdminOnly>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditAssetCategory(String(assetCategory.id))}
+                            className="h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteAssetCategory(String(assetCategory.id))}
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </SuperAdminOnly>
                       </div>
                     </TableCell>
                   </TableRow>

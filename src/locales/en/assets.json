@@ -250,7 +250,9 @@
         "name": "Name *",
         "salvageValuePercent": "Salvage Value Percent *",
         "usefulLifeYear": "Useful Life Year *",
-        "description": "Description *"
+        "description": "Description *",
+        "isKnownCost": "Known-cost bill category",
+        "isKnownCostHint": "Tick for fixed bills (e.g. EKEDC, waste, water, diesel). These can be paid through a Known-cost Payment work order, without a work request, PO or WCC. Salvage value and useful life are not needed."
       },
       "placeholders": {
         "type": "Enter asset category type",

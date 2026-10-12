@@ -8,11 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Eye, Edit, Trash2, Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { useAssetSubcategoriesQuery, useDeleteAssetSubcategory } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
+import { useAssetSubcategoriesQuery, useDeleteAssetSubcategory, assetSubcategoryKeys } from '@/hooks/assetsubcategory/useAssetSubcategoryQueries';
+import { assetCategoryKeys } from '@/hooks/assetcategory/useAssetCategoryQueries';
+import { categoryKeys } from '@/hooks/category/useCategoryQueries';
+import BulkUploadDialog from '@/components/BulkUploadDialog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { AssetSubcategory } from '@/types/assetsubcategory';
 import { toast } from 'sonner';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 // Type definitions for sorting
 type SortField = 'code' | 'name' | 'type' | 'asset_category' | 'is_active';
@@ -178,10 +182,22 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
     <div className={`space-y-6 ${className}`}>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('assetSubcategory.management')}</h1>
-        <Button onClick={handleCreate} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          {t('assetSubcategory.addButton')}
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Super Admin only (the dialog hides itself for other roles). */}
+          <BulkUploadDialog
+            title="Bulk Upload Categories & Subcategories"
+            description="One row per subcategory, e.g. PHCN/Power Payment → EKEDC. Set is_known_cost to yes for bill categories used by Raise Payment. Existing categories are matched by code and never renamed."
+            baseUrl="/asset_inventory/api/asset-subcategories"
+            templateFilename="categories_template.csv"
+            refreshKeys={[assetSubcategoryKeys.all, assetCategoryKeys.all, categoryKeys.all]}
+          />
+          <SuperAdminOnly>
+            <Button onClick={handleCreate} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              {t('assetSubcategory.addButton')}
+            </Button>
+          </SuperAdminOnly>
+        </div>
       </div>
 
       <Card>
@@ -297,41 +313,43 @@ const AssetSubcategoryManagement: React.FC<AssetSubcategoryManagementProps> = ({
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(item.id.toString())}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setDeleteId(item.id.toString())}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {t('assetSubcategory.delete.description', { name: item.name })}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(item.id.toString())}
-                                  className="bg-red-500 hover:bg-red-600"
+                          <SuperAdminOnly>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(item.id.toString())}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteId(item.id.toString())}
                                 >
-                                  {t('assetSubcategory.delete.confirm')}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>{t('common:confirmation.areYouSure')}</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {t('assetSubcategory.delete.description', { name: item.name })}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(item.id.toString())}
+                                    className="bg-red-500 hover:bg-red-600"
+                                  >
+                                    {t('assetSubcategory.delete.confirm')}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </SuperAdminOnly>
                         </div>
                       </TableCell>
                     </TableRow>

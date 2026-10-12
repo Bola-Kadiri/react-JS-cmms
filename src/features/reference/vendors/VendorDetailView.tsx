@@ -22,8 +22,8 @@ import {
 } from 'lucide-react';
 import { useVendorQuery } from '@/hooks/vendor/useVendorQueries';
 import { format } from 'date-fns';
-import { PermissionGuard } from '@/components/PermissionGuard';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 const VendorDetailView = () => {
   const { t } = useTypedTranslation('accounts');
@@ -132,11 +132,11 @@ const VendorDetailView = () => {
               {getStatusBadge(vendor.status)}
             </div>
           </div>
-          <PermissionGuard feature='reference' permission='edit'>
+          <SuperAdminOnly>
             <Button onClick={handleEdit} className="bg-green-600 hover:bg-green-700">
               <Edit className="mr-2 h-4 w-4" /> {t('vendor.detail.editVendor')}
             </Button>
-          </PermissionGuard>
+          </SuperAdminOnly>
         </div>
       </div>
 

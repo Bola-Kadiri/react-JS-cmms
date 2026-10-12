@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAssetCategoryQuery } from '@/hooks/assetcategory/useAssetCategoryQueries';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import SuperAdminOnly from '@/components/SuperAdminOnly';
 
 const AssetCategoryDetailView = () => {
   const { t } = useTypedTranslation('assets');
@@ -101,9 +102,11 @@ const AssetCategoryDetailView = () => {
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
             {assetCategory.type}
           </Badge>
-          <Button onClick={handleEdit}>
-            <Edit className="mr-2 h-4 w-4" /> {t('assetCategory.detail.editButton')}
-          </Button>
+          <SuperAdminOnly>
+            <Button onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" /> {t('assetCategory.detail.editButton')}
+            </Button>
+          </SuperAdminOnly>
         </div>
       </div>
 

@@ -22,6 +22,7 @@ import {
 } from '@/hooks/workrequest/useWorkrequestQueries';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
+import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { toast } from '@/components/ui/use-toast';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
 
@@ -39,7 +40,8 @@ const WorkorderForm = () => {
     department: z.number().optional(),
     asset: z.number().optional(),
     description: z.string().optional().default(''),
-    expected_start_date: z.string().min(1, t('workOrder.form.validation.expectedStartDateRequired')),
+    // Required for every type except RAISE-PAYMENT (a bill has no start date) — see superRefine.
+    expected_start_date: z.string().optional().default(''),
     priority: z.enum(['Low', 'Medium', 'High']).optional(),
     cost: z.string().optional().default(''),
     currency: z.enum(['USD', 'EUR', 'NGN']).optional(),
@@ -47,7 +49,23 @@ const WorkorderForm = () => {
     reviewers: z.array(z.number()).optional().default([]),
     invoice_no: z.string().optional().default(''),
     request_to: z.number().optional(),
+    // Raise Payment details (type RAISE-PAYMENT only).
+    payee: z.number().optional(),
+    expected_payment_date: z.string().optional().default(''),
+    withholding_tax: z.string().optional().default(''),
   }).superRefine((data, ctx) => {
+    if (data.type !== 'RAISE-PAYMENT' && !data.expected_start_date) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.expectedStartDateRequired'), path: ['expected_start_date'] });
+    }
+    if (data.type === 'RAISE-PAYMENT') {
+      if (!data.invoice_no?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.billNumberRequired'), path: ['invoice_no'] });
+      if (!data.category) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.categoryRequired'), path: ['category'] });
+      if (!data.subcategory) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.subcategoryRequired'), path: ['subcategory'] });
+      if (!data.facility) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.facilityRequired'), path: ['facility'] });
+      if (!data.payee) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.payeeRequired'), path: ['payee'] });
+      if (!(Number(data.cost) > 0)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.amountRequired'), path: ['cost'] });
+      if (!data.description?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.descriptionRequired'), path: ['description'] });
+    }
     if (data.type === 'FROM-WORK-REQUEST' && !data.source_work_request) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.sourceWorkRequestRequired'), path: ['source_work_request'] });
     }
@@ -74,13 +92,19 @@ const WorkorderForm = () => {
     wrDetails: false,
     wrInvoice: true,
     wrApproval: true,
+    kcBill: true,
+    kcPayment: true,
+    kcEvidence: true,
+    kcApproval: true,
   });
 
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
   const [selectedWrVendorName, setSelectedWrVendorName] = useState<string | null>(null);
   const [selectedWrInvoiceUrl, setSelectedWrInvoiceUrl] = useState<string | null>(null);
-  const [invoiceDocument, setInvoiceDocument] = useState<File | null>(null);
+  // Raise Payment: the bill is mandatory on create (it replaces the WCC as evidence).
+  const [billDocument, setBillDocument] = useState<File | null>(null);
+  const [billError, setBillError] = useState<string | null>(null);
 
   const workorderForm = useForm<WorkorderFormValues>({
     resolver: zodResolver(workorderSchema),
@@ -103,6 +127,9 @@ const WorkorderForm = () => {
       reviewers: [],
       invoice_no: '',
       request_to: undefined,
+      payee: undefined,
+      expected_payment_date: '',
+      withholding_tax: '',
     },
   });
 
@@ -121,12 +148,16 @@ const WorkorderForm = () => {
   const { data: approvedRequests = [] } = useApprovedWorkrequestsQuery();
   const { data: approvedPpms = { results: [] } } = useApprovedPpmsQuery();
   const { data: reviewers = [] } = useReviewersQuery();
+  const { data: vendorsData = { results: [] } } = useVendorsQuery();
 
   const { data: buildingsData = [] } = useBuildingsByFacilityQuery(selectedFacility || undefined);
   const { data: assetsData = [] } = useAssetsByFacilityQuery(selectedFacility || undefined);
 
   const selectedCategoryData = categoriesData.results.find((cat: any) => cat.id === selectedCategory);
   const filteredSubcategories = selectedCategoryData?.subcategories || [];
+  // Raise Payment is only for categories an Admin has marked known-cost (EKEDC, waste…).
+  const knownCostCategories = categoriesData.results.filter((cat: any) => cat.is_known_cost);
+  const isRaisePayment = selectedType === 'RAISE-PAYMENT';
 
   const {
     data: workorderData,
@@ -246,29 +277,45 @@ const WorkorderForm = () => {
         reviewers: Array.isArray(workorderData.reviewers) ? workorderData.reviewers : [],
         invoice_no: workorderData.invoice_no || '',
         request_to: workorderData.request_to || undefined,
+        payee: workorderData.payee || undefined,
+        expected_payment_date: workorderData.expected_payment_date || '',
+        withholding_tax: workorderData.withholding_tax || '',
       });
     }
   }, [workorderData, isEditMode, workorderForm]);
 
   const onSubmitWorkorder = async (data: WorkorderFormValues) => {
+    if (data.type === 'RAISE-PAYMENT' && !isEditMode && !billDocument) {
+      setBillError(t('workOrder.form.validation.billRequired'));
+      setOpenSections((prev) => ({ ...prev, kcEvidence: true }));
+      return;
+    }
+    setBillError(null);
     try {
       const formDataToSend: any = { ...data };
 
-      if (data.type === 'FROM-WORK-REQUEST') {
+      if (data.type !== 'RAISE-PAYMENT') {
+        delete formDataToSend.payee;
+        delete formDataToSend.expected_payment_date;
+        delete formDataToSend.withholding_tax;
+      }
+
+      if (data.type === 'RAISE-PAYMENT') {
+        // Raised directly — never from a work request or PPM.
+        delete formDataToSend.source_work_request;
+        delete formDataToSend.source_ppm;
+        delete formDataToSend.request_to;
+        delete formDataToSend.expected_start_date;
+      } else if (data.type === 'FROM-WORK-REQUEST') {
         delete formDataToSend.source_ppm;
         delete formDataToSend.request_to;
       } else if (data.type === 'FROM-PPM') {
         delete formDataToSend.source_work_request;
         delete formDataToSend.invoice_no;
         delete formDataToSend.request_to;
-      } else {
-        // RAISE-PAYMENT — keep invoice_no, drop source fields
-        delete formDataToSend.source_work_request;
-        delete formDataToSend.source_ppm;
-        delete formDataToSend.request_to;
       }
 
-      const FK_FIELDS = new Set(['subcategory', 'category', 'facility', 'building', 'department', 'asset', 'approver', 'source_work_request', 'source_ppm', 'request_to']);
+      const FK_FIELDS = new Set(['subcategory', 'category', 'facility', 'building', 'department', 'asset', 'approver', 'source_work_request', 'source_ppm', 'request_to', 'payee']);
       FK_FIELDS.forEach(key => { if (formDataToSend[key] === 0) delete formDataToSend[key]; });
 
       const buildFd = (obj: any) => {
@@ -293,8 +340,8 @@ const WorkorderForm = () => {
 
       const formData = buildFd(formDataToSend);
 
-      if (data.type === 'RAISE-PAYMENT' && invoiceDocument) {
-        formData.append('resources', invoiceDocument);
+      if (data.type === 'RAISE-PAYMENT' && billDocument) {
+        formData.append('resources', billDocument);
       }
 
       if (isEditMode && slug) {
@@ -305,8 +352,14 @@ const WorkorderForm = () => {
               toast({ title: t('workOrder.form.toast.successTitle'), description: t('workOrder.form.toast.updateSuccess') });
               navigate('/dashboard/work/orders');
             },
-            onError: () => {
-              toast({ title: t('workOrder.form.toast.errorTitle'), description: t('workOrder.form.toast.updateError'), variant: 'destructive' });
+            onError: (error: any) => {
+              // Raise Payment work orders get the backend's own message (e.g. "approved… can no longer be edited").
+              const data = error?.response?.data;
+              const showBackendMessage = workorderData?.type === 'RAISE-PAYMENT' && data && typeof data === 'object';
+              const description = showBackendMessage
+                ? Object.entries(data).map(([k, v]) => `${k === 'non_field_errors' ? '' : `${k}: `}${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')
+                : t('workOrder.form.toast.updateError');
+              toast({ title: t('workOrder.form.toast.errorTitle'), description, variant: 'destructive' });
             },
           },
         );
@@ -323,6 +376,9 @@ const WorkorderForm = () => {
               const FIELD_LABELS: Record<string, string> = {
                 source_ppm: t('workOrder.form.sourcePpmLabel'),
                 source_work_request: t('workOrder.form.sourceWrLabel'),
+                payee: t('workOrder.form.payee'),
+                cost: t('workOrder.form.billAmount'),
+                resources: t('workOrder.form.billDocument'),
               };
               const description = data && typeof data === 'object'
                 ? Object.entries(data).map(([k, v]) => `${FIELD_LABELS[k] ?? k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')
@@ -1044,243 +1100,298 @@ const WorkorderForm = () => {
             </>
           )}
 
-          {/* ── RAISE-PAYMENT: original Work Order Details layout ── */}
-          {selectedType === 'RAISE-PAYMENT' && (
-            <div className="rounded-lg border border-green-200 overflow-hidden bg-white shadow-sm">
-              <button
-                type="button"
-                className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors"
-                onClick={() => toggleSection('conditional')}
-              >
-                <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionWorkOrderDetails')}</h2>
-                {openSections.conditional ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
-              </button>
-              {openSections.conditional && (
-                <div className="p-6 space-y-6 bg-white">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={workorderForm.control} name="category" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.category')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectCategory')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {categoriesData.results.map((c: any) => (
-                              <SelectItem key={c.id} value={String(c.id)}>{c.name || c.title}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {filteredSubcategories.map((s: any) => (
-                              <SelectItem key={s.id} value={String(s.id)}>{s.name || s.title}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+          {/* ── RAISE-PAYMENT: known-cost bills (EKEDC, waste…) — no WR, PO or WCC ── */}
+          {isRaisePayment && (
+            <>
+              {/* Bill Details */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+                <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('kcBill')}>
+                  <div>
+                    <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionKnownCostBill')}</h2>
+                    <p className="text-sm text-green-600 mt-1">{t('workOrder.form.sectionKnownCostBillHint')}</p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={workorderForm.control} name="facility" render={({ field }) => (
+                  {openSections.kcBill ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
+                </button>
+                {openSections.kcBill && (
+                  <div className="p-6 space-y-6 bg-white">
+                    {knownCostCategories.length === 0 && (
+                      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        {t('workOrder.form.noKnownCostCategories')}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={workorderForm.control} name="category" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.category')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectCategory')} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {knownCostCategories.map((c: any) => (
+                                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory}>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {/* Only the chosen category's active subcategories (e.g. EKEDC under PHCN/Power Payment). */}
+                              {filteredSubcategories.filter((s: any) => s.is_active !== false).map((s: any) => (
+                                <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={workorderForm.control} name="facility" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.facility')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectFacility')} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {facilitiesData.results.map((f: any) => (
+                                <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={workorderForm.control} name="building" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.building')}</FormLabel>
+                          <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectBuilding')} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {(Array.isArray(buildingsData) ? buildingsData : []).map((b: any) => (
+                                <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <FormField control={workorderForm.control} name="description" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.facility')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectFacility')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {facilitiesData.results.map((f: any) => (
-                              <SelectItem key={f.id} value={String(f.id)}>{f.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={workorderForm.control} name="building" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.building')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectBuilding')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {(Array.isArray(buildingsData) ? buildingsData : []).map((b: any) => (
-                              <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={workorderForm.control} name="department" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.department')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectDepartment')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {departmentsData.results.map((d: any) => (
-                              <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={workorderForm.control} name="asset" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.asset')}</FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedFacility}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={!selectedFacility ? t('workOrder.form.selectFacilityFirst') : t('workOrder.form.selectAsset')} /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {(Array.isArray(assetsData) ? assetsData : []).map((a: any) => (
-                              <SelectItem key={a.id} value={String(a.id)}>{a.asset_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-                  <FormField control={workorderForm.control} name="description" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.description')}</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder={t('workOrder.form.descriptionPlaceholder')} {...field} className="min-h-[120px] resize-y border-gray-300" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={workorderForm.control} name="cost" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.cost')}</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.description')}<span className="text-red-500 ml-1">*</span></FormLabel>
                         <FormControl>
-                          <Input type="text" placeholder={t('workOrder.form.costPlaceholder')} {...field} className="h-10 border-gray-300" />
+                          <Textarea placeholder={t('workOrder.form.validation.descriptionRequired')} {...field} className="min-h-[100px] resize-y" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
-                    <FormField control={workorderForm.control} name="currency" render={({ field }) => (
+
+                    <FormField control={workorderForm.control} name="invoice_no" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.currency')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectCurrency')} /></SelectTrigger></FormControl>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.billNumber')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('workOrder.form.invoiceNoPlaceholder')} {...field} className="h-10" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                )}
+              </div>
+
+              {/* Payment Details */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+                <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('kcPayment')}>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionKnownCostPayment')}</h2>
+                  {openSections.kcPayment ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
+                </button>
+                {openSections.kcPayment && (
+                  <div className="p-6 space-y-6 bg-white">
+                    <FormField control={workorderForm.control} name="payee" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.payee')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
+                          <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectPayee')} /></SelectTrigger></FormControl>
                           <SelectContent>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="EUR">EUR</SelectItem>
-                            <SelectItem value="NGN">NGN</SelectItem>
+                            {(vendorsData?.results || []).length > 0 ? (
+                              (vendorsData.results as any[]).map((v: any) => (
+                                <SelectItem key={v.id} value={String(v.id)}>
+                                  {v.name}{v.bank ? ` — ${v.bank}` : ''}{v.account_number ? ` (${v.account_number})` : ''}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-vendors" disabled>{t('workOrder.form.noVendors')}</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )} />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={workorderForm.control} name="cost" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.billAmount')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" step="0.01" placeholder="0.00" {...field} className="h-10" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={workorderForm.control} name="currency" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.currency')}</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workOrder.form.selectCurrency')} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="NGN">NGN</SelectItem>
+                              <SelectItem value="USD">USD</SelectItem>
+                              <SelectItem value="EUR">EUR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={workorderForm.control} name="expected_payment_date" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.expectedPaymentDate')}</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} className="h-10" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={workorderForm.control} name="withholding_tax" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.withholdingTax')}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={t('workOrder.form.withholdingTaxPlaceholder')} {...field} className="h-10" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
                   </div>
-                  <FormField control={workorderForm.control} name="expected_start_date" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.expectedStartDate')}<span className="text-red-500 ml-1">*</span></FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} className="h-10 border-gray-300" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={workorderForm.control} name="priority" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.priority')}</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="h-10 border-gray-300"><SelectValue placeholder={t('workOrder.form.selectPriority')} /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="Low">{t('workOrder.priority.low')}</SelectItem>
-                          <SelectItem value="Medium">{t('workOrder.priority.medium')}</SelectItem>
-                          <SelectItem value="High">{t('workOrder.priority.high')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={workorderForm.control} name="invoice_no" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.invoiceNoLabel')}</FormLabel>
-                      <FormControl>
-                        <Input type="text" placeholder={t('workOrder.form.invoiceNoPlaceholder')} {...field} className="h-10 border-gray-300" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1.5">
-                      {t('workOrder.form.invoiceDocument')}<span className="text-red-500 ml-1">*</span>
-                    </label>
+                )}
+              </div>
+
+              {/* Bill Attachment */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+                <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('kcEvidence')}>
+                  <h2 className="text-lg font-semibold text-green-800">
+                    {t('workOrder.form.sectionKnownCostEvidence')}{!isEditMode && <span className="text-red-500 ml-1">*</span>}
+                  </h2>
+                  {openSections.kcEvidence ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
+                </button>
+                {openSections.kcEvidence && (
+                  <div className="p-6 space-y-3 bg-white">
+                    {isEditMode && (workorderData?.resources_data?.length ?? 0) > 0 && (
+                      <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        {t('workOrder.form.billAlreadyAttached')}
+                      </p>
+                    )}
+                    <label className="text-sm font-medium text-gray-700 block">{t('workOrder.form.billDocument')}</label>
                     <input
                       type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      onChange={(e) => setInvoiceDocument(e.target.files?.[0] ?? null)}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        setBillDocument(e.target.files?.[0] ?? null);
+                        setBillError(null);
+                      }}
                       className="block w-full text-sm text-gray-600 border border-gray-300 rounded-md cursor-pointer bg-gray-50 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                     />
-                    {invoiceDocument && (
-                      <p className="text-xs text-green-700 mt-1">{invoiceDocument.name}</p>
-                    )}
+                    {billDocument && <p className="text-xs text-green-700">{billDocument.name}</p>}
+                    {billError && <p className="text-sm font-medium text-destructive">{billError}</p>}
                   </div>
-                  <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.reviewers')}<span className="text-red-500 ml-1">*</span></FormLabel>
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {Array.isArray(reviewers) && reviewers.length > 0 ? (reviewers as any[]).map((reviewer: any) => (
-                            <div key={reviewer.id} className="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm border">
-                              <Checkbox
-                                id={`rp-reviewer-${reviewer.id}`}
-                                checked={(field.value || []).includes(reviewer.id)}
-                                onCheckedChange={(checked) => {
-                                  field.onChange(checked
-                                    ? [...(field.value || []), reviewer.id]
-                                    : (field.value || []).filter((id: number) => id !== reviewer.id));
-                                }}
-                              />
-                              <label htmlFor={`rp-reviewer-${reviewer.id}`} className="text-sm font-medium leading-none cursor-pointer">
-                                {reviewer.name}
-                                {reviewer.email && <div className="text-xs text-gray-500 mt-1">{reviewer.email}</div>}
-                              </label>
+                )}
+              </div>
+
+              {/* Approval Chain */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+                <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('kcApproval')}>
+                  <h2 className="text-lg font-semibold text-green-800">{t('workOrder.form.sectionApproval')}</h2>
+                  {openSections.kcApproval ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
+                </button>
+                {openSections.kcApproval && (
+                  <div className="p-6 space-y-6 bg-white">
+                    <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      {t('workOrder.form.approvalChainHintKnownCost')}
+                    </p>
+
+                    <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('workOrder.form.step1Reviewer')}<span className="text-red-500 ml-1">*</span>
+                        </FormLabel>
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                          {(Array.isArray(reviewers) && reviewers.length === 0) ? (
+                            <p className="text-sm text-gray-500">{t('workOrder.form.noReviewers')}</p>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {(reviewers as any[]).map((reviewer: any) => (
+                                <div key={reviewer.id} className="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm border">
+                                  <Checkbox
+                                    id={`kc-reviewer-${reviewer.id}`}
+                                    checked={(field.value || []).includes(reviewer.id)}
+                                    onCheckedChange={(checked) => {
+                                      field.onChange(checked
+                                        ? [...(field.value || []), reviewer.id]
+                                        : (field.value || []).filter((id: number) => id !== reviewer.id),
+                                      );
+                                    }}
+                                  />
+                                  <label htmlFor={`kc-reviewer-${reviewer.id}`} className="text-sm font-medium leading-none cursor-pointer">
+                                    {reviewer.name}
+                                    <div className="text-xs text-gray-500 mt-1">{reviewer.email}</div>
+                                  </label>
+                                </div>
+                              ))}
                             </div>
-                          )) : (
-                            <div className="col-span-full text-center py-4 text-gray-500">{t('workOrder.form.noReviewers')}</div>
                           )}
                         </div>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={workorderForm.control} name="approver" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
-                        {t('workOrder.form.selectApproverLabel')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
-                      </FormLabel>
-                      <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
-                        <FormControl>
-                          <SelectTrigger className="h-10 border-gray-300">
-                            <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {(approvers as any[]).map((approver: any) => (
-                            <SelectItem key={approver.id} value={String(approver.id)}>
-                              {approver.name} — {approver.email}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-              )}
-            </div>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <FormField control={workorderForm.control} name="approver" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
+                          {t('workOrder.form.step2Approver')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
+                        </FormLabel>
+                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
+                          <FormControl>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {(approvers as any[]).map((approver: any) => (
+                              <SelectItem key={approver.id} value={String(approver.id)}>
+                                {approver.name} — {approver.email}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           <div className="flex justify-end gap-3 pt-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">

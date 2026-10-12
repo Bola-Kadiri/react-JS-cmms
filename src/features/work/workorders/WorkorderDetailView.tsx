@@ -193,6 +193,11 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
   const isOwner = !!(user && workorder && workorder.requester === (user as any).id);
   const isAdmin = ['SUPER ADMIN', 'ADMIN'].includes(userRole);
   const isRaisePaymentRequester = workorder.type === 'RAISE-PAYMENT' && userRole === 'REQUESTER';
+  // Raise Payment — known-cost bill (EKEDC, waste…): no WCC; approval raises the payment
+  // requisition already approved, and Finance's disbursement closes it all. Raise
+  // Payment work orders from before this flow have no payee and keep the WCC flow.
+  const isKnownCost = workorder.type === 'RAISE-PAYMENT' && !!workorder.payee;
+  const knownCostPayment = isKnownCost ? workorder.linked_payment_requisition : null;
   const isRejected = REJECTED_STATUSES.includes(workorder.approval_status);
   const currentStep = getPipelineStep(workorder.approval_status);
   // Routing (reviewer/approver) can be assigned/changed by the Requester (or
@@ -201,7 +206,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
   const canAssignRouting = (isOwner || isAdmin) && workorder.approval_status !== 'Approved' && !isRejected;
   // Once Approved, WCC is the next (and only remaining) thing to add — no
   // WCC yet, or the last one was rejected and needs resubmitting.
-  const needsWccAction = workorder.approval_status === 'Approved' && (
+  const needsWccAction = !isKnownCost && workorder.approval_status === 'Approved' && (
     !workorder.latest_completion || workorder.latest_completion.approval_status.includes('Rejected')
   );
 
@@ -323,7 +328,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               Requisition to already exist; the backend enforces both, but
               we pre-check here too so the trigger is disabled with a clear
               reason instead of letting the dialog fail on submit. */}
-          {workorder.approval_status === 'Approved' && workorder.work_status !== 'closed' && (
+          {!isKnownCost && workorder.approval_status === 'Approved' && workorder.work_status !== 'closed' && (
             userRole === 'APPROVER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -377,14 +382,17 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           {/* Print/Download Button */}
           <WorkorderPrintView workorder={workorder} />
 
-          <PermissionGuard feature='work_order' permission='edit'>
-            <Button
-              onClick={() => handleEdit(workorder.slug)}
-              className="bg-gray-600 hover:bg-gray-700 text-white"
-            >
-              <Edit className="mr-2 h-4 w-4" /> Edit Work Order
-            </Button>
-          </PermissionGuard>
+          {/* An approved Raise Payment is locked (its payment is already raised). */}
+          {!(isKnownCost && workorder.approval_status === 'Approved') && (
+            <PermissionGuard feature='work_order' permission='edit'>
+              <Button
+                onClick={() => handleEdit(workorder.slug)}
+                className="bg-gray-600 hover:bg-gray-700 text-white"
+              >
+                <Edit className="mr-2 h-4 w-4" /> Edit Work Order
+              </Button>
+            </PermissionGuard>
+          )}
         </div>
       </div>
 
@@ -481,6 +489,13 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           {workorder.digital_signature && (
             <p className="text-sm text-green-900">
               <span className="font-medium">Signed by:</span> {workorder.digital_signature}
+            </p>
+          )}
+          {isKnownCost && (
+            <p className="text-sm text-green-900">
+              {knownCostPayment?.is_disbursed
+                ? 'Payment disbursed by Finance — this work order is closed.'
+                : 'Payment approved and sent to Finance for disbursement. This work order closes automatically once paid.'}
             </p>
           )}
         </div>
@@ -775,7 +790,80 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           </AccordionContent>
         </AccordionItem>
 
+        {/* ── Payment (Raise Payment only — takes the place of the WCC) ─── */}
+        {isKnownCost && (
+          <AccordionItem value="payment" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="flex items-center gap-2 text-green-800 font-semibold">
+                <Banknote className="h-5 w-5" />Payment ({knownCostPayment ? 1 : 0})
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500">Pay to</p>
+                  <p className="font-medium text-gray-900">{workorder.payee_detail?.name || 'N/A'}</p>
+                  {(workorder.payee_detail as any)?.bank && (
+                    <p className="text-xs text-gray-500">
+                      {(workorder.payee_detail as any).bank} — {(workorder.payee_detail as any).account_number}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p className="font-semibold text-gray-900">
+                    {workorder.cost ? formatCurrency(workorder.cost, workorder.currency) : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Expected Payment Date</p>
+                  <p className="font-medium text-gray-900">
+                    {workorder.expected_payment_date ? format(new Date(workorder.expected_payment_date), 'PPP') : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Withholding Tax</p>
+                  <p className="font-medium text-gray-900">{workorder.withholding_tax || 'N/A'}</p>
+                </div>
+              </div>
+
+              {knownCostPayment ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <Receipt className="h-5 w-5 text-green-700" />
+                    <span className="font-semibold text-gray-900">Payment Requisition {knownCostPayment.requisition_number}</span>
+                    <Badge variant="outline" className={
+                      knownCostPayment.is_disbursed
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                    }>
+                      {knownCostPayment.is_disbursed
+                        ? `Disbursed${knownCostPayment.disbursed_at ? ` on ${format(new Date(knownCostPayment.disbursed_at), 'PPP')}` : ''}`
+                        : 'Approved — awaiting Finance'}
+                    </Badge>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-green-300 text-green-700 hover:bg-green-50"
+                    onClick={() => navigate(`/dashboard/work/payment-requisitions/view/${knownCostPayment.id}`)}
+                  >
+                    View Payment Requisition
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">
+                  {isRejected
+                    ? 'No payment — this work order was rejected.'
+                    : 'The payment requisition is created automatically, already approved, when the Approver approves this work order. No WCC is needed — the attached bill is the evidence.'}
+                </p>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
         {/* ── WCC (Work Completion Certificate) ─────────────────────── */}
+        {!isKnownCost && (
         <AccordionItem value="wcc" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">
           <AccordionTrigger className="hover:no-underline">
             <span className="flex items-center gap-2 text-green-800 font-semibold">
@@ -826,6 +914,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
             )}
           </AccordionContent>
         </AccordionItem>
+        )}
 
         {/* ── History ────────────────────────────────────────────────── */}
         <AccordionItem value="history" className="border border-green-200 rounded-lg shadow-sm bg-white px-4">

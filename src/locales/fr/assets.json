@@ -250,7 +250,9 @@
         "name": "Nom *",
         "salvageValuePercent": "Valeur Résiduelle (%) *",
         "usefulLifeYear": "Durée de Vie Utile (Années) *",
-        "description": "Description *"
+        "description": "Description *",
+        "isKnownCost": "Catégorie de facture à coût connu",
+        "isKnownCostHint": "Cocher pour les factures fixes (ex. EKEDC, déchets, eau, diesel). Elles peuvent être payées via un ordre de travail « Paiement à coût connu », sans demande de travail, bon de commande ni WCC. La valeur de récupération et la durée de vie ne sont pas nécessaires."
       },
       "placeholders": {
         "type": "Entrez le type de catégorie d'actif",

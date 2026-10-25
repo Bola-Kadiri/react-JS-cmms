@@ -54,7 +54,6 @@ const UserForm = () => {
       'REVIEWER',
       'APPROVER',
       'PROCUREMENT AND STORE',
-      'FINANCE',
       'CLIENT',
       'CENTRAL OPERATION',
       'AP OFFICER',
@@ -606,7 +605,6 @@ const UserForm = () => {
                             <SelectItem value="AP OFFICER">AP OFFICER</SelectItem>
                             <SelectItem value="HEAD OF FINANCE & TREASURY">HEAD OF FINANCE &amp; TREASURY</SelectItem>
                             <SelectItem value="CONTRACTOR">CONTRACTOR (Vendor)</SelectItem>
-                            <SelectItem value="FINANCE">FINANCE (being retired)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

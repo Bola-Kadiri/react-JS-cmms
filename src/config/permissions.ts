@@ -30,7 +30,6 @@ export type Role =
   | 'Facility Account'
   | 'Facility Store'
   | 'Facility View'
-  | 'FINANCE'
   // View-only access to their own client's facilities (enforced by the backend).
   | 'CLIENT'
   // Five-stage Work Request flow (company-wide roles, view-only for now).
@@ -40,9 +39,8 @@ export type Role =
   // Vendor login; no staff screens until the vendor portal arrives.
   | 'CONTRACTOR';
 
-// Roles holding the FINANCE powers (disburse). FINANCE is being retired;
-// HEAD OF FINANCE & TREASURY takes over from it. Mirrors the backend.
-export const FINANCE_ROLES = ['FINANCE', 'HEAD OF FINANCE & TREASURY'];
+// Roles that disburse payment requisitions (formerly FINANCE). Mirrors the backend.
+export const FINANCE_ROLES = ['HEAD OF FINANCE & TREASURY'];
 
 // Roles that see every work request, work order and completion.
 export const SEE_ALL_ROLES = ['SUPER ADMIN', 'ADMIN', 'AP OFFICER', 'CENTRAL OPERATION', ...FINANCE_ROLES];
@@ -188,14 +186,6 @@ export const ROLE_FEATURES: RolePermissions = {
     'movement_history': ['view'],
     'report': ['view'],
     'reference': ['view'],
-    'comment': ['view'],
-  },
-  'FINANCE': {
-    'work_request': ['view'],
-    'work_order': ['view'],
-    'requisition': ['view'],
-    'pending_ppm': ['view'],
-    'report': ['view'],
     'comment': ['view'],
   },
   'HEAD OF FINANCE & TREASURY': {

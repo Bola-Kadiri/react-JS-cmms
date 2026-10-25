@@ -13,7 +13,6 @@ export type Role =
   | 'REVIEWER'
   | 'APPROVER'
   | 'PROCUREMENT AND STORE'
-  | 'FINANCE'
   | 'CLIENT'
   | 'CENTRAL OPERATION'
   | 'AP OFFICER'

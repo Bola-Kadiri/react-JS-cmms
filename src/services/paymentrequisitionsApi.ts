@@ -88,7 +88,7 @@ export const deletePaymentrequisition = async (id: string): Promise<void> => {
 };
 
 // Approve a payment requisition — role- and approval-limit-checked on the
-// backend (FINANCE/ADMIN/SUPER ADMIN bypass; APPROVER checked against their
+// backend (HEAD OF FINANCE & TREASURY/ADMIN/SUPER ADMIN bypass; APPROVER checked against their
 // own approval_limit against expected_payment_amount).
 export const approvePaymentrequisitionAction = async (id: string): Promise<Paymentrequisition> => {
   const response = await api.post(`${PAYMENTREQUISITIONS_API_BASE}/${id}/approve/`);

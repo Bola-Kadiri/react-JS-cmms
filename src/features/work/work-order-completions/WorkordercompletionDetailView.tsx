@@ -30,6 +30,7 @@ import {
   useRejectByReviewerMutation
 } from '@/hooks/workordercompletion/useWorkordercompletionQueries';
 import { formatDate } from '@/utils/formatters';
+import Stage3Panel from './components/Stage3Panel';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/contexts/PermissionsContext';
 import {
@@ -91,6 +92,8 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
   const isApprover = userRole === 'APPROVER' || userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
   const isOwner = completion?.owner === Number(user?.id);
   const isRequester = userRole === 'REQUESTER';
+  // Five-stage flow: the Stage 3 panel replaces the original pipeline and actions.
+  const isFiveStage = (completion as any)?.flow === 'five_stage';
 
   // Handle approve by approver
   const handleApproveByApprover = async () => {
@@ -284,7 +287,7 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
         </div>
         <div className="flex items-center gap-2">
           {/* Reviewer buttons - only visible to reviewers */}
-          {(isReviewer || completion.reviewers?.includes(Number(user?.id))) && completion.approval_status === 'Pending' && (
+          {!isFiveStage && (isReviewer || completion.reviewers?.includes(Number(user?.id))) && completion.approval_status === 'Pending' && (
             <>
               <Button
                 onClick={() => setShowReviewerConfirm(true)}
@@ -311,7 +314,7 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
           )}
           
           {/* Approver buttons - only visible to approvers and only if reviewed */}
-          {(isApprover || completion.approver === Number(user?.id)) && completion.approval_status === 'Reviewed' && (
+          {!isFiveStage && (isApprover || completion.approver === Number(user?.id)) && completion.approval_status === 'Reviewed' && (
             <>
               <Button
                 onClick={() => setShowApproverConfirm(true)}
@@ -336,6 +339,7 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
             </>
           )}
           
+          {!isFiveStage && (
           <Button
             onClick={() => navigate(`/dashboard/work/work-order-completions/${completion.id}/edit`)}
             size="sm"
@@ -345,6 +349,7 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
+          )}
         </div>
       </div>
 
@@ -370,7 +375,9 @@ const WorkordercompletionDetailView = ({ idProp, embedded = false }: Workorderco
       </Card>
 
       {/* Pipeline stepper — visible to owner, requester */}
-      {(isOwner || isRequester) && (() => {
+      {isFiveStage ? (
+        <Stage3Panel id={completion.id} />
+      ) : (isOwner || isRequester) && (() => {
         const isRejected = WCC_REJECTED_STATUSES.includes(completion.approval_status);
         const order = ['Pending', 'Reviewed', 'Approved'];
         const currentStep = order.indexOf(completion.approval_status) >= 0 ? order.indexOf(completion.approval_status) : 0;

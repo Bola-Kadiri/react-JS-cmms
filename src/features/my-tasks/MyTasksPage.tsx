@@ -20,16 +20,20 @@ const WHAT_TO_DO: Record<MyTask['step'], string> = {
   client_rep: 'Approve or reject',
   procurement: 'Price it and submit',
   contractor: 'Accept the job',
+  central_operation: 'Verify the work on site',
 };
 
 const TITLE: Record<MyTask['kind'], string> = {
   work_request: 'Work Request',
   work_order: 'Work Order',
   work_order_to_raise: 'Work Request',
+  wcc: 'Certificate',
+  wcc_to_raise: 'Work Order',
 };
 
 const linkFor = (task: MyTask) =>
-  task.kind === 'work_order' ? `/dashboard/work/orders/view/${task.slug}`
+  task.kind === 'work_order' || task.kind === 'wcc_to_raise' ? `/dashboard/work/orders/view/${task.slug}`
+    : task.kind === 'wcc' ? `/dashboard/work/work-order-completions/${task.slug}`
     : task.kind === 'work_order_to_raise' ? '/dashboard/procurement-queue'
     : `/dashboard/work/requests/view/${task.slug}`;
 
@@ -76,7 +80,10 @@ const MyTasksPage = () => {
                 </TableCell>
                 <TableCell>{task.facility ?? '—'}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{task.kind === 'work_order_to_raise' ? 'Create the Work Order' : WHAT_TO_DO[task.step]}</div>
+                  <div className="font-medium">{task.kind === 'work_order_to_raise' ? 'Create the Work Order'
+                    : task.kind === 'wcc_to_raise' ? 'Raise the completion certificate'
+                    : task.kind === 'wcc' && task.step === 'approver' ? 'Approve the certificate'
+                    : WHAT_TO_DO[task.step]}</div>
                   <div className="text-xs text-gray-500">
                     {task.step_label}{task.on_behalf_of ? ` · on behalf of ${task.on_behalf_of}` : ''}
                   </div>

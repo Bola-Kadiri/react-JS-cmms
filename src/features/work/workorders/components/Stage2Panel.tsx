@@ -19,6 +19,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { useAllRecords } from '@/hooks/crud/useAllRecords';
+import { usePermissions } from '@/contexts/PermissionsContext';
+import { startCompletion } from '@/services/completionFlowApi';
 import { workorderKeys } from '@/hooks/workorder/useWorkorderQueries';
 import {
   WorkOrderFlow, WorkOrderFlowAction, fetchWorkOrderFlow, saveWorkOrderPricing, takeWorkOrderAction,
@@ -69,6 +71,15 @@ const Stage2Panel = ({ slug, number }: Props) => {
   const queryClient = useQueryClient();
   const { data: flow, isLoading } = useQuery({ queryKey: ['workorder-flow', slug], queryFn: () => fetchWorkOrderFlow(slug) });
   const canEdit = !!flow?.my_actions.includes('edit_pricing');
+  const { userRole } = usePermissions();
+  const raiseCompletion = useMutation({
+    mutationFn: () => startCompletion(slug),
+    onSuccess: (created) => {
+      queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      navigate(`/dashboard/work/work-order-completions/${created.id}`);
+    },
+    onError: (error: any) => toast.error(error?.response?.data?.error || 'Could not raise the certificate.'),
+  });
   const { data: vendors = [] } = useAllRecords<any>('vendors', 'accounts/api/vendors/', canEdit);
 
   // Pricing draft (Procurement & Store only).
@@ -228,6 +239,16 @@ const Stage2Panel = ({ slug, number }: Props) => {
           {flow.accepted
             ? <p className="mt-1">The contractor accepted the job: start {flow.accepted.start_date}, technician {flow.accepted.technician}.</p>
             : <p className="mt-1">Waiting for the contractor to accept the job.</p>}
+          {userRole === 'REQUESTER' && (
+            <div className="mt-3">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={raiseCompletion.isPending}
+                      onClick={() => raiseCompletion.mutate()}>
+                {raiseCompletion.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Raise completion certificate
+              </Button>
+              <span className="ml-2 text-xs text-green-800">When the work is done on site.</span>
+            </div>
+          )}
         </div>
       )}
       {flow.source_work_request && (

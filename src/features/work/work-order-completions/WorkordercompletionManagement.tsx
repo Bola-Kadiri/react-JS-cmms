@@ -91,6 +91,8 @@ const WorkordercompletionManagement = () => {
     if (hasRole(SEE_ALL_ROLES, roleUpper)) return rawData.results;
     const userId = Number(user.id);
     return rawData.results.filter(wcc => {
+      // Five-stage certificates are already scoped by the server (facility team, named signer, contractor).
+      if ((wcc as any).flow === 'five_stage') return true;
       switch (roleUpper) {
         case 'REQUESTER': return wcc.owner === userId;
         case 'REVIEWER':  return wcc.reviewers?.includes(userId);

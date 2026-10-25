@@ -24,6 +24,8 @@ export interface InvoiceFlow {
   history: HistoryEntry[];
   timing: FlowTiming | null;
   my_actions: InvoiceAction[];
+  /** Once approved: how the payment is going. */
+  payment: { status: 'Being prepared' | 'Paid'; voucher_id: number | null; paid_at: string | null } | null;
 }
 
 export interface JobToInvoice {

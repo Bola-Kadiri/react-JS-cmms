@@ -127,6 +127,10 @@ const UserDetailView = lazy(() => import('@/features/reference/users/UserDetailV
 const UserManagementPage = lazy(() => import('@/pages/reference/users/userManagementPage'))
 const ApprovalMatrixPage = lazy(() => import('@/features/approval-matrix/ApprovalMatrixPage'))
 const CoverWhileAwayPage = lazy(() => import('@/features/delegation/CoverWhileAwayPage'))
+const PaymentsPage = lazy(() => import('@/features/payments/PaymentsPage'))
+const PayAndConfirmPage = lazy(() => import('@/features/payments/PayAndConfirmPage'))
+const VoucherDetailPage = lazy(() => import('@/features/payments/VoucherDetailPage'))
+const WhtRatesPage = lazy(() => import('@/features/payments/WhtRatesPage'))
 const MyTasksPage = lazy(() => import('@/features/my-tasks/MyTasksPage'))
 const ProcurementQueuePage = lazy(() => import('@/features/work/workorders/ProcurementQueuePage'))
 const PersonnelForm = lazy(() => import('@/features/reference/personnels/PersonnelForm'))
@@ -268,6 +272,39 @@ const protectedRoutes: RouteObject[] = [
             element: (
               <Suspense fallback={<LoadingComponent />}>
                 <ProcurementQueuePage />
+              </Suspense>
+            ),
+          },
+          {
+            // Stage 5: payment vouchers (finance side; contractors open their remittance advice).
+            path: "payments",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <PaymentsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "payments/pay",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <PayAndConfirmPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "payments/wht-rates",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <WhtRatesPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "payments/:id",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <VoucherDetailPage />
               </Suspense>
             ),
           },

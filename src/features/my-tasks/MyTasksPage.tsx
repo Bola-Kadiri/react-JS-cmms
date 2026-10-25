@@ -23,6 +23,7 @@ const WHAT_TO_DO: Record<MyTask['step'], string> = {
   central_operation: 'Verify the work on site',
   ap_officer: 'Check the invoice',
   head_of_finance: 'Approve the invoice',
+  reviewer: 'Check the payment voucher',
 };
 
 const TITLE: Record<MyTask['kind'], string> = {
@@ -33,6 +34,8 @@ const TITLE: Record<MyTask['kind'], string> = {
   wcc_to_raise: 'Work Order',
   invoice: 'Invoice',
   invoice_to_raise: 'Certificate',
+  voucher: 'Voucher',
+  voucher_to_raise: 'Invoice',
 };
 
 const linkFor = (task: MyTask) =>
@@ -41,6 +44,8 @@ const linkFor = (task: MyTask) =>
     : task.kind === 'work_order_to_raise' ? '/dashboard/procurement-queue'
     : task.kind === 'invoice' ? `/dashboard/work/invoice-items/${task.slug}`
     : task.kind === 'invoice_to_raise' ? '/dashboard/work/invoice-items/to-invoice'
+    : task.kind === 'voucher' ? `/dashboard/payments/${task.slug}`
+    : task.kind === 'voucher_to_raise' ? '/dashboard/payments'
     : `/dashboard/work/requests/view/${task.slug}`;
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -90,6 +95,10 @@ const MyTasksPage = () => {
                     : task.kind === 'wcc_to_raise' ? 'Raise the completion certificate'
                     : task.kind === 'invoice_to_raise' ? (task.step === 'ap_officer' ? 'Enter the invoice for the vendor' : 'Submit your invoice')
                     : task.kind === 'invoice' && ['Draft', 'Returned'].includes(task.status) ? 'Complete and submit the invoice'
+                    : task.kind === 'voucher_to_raise' ? 'Raise the payment voucher'
+                    : task.kind === 'voucher' && ['Draft', 'Returned'].includes(task.status) ? 'Complete and submit the voucher'
+                    : task.kind === 'voucher' && task.status === 'Awaiting Approval' ? 'Approve the payment'
+                    : task.kind === 'voucher' && ['Approved', 'Payment Failed'].includes(task.status) ? 'Pay and confirm Paid'
                     : task.kind === 'wcc' && task.step === 'approver' ? 'Approve the certificate'
                     : WHAT_TO_DO[task.step]}</div>
                   <div className="text-xs text-gray-500">

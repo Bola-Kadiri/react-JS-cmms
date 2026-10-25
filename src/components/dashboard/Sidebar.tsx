@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   UserCheck,
   Inbox,
-  ClipboardList
+  ClipboardList,
+  Banknote
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -105,6 +106,26 @@ const Sidebar = () => {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+          )}
+
+          {['SUPER ADMIN', 'ADMIN', 'AP OFFICER', 'REVIEWER', 'HEAD OF FINANCE & TREASURY'].includes(userRole ?? '') && (
+            /* Stage 5: payment vouchers, paying, and Finance's withholding tax rates */
+            <>
+              {[
+                { to: '/dashboard/payments', label: 'Payments', show: true },
+                { to: '/dashboard/payments/pay', label: 'Pay and confirm', show: ['AP OFFICER', 'HEAD OF FINANCE & TREASURY'].includes(userRole ?? '') },
+                { to: '/dashboard/payments/wht-rates', label: 'WHT rates', show: true },
+              ].filter((item) => item.show).map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton isActive={location.pathname === item.to} tooltip={item.label} asChild>
+                    <Link to={item.to}>
+                      <Banknote className="mr-2" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </>
           )}
 
           {['SUPER ADMIN', 'APPROVER', 'CLIENT', 'HEAD OF FINANCE & TREASURY'].includes(userRole ?? '') && (

@@ -124,6 +124,7 @@ const PpmitemManagementPage = lazy(() => import('@/pages/work/ppmitems/ppmitemMa
 const UserForm = lazy(() => import('@/features/reference/users/UserForm'))
 const UserDetailView = lazy(() => import('@/features/reference/users/UserDetailView'))
 const UserManagementPage = lazy(() => import('@/pages/reference/users/userManagementPage'))
+const ApprovalMatrixPage = lazy(() => import('@/features/approval-matrix/ApprovalMatrixPage'))
 const PersonnelForm = lazy(() => import('@/features/reference/personnels/PersonnelForm'))
 const PersonnelDetailView = lazy(() => import('@/features/reference/personnels/PersonnelDetailView'))
 const PersonnelManagementPage = lazy(() => import('@/pages/reference/personnels/personnelManagementPage'))
@@ -1515,6 +1516,14 @@ const protectedRoutes: RouteObject[] = [
             path: "accounts",
             element: <AdminRoute />,
             children: [
+              {
+                path: 'approval-matrix',
+                element: (
+                  <Suspense fallback={<LoadingComponent />}>
+                    <ApprovalMatrixPage />
+                  </Suspense>
+                )
+              },
               {
                 path: 'users',
                 element: (

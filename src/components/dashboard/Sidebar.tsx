@@ -13,7 +13,8 @@ import {
   BookOpen,
   ChevronDown,
   ChevronRight,
-  Users
+  Users,
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -758,6 +759,19 @@ const Sidebar = () => {
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
+                {userRole === 'SUPER ADMIN' && (
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton
+                      isActive={isActive('/dashboard/accounts/approval-matrix')}
+                      asChild
+                    >
+                      <Link to="/dashboard/accounts/approval-matrix">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        <span>Approval Matrix</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                )}
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton 
                     isActive={isActive('/dashboard/accounts/personnels')}

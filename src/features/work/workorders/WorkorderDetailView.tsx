@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
   Receipt,
+  Clock,
 } from 'lucide-react';
 import { useWorkorderQuery, useUnlockResubmission, useCreatePaymentRequisitionFromWorkorder } from '@/hooks/workorder/useWorkorderQueries';
 import { format } from 'date-fns';
@@ -40,7 +41,15 @@ const PIPELINE_STEPS = [
   { label: 'Approved', status: 'Approved' },
 ];
 
-const REJECTED_STATUSES = ['Reviewer Rejected', 'Approver Rejected'];
+// New Raise Payment bills: Approver → Reviewer → (second approver for large bills).
+const APPROVER_FIRST_STEPS = [
+  { label: 'Pending', status: 'Pending' },
+  { label: 'Approver Approved', status: 'Approver Approved' },
+  { label: 'Reviewed', status: 'Awaiting Final Approval' },
+  { label: 'Approved', status: 'Approved' },
+];
+
+const REJECTED_STATUSES = ['Reviewer Rejected', 'Approver Rejected', 'Final Approver Rejected'];
 
 interface WorkorderDetailViewProps {
   // Lets this same component render nested inside a Work Request's "Past
@@ -89,9 +98,8 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
     setIsApprovalModalOpen(true);
   };
 
-  const getPipelineStep = (currentStatus: string): number => {
-    const order = ['Pending', 'Reviewed', 'Approved'];
-    const idx = order.indexOf(currentStatus);
+  const getPipelineStep = (currentStatus: string, steps = PIPELINE_STEPS): number => {
+    const idx = steps.findIndex((step) => step.status === currentStatus);
     return idx >= 0 ? idx : 0;
   };
 
@@ -142,6 +150,9 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
       'Reviewer Rejected': 'bg-red-100 text-red-800 border-red-200',
       'Approver Rejected': 'bg-red-100 text-red-800 border-red-200',
       'Rejected': 'bg-red-100 text-red-800 border-red-200',
+      'Approver Approved': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'Awaiting Final Approval': 'bg-amber-100 text-amber-800 border-amber-200',
+      'Final Approver Rejected': 'bg-red-100 text-red-800 border-red-200',
     };
     return (
       <Badge variant="outline" className={`${map[status] || 'bg-gray-100 text-gray-800 border-gray-200'} font-medium`}>
@@ -199,7 +210,16 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
   const isKnownCost = workorder.type === 'RAISE-PAYMENT' && !!workorder.payee;
   const knownCostPayment = isKnownCost ? workorder.linked_payment_requisition : null;
   const isRejected = REJECTED_STATUSES.includes(workorder.approval_status);
-  const currentStep = getPipelineStep(workorder.approval_status);
+  // New Raise Payment bills: Approver first, then Reviewer, then (₦1,000,000 or
+  // more) the second approver. `next_step` from the backend says who acts next.
+  const isApproverFirst = workorder.approval_route === 'APPROVER_FIRST';
+  const pipelineSteps = isApproverFirst
+    ? APPROVER_FIRST_STEPS.filter((step) => workorder.needs_second_approval || step.status !== 'Awaiting Final Approval')
+    : PIPELINE_STEPS;
+  const currentStep = getPipelineStep(workorder.approval_status, pipelineSteps);
+  const canActAsApprover = ['APPROVER', 'ADMIN', 'SUPER ADMIN'].includes(userRole) || workorder.approver === currentUserId;
+  const canActAsReviewer = ['REVIEWER', 'ADMIN', 'SUPER ADMIN'].includes(userRole) || !!workorder.reviewers?.includes(currentUserId);
+  const isFinalApprover = !!workorder.final_approver && workorder.final_approver === currentUserId;
   // Routing (reviewer/approver) can be assigned/changed by the Requester (or
   // Admin) any time before the work order reaches a terminal state — matches
   // the backend's own gate on assign-routing.
@@ -219,6 +239,10 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
     'Reviewed': 1,
     'Approver Rejected': 2,
     'Approved': 2,
+    // Approver-first Raise Payment: the Approver acts first.
+    'Approver Approved': 1,
+    'Awaiting Final Approval': 2,
+    'Final Approver Rejected': 2,
   };
   const approvalCount = APPROVAL_STEPS_DONE[workorder.approval_status] ?? 0;
   const isRequesterView = userRole === 'REQUESTER';
@@ -273,8 +297,46 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
             )}
           </div>
           
+          {/* New Raise Payment bills: buttons for whoever acts next (Approver → Reviewer → second approver) */}
+          {isApproverFirst && workorder.next_step === 'approver' && canActAsApprover && (
+            <div className="flex gap-2">
+              <Button onClick={() => openApprovalModal('approver-approve')} className="bg-green-600 hover:bg-green-700 text-white">
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Approve
+              </Button>
+              <Button onClick={() => openApprovalModal('approver-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </div>
+          )}
+          {isApproverFirst && workorder.next_step === 'reviewer' && canActAsReviewer && (
+            <div className="flex gap-2">
+              <Button onClick={() => openApprovalModal('reviewer-approve')} className="bg-green-600 hover:bg-green-700 text-white">
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Approve Review
+              </Button>
+              <Button onClick={() => openApprovalModal('reviewer-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </div>
+          )}
+          {isApproverFirst && workorder.next_step === 'final_approver' && isFinalApprover && (
+            <div className="flex gap-2">
+              <Button onClick={() => openApprovalModal('final-approve')} className="bg-green-600 hover:bg-green-700 text-white">
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Give Final Approval
+              </Button>
+              <Button onClick={() => openApprovalModal('final-reject')} variant="destructive">
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </div>
+          )}
+
           {/* Reviewer action buttons — shown when not yet reviewed and user is a reviewer */}
-          {!workorder.is_reviewed && (
+          {!isApproverFirst && !workorder.is_reviewed && (
             userRole === 'REVIEWER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -299,7 +361,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           )}
 
           {/* Approver action buttons — shown after review and user is the approver */}
-          {workorder.is_reviewed && !workorder.is_approved && (
+          {!isApproverFirst && workorder.is_reviewed && !workorder.is_approved && (
             userRole === 'APPROVER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -400,7 +462,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
       {(isOwner || isAdmin || isRaisePaymentRequester) && (
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
           <div className="flex items-center justify-between">
-            {PIPELINE_STEPS.map((step, idx) => {
+            {pipelineSteps.map((step, idx) => {
               const isActive = workorder.approval_status === step.status;
               const isPast = !isRejected && currentStep > idx;
               const isFullyApproved = workorder.approval_status === 'Approved';
@@ -411,14 +473,14 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
                       ${isFullyApproved || isPast || isActive ? 'bg-green-600 text-white' :
                         isRejected && currentStep <= idx ? 'bg-red-100 text-red-400' :
                         'bg-gray-200 text-gray-500'}`}>
-                      {(isFullyApproved && idx < 3) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                      {(isFullyApproved && idx < pipelineSteps.length) || isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                     </div>
                     <span className={`text-xs mt-1 text-center font-medium
                       ${isActive || isPast || isFullyApproved ? 'text-green-700' : 'text-gray-500'}`}>
                       {step.label}
                     </span>
                   </div>
-                  {idx < PIPELINE_STEPS.length - 1 && (
+                  {idx < pipelineSteps.length - 1 && (
                     <div className={`h-0.5 flex-1 mx-2 ${isPast || isFullyApproved ? 'bg-green-400' : 'bg-gray-200'}`} />
                   )}
                 </div>
@@ -459,6 +521,12 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               <span className="text-sm text-red-900">{workorder.approver_reason}</span>
             </div>
           )}
+          {workorder.final_approver_reason && (
+            <div className="mb-2">
+              <span className="text-sm font-medium text-red-700">Final approver reason: </span>
+              <span className="text-sm text-red-900">{workorder.final_approver_reason}</span>
+            </div>
+          )}
           {isAdmin && !(workorder as any).allow_resubmission && (
             <div className="mt-4 pt-4 border-t border-red-200">
               <p className="text-xs text-red-700 mb-3">
@@ -476,6 +544,21 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               </Button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Raise Payment of ₦1,000,000 or more, approved and reviewed: waiting for the second approver */}
+      {workorder.approval_status === 'Awaiting Final Approval' && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex items-start gap-3">
+          <Clock className="h-5 w-5 text-amber-700 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            <p className="font-semibold">
+              Awaiting final approval from {workorder.final_approver_detail
+                ? `${workorder.final_approver_detail.first_name || ''} ${workorder.final_approver_detail.last_name || ''}`.trim() || workorder.final_approver_detail.email
+                : 'the second approver'}
+            </p>
+            <p>Approved by the Approver and reviewed by the Reviewer. Because of its amount, the payment is raised only after this final approval.</p>
+          </div>
         </div>
       )}
 
@@ -656,6 +739,16 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
                         <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{workorder.approver_detail.first_name} {workorder.approver_detail.last_name}</p><p className="text-xs text-gray-500 truncate">{workorder.approver_detail.email}</p></div>
                       </div>
                     ) : <p className="text-sm text-gray-400">Not assigned</p>}
+                  </div>
+                )}
+                {/* Raise Payment of NGN 1,000,000 or more: the final approver the Requester selected */}
+                {isApproverFirst && workorder.final_approver_detail && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Final Approver</p>
+                    <div className="flex items-center gap-2.5 p-2 rounded-lg bg-amber-50 border border-amber-200">
+                      <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-amber-100 text-amber-800 font-semibold">{`${(workorder.final_approver_detail.first_name || '').charAt(0)}${(workorder.final_approver_detail.last_name || '').charAt(0)}`}</AvatarFallback></Avatar>
+                      <div className="min-w-0"><p className="text-sm font-semibold text-gray-800 truncate">{workorder.final_approver_detail.first_name} {workorder.final_approver_detail.last_name}</p><p className="text-xs text-gray-500 truncate">{workorder.final_approved_at ? `Approved ${format(new Date(workorder.final_approved_at), 'PPP p')}` : workorder.final_approver_detail.email}</p></div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -974,6 +1067,8 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           workorderSlug={workorder.slug}
           workorderNumber={workorder.work_order_number}
           action={approvalAction}
+          approverFirst={isApproverFirst}
+          needsSecondApproval={!!workorder.needs_second_approval}
         />
       )}
 

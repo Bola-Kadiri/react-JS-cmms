@@ -216,7 +216,13 @@
       "withholdingTaxPlaceholder": "ex. 5 %",
       "billDocument": "Facture (PDF ou photo)",
       "billAlreadyAttached": "Une facture est déjà jointe. Téléversez un autre fichier seulement pour la compléter.",
-      "approvalChainHintKnownCost": "Le réviseur vérifie la facture, puis l’approbateur approuve. L’approbation vaut aussi pour le paiement : la demande de paiement est créée automatiquement et envoyée aux Finances.",
+      "approvalChainHintKnownCost": "L’approbateur approuve d’abord la facture, puis le réviseur la vérifie. Les factures de 1 000 000 ₦ ou plus (et celles dans une autre devise) nécessitent aussi une approbation finale du second approbateur. La dernière approbation crée automatiquement la demande de paiement et l’envoie aux Finances.",
+      "knownCostApproverLabel": "Approbateur (approuve en premier)",
+      "knownCostReviewerLabel": "Réviseur (vérifie après l’approbateur)",
+      "knownCostFinalApproverLabel": "Approbateur final (factures de 1 000 000 NGN ou plus)",
+      "knownCostFinalApproverHint": "Cette facture atteint {{amount}} ou plus (ou n’est pas en NGN) : elle nécessite une seconde approbation finale après le réviseur. Le paiement n’est créé qu’après cette approbation.",
+      "selectFinalApprover": "Sélectionnez l’approbateur final",
+      "noFinalApprover": "Aucun approbateur final configuré — contactez le Super Admin",
       "loadingDetails": "Chargement des détails de l'ordre de travail...",
       "errorLoading": "Erreur lors du chargement des détails de l'ordre de travail",
       "errorFallback": "Une erreur inconnue s'est produite",
@@ -284,7 +290,8 @@
         "subcategoryRequired": "Sélectionner une sous-catégorie",
         "billNumberRequired": "Saisir le numéro de facture",
         "descriptionRequired": "Décrire la facture (ex. facture EKEDC, siège, septembre 2026)",
-        "billRequired": "Joindre la facture. C’est la preuve de ce paiement."
+        "billRequired": "Joindre la facture. C’est la preuve de ce paiement.",
+        "finalApproverRequired": "Sélectionnez l’approbateur final. Les factures de {{amount}} ou plus nécessitent une seconde approbation."
       },
       "toast": {
         "successTitle": "Succès",

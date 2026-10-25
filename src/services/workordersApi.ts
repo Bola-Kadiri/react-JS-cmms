@@ -153,6 +153,18 @@ export const getApproverUsers = async (): Promise<ApproverUserResponse> => {
   return response.data;
 };
 
+// Raise Payment: who can be selected as final approver, and from what amount (NGN) it's required
+export interface FinalApproversResponse {
+  threshold: string;
+  currency: 'NGN';
+  approvers: { id: number; name: string; email: string }[];
+}
+
+export const getFinalApprovers = async (): Promise<FinalApproversResponse> => {
+  const response = await api.get(`${WORKORDERS_API_BASE}/final-approvers/`);
+  return response.data;
+};
+
 // (legacy — kept for router compat; real approval now uses approveWorkorderByApprover below)
 
 // Approve workorder by reviewer
@@ -176,6 +188,17 @@ export const approveWorkorderByApprover = async ({ slug, digital_signature }: { 
 // Reject workorder by approver
 export const rejectWorkorderByApprover = async ({ slug, approver_reason }: { slug: string; approver_reason: string }): Promise<Workorder> => {
   const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/reject-by-approver/`, { approver_reason });
+  return response.data;
+};
+
+// Raise Payment second (final) approval — only the second approver named on the bill
+export const finalApproveWorkorder = async (slug: string): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/final-approve/`);
+  return response.data;
+};
+
+export const finalRejectWorkorder = async ({ slug, final_approver_reason }: { slug: string; final_approver_reason: string }): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/final-reject/`, { final_approver_reason });
   return response.data;
 };
 

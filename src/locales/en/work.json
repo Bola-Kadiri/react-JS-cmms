@@ -216,7 +216,13 @@
       "withholdingTaxPlaceholder": "e.g. 5%",
       "billDocument": "Bill (PDF or photo)",
       "billAlreadyAttached": "A bill is already attached. Upload another file only if you need to add to it.",
-      "approvalChainHintKnownCost": "Reviewer checks the bill, then the Approver approves. Approval also approves the payment: the payment requisition is created automatically and sent to Finance.",
+      "approvalChainHintKnownCost": "The Approver approves the bill first, then the Reviewer checks it. Bills of ₦1,000,000 or more (and bills in any other currency) also need a final approval from the second approver. The last approval raises the payment requisition automatically and sends it to Finance.",
+      "knownCostApproverLabel": "Approver (approves first)",
+      "knownCostReviewerLabel": "Reviewer (reviews after the Approver)",
+      "knownCostFinalApproverLabel": "Final Approver (bills of NGN 1,000,000 or more)",
+      "knownCostFinalApproverHint": "This bill is {{amount}} or more (or not in NGN), so it needs a second, final approval after the Reviewer. The payment is raised only after this approval.",
+      "selectFinalApprover": "Select the final approver",
+      "noFinalApprover": "No final approver set up — ask the Super Admin",
       "loadingDetails": "Loading work order details...",
       "errorLoading": "Error loading work order details",
       "errorFallback": "An unknown error occurred",
@@ -284,7 +290,8 @@
         "subcategoryRequired": "Select a subcategory",
         "billNumberRequired": "Enter the bill / invoice number",
         "descriptionRequired": "Describe the bill (e.g. EKEDC bill, HQ Office, September 2026)",
-        "billRequired": "Attach the bill. It is the evidence for this payment."
+        "billRequired": "Attach the bill. It is the evidence for this payment.",
+        "finalApproverRequired": "Select the final approver. Bills of {{amount}} or more need a second approval."
       },
       "toast": {
         "successTitle": "Success",

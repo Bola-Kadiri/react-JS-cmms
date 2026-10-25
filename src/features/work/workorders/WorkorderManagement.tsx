@@ -310,6 +310,10 @@ const WorkorderManagement = () => {
               <SelectItem value="Approved">{t('workOrder.status.approved')}</SelectItem>
               <SelectItem value="Reviewer Rejected">{t('workOrder.status.reviewerRejected')}</SelectItem>
               <SelectItem value="Approver Rejected">{t('workOrder.status.approverRejected')}</SelectItem>
+              {/* Raise Payment, approver-first route */}
+              <SelectItem value="Approver Approved">Approver Approved</SelectItem>
+              <SelectItem value="Awaiting Final Approval">Awaiting Final Approval</SelectItem>
+              <SelectItem value="Final Approver Rejected">Final Approver Rejected</SelectItem>
             </SelectContent>
           </Select>
 
@@ -432,9 +436,11 @@ const WorkorderManagement = () => {
                         className={
                           workorder.approval_status === 'Approved'
                             ? "bg-green-100 text-green-800 border-green-200"
-                            : workorder.approval_status === 'Reviewed'
+                            : workorder.approval_status === 'Reviewed' || workorder.approval_status === 'Approver Approved'
                             ? "bg-blue-100 text-blue-800 border-blue-200"
-                            : workorder.approval_status === 'Reviewer Rejected' || workorder.approval_status === 'Approver Rejected'
+                            : workorder.approval_status === 'Awaiting Final Approval'
+                            ? "bg-amber-100 text-amber-800 border-amber-200"
+                            : workorder.approval_status.includes('Rejected')
                             ? "bg-red-100 text-red-800 border-red-200"
                             : "bg-yellow-100 text-yellow-800 border-yellow-200"
                         }

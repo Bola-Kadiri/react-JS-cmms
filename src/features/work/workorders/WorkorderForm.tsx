@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { useWorkorderQuery, useCreateWorkorder, useUpdateWorkorder, useApproverUsersQuery } from '@/hooks/workorder/useWorkorderQueries';
+import { useWorkorderQuery, useCreateWorkorder, useUpdateWorkorder, useApproverUsersQuery, useFinalApproversQuery } from '@/hooks/workorder/useWorkorderQueries';
 import { useCategoriesQuery } from '@/hooks/category/useCategoryQueries';
 import { useApprovedPpmsQuery } from '@/hooks/ppm/usePpmQueries';
 import {
@@ -53,6 +53,9 @@ const WorkorderForm = () => {
     payee: z.number().optional(),
     expected_payment_date: z.string().optional().default(''),
     withholding_tax: z.string().optional().default(''),
+    // Raise Payment of NGN 1,000,000 or more: the Requester selects the final approver
+    // (required check in onSubmitWorkorder, where the threshold is known).
+    final_approver: z.number().optional(),
   }).superRefine((data, ctx) => {
     if (data.type !== 'RAISE-PAYMENT' && !data.expected_start_date) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.expectedStartDateRequired'), path: ['expected_start_date'] });
@@ -130,6 +133,7 @@ const WorkorderForm = () => {
       payee: undefined,
       expected_payment_date: '',
       withholding_tax: '',
+      final_approver: undefined,
     },
   });
 
@@ -158,6 +162,20 @@ const WorkorderForm = () => {
   // Raise Payment is only for categories an Admin has marked known-cost (EKEDC, waste…).
   const knownCostCategories = categoriesData.results.filter((cat: any) => cat.is_known_cost);
   const isRaisePayment = selectedType === 'RAISE-PAYMENT';
+
+  // Raise Payment of NGN 1,000,000 or more (or in another currency): the Requester
+  // selects the final approver (Wole Olufore, set by the Super Admin). Below that, no field.
+  const { data: finalApproversData } = useFinalApproversQuery(isRaisePayment);
+  const finalApprovers = finalApproversData?.approvers ?? [];
+  const billCost = workorderForm.watch('cost');
+  const billCurrency = workorderForm.watch('currency');
+  // Falls back to NGN 1,000,000 if the setting can't be loaded, so the field is never hidden by mistake.
+  const needsFinalApprover = isRaisePayment && (
+    (billCurrency || 'NGN') !== 'NGN' || Number(billCost) >= Number(finalApproversData?.threshold ?? 1000000)
+  );
+  const finalApproverThreshold = finalApproversData
+    ? `NGN ${Number(finalApproversData.threshold).toLocaleString('en-NG')}`
+    : 'NGN 1,000,000';
 
   const {
     data: workorderData,
@@ -280,6 +298,7 @@ const WorkorderForm = () => {
         payee: workorderData.payee || undefined,
         expected_payment_date: workorderData.expected_payment_date || '',
         withholding_tax: workorderData.withholding_tax || '',
+        final_approver: workorderData.final_approver || undefined,
       });
     }
   }, [workorderData, isEditMode, workorderForm]);
@@ -290,6 +309,13 @@ const WorkorderForm = () => {
       setOpenSections((prev) => ({ ...prev, kcEvidence: true }));
       return;
     }
+    if (needsFinalApprover && !data.final_approver) {
+      workorderForm.setError('final_approver', {
+        message: t('workOrder.form.validation.finalApproverRequired', { amount: finalApproverThreshold }),
+      });
+      setOpenSections((prev) => ({ ...prev, kcApproval: true }));
+      return;
+    }
     setBillError(null);
     try {
       const formDataToSend: any = { ...data };
@@ -298,6 +324,9 @@ const WorkorderForm = () => {
         delete formDataToSend.payee;
         delete formDataToSend.expected_payment_date;
         delete formDataToSend.withholding_tax;
+      }
+      if (!needsFinalApprover) {
+        delete formDataToSend.final_approver;
       }
 
       if (data.type === 'RAISE-PAYMENT') {
@@ -1334,7 +1363,7 @@ const WorkorderForm = () => {
                     <FormField control={workorderForm.control} name="reviewers" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          {t('workOrder.form.step1Reviewer')}<span className="text-red-500 ml-1">*</span>
+                          {t('workOrder.form.knownCostReviewerLabel')}<span className="text-red-500 ml-1">*</span>
                         </FormLabel>
                         <div className="border rounded-lg p-4 bg-gray-50">
                           {(Array.isArray(reviewers) && reviewers.length === 0) ? (
@@ -1369,7 +1398,7 @@ const WorkorderForm = () => {
                     <FormField control={workorderForm.control} name="approver" render={({ field }) => (
                       <FormItem>
                         <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
-                          {t('workOrder.form.step2Approver')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
+                          {t('workOrder.form.knownCostApproverLabel')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
                         </FormLabel>
                         <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
                           <FormControl>
@@ -1388,6 +1417,38 @@ const WorkorderForm = () => {
                         <FormMessage />
                       </FormItem>
                     )} />
+                    {/* Raise Payment of NGN 1,000,000 or more (or another currency): the Requester selects the final approver */}
+                    {needsFinalApprover && (
+                      <FormField control={workorderForm.control} name="final_approver" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            {t('workOrder.form.knownCostFinalApproverLabel')}<span className="text-red-500 ml-1">*</span>
+                          </FormLabel>
+                          <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
+                            <FormControl>
+                              <SelectTrigger className="h-10">
+                                <SelectValue placeholder={t('workOrder.form.selectFinalApprover')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {finalApprovers.length > 0 ? (
+                                finalApprovers.map((approver) => (
+                                  <SelectItem key={approver.id} value={String(approver.id)}>
+                                    {approver.name} — {approver.email}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem value="no-final-approver" disabled>{t('workOrder.form.noFinalApprover')}</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-amber-700">
+                            {t('workOrder.form.knownCostFinalApproverHint', { amount: finalApproverThreshold })}
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    )}
                   </div>
                 )}
               </div>

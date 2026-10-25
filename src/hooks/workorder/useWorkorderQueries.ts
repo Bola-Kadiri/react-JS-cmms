@@ -13,6 +13,9 @@ import {
   approveWorkorderByReviewer,
   rejectWorkorderByReviewer,
   rejectWorkorderByApprover,
+  finalApproveWorkorder,
+  finalRejectWorkorder,
+  getFinalApprovers,
   unlockWorkorderResubmission,
   setWorkorderStatus,
   createPaymentRequisitionFromWorkorder,
@@ -147,6 +150,16 @@ export const useApproverUsersQuery = () => {
   });
 };
 
+// Raise Payment: final approver options + the amount from which one is required
+export const useFinalApproversQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...workorderKeys.all, 'final-approvers'] as const,
+    queryFn: getFinalApprovers,
+    staleTime: 60000,
+    enabled,
+  });
+};
+
 // Hook for approving workorder by reviewer
 export const useApproveByReviewer = (slug: string | undefined) => {
   const queryClient = useQueryClient();
@@ -207,6 +220,37 @@ export const useRejectByApprover = (slug: string | undefined) => {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.error || 'Failed to reject work order', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+// Raise Payment second (final) approval — raises the payment on approve.
+export const useFinalApprove = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => finalApproveWorkorder(slug as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Final approval given — payment raised', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to give final approval', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
+    },
+  });
+};
+
+export const useFinalReject = (slug: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (final_approver_reason: string) => finalRejectWorkorder({ slug: slug as string, final_approver_reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workorderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workorderKeys.detail(slug as string) });
+      toast.success('Bill rejected at final approval', { duration: 3000, icon: React.createElement(Check, { className: "h-4 w-4 text-green-500" }) });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to reject', { duration: 5000, icon: React.createElement(X, { className: "h-4 w-4 text-red-500" }) });
     },
   });
 };

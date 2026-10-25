@@ -125,6 +125,7 @@ const UserForm = lazy(() => import('@/features/reference/users/UserForm'))
 const UserDetailView = lazy(() => import('@/features/reference/users/UserDetailView'))
 const UserManagementPage = lazy(() => import('@/pages/reference/users/userManagementPage'))
 const ApprovalMatrixPage = lazy(() => import('@/features/approval-matrix/ApprovalMatrixPage'))
+const CoverWhileAwayPage = lazy(() => import('@/features/delegation/CoverWhileAwayPage'))
 const PersonnelForm = lazy(() => import('@/features/reference/personnels/PersonnelForm'))
 const PersonnelDetailView = lazy(() => import('@/features/reference/personnels/PersonnelDetailView'))
 const PersonnelManagementPage = lazy(() => import('@/pages/reference/personnels/personnelManagementPage'))
@@ -257,6 +258,15 @@ const protectedRoutes: RouteObject[] = [
                 <Dashboard />
               </Suspense>
             ) ,
+          },
+          {
+            // Signers name a stand-in while away; the page itself checks the role.
+            path: "cover",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <CoverWhileAwayPage />
+              </Suspense>
+            ),
           },
           {
             path: "calendar",

@@ -14,7 +14,8 @@ import {
   ChevronDown,
   ChevronRight,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -82,6 +83,17 @@ const Sidebar = () => {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          {['SUPER ADMIN', 'APPROVER', 'CLIENT', 'HEAD OF FINANCE & TREASURY'].includes(userRole ?? '') && (
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={isMenuActive('/dashboard/cover')} tooltip="Cover while away" asChild>
+                <Link to="/dashboard/cover">
+                  <UserCheck className="mr-2" />
+                  <span>Cover while away</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
 
           {isClient ? (
             <>

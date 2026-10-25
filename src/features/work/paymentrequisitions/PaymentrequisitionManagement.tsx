@@ -1,6 +1,7 @@
 // src/features/asset/paymentrequisitions/PaymentrequisitionManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SEE_ALL_PAYMENT_ROLES, hasRole } from '@/config/permissions';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,7 @@ const PaymentrequisitionManagement = () => {
     if (!data?.results) return [];
     if (!user) return data.results;
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results;
+    if (hasRole(SEE_ALL_PAYMENT_ROLES, roleUpper)) return data.results;
     const userId = Number(user.id);
     return data.results.filter((pr) => {
       switch (roleUpper) {

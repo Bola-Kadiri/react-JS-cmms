@@ -28,8 +28,11 @@ import {
   SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import { useTypedTranslation } from "@/hooks/useTypedTranslation";
+import { usePermissions } from "@/contexts/PermissionsContext";
 
 const Sidebar = () => {
+  const { userRole } = usePermissions();
+  const isClient = userRole === 'CLIENT';
   const location = useLocation();
   const { t } = useTypedTranslation('sidebar');
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
@@ -79,6 +82,26 @@ const Sidebar = () => {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
+          {isClient ? (
+            <>
+              {/* CLIENT: read-only view of their own sites' work */}
+              {[
+                { to: '/dashboard/work/requests', label: t('work.requests') },
+                { to: '/dashboard/work/orders', label: t('work.orders') },
+                { to: '/dashboard/work/work-order-completions', label: t('work.workOrderCompletions') },
+              ].map(({ to, label }) => (
+                <SidebarMenuItem key={to}>
+                  <SidebarMenuButton isActive={isMenuActive(to)} tooltip={label} asChild>
+                    <Link to={to}>
+                      <FileText className="mr-2" />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </>
+          ) : (
+          <>
           {/* Facility Menu */}
           <SidebarMenuItem>
             <SidebarMenuButton 
@@ -826,6 +849,8 @@ const Sidebar = () => {
               </SidebarMenuSub>
             )}
           </SidebarMenuItem>
+          </>
+          )}
         </SidebarMenu>
       </SidebarContent>
     </SidebarComponent>

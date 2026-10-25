@@ -6,8 +6,17 @@ import DashboardChart from '@/components/dashboard/DashboardChart';
 import StatusGrid from '@/components/dashboard/StatusGrid';
 import { Loader2 } from 'lucide-react';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { usePermissions } from '@/contexts/PermissionsContext';
+import ClientHome from '@/components/dashboard/ClientHome';
 
+// CLIENT accounts get their own read-only home; the staff dashboard is internal.
 const Dashboard = () => {
+  const { userRole } = usePermissions();
+  if (userRole === 'CLIENT') return <ClientHome />;
+  return <StaffDashboard />;
+};
+
+const StaffDashboard = () => {
   const { t } = useTypedTranslation('dashboard');
   const { data: dashboardData, isLoading, isError, error } = useDashboardQuery();
   const [activeTab, setActiveTab] = useState('WORK REQUEST');

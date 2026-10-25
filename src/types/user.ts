@@ -13,7 +13,12 @@ export type Role =
   | 'REVIEWER'
   | 'APPROVER'
   | 'PROCUREMENT AND STORE'
-  | 'FINANCE';
+  | 'FINANCE'
+  | 'CLIENT'
+  | 'CENTRAL OPERATION'
+  | 'AP OFFICER'
+  | 'HEAD OF FINANCE & TREASURY'
+  | 'CONTRACTOR';
 
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -66,6 +71,7 @@ export interface User {
   clients: number[];
   clients_detail: Client[];
   supervisor: number;
+  vendor?: number | null;
 }
 
 // export interface User {

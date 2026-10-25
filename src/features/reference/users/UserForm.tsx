@@ -19,6 +19,7 @@ import { Department } from '@/types/department';
 import { Building } from '@/types/building';
 import { Warehouse } from '@/types/warehouse';
 import { Client } from '@/types/client';
+import { Vendor } from '@/types/vendor';
 import { useUserQuery, useCreateUser, useUpdateUser } from '@/hooks/user/useUserQueries';
 
 import { useList } from '@/hooks/crud/useCrudOperations';
@@ -34,6 +35,7 @@ const facilityEndpoint = 'facility/api/api/facilities/';
 // const apartmentEndpoint = 'facility/api/api/apartments/';
 const buildingEndpoint = 'facility/api/api/buildings/';
 const warehouseEndpoint = 'asset_inventory/api/warehouses/';
+const vendorEndpoint = 'accounts/api/vendors/';
 
 const UserForm = () => {
   const { t } = useTypedTranslation('accounts');
@@ -50,9 +52,14 @@ const UserForm = () => {
       'ADMIN',
       'REQUESTER',
       'REVIEWER',
-      'APPROVAL',
+      'APPROVER',
       'PROCUREMENT AND STORE',
-      'FINANCE'
+      'FINANCE',
+      'CLIENT',
+      'CENTRAL OPERATION',
+      'AP OFFICER',
+      'HEAD OF FINANCE & TREASURY',
+      'CONTRACTOR'
     ]),
     email: z.string().email(t('user.form.validation.invalidEmail')),
     phone: z.string().min(1, t('user.form.validation.phoneRequired')),
@@ -84,7 +91,11 @@ const UserForm = () => {
     access_to_all_clients: z.boolean(),
     clients: z.array(z.number()),
     supervisor: z.number().optional(),
-  });
+    vendor: z.number().nullable().optional(),
+  }).refine(
+    (values) => values.roles !== 'CONTRACTOR' || !!values.vendor,
+    { path: ['vendor'], message: 'Choose the vendor this contractor login belongs to.' },
+  );
 
   type UserFormValues = z.infer<typeof userSchema>;
 
@@ -133,7 +144,8 @@ const UserForm = () => {
       departments: [],
       access_to_all_clients: false,
       clients: [],
-      supervisor: undefined
+      supervisor: undefined,
+      vendor: null
     }
   });
 
@@ -146,6 +158,8 @@ const UserForm = () => {
   const { data: buildings = [] } = useList<Building>('buildings', buildingEndpoint);
   const { data: clients = [] } = useList<Client>('clients', clientEndpoint);
   const { data: warehouses = [] } = useList<Warehouse>('warehouses', warehouseEndpoint);
+  const { data: vendors = [] } = useList<Vendor>('vendors', vendorEndpoint);
+  const selectedRole = userForm.watch('roles');
 
   const {hasNoAccess} = useFeatureAccess('reference')
 
@@ -205,7 +219,8 @@ const UserForm = () => {
         departments: Array.isArray(userData.departments) ? userData.departments : [],
         access_to_all_clients: userData.access_to_all_clients,
         clients: Array.isArray(userData.clients) ? userData.clients : [],
-        supervisor: userData.supervisor
+        supervisor: userData.supervisor,
+        vendor: userData.vendor ?? null
       });
     }
   }, [userData, isEditMode, userForm]);
@@ -582,17 +597,50 @@ const UserForm = () => {
                           <SelectContent>
                             <SelectItem value="SUPER ADMIN">SUPER ADMIN</SelectItem>
                             <SelectItem value="ADMIN">ADMIN</SelectItem>
-                            <SelectItem value="REQUESTER">REQUESTER</SelectItem>
-                            <SelectItem value="REVIEWER">REVIEWER</SelectItem>
-                            <SelectItem value="APPROVAL">APPROVAL</SelectItem>
+                            <SelectItem value="REQUESTER">REQUESTER (Site Manager)</SelectItem>
+                            <SelectItem value="REVIEWER">REVIEWER (Internal Control)</SelectItem>
+                            <SelectItem value="APPROVER">APPROVER (Category Manager)</SelectItem>
                             <SelectItem value="PROCUREMENT AND STORE">PROCUREMENT AND STORE</SelectItem>
-                            <SelectItem value="FINANCE">FINANCE</SelectItem>
+                            <SelectItem value="CLIENT">CLIENT (Client Contract Rep)</SelectItem>
+                            <SelectItem value="CENTRAL OPERATION">CENTRAL OPERATION</SelectItem>
+                            <SelectItem value="AP OFFICER">AP OFFICER</SelectItem>
+                            <SelectItem value="HEAD OF FINANCE & TREASURY">HEAD OF FINANCE &amp; TREASURY</SelectItem>
+                            <SelectItem value="CONTRACTOR">CONTRACTOR (Vendor)</SelectItem>
+                            <SelectItem value="FINANCE">FINANCE (being retired)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {selectedRole === 'CONTRACTOR' && (
+                    <FormField
+                      control={userForm.control}
+                      name="vendor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Vendor<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <Select
+                            onValueChange={(value) => field.onChange(Number(value))}
+                            value={field.value ? String(field.value) : undefined}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select the vendor this login belongs to" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {vendors.map((vendor) => (
+                                <SelectItem key={vendor.id} value={String(vendor.id)}>{vendor.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={userForm.control}

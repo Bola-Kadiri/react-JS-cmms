@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SEE_ALL_ROLES, VIEW_ONLY_STAFF_ROLES, hasRole } from '@/config/permissions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,14 +79,16 @@ const WorkordercompletionManagement = () => {
   );
   const deleteMutation = useDeleteWorkOrderCompletionMutation();
 
-  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
+  const isFinanceUser = hasRole(VIEW_ONLY_STAFF_ROLES, user?.role);
+  // CLIENT accounts are view-only (the backend refuses changes too).
+  const isClient = (user?.role || '').toUpperCase() === 'CLIENT';
 
   // Isolate records to the current user's assignments
   const userIsolatedResults = useMemo(() => {
     if (!rawData?.results) return [];
     if (!user) return rawData.results;
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return rawData.results;
+    if (hasRole(SEE_ALL_ROLES, roleUpper)) return rawData.results;
     const userId = Number(user.id);
     return rawData.results.filter(wcc => {
       switch (roleUpper) {
@@ -259,7 +262,7 @@ const WorkordercompletionManagement = () => {
             {t('wcc.description')}
           </p>
         </div>
-        {!isFinanceUser && (
+        {!isFinanceUser && !isClient && (
           <Button
             onClick={() => navigate('/dashboard/work/work-order-completions/new')}
             className="bg-green-600 hover:bg-green-700"
@@ -392,12 +395,15 @@ const WorkordercompletionManagement = () => {
                           <Eye className="h-4 w-4 mr-2" />
                           {t('wcc.actions.view')}
                         </DropdownMenuItem>
+                        {!isClient && (
                         <DropdownMenuItem
                           onClick={() => navigate(`/dashboard/work/work-order-completions/${completion.id}/edit`)}
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           {t('wcc.actions.edit')}
                         </DropdownMenuItem>
+                        )}
+                        {!isClient && (
                         <DropdownMenuItem
                           onClick={() => setDeleteItem(completion)}
                           className="text-red-700"
@@ -405,6 +411,7 @@ const WorkordercompletionManagement = () => {
                           <Trash2 className="h-4 w-4 mr-2" />
                           {t('wcc.actions.delete')}
                         </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

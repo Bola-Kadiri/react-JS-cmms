@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SEE_ALL_ROLES, VIEW_ONLY_STAFF_ROLES, hasRole } from '@/config/permissions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -47,13 +48,13 @@ const WorkorderManagement = () => {
   // Delete workorder mutation using our custom hook
   const deleteWorkorderMutation = useDeleteWorkorder();
 
-  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
+  const isFinanceUser = hasRole(VIEW_ONLY_STAFF_ROLES, user?.role);
 
   // Isolate records to the current user's assignments
   const userIsolatedResults = useMemo(() => {
     if (!user) return data.results || [];
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results || [];
+    if (hasRole(SEE_ALL_ROLES, roleUpper)) return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(wo => {
       switch (roleUpper) {

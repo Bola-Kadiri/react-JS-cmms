@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FINANCE_ROLES, hasRole } from '@/config/permissions';
 import {
   AlertCircle,
   ArrowLeft,
@@ -66,7 +67,7 @@ const PaymentRequisitionDetailView = ({ idProp, embedded = false }: PaymentRequi
 
   const userId = Number(user?.id);
   const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER ADMIN';
-  const isFinance = userRole === 'FINANCE';
+  const isFinance = hasRole(FINANCE_ROLES, userRole);
   // Owner is the requester who created the requisition
   const isOwner = paymentRequisition?.owner === userId;
   // A person in request_to is the designated approver — but the requester (owner) must never approve their own

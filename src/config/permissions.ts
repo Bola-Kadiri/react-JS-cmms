@@ -30,7 +30,30 @@ export type Role =
   | 'Facility Account'
   | 'Facility Store'
   | 'Facility View'
-  | 'FINANCE';
+  | 'FINANCE'
+  // View-only access to their own client's facilities (enforced by the backend).
+  | 'CLIENT'
+  // Five-stage Work Request flow (company-wide roles, view-only for now).
+  | 'CENTRAL OPERATION'
+  | 'AP OFFICER'
+  | 'HEAD OF FINANCE & TREASURY'
+  // Vendor login; no staff screens until the vendor portal arrives.
+  | 'CONTRACTOR';
+
+// Roles holding the FINANCE powers (disburse). FINANCE is being retired;
+// HEAD OF FINANCE & TREASURY takes over from it. Mirrors the backend.
+export const FINANCE_ROLES = ['FINANCE', 'HEAD OF FINANCE & TREASURY'];
+
+// Roles that see every work request, work order and completion.
+export const SEE_ALL_ROLES = ['SUPER ADMIN', 'ADMIN', 'AP OFFICER', 'CENTRAL OPERATION', ...FINANCE_ROLES];
+
+// Roles that see every payment requisition (CENTRAL OPERATION does not).
+export const SEE_ALL_PAYMENT_ROLES = ['SUPER ADMIN', 'ADMIN', 'AP OFFICER', ...FINANCE_ROLES];
+
+// Staff who only view the work lists and never raise documents from them.
+export const VIEW_ONLY_STAFF_ROLES = ['AP OFFICER', 'CENTRAL OPERATION', ...FINANCE_ROLES];
+
+export const hasRole = (roles: string[], role?: string) => roles.includes((role || '').toUpperCase());
 
 export type RolePermissions = {
   [key in Role]: {
@@ -39,6 +62,10 @@ export type RolePermissions = {
 };
 
 export const ROLE_FEATURES: RolePermissions = {
+  'CLIENT': {
+    'work_request': ['view'],
+    'work_order': ['view'],
+  },
   'SUPER ADMIN': {
     'work_request': ['view', 'edit', 'review'],
     'work_order': ['view', 'edit', 'review'],
@@ -171,4 +198,28 @@ export const ROLE_FEATURES: RolePermissions = {
     'report': ['view'],
     'comment': ['view'],
   },
+  'HEAD OF FINANCE & TREASURY': {
+    'work_request': ['view'],
+    'work_order': ['view'],
+    'requisition': ['view'],
+    'pending_ppm': ['view'],
+    'report': ['view'],
+    'comment': ['view'],
+  },
+  'AP OFFICER': {
+    'work_request': ['view'],
+    'work_order': ['view'],
+    'requisition': ['view'],
+    'pending_ppm': ['view'],
+    'report': ['view'],
+    'comment': ['view'],
+  },
+  'CENTRAL OPERATION': {
+    'work_request': ['view'],
+    'work_order': ['view'],
+    'pending_ppm': ['view'],
+    'report': ['view'],
+    'comment': ['view'],
+  },
+  'CONTRACTOR': {},
 };

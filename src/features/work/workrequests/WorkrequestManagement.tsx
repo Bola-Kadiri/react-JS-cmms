@@ -1,6 +1,7 @@
 // src/features/work/workrequests/WorkrequestManagement.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SEE_ALL_ROLES, VIEW_ONLY_STAFF_ROLES, hasRole } from '@/config/permissions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,7 +35,7 @@ const WorkrequestManagement = () => {
   // Check if user is PROCUREMENT AND STORE
   const isProcurementUser = (user?.role || '').toUpperCase() === 'PROCUREMENT AND STORE';
   const isSuperAdmin = (user?.role || '').toUpperCase() === 'SUPER ADMIN';
-  const isFinanceUser = (user?.role || '').toUpperCase() === 'FINANCE';
+  const isFinanceUser = hasRole(VIEW_ONLY_STAFF_ROLES, user?.role);
 
   // Get filters from URL params
   const urlApprovalStatus = searchParams.get('approval_status');
@@ -99,7 +100,7 @@ const WorkrequestManagement = () => {
   const userIsolatedResults = useMemo(() => {
     if (!user || isProcurementUser) return data.results || [];
     const roleUpper = (user.role || '').toUpperCase();
-    if (roleUpper === 'SUPER ADMIN' || roleUpper === 'ADMIN' || roleUpper === 'FINANCE') return data.results || [];
+    if (hasRole(SEE_ALL_ROLES, roleUpper)) return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(req => {
       switch (roleUpper) {

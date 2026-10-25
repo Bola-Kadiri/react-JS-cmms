@@ -29,6 +29,7 @@ import { WorkrequestAssignResourcesForm } from './components/WorkrequestAssignRe
 import { WorkrequestVendorForm } from './components/WorkrequestVendorForm';
 import { useAuth } from '@/contexts/AuthContext';
 import WorkrequestPrintView from './WorkrequestPrintView';
+import FiveStagePanel from './components/FiveStagePanel';
 import WorkorderDetailView from '@/features/work/workorders/WorkorderDetailView';
 import { REJECTED_STATUSES } from '@/types/workrequest';
 import { useFormatters } from '@/utils/formatters';
@@ -66,6 +67,8 @@ const WorkrequestDetailView = () => {
   const cpApproveMutation = useCpApprove();
 
   const isOwner = !!(user && workrequest && workrequest.requester === (user as any).id);
+  // Five-stage flow: the Stage 1 panel replaces the original pipeline, chain and actions.
+  const isFiveStage = (workrequest as any)?.flow === 'five_stage';
   const isRejected = workrequest ? REJECTED_STATUSES.includes(workrequest.approval_status) : false;
 
   // Once Procurement & Store has imputed both a cost (quotation line) and a
@@ -114,6 +117,10 @@ const WorkrequestDetailView = () => {
       'Rejected – Vendor Changed': 'bg-red-100 text-red-800 border-red-200',
       'Reviewer Rejected': 'bg-red-100 text-red-800 border-red-200',
       'Approver Rejected': 'bg-red-100 text-red-800 border-red-200',
+      'Awaiting Review': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'Sent Back': 'bg-amber-100 text-amber-800 border-amber-200',
+      'Awaiting Client': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'Client Rejected': 'bg-red-100 text-red-800 border-red-200',
     };
     return (
       <Badge variant="outline" className={`${map[status] || 'bg-gray-100 text-gray-800 border-gray-200'} font-medium`}>
@@ -267,7 +274,7 @@ const WorkrequestDetailView = () => {
           {/* Requester: Procurement & Store has priced it — add Reviewer +
               Approver here, right at the top, rather than having to dig for
               the edit page. Unlocked specifically for this (see cp_approve). */}
-          {workrequest.approval_status !== 'Pending Review' && !isRejected && !workrequest.is_locked && (isOwner || isAdmin) && (
+          {!isFiveStage && workrequest.approval_status !== 'Pending Review' && !isRejected && !workrequest.is_locked && (isOwner || isAdmin) && (
             <PermissionGuard feature="work_request" permission="edit">
               <Button onClick={() => handleEdit(workrequest.slug)} className="bg-green-600 hover:bg-green-700 text-white">
                 <Edit className="mr-2 h-4 w-4" /> Add Reviewer &amp; Approver
@@ -299,6 +306,9 @@ const WorkrequestDetailView = () => {
         </div>
       </div>
 
+      {isFiveStage ? (
+        <FiveStagePanel slug={workrequest.slug} number={workrequest.work_request_number} />
+      ) : (<>
       {/* Pipeline stepper — visible to all roles; assigned step highlighted per viewer */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
         {(isMyCpStep || isMyReviewStep || isMyApproveStep) && (
@@ -474,8 +484,10 @@ const WorkrequestDetailView = () => {
         </div>
       )}
 
+      </>)}
+
       {/* Fully approved banner — Requester only */}
-      {workrequest.approval_status === 'Fully Approved' && isOwner && (
+      {!isFiveStage && workrequest.approval_status === 'Fully Approved' && isOwner && (
         <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <ShieldCheck className="h-5 w-5 text-green-700" />

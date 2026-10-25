@@ -103,6 +103,8 @@ const WorkrequestManagement = () => {
     if (hasRole(SEE_ALL_ROLES, roleUpper)) return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(req => {
+      // Five-stage requests are already scoped by the server (facility team, named signer, stand-in).
+      if ((req as any).flow === 'five_stage') return true;
       switch (roleUpper) {
         case 'REQUESTER': return req.requester === userId;
         case 'REVIEWER': return req.reviewers?.includes(userId);

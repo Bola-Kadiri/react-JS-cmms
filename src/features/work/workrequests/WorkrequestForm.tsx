@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,6 +28,7 @@ import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { fetchFlowPreview } from '@/services/workRequestFlowApi';
 
 const WorkrequestForm = () => {
   const { t } = useTypedTranslation('work');
@@ -79,6 +81,10 @@ const WorkrequestForm = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEditMode = !!slug;
+  // "Raise a new request from this one" after a client rejection (five-stage flow).
+  const [searchParams] = useSearchParams();
+  const replacesSlug = !isEditMode ? searchParams.get('replaces') || undefined : undefined;
+  const keepLocation = isEditMode || !!replacesSlug;
 
   const vendorInvoiceRef = useRef<HTMLInputElement>(null);
   const [vendorInvoiceFiles, setVendorInvoiceFiles] = useState<File[]>([]);
@@ -156,7 +162,17 @@ const WorkrequestForm = () => {
 
   // Procurement & Store has priced it and there's still no Reviewer/Approver
   // on record — this Edit is the Requester's chance to add them.
-  const needsRouting = isEditMode && workrequestData && workrequestData.approval_status !== 'Pending Review';
+  const needsRouting = isEditMode && workrequestData && workrequestData.approval_status !== 'Pending Review'
+    && (workrequestData as any).flow !== 'five_stage';
+
+  // Five-stage flow: the Approval Matrix picks who handles it, and pricing happens later (Work Order).
+  const { data: flowPreview } = useQuery({
+    queryKey: ['wr-flow-preview', selectedFacility],
+    queryFn: () => fetchFlowPreview(selectedFacility as number),
+    enabled: !!selectedFacility,
+  });
+  const isFiveStage = !!flowPreview?.live || (workrequestData as any)?.flow === 'five_stage';
+  const { data: replacesData } = useWorkrequestQuery(replacesSlug);
 
   // Category and component always come from the chosen asset, so they can
   // never disagree with it (the backend rejects a mismatch). Locked only when
@@ -287,7 +303,26 @@ const WorkrequestForm = () => {
   }, [workrequestData, isEditMode, form]);
 
   useEffect(() => {
-    if (selectedFacility && !isEditMode) {
+    if (replacesData && !isEditMode) {
+      form.reset({
+        ...form.getValues(),
+        type: (replacesData.type as 'Work' | 'Procument') || 'Work',
+        category: replacesData.category,
+        subcategory: replacesData.subcategory,
+        facility: replacesData.facility,
+        zone: replacesData.zone,
+        building: replacesData.building,
+        subsystem: replacesData.subsystem,
+        department: replacesData.department,
+        asset: replacesData.asset,
+        description: replacesData.description || '',
+        priority: (replacesData.priority as 'Low' | 'Medium' | 'High') || 'Medium',
+      });
+    }
+  }, [replacesData, isEditMode, form]);
+
+  useEffect(() => {
+    if (selectedFacility && !keepLocation) {
       form.setValue('zone', null);
       form.setValue('building', null);
       form.setValue('subsystem', null);
@@ -296,14 +331,14 @@ const WorkrequestForm = () => {
   }, [selectedFacility, form, isEditMode]);
 
   useEffect(() => {
-    if (selectedZone && !isEditMode) {
+    if (selectedZone && !keepLocation) {
       form.setValue('subsystem', null);
       form.setValue('asset', null);
     }
   }, [selectedZone, form, isEditMode]);
 
   useEffect(() => {
-    if (selectedSubsystem && !isEditMode) {
+    if (selectedSubsystem && !keepLocation) {
       form.setValue('asset', null);
     }
   }, [selectedSubsystem, form, isEditMode]);
@@ -352,7 +387,7 @@ const WorkrequestForm = () => {
   };
 
   const onSubmit = (data: WorkrequestFormValues) => {
-    if (!isEditMode && vendorInvoiceFiles.length === 0) {
+    if (!isEditMode && !isFiveStage && vendorInvoiceFiles.length === 0) {
       toast({ title: t('workRequest.form.toast.errorTitle'), description: t('workRequest.form.toast.invoiceRequired'), variant: 'destructive' });
       return;
     }
@@ -374,6 +409,7 @@ const WorkrequestForm = () => {
     }
 
     const formData = buildFormData(data);
+    if (replacesData && !isEditMode) formData.append('replaces', String(replacesData.id));
 
     const onError = (error: any) => {
       const message =
@@ -389,6 +425,11 @@ const WorkrequestForm = () => {
         { slug, formData },
         {
           onSuccess: () => {
+            if (isFiveStage) {
+              toast({ title: 'Changes saved', description: 'Click Resubmit on the request to send it for review again.' });
+              navigate(`/dashboard/work/requests/view/${slug}`);
+              return;
+            }
             toast({
               title: 'Work Request Updated',
               description: 'Your changes have been saved and submitted for review.',
@@ -684,7 +725,8 @@ const WorkrequestForm = () => {
             )}
           </div>
 
-          {/* Invoice & Vendor */}
+          {/* Invoice & Vendor — not part of the five-stage Work Request (pricing comes with the Work Order) */}
+          {!isFiveStage && (
           <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
             <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('invoice')}>
               <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionInvoice')}</h2>
@@ -794,6 +836,7 @@ const WorkrequestForm = () => {
               </div>
             )}
           </div>
+          )}
 
           </fieldset>
 
@@ -805,7 +848,29 @@ const WorkrequestForm = () => {
             </button>
             {openSections.approval && (
               <div className="p-6 space-y-6 bg-white">
-                {!needsRouting ? (
+                {isFiveStage ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      Filled in automatically from the Approval Matrix for this facility. You do not need to pick anyone,
+                      and pricing happens later in the Work Order.
+                    </p>
+                    {replacesData && (
+                      <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        Copied from {replacesData.work_request_number}, which the client rejected. Check the details before submitting.
+                      </p>
+                    )}
+                    <div className={`grid grid-cols-1 gap-4 ${flowPreview?.chain?.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+                      {(flowPreview?.chain ?? []).map((entry, index) => (
+                        <div key={entry.step} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                          <p className="text-xs text-gray-500">Step {index + 1} · {entry.label}</p>
+                          <p className="text-sm font-semibold mt-1">
+                            {entry.kind === 'team' ? `Site Managers at this facility (${entry.people})` : entry.person ?? 'Not set'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !needsRouting ? (
                   <p className="text-sm text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
                     {isEditMode
                       ? t('workRequest.form.approvalChainWaitingInfo')

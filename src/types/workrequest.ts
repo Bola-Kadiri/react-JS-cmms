@@ -15,7 +15,12 @@ export type WorkrequestApprovalStatus =
   | 'Fully Approved'
   | 'Rejected – Vendor Changed'
   | 'Reviewer Rejected'
-  | 'Approver Rejected';
+  | 'Approver Rejected'
+  // Five-stage flow
+  | 'Awaiting Review'
+  | 'Sent Back'
+  | 'Awaiting Client'
+  | 'Client Rejected';
 
 export const REJECTED_STATUSES: WorkrequestApprovalStatus[] = [
   'Rejected – Vendor Changed',
@@ -67,6 +72,10 @@ export interface Workrequest {
   vendor_invoice: string | null;
   require_quotation: boolean;
   approval_status: WorkrequestApprovalStatus;
+  // Which approval flow this request follows (set when raised).
+  flow?: 'legacy' | 'five_stage';
+  // Five-stage: the client-rejected request this one was raised again from.
+  replaces?: number | null;
   is_locked: boolean;
   po_number: string | null;
   po_document: string | null;

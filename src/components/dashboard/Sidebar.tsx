@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Users,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  Inbox
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -80,6 +81,15 @@ const Sidebar = () => {
               <Link to="/dashboard">
                 <LayoutDashboard className="mr-2" />
                 <span>{t('dashboard')}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive={isMenuActive('/dashboard/my-tasks')} tooltip="My Tasks" asChild>
+              <Link to="/dashboard/my-tasks">
+                <Inbox className="mr-2" />
+                <span>My Tasks</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

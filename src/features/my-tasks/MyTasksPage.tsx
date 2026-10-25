@@ -18,7 +18,20 @@ const WHAT_TO_DO: Record<MyTask['step'], string> = {
   requester: 'Fix and resubmit',
   approver: 'Review',
   client_rep: 'Approve or reject',
+  procurement: 'Price it and submit',
+  contractor: 'Accept the job',
 };
+
+const TITLE: Record<MyTask['kind'], string> = {
+  work_request: 'Work Request',
+  work_order: 'Work Order',
+  work_order_to_raise: 'Work Request',
+};
+
+const linkFor = (task: MyTask) =>
+  task.kind === 'work_order' ? `/dashboard/work/orders/view/${task.slug}`
+    : task.kind === 'work_order_to_raise' ? '/dashboard/procurement-queue'
+    : `/dashboard/work/requests/view/${task.slug}`;
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -58,12 +71,12 @@ const MyTasksPage = () => {
             ) : tasks.map((task) => (
               <TableRow key={`${task.kind}-${task.id}`}>
                 <TableCell>
-                  <div className="font-semibold">Work Request {task.number}</div>
+                  <div className="font-semibold">{TITLE[task.kind]} {task.number}</div>
                   <div className="text-xs text-gray-500 max-w-xs truncate">{task.description}</div>
                 </TableCell>
                 <TableCell>{task.facility ?? '—'}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{WHAT_TO_DO[task.step]}</div>
+                  <div className="font-medium">{task.kind === 'work_order_to_raise' ? 'Create the Work Order' : WHAT_TO_DO[task.step]}</div>
                   <div className="text-xs text-gray-500">
                     {task.step_label}{task.on_behalf_of ? ` · on behalf of ${task.on_behalf_of}` : ''}
                   </div>
@@ -78,7 +91,7 @@ const MyTasksPage = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => navigate(`/dashboard/work/requests/view/${task.slug}`)}>
+                          onClick={() => navigate(linkFor(task))}>
                     Open
                   </Button>
                 </TableCell>

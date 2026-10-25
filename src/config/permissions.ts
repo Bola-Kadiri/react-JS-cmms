@@ -49,7 +49,7 @@ export const SEE_ALL_ROLES = ['SUPER ADMIN', 'ADMIN', 'AP OFFICER', 'CENTRAL OPE
 export const SEE_ALL_PAYMENT_ROLES = ['SUPER ADMIN', 'ADMIN', 'AP OFFICER', ...FINANCE_ROLES];
 
 // Staff who only view the work lists and never raise documents from them.
-export const VIEW_ONLY_STAFF_ROLES = ['AP OFFICER', 'CENTRAL OPERATION', ...FINANCE_ROLES];
+export const VIEW_ONLY_STAFF_ROLES = ['AP OFFICER', 'CENTRAL OPERATION', 'CONTRACTOR', ...FINANCE_ROLES];
 
 export const hasRole = (roles: string[], role?: string) => roles.includes((role || '').toUpperCase());
 

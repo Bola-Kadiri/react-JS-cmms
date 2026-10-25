@@ -23,6 +23,7 @@ import { Vendor } from '@/types/vendor';
 import { useUserQuery, useCreateUser, useUpdateUser } from '@/hooks/user/useUserQueries';
 
 import { useList } from '@/hooks/crud/useCrudOperations';
+import { useAllRecords } from '@/hooks/crud/useAllRecords';
 import { toast } from '@/components/ui/use-toast';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
@@ -157,7 +158,7 @@ const UserForm = () => {
   const { data: buildings = [] } = useList<Building>('buildings', buildingEndpoint);
   const { data: clients = [] } = useList<Client>('clients', clientEndpoint);
   const { data: warehouses = [] } = useList<Warehouse>('warehouses', warehouseEndpoint);
-  const { data: vendors = [] } = useList<Vendor>('vendors', vendorEndpoint);
+  const { data: vendors = [] } = useAllRecords<Vendor>('vendors', vendorEndpoint);
   const selectedRole = userForm.watch('roles');
 
   const {hasNoAccess} = useFeatureAccess('reference')

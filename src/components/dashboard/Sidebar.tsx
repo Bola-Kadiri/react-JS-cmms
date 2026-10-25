@@ -16,7 +16,8 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
-  Inbox
+  Inbox,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -36,6 +37,7 @@ import { usePermissions } from "@/contexts/PermissionsContext";
 const Sidebar = () => {
   const { userRole } = usePermissions();
   const isClient = userRole === 'CLIENT';
+  const isContractor = userRole === 'CONTRACTOR';
   const location = useLocation();
   const { t } = useTypedTranslation('sidebar');
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
@@ -94,6 +96,17 @@ const Sidebar = () => {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
+          {['PROCUREMENT AND STORE', 'SUPER ADMIN', 'ADMIN'].includes(userRole ?? '') && (
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={isMenuActive('/dashboard/procurement-queue')} tooltip="Work Orders to raise" asChild>
+                <Link to="/dashboard/procurement-queue">
+                  <ClipboardList className="mr-2" />
+                  <span>Work Orders to raise</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+
           {['SUPER ADMIN', 'APPROVER', 'CLIENT', 'HEAD OF FINANCE & TREASURY'].includes(userRole ?? '') && (
             <SidebarMenuItem>
               <SidebarMenuButton isActive={isMenuActive('/dashboard/cover')} tooltip="Cover while away" asChild>
@@ -105,7 +118,17 @@ const Sidebar = () => {
             </SidebarMenuItem>
           )}
 
-          {isClient ? (
+          {isContractor ? (
+            /* CONTRACTOR (vendor login): only their own company's jobs */
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={isMenuActive('/dashboard/work/orders')} tooltip="My Jobs" asChild>
+                <Link to="/dashboard/work/orders">
+                  <FileText className="mr-2" />
+                  <span>My Jobs</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : isClient ? (
             <>
               {/* CLIENT: read-only view of their own sites' work */}
               {[

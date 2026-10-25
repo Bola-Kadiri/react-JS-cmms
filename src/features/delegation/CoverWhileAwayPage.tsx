@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { usePermissions } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useList } from '@/hooks/crud/useCrudOperations';
+import { useAllRecords } from '@/hooks/crud/useAllRecords';
 import { User } from '@/types/user';
 import { Cover, CoverStatus, createCover, endCover, fetchCovers, fetchStandIns } from '@/services/delegationsApi';
 
@@ -49,7 +49,7 @@ const CoverWhileAwayPage = () => {
   const [errors, setErrors] = useState<FormErrors>({});
 
   const { data: covers = [], isLoading } = useQuery({ queryKey: ['covers'], queryFn: fetchCovers });
-  const { data: users = [] } = useList<User>('users', 'accounts/api/users/');
+  const { data: users = [] } = useAllRecords<User>('users', 'accounts/api/users/', userRole === 'SUPER ADMIN');
   const signers = isSuperAdmin ? users.filter((u) => SIGNER_ROLES.includes(u.roles)) : [];
   const personId = isSuperAdmin && form.person ? Number(form.person) : undefined;
   const { data: standIns = [] } = useQuery({

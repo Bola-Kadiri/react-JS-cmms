@@ -127,6 +127,7 @@ const UserManagementPage = lazy(() => import('@/pages/reference/users/userManage
 const ApprovalMatrixPage = lazy(() => import('@/features/approval-matrix/ApprovalMatrixPage'))
 const CoverWhileAwayPage = lazy(() => import('@/features/delegation/CoverWhileAwayPage'))
 const MyTasksPage = lazy(() => import('@/features/my-tasks/MyTasksPage'))
+const ProcurementQueuePage = lazy(() => import('@/features/work/workorders/ProcurementQueuePage'))
 const PersonnelForm = lazy(() => import('@/features/reference/personnels/PersonnelForm'))
 const PersonnelDetailView = lazy(() => import('@/features/reference/personnels/PersonnelDetailView'))
 const PersonnelManagementPage = lazy(() => import('@/pages/reference/personnels/personnelManagementPage'))
@@ -259,6 +260,15 @@ const protectedRoutes: RouteObject[] = [
                 <Dashboard />
               </Suspense>
             ) ,
+          },
+          {
+            // Procurement & Store: client-approved Work Requests waiting for a Work Order.
+            path: "procurement-queue",
+            element: (
+              <Suspense fallback={<LoadingComponent />}>
+                <ProcurementQueuePage />
+              </Suspense>
+            ),
           },
           {
             // Everything waiting on this person in the five-stage flow.

@@ -25,6 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { useWorkorderQuery, useUnlockResubmission, useCreatePaymentRequisitionFromWorkorder } from '@/hooks/workorder/useWorkorderQueries';
+import Stage2Panel from './components/Stage2Panel';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { usePermissions } from '@/contexts/PermissionsContext';
@@ -202,6 +203,8 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
   }
 
   const isOwner = !!(user && workorder && workorder.requester === (user as any).id);
+  // Five-stage flow: the Stage 2 panel replaces the original pipeline, banners and actions.
+  const isFiveStage = (workorder as any).flow === 'five_stage';
   const isAdmin = ['SUPER ADMIN', 'ADMIN'].includes(userRole);
   const isRaisePaymentRequester = workorder.type === 'RAISE-PAYMENT' && userRole === 'REQUESTER';
   // Raise Payment — known-cost bill (EKEDC, waste…): no WCC; approval raises the payment
@@ -287,7 +290,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               {getTypeBadge(workorder.type)}
               {workorder.priority && getPriorityBadge(workorder.priority)}
             </div>
-            {workorder.cost && workorder.currency && (
+            {!isFiveStage && workorder.cost && workorder.currency && (
               <div className="text-right">
                 <p className="text-lg font-semibold text-green-700">
                   {formatCurrency(workorder.cost, workorder.currency)}
@@ -336,7 +339,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           )}
 
           {/* Reviewer action buttons — shown when not yet reviewed and user is a reviewer */}
-          {!isApproverFirst && !workorder.is_reviewed && (
+          {!isFiveStage && !isApproverFirst && !workorder.is_reviewed && (
             userRole === 'REVIEWER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -361,7 +364,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           )}
 
           {/* Approver action buttons — shown after review and user is the approver */}
-          {!isApproverFirst && workorder.is_reviewed && !workorder.is_approved && (
+          {!isFiveStage && !isApproverFirst && workorder.is_reviewed && !workorder.is_approved && (
             userRole === 'APPROVER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -390,7 +393,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               Requisition to already exist; the backend enforces both, but
               we pre-check here too so the trigger is disabled with a clear
               reason instead of letting the dialog fail on submit. */}
-          {!isKnownCost && workorder.approval_status === 'Approved' && workorder.work_status !== 'closed' && (
+          {!isFiveStage && !isKnownCost && workorder.approval_status === 'Approved' && workorder.work_status !== 'closed' && (
             userRole === 'APPROVER' ||
             userRole === 'ADMIN' ||
             userRole === 'SUPER ADMIN' ||
@@ -422,7 +425,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               order is Approved) add the WCC. Neither action touches any
               other field on this record, so nothing already entered is
               ever at risk of being lost. */}
-          {(isOwner || isAdmin) && canAssignRouting && (
+          {!isFiveStage && (isOwner || isAdmin) && canAssignRouting && (
             <Button
               onClick={() => setIsRoutingModalOpen(true)}
               className="bg-green-600 hover:bg-green-700 text-white"
@@ -431,7 +434,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
               {workorder.reviewers_detail?.length || workorder.approver_detail ? 'Change' : 'Add'} Reviewer &amp; Approver
             </Button>
           )}
-          {(isOwner || isAdmin) && !canAssignRouting && needsWccAction && (
+          {!isFiveStage && (isOwner || isAdmin) && !canAssignRouting && needsWccAction && (
             <Button
               onClick={() => navigate(`/dashboard/work/work-order-completions/new?work_order=${workorder.id}`)}
               className="bg-green-600 hover:bg-green-700 text-white"
@@ -445,7 +448,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           <WorkorderPrintView workorder={workorder} />
 
           {/* An approved Raise Payment is locked (its payment is already raised). */}
-          {!(isKnownCost && workorder.approval_status === 'Approved') && (
+          {!isFiveStage && !(isKnownCost && workorder.approval_status === 'Approved') && (
             <PermissionGuard feature='work_order' permission='edit'>
               <Button
                 onClick={() => handleEdit(workorder.slug)}
@@ -458,6 +461,9 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
         </div>
       </div>
 
+      {isFiveStage ? (
+        <Stage2Panel slug={workorder.slug} number={workorder.work_order_number} />
+      ) : (<>
       {/* Pipeline stepper — visible to owner (requester), admin, and RAISE-PAYMENT requester */}
       {(isOwner || isAdmin || isRaisePaymentRequester) && (
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
@@ -583,6 +589,8 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
           )}
         </div>
       )}
+
+      </>)}
 
       {/* Accordion sections — same set as the Work Request page (Detail,
           Resource, Approval, Quotation, Comments, File attachments,

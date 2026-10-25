@@ -57,6 +57,8 @@ const WorkorderManagement = () => {
     if (hasRole(SEE_ALL_ROLES, roleUpper)) return data.results || [];
     const userId = Number(user.id);
     return (data.results || []).filter(wo => {
+      // Five-stage work orders are already scoped by the server (team, named signer, contractor's own jobs).
+      if ((wo as any).flow === 'five_stage') return true;
       switch (roleUpper) {
         case 'REQUESTER': return wo.requester === userId;
         case 'REVIEWER': return wo.reviewers?.includes(userId);

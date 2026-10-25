@@ -54,7 +54,7 @@ export interface FlowPreview {
 }
 
 export interface MyTask {
-  kind: 'work_request';
+  kind: 'work_request' | 'work_order' | 'work_order_to_raise';
   id: number;
   slug: string;
   number: string;
@@ -62,7 +62,7 @@ export interface MyTask {
   description: string;
   priority: string;
   status: string;
-  step: FlowStep;
+  step: FlowStep | 'procurement' | 'contractor';
   step_label: string;
   on_behalf_of: string | null;
   waiting_since: string;

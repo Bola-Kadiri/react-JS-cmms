@@ -117,6 +117,7 @@ const WorkordercompletionDetailView = lazy(() => import('@/features/work/work-or
 const WorkordercompletionManagementPage = lazy(() => import('@/pages/work/work-order-completions/WorkOrderCompletionManagementPage'))
 const InvoiceitemForm = lazy(() => import('@/features/work/invoiceitems/InvoiceitemForm'))
 const InvoiceitemDetailView = lazy(() => import('@/features/work/invoiceitems/InvoiceitemDetailView'))
+const JobsToInvoicePage = lazy(() => import('@/features/work/invoiceitems/JobsToInvoicePage'))
 const InvoiceitemManagementPage = lazy(() => import('@/pages/work/invoiceitems/InvoiceitemManagementPage'))
 const PpmitemForm = lazy(() => import('@/features/work/ppmitems/PpmitemForm'))
 const PpmitemDetailView = lazy(() => import('@/features/work/ppmitems/PpmitemDetailView'))
@@ -550,6 +551,14 @@ const protectedRoutes: RouteObject[] = [
                 element: (
                   <Suspense fallback={<LoadingComponent />}>
                     <InvoiceitemManagementPage />
+                  </Suspense>
+                )
+              },
+              {
+                path: 'invoice-items/to-invoice',
+                element: (
+                  <Suspense fallback={<LoadingComponent />}>
+                    <JobsToInvoicePage />
                   </Suspense>
                 )
               },

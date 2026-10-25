@@ -39,6 +39,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDate } from '@/utils/formatters';
 import InvoiceitemPrintView from './InvoiceitemPrintView';
+import Stage4Panel from './components/Stage4Panel';
 
 const InvoiceitemDetailView = () => {
   const navigate = useNavigate();
@@ -72,6 +73,8 @@ const InvoiceitemDetailView = () => {
   const isReviewer = invoiceItem?.reviewers?.includes(userId);
   const isApprover = invoiceItem?.approver === userId;
   const isReviewed = invoiceItem?.is_reviewed || false;
+  // Five-stage invoices are handled by the Stage 4 panel, not the old buttons and tabs.
+  const isFiveStage = (invoiceItem as any)?.flow === 'five_stage';
 
   // Check if user can edit (SUPER ADMIN, ADMIN, REQUESTER)
   const canEdit = user?.role === 'SUPER ADMIN' || user?.role === 'ADMIN' || user?.role === 'REQUESTER';
@@ -239,7 +242,7 @@ const InvoiceitemDetailView = () => {
         </div>
         <div className="flex items-center gap-2">
           {/* Reviewer Buttons - Show only if user is a reviewer and not yet reviewed */}
-          {isReviewer && !isReviewed && (
+          {!isFiveStage && isReviewer && !isReviewed && (
             <>
               <Button
                 onClick={() =>
@@ -287,7 +290,7 @@ const InvoiceitemDetailView = () => {
           )}
 
           {/* Approver Buttons - Show only if user is approver and invoice is reviewed */}
-          {isApprover && isReviewed && (
+          {!isFiveStage && isApprover && isReviewed && (
             <>
               <Button
                 onClick={() =>
@@ -338,7 +341,7 @@ const InvoiceitemDetailView = () => {
           <InvoiceitemPrintView invoiceItem={invoiceItem} />
 
           {/* Edit Button - Only for SUPER ADMIN, ADMIN, REQUESTER */}
-          {canEdit && (
+          {!isFiveStage && canEdit && (
             <Button
               onClick={() => navigate(`/dashboard/work/invoice-items/${invoiceItem.slug || invoiceItem.id}/edit`)}
               className="bg-green-600 hover:bg-green-700"
@@ -351,6 +354,7 @@ const InvoiceitemDetailView = () => {
       </div>
 
       {/* Content */}
+      {isFiveStage ? <Stage4Panel id={invoiceItem.id} /> : (
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -781,6 +785,7 @@ const InvoiceitemDetailView = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      )}
 
       {/* Confirmation Dialog */}
       <AlertDialog open={confirmDialog.open} onOpenChange={closeConfirmDialog}>

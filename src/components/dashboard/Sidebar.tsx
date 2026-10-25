@@ -119,15 +119,23 @@ const Sidebar = () => {
           )}
 
           {isContractor ? (
-            /* CONTRACTOR (vendor login): only their own company's jobs */
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={isMenuActive('/dashboard/work/orders')} tooltip="My Jobs" asChild>
-                <Link to="/dashboard/work/orders">
-                  <FileText className="mr-2" />
-                  <span>My Jobs</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            /* CONTRACTOR (vendor login): only their own company's jobs and invoices */
+            <>
+              {[
+                { to: '/dashboard/work/orders', label: 'My Jobs' },
+                { to: '/dashboard/work/invoice-items/to-invoice', label: 'Jobs to invoice' },
+                { to: '/dashboard/work/invoice-items', label: 'My Invoices' },
+              ].map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton isActive={location.pathname === item.to} tooltip={item.label} asChild>
+                    <Link to={item.to}>
+                      <FileText className="mr-2" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </>
           ) : isClient ? (
             <>
               {/* CLIENT: read-only view of their own sites' work */}
@@ -408,6 +416,16 @@ const Sidebar = () => {
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
+                {userRole === 'AP OFFICER' && (
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton isActive={isActive('/dashboard/work/invoice-items/to-invoice')} asChild>
+                      <Link to="/dashboard/work/invoice-items/to-invoice">
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Jobs to invoice</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                )}
                 {/* <SidebarMenuSubItem>
                   <SidebarMenuSubButton 
                     isActive={isActive('/dashboard/work/payment-comments')}

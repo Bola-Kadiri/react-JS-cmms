@@ -21,6 +21,8 @@ const WHAT_TO_DO: Record<MyTask['step'], string> = {
   procurement: 'Price it and submit',
   contractor: 'Accept the job',
   central_operation: 'Verify the work on site',
+  ap_officer: 'Check the invoice',
+  head_of_finance: 'Approve the invoice',
 };
 
 const TITLE: Record<MyTask['kind'], string> = {
@@ -29,12 +31,16 @@ const TITLE: Record<MyTask['kind'], string> = {
   work_order_to_raise: 'Work Request',
   wcc: 'Certificate',
   wcc_to_raise: 'Work Order',
+  invoice: 'Invoice',
+  invoice_to_raise: 'Certificate',
 };
 
 const linkFor = (task: MyTask) =>
   task.kind === 'work_order' || task.kind === 'wcc_to_raise' ? `/dashboard/work/orders/view/${task.slug}`
     : task.kind === 'wcc' ? `/dashboard/work/work-order-completions/${task.slug}`
     : task.kind === 'work_order_to_raise' ? '/dashboard/procurement-queue'
+    : task.kind === 'invoice' ? `/dashboard/work/invoice-items/${task.slug}`
+    : task.kind === 'invoice_to_raise' ? '/dashboard/work/invoice-items/to-invoice'
     : `/dashboard/work/requests/view/${task.slug}`;
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -82,6 +88,8 @@ const MyTasksPage = () => {
                 <TableCell>
                   <div className="font-medium">{task.kind === 'work_order_to_raise' ? 'Create the Work Order'
                     : task.kind === 'wcc_to_raise' ? 'Raise the completion certificate'
+                    : task.kind === 'invoice_to_raise' ? (task.step === 'ap_officer' ? 'Enter the invoice for the vendor' : 'Submit your invoice')
+                    : task.kind === 'invoice' && ['Draft', 'Returned'].includes(task.status) ? 'Complete and submit the invoice'
                     : task.kind === 'wcc' && task.step === 'approver' ? 'Approve the certificate'
                     : WHAT_TO_DO[task.step]}</div>
                   <div className="text-xs text-gray-500">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, ChevronDown, ChevronUp, AlertTriangle, X, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import {
   useWorkrequestQuery,
   useCreateWorkrequest,
@@ -23,7 +23,6 @@ import {
   useApproversQuery,
 } from '@/hooks/workrequest/useWorkrequestQueries';
 import { useCategoriesQuery } from '@/hooks/category/useCategoryQueries';
-import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useDepartmentsQuery } from '@/hooks/department/useDepartmentQueries';
 import { toast } from '@/components/ui/use-toast';
@@ -86,13 +85,9 @@ const WorkrequestForm = () => {
   const replacesSlug = !isEditMode ? searchParams.get('replaces') || undefined : undefined;
   const keepLocation = isEditMode || !!replacesSlug;
 
-  const vendorInvoiceRef = useRef<HTMLInputElement>(null);
-  const [vendorInvoiceFiles, setVendorInvoiceFiles] = useState<File[]>([]);
-
   const [openSections, setOpenSections] = useState({
     basic: true,
     details: true,
-    invoice: true,
     approval: true,
     additional: false,
   });
@@ -133,7 +128,6 @@ const WorkrequestForm = () => {
   const { data: categoriesData = { results: [] } } = useCategoriesQuery();
   const { data: facilitiesData = { results: [] } } = useFacilitiesQuery();
   const { data: departmentsData = { results: [] } } = useDepartmentsQuery();
-  const { data: vendorsData = { results: [] } } = useVendorsQuery();
   const { data: reviewers = [] } = useReviewersQuery();
   const { data: approvers = [] } = useApproversQuery();
 
@@ -347,10 +341,6 @@ const WorkrequestForm = () => {
 
   const buildFormData = (data: WorkrequestFormValues): FormData => {
     const fd = new FormData();
-    if (vendorInvoiceFiles.length > 0) {
-      fd.append('vendor_invoice', vendorInvoiceFiles[0]);
-      vendorInvoiceFiles.slice(1).forEach((f) => fd.append('resources', f));
-    }
     Object.entries(data).forEach(([key, value]) => {
       if (value === null || value === undefined) return;
       if (FK_FIELDS.includes(key) && value === 0) return;
@@ -367,12 +357,10 @@ const WorkrequestForm = () => {
     const errors = form.formState.errors;
     const basicFields = ['type', 'category', 'subcategory', 'description', 'priority', 'cost', 'currency'];
     const detailsFields = ['facility', 'zone', 'building', 'subsystem', 'department', 'asset'];
-    const invoiceFields = ['vendor', 'invoice_no'];
     const approvalFields = ['payment_requisition', 'approver', 'reviewers', 'request_to'];
     setOpenSections((prev) => ({
       basic: prev.basic || basicFields.some((f) => f in errors),
       details: prev.details || detailsFields.some((f) => f in errors),
-      invoice: prev.invoice || invoiceFields.some((f) => f in errors),
       approval: prev.approval || approvalFields.some((f) => f in errors),
       additional: prev.additional,
     }));
@@ -387,11 +375,6 @@ const WorkrequestForm = () => {
   };
 
   const onSubmit = (data: WorkrequestFormValues) => {
-    if (!isEditMode && !isFiveStage && vendorInvoiceFiles.length === 0) {
-      toast({ title: t('workRequest.form.toast.errorTitle'), description: t('workRequest.form.toast.invoiceRequired'), variant: 'destructive' });
-      return;
-    }
-
     if (needsRouting) {
       let hasError = false;
       if (data.reviewers.length === 0) {
@@ -724,119 +707,6 @@ const WorkrequestForm = () => {
               </div>
             )}
           </div>
-
-          {/* Invoice & Vendor — not part of the five-stage Work Request (pricing comes with the Work Order) */}
-          {!isFiveStage && (
-          <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
-            <button type="button" className="flex justify-between items-center w-full p-6 bg-green-50 border-b border-green-100 text-left hover:bg-green-100 transition-colors" onClick={() => toggleSection('invoice')}>
-              <h2 className="text-lg font-semibold text-green-800">{t('workRequest.form.sectionInvoice')}</h2>
-              {openSections.invoice ? <ChevronUp className="h-5 w-5 text-green-600" /> : <ChevronDown className="h-5 w-5 text-green-600" />}
-            </button>
-            {(openSections.invoice || needsRouting) && (
-              <div className="p-6 space-y-6 bg-white">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">
-                    {t('workRequest.form.vendorInvoice')}{!isEditMode && <span className="text-red-500 ml-1">*</span>}
-                  </label>
-                  <Input
-                    ref={vendorInvoiceRef}
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
-                    onChange={(e) => {
-                      const newFile = e.target.files?.[0];
-                      if (newFile) {
-                        setVendorInvoiceFiles((prev) => [...prev, newFile]);
-                      }
-                      if (vendorInvoiceRef.current) vendorInvoiceRef.current.value = '';
-                    }}
-                    className="h-10"
-                  />
-                  {isEditMode && workrequestData?.vendor_invoice && (
-                    <div className="mt-2">
-                      {/\.(png|jpe?g|gif|webp)$/i.test(workrequestData.vendor_invoice) ? (
-                        <a href={workrequestData.vendor_invoice} target="_blank" rel="noopener noreferrer" className="block">
-                          <img
-                            src={workrequestData.vendor_invoice}
-                            alt={t('workRequest.form.viewUploadedInvoice')}
-                            className="max-h-48 rounded-lg border border-gray-200 object-contain"
-                          />
-                        </a>
-                      ) : (
-                        <a
-                          href={workrequestData.vendor_invoice}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-sm text-green-600 underline"
-                        >
-                          <FileText className="h-4 w-4" /> {t('workRequest.form.viewUploadedInvoice')}
-                        </a>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">{t('workRequest.form.replaceInvoice')}</p>
-                    </div>
-                  )}
-                  {!isEditMode && vendorInvoiceFiles.length === 0 && (
-                    <p className="text-xs text-gray-500 mt-1">{t('workRequest.form.uploadInvoiceHint')}</p>
-                  )}
-
-                  {/* Queued files list */}
-                  {vendorInvoiceFiles.length > 0 && (
-                    <ul className="mt-3 space-y-2">
-                      {vendorInvoiceFiles.map((file, idx) => (
-                        <li key={idx} className="flex items-center justify-between gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <FileText className="h-4 w-4 text-green-600 flex-shrink-0" />
-                            <span className="text-sm text-gray-700 truncate">{file.name}</span>
-                            {idx === 0 && (
-                              <span className="text-xs bg-green-100 text-green-700 border border-green-200 rounded px-1.5 py-0.5 flex-shrink-0">Primary</span>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setVendorInvoiceFiles((prev) => prev.filter((_, i) => i !== idx))}
-                            className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField control={form.control} name="vendor" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.vendorOnInvoice')}<span className="text-red-500 ml-1">*</span></FormLabel>
-                      <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                        <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={t('workRequest.form.selectVendor')} /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {vendorsData.results.map((v: any) => (
-                            <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
-                          ))}
-                          {isEditMode && workrequestData?.vendor && workrequestData.vendor_detail &&
-                            !vendorsData.results.some((v: any) => String(v.id) === String(workrequestData.vendor)) && (
-                            <SelectItem value={String(workrequestData.vendor)}>{workrequestData.vendor_detail.name}</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-
-                  <FormField control={form.control} name="invoice_no" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.invoiceNumber')}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={t('workRequest.form.invoicePlaceholder')} {...field} className="h-10" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-              </div>
-            )}
-          </div>
-          )}
 
           </fieldset>
 

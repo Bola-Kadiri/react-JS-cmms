@@ -606,6 +606,10 @@ const WorkrequestDetailView = () => {
           workrequest.po_document && { label: 'PO Document', url: workrequest.po_document },
           workrequest.vendor_invoice && { label: 'Vendor Invoice', url: workrequest.vendor_invoice },
           workrequest.attachment && { label: 'Attachment', url: workrequest.attachment },
+          // Supporting documents (several allowed).
+          ...(((workrequest as any).resources_data ?? []) as { file: string }[]).map((f) => ({
+            label: decodeURIComponent(f.file.split('/').pop() || 'Supporting document'), url: f.file,
+          })),
         ].filter(Boolean) as { label: string; url: string }[];
         const historyEntries = 3; // Submitted / Last Updated / Current Status — always present
 
@@ -919,7 +923,7 @@ const WorkrequestDetailView = () => {
                   <div className="space-y-2">
                     {attachments.map((a) => (
                       <a
-                        key={a.label}
+                        key={a.url}
                         href={a.url}
                         target="_blank"
                         rel="noopener noreferrer"

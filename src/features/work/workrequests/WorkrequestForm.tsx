@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import MultiFileInput from '@/components/MultiFileInput';
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import {
   useWorkrequestQuery,
@@ -84,6 +85,9 @@ const WorkrequestForm = () => {
   const [searchParams] = useSearchParams();
   const replacesSlug = !isEditMode ? searchParams.get('replaces') || undefined : undefined;
   const keepLocation = isEditMode || !!replacesSlug;
+
+  // Supporting documents: photos, reports, anything that explains the problem (optional, several allowed).
+  const [supportingFiles, setSupportingFiles] = useState<File[]>([]);
 
   const [openSections, setOpenSections] = useState({
     basic: true,
@@ -341,6 +345,7 @@ const WorkrequestForm = () => {
 
   const buildFormData = (data: WorkrequestFormValues): FormData => {
     const fd = new FormData();
+    supportingFiles.forEach((file) => fd.append('resources', file));
     Object.entries(data).forEach(([key, value]) => {
       if (value === null || value === undefined) return;
       if (FK_FIELDS.includes(key) && value === 0) return;
@@ -706,6 +711,36 @@ const WorkrequestForm = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Supporting documents — optional, several allowed */}
+          <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+            <div className="p-6 bg-green-50 border-b border-green-100">
+              <h2 className="text-lg font-semibold text-green-800">Supporting documents</h2>
+            </div>
+            <div className="p-6 space-y-3 bg-white">
+              {isEditMode && ((workrequestData as any)?.resources_data?.length ?? 0) > 0 && (
+                <div className="text-sm">
+                  <p className="text-gray-500 mb-1">Already attached:</p>
+                  <ul className="space-y-1">
+                    {(workrequestData as any).resources_data.map((f: { file: string }, i: number) => (
+                      <li key={i}>
+                        <a href={f.file} target="_blank" rel="noopener noreferrer" className="text-green-700 underline break-all">
+                          {decodeURIComponent(f.file.split('/').pop() || 'File')}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <MultiFileInput
+                id="supporting-documents"
+                files={supportingFiles}
+                onChange={setSupportingFiles}
+                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx"
+                hint="Optional. Photos of the problem, reports, or anything else that helps explain it."
+              />
+            </div>
           </div>
 
           </fieldset>

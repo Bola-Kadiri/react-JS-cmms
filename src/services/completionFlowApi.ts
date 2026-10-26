@@ -24,7 +24,11 @@ export interface CompletionFlow {
     site_visit_date: string | null;
     time_on_job_minutes: number | null;
   };
-  evidence: { kind: EvidenceKind; label: string; file: { url: string; name: string; uploaded_at: string } | null }[];
+  evidence: {
+    kind: EvidenceKind; label: string;
+    files: { id: number; url: string; name: string; uploaded_at: string }[];
+    file: { id: number; url: string; name: string; uploaded_at: string } | null;
+  }[];
   problems: string[];
   history: HistoryEntry[];
   timing: FlowTiming | null;
@@ -53,12 +57,15 @@ export const saveCompletionDetails = async (id: number | string, input: Completi
     finished_at: input.finished_at ? new Date(input.finished_at).toISOString() : '',
   })).data;
 
-export const uploadCompletionEvidence = async (id: number | string, kind: EvidenceKind, file: File): Promise<CompletionFlow> => {
+export const uploadCompletionEvidence = async (id: number | string, kind: EvidenceKind, files: File[]): Promise<CompletionFlow> => {
   const form = new FormData();
   form.append('kind', kind);
-  form.append('file', file);
+  files.forEach((file) => form.append('file', file));
   return (await api.post(`${WCC_API_BASE}/${id}/flow-evidence/`, form)).data;
 };
+
+export const removeCompletionEvidence = async (id: number | string, evidenceId: number): Promise<CompletionFlow> =>
+  (await api.post(`${WCC_API_BASE}/${id}/flow-evidence-remove/`, { evidence: evidenceId })).data;
 
 const ACTION_PATHS: Record<Exclude<CompletionAction, 'edit'>, string> = {
   submit: 'flow-submit',

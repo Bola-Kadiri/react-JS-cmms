@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AlertTriangle, CheckCircle, CheckCircle2, Clock, FileCheck, Loader2, Send, Upload, Users, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, CheckCircle2, Clock, FileCheck, Loader2, Send, Upload, Users, X, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  CompletionFlow, EvidenceKind, fetchCompletionFlow, saveCompletionDetails, takeCompletionAction, uploadCompletionEvidence,
+  CompletionFlow, EvidenceKind, fetchCompletionFlow, removeCompletionEvidence, saveCompletionDetails, takeCompletionAction,
+  uploadCompletionEvidence,
 } from '@/services/completionFlowApi';
 
 type DialogAction = 'verify' | 'send_back' | 'approve';
@@ -92,8 +93,13 @@ const Stage3Panel = ({ id }: Props) => {
     onError,
   });
   const upload = useMutation({
-    mutationFn: ({ kind, file }: { kind: EvidenceKind; file: File }) => uploadCompletionEvidence(id, kind, file),
+    mutationFn: ({ kind, files }: { kind: EvidenceKind; files: File[] }) => uploadCompletionEvidence(id, kind, files),
     onSuccess: (updated) => { refresh(updated); toast.success('Evidence attached'); },
+    onError,
+  });
+  const removeFile = useMutation({
+    mutationFn: (evidenceId: number) => removeCompletionEvidence(id, evidenceId),
+    onSuccess: (updated) => { refresh(updated); toast.success('File removed'); },
     onError,
   });
   const act = useMutation({
@@ -289,14 +295,30 @@ const Stage3Panel = ({ id }: Props) => {
                 {item.file ? <FileCheck className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-500" />}
                 {item.label}
               </p>
-              {item.file
-                ? <a href={item.file.url} target="_blank" rel="noreferrer" className="text-sm text-green-700 underline break-all">{item.file.name}</a>
-                : <p className="text-sm text-red-600">Not attached yet</p>}
+              {item.files.length > 0 ? (
+                <ul className="space-y-1">
+                  {item.files.map((f) => (
+                    <li key={f.id} className="flex items-center justify-between gap-2">
+                      <a href={f.url} target="_blank" rel="noreferrer" className="text-sm text-green-700 underline break-all">{f.name}</a>
+                      {canEdit && (
+                        <button type="button" aria-label={`Remove ${f.name}`} disabled={removeFile.isPending}
+                                onClick={() => removeFile.mutate(f.id)} className="text-gray-400 hover:text-red-600 shrink-0">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-sm text-red-600">Not attached yet</p>}
               {canEdit && (
                 <label className="inline-flex items-center gap-2 text-sm text-green-800 cursor-pointer">
-                  <Upload className="h-4 w-4" /> {item.file ? 'Replace' : 'Upload'}
-                  <input type="file" accept=".jpg,.jpeg,.png,.pdf" className="hidden" disabled={upload.isPending}
-                         onChange={(e) => { const file = e.target.files?.[0]; if (file) upload.mutate({ kind: item.kind, file }); e.target.value = ''; }} />
+                  <Upload className="h-4 w-4" /> {item.files.length ? 'Add more' : 'Upload'}
+                  <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf" className="hidden" disabled={upload.isPending}
+                         onChange={(e) => {
+                           const files = Array.from(e.target.files ?? []);
+                           if (files.length) upload.mutate({ kind: item.kind, files });
+                           e.target.value = '';
+                         }} />
                 </label>
               )}
             </div>

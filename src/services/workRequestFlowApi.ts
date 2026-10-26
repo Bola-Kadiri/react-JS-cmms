@@ -45,6 +45,8 @@ export interface WorkRequestFlow {
   timing: FlowTiming | null;
   my_actions: FlowAction[];
   replaces: { slug: string; number: string } | null;
+  /** The Requester's supporting documents. */
+  files: { id: number; url: string | null; name: string }[];
 }
 
 export interface FlowPreview {

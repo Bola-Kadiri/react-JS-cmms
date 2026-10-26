@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import MultiFileInput from '@/components/MultiFileInput';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -28,7 +29,7 @@ const PayAndConfirmPage = () => {
   const [selected, setSelected] = useState<number[]>([]);
   const [paymentDate, setPaymentDate] = useState(today());
   const [reference, setReference] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,8 +44,8 @@ const PayAndConfirmPage = () => {
   };
 
   const attach = useMutation({
-    mutationFn: () => attachReceipt(selected, file as File),
-    onSuccess: () => { refresh(); setFile(null); toast.success('Receipt attached'); setError(''); },
+    mutationFn: () => attachReceipt(selected, files),
+    onSuccess: () => { refresh(); setFiles([]); toast.success(files.length > 1 ? 'Receipts attached' : 'Receipt attached'); setError(''); },
     onError: (e) => { setError(errorMessage(e)); toast.error(errorMessage(e)); },
   });
   const pay = useMutation({
@@ -126,8 +127,8 @@ const PayAndConfirmPage = () => {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <label htmlFor="receipt" className="text-sm font-medium text-gray-700">Bank receipt / batch report<span className="text-red-500 ml-1">*</span></label>
-                <Input id="receipt" type="file" accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                <Button variant="outline" size="sm" disabled={!file || !selected.length || attach.isPending} onClick={() => attach.mutate()}>
+                <MultiFileInput id="receipt" files={files} onChange={setFiles} accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx" />
+                <Button variant="outline" size="sm" disabled={!files.length || !selected.length || attach.isPending} onClick={() => attach.mutate()}>
                   {attach.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Paperclip className="mr-2 h-4 w-4" />}
                   Attach to selected
                 </Button>

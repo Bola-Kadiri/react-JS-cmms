@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import MultiFileInput from '@/components/MultiFileInput';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -106,7 +107,8 @@ const WorkorderForm = () => {
   const [selectedWrVendorName, setSelectedWrVendorName] = useState<string | null>(null);
   const [selectedWrInvoiceUrl, setSelectedWrInvoiceUrl] = useState<string | null>(null);
   // Raise Payment: the bill is mandatory on create (it replaces the WCC as evidence).
-  const [billDocument, setBillDocument] = useState<File | null>(null);
+  // The bill, plus any supporting documents (several allowed; at least one when raising).
+  const [billDocuments, setBillDocuments] = useState<File[]>([]);
   const [billError, setBillError] = useState<string | null>(null);
 
   const workorderForm = useForm<WorkorderFormValues>({
@@ -305,7 +307,7 @@ const WorkorderForm = () => {
   }, [workorderData, isEditMode, workorderForm]);
 
   const onSubmitWorkorder = async (data: WorkorderFormValues) => {
-    if (data.type === 'RAISE-PAYMENT' && !isEditMode && !billDocument) {
+    if (data.type === 'RAISE-PAYMENT' && !isEditMode && billDocuments.length === 0) {
       setBillError(t('workOrder.form.validation.billRequired'));
       setOpenSections((prev) => ({ ...prev, kcEvidence: true }));
       return;
@@ -370,8 +372,8 @@ const WorkorderForm = () => {
 
       const formData = buildFd(formDataToSend);
 
-      if (data.type === 'RAISE-PAYMENT' && billDocument) {
-        formData.append('resources', billDocument);
+      if (data.type === 'RAISE-PAYMENT') {
+        billDocuments.forEach((file) => formData.append('resources', file));
       }
 
       if (isEditMode && slug) {
@@ -1334,16 +1336,14 @@ const WorkorderForm = () => {
                       </p>
                     )}
                     <label className="text-sm font-medium text-gray-700 block">{t('workOrder.form.billDocument')}</label>
-                    <input
-                      type="file"
+                    <MultiFileInput
+                      id="bill-documents"
+                      files={billDocuments}
+                      onChange={(files) => { setBillDocuments(files); setBillError(null); }}
                       accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => {
-                        setBillDocument(e.target.files?.[0] ?? null);
-                        setBillError(null);
-                      }}
-                      className="block w-full text-sm text-gray-600 border border-gray-300 rounded-md cursor-pointer bg-gray-50 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                      invalid={!!billError}
+                      hint="Attach the bill. You can add supporting documents too."
                     />
-                    {billDocument && <p className="text-xs text-green-700">{billDocument.name}</p>}
                     {billError && <p className="text-sm font-medium text-destructive">{billError}</p>}
                   </div>
                 )}

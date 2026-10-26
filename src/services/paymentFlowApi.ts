@@ -113,10 +113,10 @@ export const takeVoucherAction = async (
 
 export const fetchVouchersToPay = async (): Promise<VoucherRow[]> => (await api.get(`${VOUCHER_API_BASE}/to-pay/`)).data;
 
-export const attachReceipt = async (voucherIds: number[], file: File): Promise<void> => {
+export const attachReceipt = async (voucherIds: number[], files: File[]): Promise<void> => {
   const form = new FormData();
   voucherIds.forEach((id) => form.append('vouchers', String(id)));
-  form.append('file', file);
+  files.forEach((file) => form.append('file', file));
   await api.post(`${VOUCHER_API_BASE}/attach-receipt/`, form);
 };
 

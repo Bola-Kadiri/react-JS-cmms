@@ -192,6 +192,28 @@ export const rejectWorkorderByApprover = async ({ slug, approver_reason }: { slu
 };
 
 // Raise Payment second (final) approval — only the second approver named on the bill
+// Raise Payment bills of ₦100,000 or more: Procurement & Store adds the PO and quotation, or returns the bill.
+export const procurementSubmitWorkorder = async (
+  slug: string, input: { po_number: string; quotation_reference?: string; quotation_file: File | null },
+): Promise<Workorder> => {
+  const form = new FormData();
+  form.append('po_number', input.po_number);
+  form.append('quotation_reference', input.quotation_reference ?? '');
+  if (input.quotation_file) form.append('quotation_file', input.quotation_file);
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/procurement-submit/`, form);
+  return response.data;
+};
+
+export const procurementReturnWorkorder = async (slug: string, procurement_reason: string): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/procurement-return/`, { procurement_reason });
+  return response.data;
+};
+
+export const raisePaymentResubmitWorkorder = async (slug: string): Promise<Workorder> => {
+  const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/raise-payment-resubmit/`);
+  return response.data;
+};
+
 export const finalApproveWorkorder = async (slug: string): Promise<Workorder> => {
   const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/final-approve/`);
   return response.data;

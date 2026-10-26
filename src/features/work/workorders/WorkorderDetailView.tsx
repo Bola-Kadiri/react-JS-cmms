@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useWorkorderQuery, useUnlockResubmission, useCreatePaymentRequisitionFromWorkorder } from '@/hooks/workorder/useWorkorderQueries';
 import Stage2Panel from './components/Stage2Panel';
+import RaisePaymentProcurementPanel from './components/RaisePaymentProcurementPanel';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { usePermissions } from '@/contexts/PermissionsContext';
@@ -44,6 +45,7 @@ const PIPELINE_STEPS = [
 
 // New Raise Payment bills: Approver → Reviewer → (second approver for large bills).
 const APPROVER_FIRST_STEPS = [
+  { label: 'PO & Quotation', status: 'Awaiting Procurement' },
   { label: 'Pending', status: 'Pending' },
   { label: 'Approver Approved', status: 'Approver Approved' },
   { label: 'Reviewed', status: 'Awaiting Final Approval' },
@@ -213,11 +215,14 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
   const isKnownCost = workorder.type === 'RAISE-PAYMENT' && !!workorder.payee;
   const knownCostPayment = isKnownCost ? workorder.linked_payment_requisition : null;
   const isRejected = REJECTED_STATUSES.includes(workorder.approval_status);
-  // New Raise Payment bills: Approver first, then Reviewer, then (₦1,000,000 or
-  // more) the second approver. `next_step` from the backend says who acts next.
+  // New Raise Payment bills: Approver first, then Reviewer. Bills of ₦100,000 or more start
+  // with Procurement & Store (PO and quotation) and end with the second approver.
+  // `next_step` from the backend says who acts next.
   const isApproverFirst = workorder.approval_route === 'APPROVER_FIRST';
   const pipelineSteps = isApproverFirst
-    ? APPROVER_FIRST_STEPS.filter((step) => workorder.needs_second_approval || step.status !== 'Awaiting Final Approval')
+    ? APPROVER_FIRST_STEPS
+        .filter((step) => workorder.needs_second_approval || step.status !== 'Awaiting Final Approval')
+        .filter((step) => workorder.needs_procurement || step.status !== 'Awaiting Procurement')
     : PIPELINE_STEPS;
   const currentStep = getPipelineStep(workorder.approval_status, pipelineSteps);
   const canActAsApprover = ['APPROVER', 'ADMIN', 'SUPER ADMIN'].includes(userRole) || workorder.approver === currentUserId;
@@ -553,7 +558,12 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
         </div>
       )}
 
-      {/* Raise Payment of ₦1,000,000 or more, approved and reviewed: waiting for the second approver */}
+      {/* Raise Payment of ₦100,000 or more: Procurement & Store adds the PO and quotation first */}
+      {isApproverFirst && workorder.needs_procurement && (
+        <RaisePaymentProcurementPanel workorder={workorder} userRole={userRole} currentUserId={currentUserId} />
+      )}
+
+      {/* Raise Payment of ₦100,000 or more, approved and reviewed: waiting for the second approver */}
       {workorder.approval_status === 'Awaiting Final Approval' && (
         <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex items-start gap-3">
           <Clock className="h-5 w-5 text-amber-700 mt-0.5" />
@@ -749,7 +759,7 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
                     ) : <p className="text-sm text-gray-400">Not assigned</p>}
                   </div>
                 )}
-                {/* Raise Payment of NGN 1,000,000 or more: the final approver the Requester selected */}
+                {/* Raise Payment of NGN 100,000 or more: the final approver the Requester selected */}
                 {isApproverFirst && workorder.final_approver_detail && (
                   <div>
                     <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Final Approver</p>

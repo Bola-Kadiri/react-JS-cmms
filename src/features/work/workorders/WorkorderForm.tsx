@@ -53,7 +53,7 @@ const WorkorderForm = () => {
     payee: z.number().optional(),
     expected_payment_date: z.string().optional().default(''),
     withholding_tax: z.string().optional().default(''),
-    // Raise Payment of NGN 1,000,000 or more: the Requester selects the final approver
+    // Raise Payment of NGN 100,000 or more: the Requester selects the final approver
     // (required check in onSubmitWorkorder, where the threshold is known).
     final_approver: z.number().optional(),
   }).superRefine((data, ctx) => {
@@ -163,19 +163,20 @@ const WorkorderForm = () => {
   const knownCostCategories = categoriesData.results.filter((cat: any) => cat.is_known_cost);
   const isRaisePayment = selectedType === 'RAISE-PAYMENT';
 
-  // Raise Payment of NGN 1,000,000 or more (or in another currency): the Requester
-  // selects the final approver (Wole Olufore, set by the Super Admin). Below that, no field.
+  // Raise Payment of NGN 100,000 or more (or in another currency): the Requester selects the
+  // final approver (Wole Olufore, set by the Super Admin), and Procurement & Store adds the PO and
+  // quotation before the Approver acts. Below that, no field.
   const { data: finalApproversData } = useFinalApproversQuery(isRaisePayment);
   const finalApprovers = finalApproversData?.approvers ?? [];
   const billCost = workorderForm.watch('cost');
   const billCurrency = workorderForm.watch('currency');
-  // Falls back to NGN 1,000,000 if the setting can't be loaded, so the field is never hidden by mistake.
+  // Falls back to NGN 100,000 if the setting can't be loaded, so the field is never hidden by mistake.
   const needsFinalApprover = isRaisePayment && (
-    (billCurrency || 'NGN') !== 'NGN' || Number(billCost) >= Number(finalApproversData?.threshold ?? 1000000)
+    (billCurrency || 'NGN') !== 'NGN' || Number(billCost) >= Number(finalApproversData?.threshold ?? 100000)
   );
   const finalApproverThreshold = finalApproversData
     ? `NGN ${Number(finalApproversData.threshold).toLocaleString('en-NG')}`
-    : 'NGN 1,000,000';
+    : 'NGN 100,000';
 
   const {
     data: workorderData,
@@ -1417,7 +1418,7 @@ const WorkorderForm = () => {
                         <FormMessage />
                       </FormItem>
                     )} />
-                    {/* Raise Payment of NGN 1,000,000 or more (or another currency): the Requester selects the final approver */}
+                    {/* Raise Payment of NGN 100,000 or more (or another currency): the Requester selects the final approver */}
                     {needsFinalApprover && (
                       <FormField control={workorderForm.control} name="final_approver" render={({ field }) => (
                         <FormItem>

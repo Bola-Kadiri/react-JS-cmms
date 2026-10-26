@@ -11,7 +11,8 @@ export type WorkOrderType = 'Unplanned' | 'Planned';
 export type Priority = 'Low' | 'Medium' | 'High';
 export type PpmType = 'Scheduled' | 'Unscheduled';
 export type ApprovalStatus = 'Pending' | 'Reviewed' | 'Approved' | 'Reviewer Rejected' | 'Approver Rejected' | 'Rejected'
-  // Raise Payment, approver-first route
+  // Raise Payment, approver-first route (bills of ₦100,000 or more start with Procurement & Store)
+  | 'Awaiting Procurement' | 'Procurement Returned'
   | 'Approver Approved' | 'Awaiting Final Approval' | 'Final Approver Rejected'
 export type WorkStatus = 'pending' | 'closed' | 'rejected'
 export type Currency = 'USD' | 'EUR' | 'NGN'
@@ -173,10 +174,18 @@ export interface ResourceData {
   payee_detail?: Vendor | null;
   expected_payment_date?: string | null;
   withholding_tax?: string | null;
-  // New Raise Payment bills: Approver → Reviewer → (second approver for bills of
-  // ₦1,000,000 or more). `next_step` says who acts next; null on every other work order.
+  // New Raise Payment bills: Approver → Reviewer. Bills of ₦100,000 or more start with
+  // Procurement & Store (PO and quotation) and end with the second approver.
+  // `next_step` says who acts next; null on every other work order.
   approval_route?: 'APPROVER_FIRST' | null;
-  next_step?: 'approver' | 'reviewer' | 'final_approver' | null;
+  next_step?: 'procurement' | 'requester' | 'approver' | 'reviewer' | 'final_approver' | null;
+  needs_procurement?: boolean;
+  po_number?: string;
+  quotation_reference?: string;
+  quotation_file?: string | null;
+  procurement_by?: number | null;
+  procurement_at?: string | null;
+  procurement_reason?: string;
   needs_second_approval?: boolean;
   final_approver?: number | null;
   final_approver_detail?: User | null;

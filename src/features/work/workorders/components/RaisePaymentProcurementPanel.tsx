@@ -35,6 +35,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
   const queryClient = useQueryClient();
   const [poNumber, setPoNumber] = useState('');
   const [quotationRef, setQuotationRef] = useState('');
+  const [poFile, setPoFile] = useState<File | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [returnOpen, setReturnOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -52,7 +53,9 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
   const onError = (e: any) => { setError(errorText(e)); toast.error(errorText(e)); };
 
   const submit = useMutation({
-    mutationFn: () => procurementSubmitWorkorder(workorder.slug, { po_number: poNumber, quotation_reference: quotationRef, quotation_file: file }),
+    mutationFn: () => procurementSubmitWorkorder(workorder.slug, {
+      po_number: poNumber, quotation_reference: quotationRef, po_document: poFile, quotation_file: file,
+    }),
     onSuccess: () => { refresh(); toast.success('PO and quotation added. The Approver has been told.'); setError(''); },
     onError,
   });
@@ -67,7 +70,9 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
     onError,
   });
 
-  const missing = [!poNumber.trim() && 'Enter the PO number.', !file && 'Attach the quotation.'].filter(Boolean) as string[];
+  const missing = [
+    !poNumber.trim() && 'Enter the PO number.', !poFile && 'Attach the PO.', !file && 'Attach the quotation.',
+  ].filter(Boolean) as string[];
 
   return (
     <div className="rounded-lg border bg-white shadow-sm overflow-hidden mb-6">
@@ -78,8 +83,13 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
       <div className="p-4 space-y-4 text-sm">
         {/* Done */}
         {workorder.procurement_at && status !== 'Awaiting Procurement' && (
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-5">
             <div><p className="text-xs text-gray-500">PO number</p><p className="font-medium">{workorder.po_number || '—'}</p></div>
+            <div><p className="text-xs text-gray-500">PO</p>
+              {workorder.po_document
+                ? <a href={workorder.po_document} target="_blank" rel="noreferrer" className="text-green-700 underline inline-flex items-center gap-1"><FileText className="h-3.5 w-3.5" /> Open</a>
+                : <p>—</p>}
+            </div>
             <div><p className="text-xs text-gray-500">Quotation reference</p><p className="font-medium">{workorder.quotation_reference || '—'}</p></div>
             <div><p className="text-xs text-gray-500">Quotation</p>
               {workorder.quotation_file
@@ -116,10 +126,14 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
         )}
         {status === 'Awaiting Procurement' && canProcure && (
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="po-number" className="font-medium text-gray-700">PO number<span className="text-red-500 ml-1">*</span></label>
                 <Input id="po-number" value={poNumber} onChange={(e) => setPoNumber(e.target.value)} placeholder="e.g. PO-2026-0101" />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="po-file" className="font-medium text-gray-700">PO document<span className="text-red-500 ml-1">*</span></label>
+                <Input id="po-file" type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setPoFile(e.target.files?.[0] ?? null)} />
               </div>
               <div className="space-y-2">
                 <label htmlFor="quote-ref" className="font-medium text-gray-700">Quotation reference</label>

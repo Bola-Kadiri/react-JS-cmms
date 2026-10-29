@@ -183,6 +183,7 @@ export interface ResourceData {
   po_number?: string;
   quotation_reference?: string;
   quotation_file?: string | null;
+  po_document?: string | null;
   procurement_by?: number | null;
   procurement_at?: string | null;
   procurement_reason?: string;

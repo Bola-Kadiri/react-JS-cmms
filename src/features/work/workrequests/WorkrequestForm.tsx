@@ -38,9 +38,8 @@ const WorkrequestForm = () => {
     category: z.number().nullable().refine((val) => val !== null && val > 0, {
       message: t('workRequest.form.validation.categoryRequired'),
     }),
-    subcategory: z.number().nullable().refine((val) => val !== null && val > 0, {
-      message: t('workRequest.form.validation.subcategoryRequired'),
-    }),
+    // Optional: the Requester may not know the exact component.
+    subcategory: z.number().nullable().optional(),
     facility: z.number().nullable().refine((val) => val !== null && val > 0, {
       message: t('workRequest.form.validation.facilityRequired'),
     }),
@@ -665,7 +664,7 @@ const WorkrequestForm = () => {
 
                   <FormField control={form.control} name="subcategory" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.subcategory')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('workRequest.form.subcategory')} <span className="text-xs text-gray-500 font-normal">(optional)</span></FormLabel>
                       <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory || subcategoryLocked}>
                         <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workRequest.form.selectCategoryFirst') : t('workRequest.form.selectSubcategory')} /></SelectTrigger></FormControl>
                         <SelectContent>

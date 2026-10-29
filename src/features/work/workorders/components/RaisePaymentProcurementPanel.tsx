@@ -35,8 +35,8 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
   const queryClient = useQueryClient();
   const [poNumber, setPoNumber] = useState('');
   const [quotationRef, setQuotationRef] = useState('');
-  const [poAmount, setPoAmount] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [poFile, setPoFile] = useState<File | null>(null);
+  const [quotationAmount, setQuotationAmount] = useState('');
   const [returnOpen, setReturnOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
@@ -54,7 +54,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
 
   const submit = useMutation({
     mutationFn: () => procurementSubmitWorkorder(workorder.slug, {
-      po_number: poNumber, po_amount: poAmount, quotation_reference: quotationRef, quotation_file: file,
+      po_number: poNumber, po_document: poFile, quotation_amount: quotationAmount, quotation_reference: quotationRef,
     }),
     onSuccess: () => { refresh(); toast.success('PO and quotation added. The Approver has been told.'); setError(''); },
     onError,
@@ -70,15 +70,15 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
     onError,
   });
 
-  // The PO cost must match the bill amount; the confirmed amount is what is paid.
+  // The quotation amount must match the bill amount; the confirmed amount is what is paid.
   const billAmount = Number(workorder.cost ?? 0);
   const money = (value: number) => `${workorder.currency ?? 'NGN'} ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const poMismatch = poAmount !== '' && Math.round(Number(poAmount) * 100) !== Math.round(billAmount * 100);
+  const mismatch = quotationAmount !== '' && Math.round(Number(quotationAmount) * 100) !== Math.round(billAmount * 100);
   const missing = [
     !poNumber.trim() && 'Enter the PO number.',
-    (poAmount === '' || Number(poAmount) <= 0) && 'Enter the PO cost.',
-    poMismatch && 'The PO cost must match the bill amount.',
-    !file && 'Attach the quotation.',
+    !poFile && 'Attach the PO.',
+    (quotationAmount === '' || Number(quotationAmount) <= 0) && 'Enter the quotation amount.',
+    mismatch && 'The quotation amount must match the bill amount.',
   ].filter(Boolean) as string[];
 
   return (
@@ -92,14 +92,20 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
         {workorder.procurement_at && status !== 'Awaiting Procurement' && (
           <div className="grid gap-3 md:grid-cols-5">
             <div><p className="text-xs text-gray-500">PO number</p><p className="font-medium">{workorder.po_number || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">PO cost</p>
-              <p className="font-medium">{workorder.po_amount ? money(Number(workorder.po_amount)) : '—'}</p>
-            </div>
-            <div><p className="text-xs text-gray-500">Quotation reference</p><p className="font-medium">{workorder.quotation_reference || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Quotation</p>
-              {workorder.quotation_file
-                ? <a href={workorder.quotation_file} target="_blank" rel="noreferrer" className="text-green-700 underline inline-flex items-center gap-1"><FileText className="h-3.5 w-3.5" /> Open</a>
+            <div><p className="text-xs text-gray-500">PO</p>
+              {workorder.po_document
+                ? <a href={workorder.po_document} target="_blank" rel="noreferrer" className="text-green-700 underline inline-flex items-center gap-1"><FileText className="h-3.5 w-3.5" /> Open</a>
                 : <p>—</p>}
+            </div>
+            <div><p className="text-xs text-gray-500">Quotation amount</p>
+              <p className="font-medium">{workorder.quotation_amount ? money(Number(workorder.quotation_amount)) : '—'}</p>
+            </div>
+            <div><p className="text-xs text-gray-500">Quotation reference</p>
+              <p className="font-medium">{workorder.quotation_reference || '—'}</p>
+              {/* Earlier bills had the quotation attached as a file. */}
+              {workorder.quotation_file && (
+                <a href={workorder.quotation_file} target="_blank" rel="noreferrer" className="text-green-700 underline inline-flex items-center gap-1 text-xs"><FileText className="h-3 w-3" /> Quotation file</a>
+              )}
             </div>
             <div><p className="text-xs text-gray-500">Added</p>
               <p className="font-medium flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> {format(new Date(workorder.procurement_at), 'PPP p')}</p>
@@ -137,11 +143,15 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
                 <Input id="po-number" value={poNumber} onChange={(e) => setPoNumber(e.target.value)} placeholder="e.g. PO-2026-0101" />
               </div>
               <div className="space-y-2">
-                <label htmlFor="po-amount" className="font-medium text-gray-700">PO cost<span className="text-red-500 ml-1">*</span></label>
-                <Input id="po-amount" type="number" min="0" step="0.01" value={poAmount} onChange={(e) => setPoAmount(e.target.value)}
-                       className={poMismatch ? 'border-red-500' : ''} />
-                <p className={`text-xs ${poMismatch ? 'text-red-600' : 'text-gray-500'}`}>
-                  {poMismatch
+                <label htmlFor="po-file" className="font-medium text-gray-700">PO document<span className="text-red-500 ml-1">*</span></label>
+                <Input id="po-file" type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setPoFile(e.target.files?.[0] ?? null)} />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="quote-amount" className="font-medium text-gray-700">Quotation amount<span className="text-red-500 ml-1">*</span></label>
+                <Input id="quote-amount" type="number" min="0" step="0.01" value={quotationAmount}
+                       onChange={(e) => setQuotationAmount(e.target.value)} className={mismatch ? 'border-red-500' : ''} />
+                <p className={`text-xs ${mismatch ? 'text-red-600' : 'text-gray-500'}`}>
+                  {mismatch
                     ? `Does not match the bill amount of ${money(billAmount)}. Return the bill to the Requester if the bill is wrong.`
                     : `Must match the bill amount of ${money(billAmount)}. This is the amount that will be paid.`}
                 </p>
@@ -149,10 +159,6 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
               <div className="space-y-2">
                 <label htmlFor="quote-ref" className="font-medium text-gray-700">Quotation reference</label>
                 <Input id="quote-ref" value={quotationRef} onChange={(e) => setQuotationRef(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="quote-file" className="font-medium text-gray-700">Quotation<span className="text-red-500 ml-1">*</span></label>
-                <Input id="quote-file" type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               </div>
             </div>
             {error && <p className="text-red-600">{error}</p>}

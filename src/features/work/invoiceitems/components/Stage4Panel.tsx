@@ -260,7 +260,10 @@ const Stage4Panel = ({ id }: Props) => {
                 {flow.files.length > 0 && <p className="text-xs text-gray-600">Attached: {flow.files.map((f) => f.name).join(', ')}</p>}
               </div>
               {flow.vendor && (
-                <p className="text-sm text-gray-700">Pay into: {flow.vendor.bank ?? '—'} ****{flow.vendor.account_last4} · {flow.vendor.name} (from the vendor record)</p>
+                <p className="text-sm text-gray-700">
+                  Pay into: {flow.vendor.bank ?? '—'} · {flow.vendor.account_number || `****${flow.vendor.account_last4}`}
+                  {' · '}{flow.vendor.account_name || flow.vendor.name} (from the vendor record)
+                </p>
               )}
               <p className="text-sm text-gray-800">Total <strong>{naira(String(draftAmount + draftVat))}</strong></p>
               {flow.problems.length > 0 && (
@@ -282,6 +285,10 @@ const Stage4Panel = ({ id }: Props) => {
               <div><p className="text-xs text-gray-500">Amount</p><p className="font-medium">{naira(flow.details.amount)}</p></div>
               <div><p className="text-xs text-gray-500">VAT</p><p className="font-medium">{flow.details.vat_charged ? naira(flow.details.vat) : 'Not charged'}</p></div>
               <div><p className="text-xs text-gray-500">Total</p><p className="font-semibold">{naira(flow.details.total)}</p></div>
+              {flow.vendor?.account_number && (
+                <div className="md:col-span-4"><p className="text-xs text-gray-500">Pay into (from the vendor record)</p>
+                  <p className="font-medium">{flow.vendor.bank} · {flow.vendor.account_number} · {flow.vendor.account_name}</p></div>
+              )}
               <div className="md:col-span-3"><p className="text-xs text-gray-500">Invoice file</p>
                 <p>{flow.files.length ? flow.files.map((f) => f.url
                   ? <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="text-green-700 underline mr-2">{f.name}</a>

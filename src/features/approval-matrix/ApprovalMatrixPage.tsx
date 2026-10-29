@@ -269,7 +269,15 @@ const ApprovalMatrixPage = () => {
                 <Badge variant="outline">client: {detail.facility.client ?? 'none'}</Badge>
               </div>
               <div className="p-6 space-y-4">
-                {FACILITY_SLOTS.map((slot) => slotSelect(slot, facilityDraft, setFacilityDraft, busy))}
+                {/* A facility with no client has no client steps, so no Client Contract Rep to name. */}
+                {FACILITY_SLOTS.filter((slot) => slot !== 'client_rep' || detail.facility.client)
+                  .map((slot) => slotSelect(slot, facilityDraft, setFacilityDraft, busy))}
+                {!detail.facility.client && (
+                  <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    No client on this facility, so there are no client steps: the Approver's check fully approves
+                    the Work Request and approves the Work Order price.
+                  </p>
+                )}
                 <div className="flex justify-end">
                   <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={!facilityDirty || busy}
                           onClick={() => saveFacility.mutate()}>

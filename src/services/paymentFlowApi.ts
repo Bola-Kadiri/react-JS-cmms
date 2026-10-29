@@ -33,7 +33,10 @@ export interface VoucherFlow {
   status_label: string;
   waiting_on: 'ap_officer' | 'reviewer' | 'head_of_finance' | null;
   chain: { step: 'ap_officer' | 'reviewer' | 'head_of_finance'; label: string; kind: 'team' | 'named'; person?: string | null; people?: number }[];
-  vendor: { id: number; name: string; bank: string; account_last4: string; has_bank_details: boolean };
+  vendor: {
+    id: number; name: string; bank: string; account_name: string; account_number: string;
+    account_last4: string; has_bank_details: boolean;
+  };
   invoice: { id: number; number: string; vendor_invoice_number: string };
   work_order: { slug: string; number: string; description: string; client_price: string | null };
   facility: string | null;
@@ -61,6 +64,8 @@ export interface VoucherRow {
   vendor: string;
   bank: string;
   account_last4: string;
+  account_name: string;
+  account_number: string;
   invoice: string;
   description: string;
   facility: string | null;

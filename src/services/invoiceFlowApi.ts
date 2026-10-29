@@ -14,7 +14,11 @@ export interface InvoiceFlow {
   waiting_on: 'contractor' | 'ap_officer' | 'head_of_finance' | null;
   entered_for_vendor: boolean;
   chain: (Omit<ChainEntry, 'step'> & { step: 'contractor' | 'ap_officer' | 'head_of_finance' })[];
-  vendor: { id: number; name: string; has_bank_details: boolean; bank: string | null; account_last4: string } | null;
+  vendor: {
+    id: number; name: string; has_bank_details: boolean; bank: string | null; account_last4: string;
+    /** Shown to AP and Finance only; the contractor sees the last 4 digits. */
+    account_name?: string; account_number?: string;
+  } | null;
   work_order: { slug: string; number: string; amount: string | null; description: string } | null;
   completion: { id: number; number: string; status: string } | null;
   details: { vendor_invoice_number: string; invoice_date: string | null; amount: string; vat_charged: boolean; vat: string; total: string };

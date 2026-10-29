@@ -109,7 +109,10 @@ const PayAndConfirmPage = () => {
                   )}
                 </TableCell>
                 <TableCell>{r.vendor}</TableCell>
-                <TableCell className="whitespace-nowrap">{r.bank} ****{r.account_last4}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <div className="font-medium">{r.account_number || '—'}</div>
+                  <div className="text-xs text-gray-500">{r.bank} · {r.account_name}</div>
+                </TableCell>
                 <TableCell>{naira(r.net_amount)}</TableCell>
                 <TableCell className="whitespace-nowrap">{when(r.approved_at)}</TableCell>
                 <TableCell>{r.receipts ? <span className="text-green-700 text-sm">✓ {r.receipts}</span> : <span className="text-gray-400 text-sm">None</span>}</TableCell>

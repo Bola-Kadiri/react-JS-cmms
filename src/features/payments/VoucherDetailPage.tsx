@@ -253,11 +253,13 @@ const VoucherDetailPage = () => {
           {save.isPending && <span className="text-xs text-gray-500 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving…</span>}
         </div>
         <div className="p-5 space-y-5">
-          <div className="grid gap-4 md:grid-cols-4 text-sm">
+          <div className="grid gap-4 md:grid-cols-3 text-sm">
             {[
               ['Voucher number', flow.number],
               ['Payee', flow.vendor.name],
-              ['Bank', `${flow.vendor.bank || '—'} · ****${flow.vendor.account_last4}`],
+              ['Bank', flow.vendor.bank || '—'],
+              ['Account name', flow.vendor.account_name || '—'],
+              ['Account number', flow.vendor.account_number || '—'],
               ['Invoice', flow.invoice.vendor_invoice_number || flow.invoice.number],
             ].map(([label, value]) => (
               <div key={label}>

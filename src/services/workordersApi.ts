@@ -195,12 +195,12 @@ export const rejectWorkorderByApprover = async ({ slug, approver_reason }: { slu
 // Raise Payment bills of ₦100,000 or more: Procurement & Store adds the PO and quotation, or returns the bill.
 export const procurementSubmitWorkorder = async (
   slug: string,
-  input: { po_number: string; quotation_reference?: string; po_document: File | null; quotation_file: File | null },
+  input: { po_number: string; po_amount: string; quotation_reference?: string; quotation_file: File | null },
 ): Promise<Workorder> => {
   const form = new FormData();
   form.append('po_number', input.po_number);
   form.append('quotation_reference', input.quotation_reference ?? '');
-  if (input.po_document) form.append('po_document', input.po_document);
+  form.append('po_amount', input.po_amount);
   if (input.quotation_file) form.append('quotation_file', input.quotation_file);
   const response = await api.post(`${WORKORDERS_API_BASE}/${slug}/procurement-submit/`, form);
   return response.data;

@@ -34,7 +34,7 @@ interface WorkorderApprovalFormProps {
   workorderNumber: string;
   action: WorkorderApprovalAction;
   // New Raise Payment bills: Approver acts first, then the Reviewer, then (for
-  // bills of ₦100,000 or more) the second approver. Only changes the wording.
+  // bills of ₦500,000 or more) the second approver. Only changes the wording.
   approverFirst?: boolean;
   needsSecondApproval?: boolean;
 }

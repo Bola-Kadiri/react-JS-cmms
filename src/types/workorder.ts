@@ -15,6 +15,31 @@ export type ApprovalStatus = 'Pending' | 'Reviewed' | 'Approved' | 'Reviewer Rej
   | 'Awaiting Procurement' | 'Procurement Returned'
   | 'Approver Approved' | 'Awaiting Final Approval' | 'Final Approver Rejected'
 export type WorkStatus = 'pending' | 'closed' | 'rejected'
+
+// Raise Payment approval trail (built only on a bill's own page).
+export interface TrailPerson { id: number | null; name: string; email: string }
+export interface TrailEvent {
+  action: string;
+  label: string;
+  role: string;
+  state: 'done' | 'returned' | 'rejected';
+  actor: TrailPerson | null;
+  on_behalf_of: TrailPerson | null;
+  at: string | null;
+  took_seconds: number | null;
+  reason: string | null;
+  recorded: boolean;
+  assigned: TrailPerson[];
+}
+export interface RaisePaymentTrail {
+  route: string[];
+  events: TrailEvent[];
+  waiting: { step: string; label: string; role: string; people: TrailPerson[]; since: string } | null;
+  upcoming: { step: string; label: string; role: string; people: TrailPerson[] }[];
+  closed: 'rejected' | 'paid' | null;
+  po_number: string | null;
+  quotation_amount: string | null;
+}
 export type Currency = 'USD' | 'EUR' | 'NGN'
 
 export interface ResourceData {
@@ -180,6 +205,7 @@ export interface ResourceData {
   approval_route?: 'APPROVER_FIRST' | null;
   next_step?: 'procurement' | 'requester' | 'approver' | 'reviewer' | 'final_approver' | null;
   needs_procurement?: boolean;
+  approval_trail?: RaisePaymentTrail | null;
   po_number?: string;
   quotation_reference?: string;
   quotation_file?: string | null;

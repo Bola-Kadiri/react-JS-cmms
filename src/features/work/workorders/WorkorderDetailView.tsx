@@ -27,6 +27,7 @@ import {
 import { useWorkorderQuery, useUnlockResubmission, useCreatePaymentRequisitionFromWorkorder } from '@/hooks/workorder/useWorkorderQueries';
 import Stage2Panel from './components/Stage2Panel';
 import RaisePaymentProcurementPanel from './components/RaisePaymentProcurementPanel';
+import RaisePaymentTrail from './components/RaisePaymentTrail';
 import { format } from 'date-fns';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { usePermissions } from '@/contexts/PermissionsContext';
@@ -469,8 +470,13 @@ const WorkorderDetailView = ({ slugProp, embedded = false }: WorkorderDetailView
       {isFiveStage ? (
         <Stage2Panel slug={workorder.slug} number={workorder.work_order_number} />
       ) : (<>
+      {/* Raise Payment: the approval trail (who has it now, who did each step) replaces the stepper. */}
+      {isApproverFirst && workorder.approval_trail && (
+        <RaisePaymentTrail trail={workorder.approval_trail} currentUserId={currentUserId} />
+      )}
+
       {/* Pipeline stepper — visible to owner (requester), admin, and RAISE-PAYMENT requester */}
-      {(isOwner || isAdmin || isRaisePaymentRequester) && (
+      {(isOwner || isAdmin || isRaisePaymentRequester) && !(isApproverFirst && workorder.approval_trail) && (
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
           <div className="flex items-center justify-between">
             {pipelineSteps.map((step, idx) => {

@@ -294,22 +294,23 @@ const WorkorderForm = () => {
 
   useEffect(() => {
     if (workorderData && isEditMode) {
+      // Empty fields come back as null; turn them into "not set" so the form's checks accept them.
       workorderForm.reset({
         type: workorderData.type,
-        source_ppm: workorderData.source_ppm,
-        source_work_request: workorderData.source_work_request,
-        category: workorderData.category,
-        subcategory: workorderData.subcategory,
-        facility: workorderData.facility,
-        building: workorderData.building,
-        department: workorderData.department,
-        asset: workorderData.asset,
+        source_ppm: workorderData.source_ppm ?? undefined,
+        source_work_request: workorderData.source_work_request ?? undefined,
+        category: workorderData.category ?? undefined,
+        subcategory: workorderData.subcategory ?? undefined,
+        facility: workorderData.facility ?? undefined,
+        building: workorderData.building ?? undefined,
+        department: workorderData.department ?? undefined,
+        asset: workorderData.asset ?? undefined,
         description: workorderData.description || '',
         expected_start_date: workorderData.expected_start_date || '',
-        priority: workorderData.priority,
+        priority: workorderData.priority ?? undefined,
         cost: workorderData.cost || '',
-        currency: workorderData.currency,
-        approver: workorderData.approver,
+        currency: workorderData.currency ?? undefined,
+        approver: workorderData.approver ?? undefined,
         reviewers: Array.isArray(workorderData.reviewers) ? workorderData.reviewers : [],
         invoice_no: workorderData.invoice_no || '',
         request_to: workorderData.request_to || undefined,
@@ -477,7 +478,14 @@ const WorkorderForm = () => {
       </div>
 
       <Form {...workorderForm}>
-        <form onSubmit={workorderForm.handleSubmit(onSubmitWorkorder)} className="space-y-6">
+        <form onSubmit={workorderForm.handleSubmit(onSubmitWorkorder, (errors) => {
+          const fields = Object.keys(errors).map((name) => name.replace(/_/g, ' '));
+          toast({
+            title: t('workOrder.form.toast.errorTitle'),
+            description: `Please check: ${fields.join(', ')}.`,
+            variant: 'destructive',
+          });
+        })} className="space-y-6">
 
           {/* Type Selection */}
           <div className="rounded-lg border border-green-200 overflow-hidden bg-white shadow-sm">

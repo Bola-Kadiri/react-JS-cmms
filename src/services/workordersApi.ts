@@ -160,6 +160,14 @@ export interface FinalApproversResponse {
   approvers: { id: number; name: string; email: string }[];
 }
 
+/** The Approver a Raise Payment bill at this facility goes to (from the Approval Matrix), or null. */
+export const getLocationApprover = async (
+  facilityId: number,
+): Promise<{ approver: { id: number; name: string; email: string } | null }> => {
+  const response = await api.get(`${WORKORDERS_API_BASE}/location-approver/`, { params: { facility: facilityId } });
+  return response.data;
+};
+
 export const getFinalApprovers = async (): Promise<FinalApproversResponse> => {
   const response = await api.get(`${WORKORDERS_API_BASE}/final-approvers/`);
   return response.data;

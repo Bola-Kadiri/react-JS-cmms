@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getLocationApprover } from '@/services/workordersApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -179,6 +181,19 @@ const WorkorderForm = () => {
   const finalApproverThreshold = finalApproversData
     ? `NGN ${Number(finalApproversData.threshold).toLocaleString('en-NG')}`
     : 'NGN 500,000';
+
+  // A new Raise Payment bill goes to the location's Approver from the Approval Matrix (the backend
+  // applies it too). The Requester chooses only where the location has none set yet.
+  const { data: locationApproverData } = useQuery({
+    queryKey: ['location-approver', selectedFacility],
+    queryFn: () => getLocationApprover(Number(selectedFacility)),
+    enabled: isRaisePayment && !isEditMode && !!selectedFacility,
+    staleTime: 60000,
+  });
+  const locationApprover = isRaisePayment && !isEditMode ? locationApproverData?.approver ?? null : null;
+  useEffect(() => {
+    if (locationApprover) workorderForm.setValue('approver', locationApprover.id, { shouldValidate: true });
+  }, [locationApprover, workorderForm]);
 
   const {
     data: workorderData,
@@ -1401,7 +1416,8 @@ const WorkorderForm = () => {
                         <FormLabel className={`text-sm font-medium ${!selectedReviewers?.length ? 'text-gray-400' : 'text-gray-700'}`}>
                           {t('workOrder.form.knownCostApproverLabel')}{selectedReviewers?.length > 0 ? <span className="text-red-500 ml-1">*</span> : null}
                         </FormLabel>
-                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedReviewers?.length}>
+                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}
+                                disabled={!selectedReviewers?.length || !!locationApprover}>
                           <FormControl>
                             <SelectTrigger className="h-10">
                               <SelectValue placeholder={!selectedReviewers?.length ? t('workOrder.form.selectReviewerFirst') : t('workOrder.form.selectApprover')} />
@@ -1413,8 +1429,14 @@ const WorkorderForm = () => {
                                 {approver.name} — {approver.email}
                               </SelectItem>
                             ))}
+                            {locationApprover && !(approvers as any[]).some((a: any) => a.id === locationApprover.id) && (
+                              <SelectItem value={String(locationApprover.id)}>{locationApprover.name} — {locationApprover.email}</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
+                        {locationApprover && (
+                          <p className="text-xs text-gray-500">The Approver for this location, from the Approval Matrix.</p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )} />

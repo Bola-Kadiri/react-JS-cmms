@@ -66,7 +66,6 @@ const WorkorderForm = () => {
     if (data.type === 'RAISE-PAYMENT') {
       if (!data.invoice_no?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.billNumberRequired'), path: ['invoice_no'] });
       if (!data.category) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.categoryRequired'), path: ['category'] });
-      if (!data.subcategory) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.subcategoryRequired'), path: ['subcategory'] });
       if (!data.facility) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.facilityRequired'), path: ['facility'] });
       if (!data.payee) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.payeeRequired'), path: ['payee'] });
       if (!(Number(data.cost) > 0)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('workOrder.form.validation.amountRequired'), path: ['cost'] });
@@ -1192,7 +1191,7 @@ const WorkorderForm = () => {
 
                       <FormField control={workorderForm.control} name="subcategory" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')}<span className="text-red-500 ml-1">*</span></FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">{t('workOrder.form.subcategory')} <span className="text-xs text-gray-500 font-normal">(optional)</span></FormLabel>
                           <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()} disabled={!selectedCategory}>
                             <FormControl><SelectTrigger className="h-10"><SelectValue placeholder={!selectedCategory ? t('workOrder.form.selectCategoryFirst') : t('workOrder.form.selectSubcategory')} /></SelectTrigger></FormControl>
                             <SelectContent>

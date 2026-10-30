@@ -1,5 +1,6 @@
 // src/features/work/workorders/components/RaisePaymentTrail.tsx
-// Raise Payment approval trail: who has the bill now, who did each step (name, email, time), and who is next.
+// Approval trail, shared by Raise Payment bills and five-stage Work Requests: who has it now,
+// who did each step (name, email, time), and who is next.
 import { useState } from 'react';
 import { Check, Clock, Copy, Mail, X, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
@@ -147,6 +148,10 @@ const RaisePaymentTrail = ({ trail, currentUserId }: Props) => {
                     </span>
                   )}
                   {!event.recorded && <span className="text-xs italic text-gray-600">Who did this step was not recorded (before recording began)</span>}
+                  {event.signature && <span className="text-xs text-gray-600">Signed “{event.signature}”</span>}
+                  {event.note && (
+                    <span className="text-sm rounded-md border px-3 py-2 bg-gray-50 border-gray-200 text-gray-800">Note: “{event.note}”</span>
+                  )}
                   {event.reason && (
                     <span className={`text-sm rounded-md border px-3 py-2 ${kind === 'rejected' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
                       “{event.reason}”
@@ -192,6 +197,9 @@ const RaisePaymentTrail = ({ trail, currentUserId }: Props) => {
         </ol>
 
         {trail.closed === 'paid' && <p className="text-sm font-semibold text-green-800">Paid. This bill is closed.</p>}
+        {trail.closed === 'approved' && (
+          <p className="text-sm font-semibold text-green-800">Fully approved. The job has moved on to the Work Order (see Whole job).</p>
+        )}
         {trail.closed === 'rejected' && (
           <p className="text-sm text-gray-700">This bill is closed. The Requester can raise it again with the same bill number.</p>
         )}

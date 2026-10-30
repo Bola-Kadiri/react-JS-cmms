@@ -16,6 +16,9 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { workrequestKeys } from '@/hooks/workrequest/useWorkrequestQueries';
+import { useAuth } from '@/contexts/AuthContext';
+import RaisePaymentTrail from '@/features/work/workorders/components/RaisePaymentTrail';
+import JobStrip from './JobStrip';
 import {
   FlowAction, FlowStep, WorkRequestFlow, fetchWorkRequestFlow, takeWorkRequestAction,
 } from '@/services/workRequestFlowApi';
@@ -72,6 +75,8 @@ interface Props {
 
 const FiveStagePanel = ({ slug, number }: Props) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const currentUserId = Number(user?.id);
   const queryClient = useQueryClient();
   const [dialog, setDialog] = useState<DialogAction | null>(null);
   const [value, setValue] = useState('');
@@ -198,7 +203,23 @@ const FiveStagePanel = ({ slug, number }: Props) => {
         </p>
       )}
 
-      {/* Chain */}
+      {/* Whole job, time limit and the approval trail (who did each step, with emails, and who has it now). */}
+      {flow.trail && (
+        <>
+          {flow.job && <JobStrip stages={flow.job} />}
+          {flow.timing && (
+            <div className="flex justify-end">
+              <Badge variant="outline" className={TIMING[flow.timing.state].className}>
+                <Clock className="mr-1 h-3 w-3" /> {TIMING[flow.timing.state].label} · due {when(flow.timing.due_at)}
+              </Badge>
+            </div>
+          )}
+          <RaisePaymentTrail trail={flow.trail} currentUserId={currentUserId} />
+        </>
+      )}
+
+      {/* Chain (shown only if the trail is not available) */}
+      {!flow.trail && (
       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
@@ -237,6 +258,7 @@ const FiveStagePanel = ({ slug, number }: Props) => {
           <p className="text-xs text-gray-500 mt-3">This client approves the price only, so there is no client step here.</p>
         )}
       </div>
+      )}
 
       {/* Supporting documents */}
       {flow.files?.length > 0 && (
@@ -256,7 +278,8 @@ const FiveStagePanel = ({ slug, number }: Props) => {
         </div>
       )}
 
-      {/* History */}
+      {/* History (shown only if the trail is not available) */}
+      {!flow.trail && (
       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Every step, time stamped</p>
         <ol className="space-y-3">
@@ -274,6 +297,7 @@ const FiveStagePanel = ({ slug, number }: Props) => {
           ))}
         </ol>
       </div>
+      )}
 
       {/* Dialog */}
       <Dialog open={!!dialog} onOpenChange={(isOpen) => !isOpen && setDialog(null)}>

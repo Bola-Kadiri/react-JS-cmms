@@ -28,6 +28,9 @@ export interface TrailEvent {
   at: string | null;
   took_seconds: number | null;
   reason: string | null;
+  /** A note left with the step (e.g. the Category Manager's note on a check). */
+  note?: string | null;
+  signature?: string | null;
   recorded: boolean;
   assigned: TrailPerson[];
 }
@@ -36,7 +39,7 @@ export interface RaisePaymentTrail {
   events: TrailEvent[];
   waiting: { step: string; label: string; role: string; people: TrailPerson[]; since: string } | null;
   upcoming: { step: string; label: string; role: string; people: TrailPerson[] }[];
-  closed: 'rejected' | 'paid' | null;
+  closed: 'rejected' | 'paid' | 'approved' | null;
   po_number: string | null;
   quotation_amount: string | null;
 }

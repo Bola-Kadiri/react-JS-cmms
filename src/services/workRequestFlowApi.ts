@@ -1,6 +1,7 @@
 // src/services/workRequestFlowApi.ts
 // Five-stage flow, Stage 1 (Work Request): chain, history, actions, and My Tasks.
 import { api } from './apiClient';
+import { RaisePaymentTrail } from '@/types/workorder';
 
 const WR_API_BASE = '/work/api/work-requests';
 
@@ -47,6 +48,18 @@ export interface WorkRequestFlow {
   replaces: { slug: string; number: string } | null;
   /** The Requester's supporting documents. */
   files: { id: number; url: string | null; name: string }[];
+  /** Who did each step (with emails) and who has the request now; same shape as the Raise Payment trail. */
+  trail?: RaisePaymentTrail | null;
+  /** The whole job's five stages and where it is. */
+  job?: JobStage[] | null;
+}
+
+export interface JobStage {
+  key: 'request' | 'work_order' | 'certificate' | 'invoice' | 'payment';
+  label: string;
+  state: 'done' | 'current' | 'next' | 'stopped';
+  link: string | null;
+  note: string;
 }
 
 export interface FlowPreview {

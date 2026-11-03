@@ -59,6 +59,8 @@ const WorkorderManagement = () => {
     return (data.results || []).filter(wo => {
       // Five-stage work orders are already scoped by the server (team, named signer, contractor's own jobs).
       if ((wo as any).flow === 'five_stage') return true;
+      // A Raise Payment bill's second approver sees it whatever their role (the server already scopes this).
+      if (wo.final_approver === userId) return true;
       switch (roleUpper) {
         case 'REQUESTER': return wo.requester === userId;
         case 'REVIEWER': return wo.reviewers?.includes(userId);

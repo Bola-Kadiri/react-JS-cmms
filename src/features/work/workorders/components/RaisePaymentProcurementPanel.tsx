@@ -37,6 +37,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
   const [quotationRef, setQuotationRef] = useState('');
   const [poFile, setPoFile] = useState<File | null>(null);
   const [quotationAmount, setQuotationAmount] = useState('');
+  const [clientPrice, setClientPrice] = useState('');
   const [returnOpen, setReturnOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
@@ -54,7 +55,8 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
 
   const submit = useMutation({
     mutationFn: () => procurementSubmitWorkorder(workorder.slug, {
-      po_number: poNumber, po_document: poFile, quotation_amount: quotationAmount, quotation_reference: quotationRef,
+      po_number: poNumber, po_document: poFile, quotation_amount: quotationAmount, client_price: clientPrice,
+      quotation_reference: quotationRef,
     }),
     onSuccess: () => { refresh(); toast.success('PO and quotation added. The Approver has been told.'); setError(''); },
     onError,
@@ -79,6 +81,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
     !poFile && 'Attach the PO.',
     (quotationAmount === '' || Number(quotationAmount) <= 0) && 'Enter the quotation amount.',
     mismatch && 'The quotation amount must match the bill amount.',
+    (clientPrice === '' || Number(clientPrice) < 0) && 'Enter the cost to client (0 if the client is not charged).',
   ].filter(Boolean) as string[];
 
   return (
@@ -90,7 +93,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
       <div className="p-4 space-y-4 text-sm">
         {/* Done */}
         {workorder.procurement_at && status !== 'Awaiting Procurement' && (
-          <div className="grid gap-3 md:grid-cols-5">
+          <div className="grid gap-3 md:grid-cols-6">
             <div><p className="text-xs text-gray-500">PO number</p><p className="font-medium">{workorder.po_number || '—'}</p></div>
             <div><p className="text-xs text-gray-500">PO</p>
               {workorder.po_document
@@ -99,6 +102,9 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
             </div>
             <div><p className="text-xs text-gray-500">Quotation amount</p>
               <p className="font-medium">{workorder.quotation_amount ? money(Number(workorder.quotation_amount)) : '—'}</p>
+            </div>
+            <div><p className="text-xs text-gray-500">Cost to client</p>
+              <p className="font-medium">{workorder.client_price != null ? money(Number(workorder.client_price)) : '—'}</p>
             </div>
             <div><p className="text-xs text-gray-500">Quotation reference</p>
               <p className="font-medium">{workorder.quotation_reference || '—'}</p>
@@ -154,6 +160,14 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
                   {mismatch
                     ? `Does not match the bill amount of ${money(billAmount)}. Return the bill to the Requester if the bill is wrong.`
                     : `Must match the bill amount of ${money(billAmount)}. This is the amount that will be paid.`}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="client-price" className="font-medium text-gray-700">Cost to client<span className="text-red-500 ml-1">*</span></label>
+                <Input id="client-price" type="number" min="0" step="0.01" value={clientPrice}
+                       onChange={(e) => setClientPrice(e.target.value)} />
+                <p className="text-xs text-gray-500">
+                  What the client will be billed for this bill. Enter 0 if the client is not charged.
                 </p>
               </div>
               <div className="space-y-2">

@@ -213,6 +213,7 @@ export interface ResourceData {
   quotation_reference?: string;
   quotation_file?: string | null;
   quotation_amount?: string | null;
+  client_price?: string | null;
   po_document?: string | null;
   procurement_by?: number | null;
   procurement_at?: string | null;

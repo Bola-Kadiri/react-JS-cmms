@@ -33,6 +33,8 @@ export interface WorkOrderFlow {
   price_check: { number: string; facility: string | null; vendor: string | null; client_price: string | null; vendor_cost: string | null }[];
   accepted: { at: string; start_date: string; technician: string } | null;
   source_work_request: { slug: string; number: string } | null;
+  /** The Requester's supporting documents from the Work Request. */
+  request_files?: { id: number; url: string | null; name: string }[];
   history: HistoryEntry[];
   timing: FlowTiming | null;
   my_actions: WorkOrderFlowAction[];

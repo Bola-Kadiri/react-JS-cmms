@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  AlertTriangle, CheckCircle, CheckCircle2, Clock, Loader2, Plus, Send, Trash2, Users, XCircle,
+  AlertTriangle, CheckCircle, CheckCircle2, Clock, Loader2, Paperclip, Plus, Send, Trash2, Users, XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -259,6 +259,24 @@ const Stage2Panel = ({ slug, number }: Props) => {
             {flow.source_work_request.number}
           </button>
         </p>
+      )}
+
+      {/* Requester's documents (from the Work Request) */}
+      {(flow.request_files?.length ?? 0) > 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+            <Paperclip className="h-3.5 w-3.5 text-green-600" /> Requester's documents ({flow.request_files!.length})
+          </p>
+          <ul className="space-y-1.5 text-sm">
+            {flow.request_files!.map((f) => (
+              <li key={f.id}>
+                {f.url
+                  ? <a href={f.url} target="_blank" rel="noreferrer" className="text-green-700 underline break-all">{f.name}</a>
+                  : <span>{f.name}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Chain */}

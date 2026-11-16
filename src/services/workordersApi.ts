@@ -30,42 +30,31 @@ export interface ApproverUserResponse {
 }
 
 
-// Fetch workorders with optional filtering parameters
+// Fetch workorders with optional filtering parameters.
+// The API pages lists 20 at a time and the list screen filters and pages on the client, so
+// unless a specific page is asked for, every page is loaded (otherwise older work orders never show).
 export const fetchWorkorders = async (params?: WorkorderQueryParams): Promise<WorkordersResponse> => {
   try {
-    const response = await api.get(`${WORKORDERS_API_BASE}/`, { params });
-    
-    // Check if the response has pagination data
-    if (response.data && typeof response.data === 'object') {
+    const results: Workorder[] = [];
+    for (let page = params?.page ?? 1; page <= 200; page += 1) {
+      const response = await api.get(`${WORKORDERS_API_BASE}/`, { params: { ...params, page } });
+      const data = response.data;
+
       // If the API returns an array directly instead of a paginated response
-      if (Array.isArray(response.data)) {
-        return {
-          count: response.data.length,
-          next: null,
-          previous: null,
-          results: response.data
-        };
+      if (Array.isArray(data)) {
+        return { count: data.length, next: null, previous: null, results: data };
       }
-      
-      // If the API returns paginated data
-      if (Array.isArray(response.data.results)) {
-        return {
-          count: response.data.count || response.data.results.length,
-          next: response.data.next || null,
-          previous: response.data.previous || null,
-          results: response.data.results
-        };
+      if (!data || !Array.isArray(data.results)) break;
+
+      results.push(...data.results);
+      if (params?.page !== undefined) {
+        return { count: data.count || data.results.length, next: data.next || null, previous: data.previous || null, results: data.results };
       }
+      if (!data.next) break;
     }
-    
-    // Default fallback if the structure doesn't match expected format
-    return {
-      count: 0,
-      next: null,
-      previous: null,
-      results: []
-    };
-    
+
+    return { count: results.length, next: null, previous: null, results };
+
   } catch (error) {
     console.error('Error fetching workorders:', error);
     return {

@@ -1,4 +1,5 @@
 import { api } from './apiClient';
+import { fetchAllPages } from '@/hooks/crud/useAllRecords';
 import { Workrequest, ShortUser } from '@/types/workrequest';
 import { Asset } from '@/types/asset';
 import { Building } from '@/types/building';
@@ -65,17 +66,22 @@ export interface FinalRejectData {
 
 // --- List & detail ---
 
+// The API pages lists 20 at a time and the list screen filters and pages on the client, so
+// unless a specific page is asked for, every page is loaded (otherwise older requests never show).
 export const fetchWorkrequests = async (params?: WorkrequestQueryParams): Promise<WorkrequestsResponse> => {
-  const response = await api.get(`${BASE}/`, { params });
-  if (response.data && typeof response.data === 'object') {
-    if (Array.isArray(response.data)) {
-      return { count: response.data.length, next: null, previous: null, results: response.data };
+  const results: Workrequest[] = [];
+  for (let page = params?.page ?? 1; page <= 200; page += 1) {
+    const response = await api.get(`${BASE}/`, { params: { ...params, page } });
+    const data = response.data;
+    if (Array.isArray(data)) {
+      return { count: data.length, next: null, previous: null, results: data };
     }
-    if (Array.isArray(response.data.results)) {
-      return response.data;
-    }
+    if (!data || !Array.isArray(data.results)) break;
+    if (params?.page !== undefined) return data;
+    results.push(...data.results);
+    if (!data.next) break;
   }
-  return { count: 0, next: null, previous: null, results: [] };
+  return { count: results.length, next: null, previous: null, results };
 };
 
 export const getWorkrequest = async (slug: string): Promise<Workrequest> => {
@@ -162,8 +168,7 @@ export const getWorkrequestApprovers = async (): Promise<ShortUser[]> => {
 };
 
 export const fetchProcurementWorkrequests = async (): Promise<ProcurementWorkrequestsResponse> => {
-  const response = await api.get(`${BASE}/procurement-assigned/`);
-  const results = response.data.results || (Array.isArray(response.data) ? response.data : []);
+  const results = await fetchAllPages<Workrequest>(`${BASE}/procurement-assigned/`);
   return { count: results.length, results };
 };
 

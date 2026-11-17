@@ -215,6 +215,9 @@ export interface ResourceData {
   quotation_amount?: string | null;
   client_price?: string | null;
   po_document?: string | null;
+  // Procurement & Store said the bill needs no PO and priced it as these lines instead.
+  no_po_needed?: boolean;
+  raise_payment_lines?: { id: number; description: string; quantity: string; amount: string; total: string }[];
   procurement_by?: number | null;
   procurement_at?: string | null;
   procurement_reason?: string;

@@ -160,7 +160,7 @@ const VendorManagement = () => {
             refreshKeys={[vendorKeys.all]}
           />
           <SuperAdminOnly alsoRoles={['PROCUREMENT AND STORE']}>
-            <Button onClick={handleAddVendor}>
+            <Button onClick={handleAddVendor} className="bg-green-600 hover:bg-green-700 text-white">
               <Plus className="mr-2 h-4 w-4" />
               {t('vendor.add')}
             </Button>

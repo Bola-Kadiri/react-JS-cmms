@@ -268,7 +268,7 @@ const VendorManagement = () => {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </SuperAdminOnly>
-                        <SuperAdminOnly>
+                        <SuperAdminOnly alsoRoles={['PROCUREMENT AND STORE']}>
                           <Button
                             variant="ghost"
                             size="icon"

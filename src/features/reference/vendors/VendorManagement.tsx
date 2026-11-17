@@ -159,7 +159,7 @@ const VendorManagement = () => {
             templateFilename="vendors_template.csv"
             refreshKeys={[vendorKeys.all]}
           />
-          <SuperAdminOnly>
+          <SuperAdminOnly alsoRoles={['PROCUREMENT AND STORE']}>
             <Button onClick={handleAddVendor}>
               <Plus className="mr-2 h-4 w-4" />
               {t('vendor.add')}
@@ -258,7 +258,7 @@ const VendorManagement = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </PermissionGuard>
-                        <SuperAdminOnly>
+                        <SuperAdminOnly alsoRoles={['PROCUREMENT AND STORE']}>
                           <Button
                             variant="ghost"
                             size="icon"

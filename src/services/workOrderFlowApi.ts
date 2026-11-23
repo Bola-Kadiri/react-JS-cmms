@@ -40,6 +40,8 @@ export interface WorkOrderFlow {
   history: HistoryEntry[];
   timing: FlowTiming | null;
   my_actions: WorkOrderFlowAction[];
+  /** The Super Admin is editing/submitting for Procurement & Store (a reason is required). */
+  acting_as_super_admin?: boolean;
 }
 
 export interface QueueRow {
@@ -60,6 +62,8 @@ export interface PricingInput {
   no_po_needed: boolean;
   expected_start_date: string;
   files: File[];
+  /** Required when the Super Admin edits for Procurement & Store. */
+  override_reason?: string;
 }
 
 export const fetchProcurementQueue = async (): Promise<QueueRow[]> =>
@@ -78,6 +82,7 @@ export const saveWorkOrderPricing = async (slug: string, input: PricingInput): P
   form.append('quotation_reference', input.quotation_reference);
   form.append('po_number', input.no_po_needed ? '' : input.po_number);
   form.append('no_po_needed', input.no_po_needed ? 'true' : 'false');
+  if (input.override_reason) form.append('override_reason', input.override_reason);
   form.append('expected_start_date', input.expected_start_date);
   input.files.forEach((file) => form.append('resources', file));
   return (await api.post(`${WO_API_BASE}/${slug}/flow-pricing/`, form)).data;

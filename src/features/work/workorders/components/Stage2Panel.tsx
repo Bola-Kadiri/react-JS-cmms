@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import SuperAdminReason from '@/components/SuperAdminReason';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -72,6 +73,10 @@ const Stage2Panel = ({ slug, number }: Props) => {
   const queryClient = useQueryClient();
   const { data: flow, isLoading } = useQuery({ queryKey: ['workorder-flow', slug], queryFn: () => fetchWorkOrderFlow(slug) });
   const canEdit = !!flow?.my_actions.includes('edit_pricing');
+  // The Super Admin editing/submitting for Procurement & Store must give a reason.
+  const superAdmin = !!flow?.acting_as_super_admin;
+  const [overrideReason, setOverrideReason] = useState('');
+  const needsOverrideReason = superAdmin && !overrideReason.trim();
   const { userRole } = usePermissions();
   const raiseCompletion = useMutation({
     mutationFn: () => startCompletion(slug),
@@ -129,6 +134,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
     mutationFn: () => saveWorkOrderPricing(slug, {
       lines: lines.filter((l) => l.description.trim() || l.unit_cost_vendor || l.unit_cost_client),
       vendor, quotation_reference: quoteRef, po_number: poNumber, no_po_needed: !poNeeded, expected_start_date: startDate, files,
+      override_reason: superAdmin ? overrideReason.trim() : undefined,
     }),
     onSuccess: (updated) => { refresh(updated); toast.success('Pricing saved'); },
     onError,
@@ -178,13 +184,18 @@ const Stage2Panel = ({ slug, number }: Props) => {
   return (
     <div className="space-y-6 mb-6">
       {/* Actions for this person */}
+      {superAdmin && (
+        <SuperAdminReason forWhom="Procurement & Store" value={overrideReason} onChange={setOverrideReason} />
+      )}
       {flow.my_actions.some((a) => a !== 'edit_pricing') && (
         <div className="bg-white border-2 border-green-600 rounded-lg p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-medium text-green-800">This Work Order is waiting for you.</p>
           <div className="flex flex-wrap gap-2">
             {flow.my_actions.includes('submit') && (
-              <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={act.isPending || flow.pricing_problems.length > 0}
-                      title={flow.pricing_problems.join(' ') || undefined} onClick={() => act.mutate({ action: 'submit' })}>
+              <Button className="bg-green-600 hover:bg-green-700 text-white"
+                      disabled={act.isPending || flow.pricing_problems.length > 0 || needsOverrideReason}
+                      title={[...flow.pricing_problems, ...(needsOverrideReason ? ['Give your reason as Super Admin.'] : [])].join(' ') || undefined}
+                      onClick={() => act.mutate({ action: 'submit', data: superAdmin ? { override_reason: overrideReason.trim() } : undefined })}>
                 {act.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                 Submit for review
               </Button>
@@ -417,7 +428,8 @@ const Stage2Panel = ({ slug, number }: Props) => {
                 </div>
               )}
               <div className="flex justify-end">
-                <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={savePricing.isPending} onClick={() => savePricing.mutate()}>
+                <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={savePricing.isPending || needsOverrideReason}
+                        title={needsOverrideReason ? 'Give your reason as Super Admin (above).' : undefined} onClick={() => savePricing.mutate()}>
                   {savePricing.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save pricing
                 </Button>
               </div>

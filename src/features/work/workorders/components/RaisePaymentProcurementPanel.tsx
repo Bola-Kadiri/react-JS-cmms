@@ -17,9 +17,12 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Workorder } from '@/types/workorder';
-import { procurementReturnWorkorder, procurementSubmitWorkorder, raisePaymentResubmitWorkorder } from '@/services/workordersApi';
+import { procurementReturnWorkorder } from '@/services/workordersApi';
+import SuperAdminReason from '@/components/SuperAdminReason';
 import { workorderKeys } from '@/hooks/workorder/useWorkorderQueries';
-import { procurementSubmitWithoutPo, RaisePaymentQuoteLine } from '@/services/raisePaymentProcurementApi';
+import {
+  procurementSubmitWithoutPo, procurementSubmitWithPo, raisePaymentResubmit, RaisePaymentQuoteLine,
+} from '@/services/raisePaymentProcurementApi';
 
 interface Props {
   workorder: Workorder;
@@ -55,6 +58,10 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
   const isRaiser = workorder.requester === currentUserId || workorder.owner === currentUserId;
   const canProcure = ['PROCUREMENT AND STORE', 'ADMIN', 'SUPER ADMIN'].includes(userRole) && !isRaiser;
   const canResubmit = isRaiser || ['ADMIN', 'SUPER ADMIN'].includes(userRole);
+  // The Super Admin doing the P&S step, or resubmitting someone else's bill, gives a reason for the history.
+  const superAdmin = userRole === 'SUPER ADMIN';
+  const [overrideReason, setOverrideReason] = useState('');
+  const needsOverrideReason = superAdmin && !overrideReason.trim();
   const status = workorder.approval_status;
 
   const refresh = () => {
@@ -65,13 +72,14 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
 
   const submit = useMutation({
     mutationFn: () => (poNeeded
-      ? procurementSubmitWorkorder(workorder.slug, {
+      ? procurementSubmitWithPo(workorder.slug, {
         po_number: poNumber, po_document: poFile, quotation_amount: quotationAmount, client_price: clientPrice,
-        quotation_reference: quotationRef,
+        quotation_reference: quotationRef, override_reason: superAdmin ? overrideReason.trim() : undefined,
       })
       : procurementSubmitWithoutPo(workorder.slug, {
         lines: lines.map((line) => ({ ...line, description: line.description.trim() })),
         client_price: clientPrice, quotation_reference: quotationRef,
+        override_reason: superAdmin ? overrideReason.trim() : undefined,
       })),
     onSuccess: () => {
       refresh();
@@ -86,7 +94,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
     onError,
   });
   const resubmit = useMutation({
-    mutationFn: () => raisePaymentResubmitWorkorder(workorder.slug),
+    mutationFn: () => raisePaymentResubmit(workorder.slug, superAdmin && !isRaiser ? overrideReason.trim() : undefined),
     onSuccess: () => { refresh(); toast.success('Bill resubmitted'); setError(''); },
     onError,
   });
@@ -196,10 +204,14 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-900 space-y-2">
             <p className="font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Returned by Procurement &amp; Store</p>
             {workorder.procurement_reason && <p>Reason: {workorder.procurement_reason}</p>}
+            {canResubmit && superAdmin && !isRaiser && (
+              <SuperAdminReason forWhom="the Requester" value={overrideReason} onChange={setOverrideReason} />
+            )}
             {canResubmit && (
               <div className="flex flex-wrap gap-2 pt-1">
                 <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/work/orders/edit/${workorder.slug}`)}>Fix the bill</Button>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={resubmit.isPending} onClick={() => resubmit.mutate()}>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={resubmit.isPending || (!isRaiser && needsOverrideReason)} onClick={() => resubmit.mutate()}>
                   {resubmit.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Resubmit
                 </Button>
               </div>
@@ -318,13 +330,15 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
                 <Input id="quote-ref" value={quotationRef} onChange={(e) => setQuotationRef(e.target.value)} />
               </div>
             </div>
+            {superAdmin && <SuperAdminReason forWhom="Procurement & Store" value={overrideReason} onChange={setOverrideReason} />}
             {error && <p className="text-red-600">{error}</p>}
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-50" onClick={() => { setReason(''); setReturnOpen(true); }}>
                 Return to Requester
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={missing.length > 0 || submit.isPending}
-                      title={missing.join(' ') || undefined} onClick={() => submit.mutate()}>
+              <Button className="bg-green-600 hover:bg-green-700 text-white" disabled={missing.length > 0 || needsOverrideReason || submit.isPending}
+                      title={[...missing, ...(needsOverrideReason ? ['Give your reason as Super Admin.'] : [])].join(' ') || undefined}
+                      onClick={() => submit.mutate()}>
                 {submit.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Submit to Approver
               </Button>
             </div>

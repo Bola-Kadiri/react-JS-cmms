@@ -24,6 +24,9 @@ const WHAT_TO_DO: Record<MyTask['step'], string> = {
   ap_officer: 'Check the invoice',
   head_of_finance: 'Approve the invoice',
   reviewer: 'Check the payment voucher',
+  // Raise Payment steps (their rows show `what` from the server instead).
+  raised: 'Fix and resubmit the bill',
+  final: 'Give final approval',
 };
 
 const TITLE: Record<MyTask['kind'], string> = {
@@ -36,10 +39,11 @@ const TITLE: Record<MyTask['kind'], string> = {
   invoice_to_raise: 'Certificate',
   voucher: 'Voucher',
   voucher_to_raise: 'Invoice',
+  raise_payment: 'Raise Payment',
 };
 
 const linkFor = (task: MyTask) =>
-  task.kind === 'work_order' || task.kind === 'wcc_to_raise' ? `/dashboard/work/orders/view/${task.slug}`
+  task.kind === 'work_order' || task.kind === 'wcc_to_raise' || task.kind === 'raise_payment' ? `/dashboard/work/orders/view/${task.slug}`
     : task.kind === 'wcc' ? `/dashboard/work/work-order-completions/${task.slug}`
     : task.kind === 'work_order_to_raise' ? '/dashboard/procurement-queue'
     : task.kind === 'invoice' ? `/dashboard/work/invoice-items/${task.slug}`
@@ -91,7 +95,8 @@ const MyTasksPage = () => {
                 </TableCell>
                 <TableCell>{task.facility ?? '—'}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{task.kind === 'work_order_to_raise' ? 'Create the Work Order'
+                  <div className="font-medium">{task.kind === 'raise_payment' ? task.what
+                    : task.kind === 'work_order_to_raise' ? 'Create the Work Order'
                     : task.kind === 'wcc_to_raise' ? 'Raise the completion certificate'
                     : task.kind === 'invoice_to_raise' ? (task.step === 'ap_officer' ? 'Enter the invoice for the vendor' : 'Submit your invoice')
                     : task.kind === 'invoice' && ['Draft', 'Returned'].includes(task.status) ? 'Complete and submit the invoice'

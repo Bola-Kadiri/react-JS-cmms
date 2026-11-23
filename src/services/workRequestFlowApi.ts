@@ -69,7 +69,8 @@ export interface FlowPreview {
 }
 
 export interface MyTask {
-  kind: 'work_request' | 'work_order' | 'work_order_to_raise' | 'wcc' | 'wcc_to_raise' | 'invoice' | 'invoice_to_raise' | 'voucher' | 'voucher_to_raise';
+  kind: 'work_request' | 'work_order' | 'work_order_to_raise' | 'wcc' | 'wcc_to_raise' | 'invoice' | 'invoice_to_raise' | 'voucher' | 'voucher_to_raise'
+    | 'raise_payment';
   id: number;
   slug: string;
   number: string;
@@ -77,8 +78,11 @@ export interface MyTask {
   description: string;
   priority: string;
   status: string;
-  step: FlowStep | 'procurement' | 'contractor' | 'central_operation' | 'ap_officer' | 'head_of_finance' | 'reviewer';
+  step: FlowStep | 'procurement' | 'contractor' | 'central_operation' | 'ap_officer' | 'head_of_finance' | 'reviewer'
+    | 'raised' | 'final';
   step_label: string;
+  /** Raise Payment: what to do, e.g. "Approve the bill". */
+  what?: string;
   on_behalf_of: string | null;
   waiting_since: string;
   timing: { state: FlowTiming['state']; due_at: string } | null;

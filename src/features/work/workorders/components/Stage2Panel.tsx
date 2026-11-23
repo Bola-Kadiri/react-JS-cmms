@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -87,6 +88,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
   const [vendor, setVendor] = useState<number | null>(null);
   const [quoteRef, setQuoteRef] = useState('');
   const [poNumber, setPoNumber] = useState('');
+  const [poNeeded, setPoNeeded] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [files, setFiles] = useState<File[]>([]);
 
@@ -98,6 +100,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
     setVendor(flow.vendor?.id ?? null);
     setQuoteRef(flow.quotation_reference);
     setPoNumber(flow.po_number);
+    setPoNeeded(!flow.no_po_needed);
     setStartDate(flow.expected_start_date ?? '');
     setFiles([]);
   }, [flow, canEdit]);
@@ -125,7 +128,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
   const savePricing = useMutation({
     mutationFn: () => saveWorkOrderPricing(slug, {
       lines: lines.filter((l) => l.description.trim() || l.unit_cost_vendor || l.unit_cost_client),
-      vendor, quotation_reference: quoteRef, po_number: poNumber, expected_start_date: startDate, files,
+      vendor, quotation_reference: quoteRef, po_number: poNumber, no_po_needed: !poNeeded, expected_start_date: startDate, files,
     }),
     onSuccess: (updated) => { refresh(updated); toast.success('Pricing saved'); },
     onError,
@@ -344,8 +347,19 @@ const Stage2Panel = ({ slug, number }: Props) => {
                   <Input value={quoteRef} onChange={(e) => setQuoteRef(e.target.value)} placeholder="e.g. CA-Q-2210" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">PO number<span className="text-red-500 ml-1">*</span></label>
-                  <Input value={poNumber} onChange={(e) => setPoNumber(e.target.value)} placeholder="e.g. PO-2026-0341" />
+                  <div className="flex items-center justify-between gap-2">
+                    <label htmlFor="wo-po-number" className={`text-sm font-medium text-gray-700 transition-opacity ${poNeeded ? '' : 'opacity-40'}`}>
+                      PO number{poNeeded ? <span className="text-red-500 ml-1">*</span> : <span className="ml-2 text-xs font-normal text-gray-500">Not needed</span>}
+                    </label>
+                    <div className="flex items-center gap-2" title="This work order needs a PO">
+                      <span className={`text-xs font-semibold ${poNeeded ? 'text-green-700' : 'text-gray-500'}`}>PO needed: {poNeeded ? 'Yes' : 'No'}</span>
+                      <Switch id="wo-po-needed" aria-label="This work order needs a PO" checked={poNeeded} onCheckedChange={setPoNeeded}
+                              className="data-[state=checked]:bg-green-600" />
+                    </div>
+                  </div>
+                  <Input id="wo-po-number" value={poNeeded ? poNumber : ''} disabled={!poNeeded} onChange={(e) => setPoNumber(e.target.value)}
+                         placeholder={poNeeded ? 'e.g. PO-2026-0341' : 'No PO required'}
+                         className={`transition-opacity ${poNeeded ? '' : 'opacity-40 pointer-events-none'}`} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Expected start<span className="text-red-500 ml-1">*</span></label>
@@ -410,11 +424,13 @@ const Stage2Panel = ({ slug, number }: Props) => {
             </>
           ) : (
             <>
-              {(flow.vendor || flow.quotation_reference || flow.po_number) && (
+              {(flow.vendor || flow.quotation_reference || flow.po_number || flow.no_po_needed) && (
                 <div className="grid gap-3 md:grid-cols-4 text-sm">
                   {flow.vendor && <div><p className="text-xs text-gray-500">Vendor</p><p className="font-medium">{flow.vendor.name}</p></div>}
                   {flow.quotation_reference && <div><p className="text-xs text-gray-500">Quotation</p><p className="font-medium">{flow.quotation_reference}</p></div>}
-                  {flow.po_number && <div><p className="text-xs text-gray-500">PO</p><p className="font-medium">{flow.po_number}</p></div>}
+                  {flow.no_po_needed
+                    ? <div><p className="text-xs text-gray-500">PO</p><p className="font-medium">No PO required</p></div>
+                    : flow.po_number && <div><p className="text-xs text-gray-500">PO</p><p className="font-medium">{flow.po_number}</p></div>}
                   {flow.expected_start_date && <div><p className="text-xs text-gray-500">Expected start</p><p className="font-medium">{flow.expected_start_date}</p></div>}
                 </div>
               )}

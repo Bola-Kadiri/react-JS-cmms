@@ -27,6 +27,8 @@ export interface WorkOrderFlow {
   vendor: { id: number; name: string; has_bank_details: boolean } | null;
   quotation_reference: string;
   po_number: string;
+  /** P&S switched "This work order needs a PO" off. */
+  no_po_needed?: boolean;
   expected_start_date: string | null;
   files: { id: number; url: string | null; name: string }[];
   pricing_problems: string[];
@@ -55,6 +57,7 @@ export interface PricingInput {
   vendor: number | null;
   quotation_reference: string;
   po_number: string;
+  no_po_needed: boolean;
   expected_start_date: string;
   files: File[];
 }
@@ -73,7 +76,8 @@ export const saveWorkOrderPricing = async (slug: string, input: PricingInput): P
   form.append('lines', JSON.stringify(input.lines));
   if (input.vendor) form.append('vendor', String(input.vendor));
   form.append('quotation_reference', input.quotation_reference);
-  form.append('po_number', input.po_number);
+  form.append('po_number', input.no_po_needed ? '' : input.po_number);
+  form.append('no_po_needed', input.no_po_needed ? 'true' : 'false');
   form.append('expected_start_date', input.expected_start_date);
   input.files.forEach((file) => form.append('resources', file));
   return (await api.post(`${WO_API_BASE}/${slug}/flow-pricing/`, form)).data;

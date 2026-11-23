@@ -404,7 +404,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
                 </p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Vendor's quotation<span className="text-red-500 ml-1">*</span></label>
+                <label className="text-sm font-medium text-gray-700">Purchase Order (PO)<span className="ml-2 text-xs font-normal text-gray-500">Optional</span></label>
                 <Input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
                 {flow.files.length > 0 && (
                   <p className="text-xs text-gray-600">Attached: {flow.files.map((f) => f.name).join(', ')}</p>
@@ -464,7 +464,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
                 {flow.pricing.margin !== undefined && <span>Margin <strong>{naira(flow.pricing.margin)}</strong>{flow.pricing.margin_percent != null && ` (${flow.pricing.margin_percent}%)`}</span>}
               </div>
               {flow.files.length > 0 && (
-                <p className="text-sm">Quotation: {flow.files.map((f) => f.url
+                <p className="text-sm">Purchase Order (PO): {flow.files.map((f) => f.url
                   ? <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="text-green-700 underline mr-2">{f.name}</a>
                   : <span key={f.id} className="mr-2">{f.name}</span>)}</p>
               )}

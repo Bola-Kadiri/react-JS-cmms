@@ -19,6 +19,7 @@ import {
   CompletionFlow, EvidenceKind, fetchCompletionFlow, removeCompletionEvidence, saveCompletionDetails, takeCompletionAction,
   uploadCompletionEvidence,
 } from '@/services/completionFlowApi';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 type DialogAction = 'verify' | 'send_back' | 'approve';
 
@@ -315,7 +316,7 @@ const Stage3Panel = ({ id }: Props) => {
                   <Upload className="h-4 w-4" /> {item.files.length ? 'Add more' : 'Upload'}
                   <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf" className="hidden" disabled={upload.isPending}
                          onChange={(e) => {
-                           const files = Array.from(e.target.files ?? []);
+                           const files = keepUploadable(Array.from(e.target.files ?? []));
                            if (files.length) upload.mutate({ kind: item.kind, files });
                            e.target.value = '';
                          }} />

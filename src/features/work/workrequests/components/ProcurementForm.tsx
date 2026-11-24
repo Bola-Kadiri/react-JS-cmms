@@ -19,6 +19,7 @@ import type { QuotationItemInput } from '@/services/workrequestsApi';
 import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { useFormatters } from '@/utils/formatters';
 import { toast } from '@/components/ui/use-toast';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 // 'save-quotation': fills in Quotation/PO/Vendor as its own step, from the
 // Quotation accordion — no longer bundled with actually approving (see
@@ -444,13 +445,14 @@ export const ProcurementForm = ({
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">
                   PO Document{' '}
-                  <span className="text-gray-400 font-normal">(optional — PDF, Word, or image)</span>
+                  <span className="text-gray-400 font-normal">(optional — PDF, Word, or image, up to 15 MB)</span>
                 </label>
                 <div className="flex items-center gap-3">
                   <Input
                     ref={poDocumentRef}
                     type="file"
                     accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    onChange={(e) => { if (!keepUploadable(Array.from(e.target.files ?? []).slice(0, 1)).length) e.target.value = ''; }}
                     className="h-10"
                   />
                   <Upload className="h-4 w-4 text-gray-400 shrink-0" />

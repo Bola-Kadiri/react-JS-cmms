@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { usePermissions } from '@/contexts/PermissionsContext';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 interface RowResult {
   row: number;
@@ -136,7 +137,7 @@ export const BulkUploadDialog = ({ title, description, baseUrl, templateFilename
             <input
               type="file"
               accept=".csv,text/csv"
-              onChange={(e) => { setFile(e.target.files?.[0] ?? null); setResult(null); setError(null); }}
+              onChange={(e) => { const [ok] = keepUploadable(Array.from(e.target.files ?? []).slice(0, 1)); setFile(ok ?? null); if (!ok) e.target.value = ''; setResult(null); setError(null); }}
               className="block w-full text-sm text-gray-600 border border-gray-300 rounded-md cursor-pointer bg-gray-50 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
             />
           </div>

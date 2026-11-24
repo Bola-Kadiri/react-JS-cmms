@@ -13,6 +13,7 @@ import { ArrowLeft, Loader2, Upload, FileText, X } from 'lucide-react';
 import { usePorequisitionQuery, useCreatePorequisition, useUpdatePorequisition } from '@/hooks/porequisition/usePorequisitionQueries';
 import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { useApproverUsersQuery } from '@/hooks/workorder/useWorkorderQueries';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 // Form schema definition
 const porequisitionSchema = z.object({
@@ -107,7 +108,7 @@ const PorequisitionForm = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const filesArray = Array.from(files);
+      const filesArray = keepUploadable(Array.from(files));
       const currentFiles = porequisitionForm.getValues('attachment') || [];
       porequisitionForm.setValue('attachment', [...currentFiles, ...filesArray]);
       
@@ -382,7 +383,7 @@ const PorequisitionForm = () => {
                       Click to upload or drag and drop
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      PDF, DOC, DOCX, Images up to 10MB each
+                      PDF, DOC, DOCX, Images, up to 15 MB per file
                     </p>
                   </div>
                   <input

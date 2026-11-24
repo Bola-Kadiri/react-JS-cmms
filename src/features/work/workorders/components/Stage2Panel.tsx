@@ -27,6 +27,7 @@ import { workorderKeys } from '@/hooks/workorder/useWorkorderQueries';
 import {
   WorkOrderFlow, WorkOrderFlowAction, fetchWorkOrderFlow, saveWorkOrderPricing, takeWorkOrderAction,
 } from '@/services/workOrderFlowApi';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 type DialogAction = 'review' | 'send_back' | 'approve' | 'reject' | 'accept';
 
@@ -416,7 +417,7 @@ const Stage2Panel = ({ slug, number }: Props) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Purchase Order (PO)<span className="ml-2 text-xs font-normal text-gray-500">Optional</span></label>
-                <Input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+                <Input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(e) => setFiles(keepUploadable(Array.from(e.target.files || [])))} />
                 {flow.files.length > 0 && (
                   <p className="text-xs text-gray-600">Attached: {flow.files.map((f) => f.name).join(', ')}</p>
                 )}

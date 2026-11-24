@@ -16,6 +16,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { InvoiceFlow, fetchInvoiceFlow, saveInvoiceDetails, takeInvoiceAction } from '@/services/invoiceFlowApi';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 type DialogAction = 'review' | 'return' | 'approve';
 
@@ -256,7 +257,7 @@ const Stage4Panel = ({ id }: Props) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Invoice PDF<span className="text-red-500 ml-1">*</span></label>
-                <Input type="file" accept=".pdf" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+                <Input type="file" accept=".pdf" multiple onChange={(e) => setFiles(keepUploadable(Array.from(e.target.files || [])))} />
                 {flow.files.length > 0 && <p className="text-xs text-gray-600">Attached: {flow.files.map((f) => f.name).join(', ')}</p>}
               </div>
               {flow.vendor && (

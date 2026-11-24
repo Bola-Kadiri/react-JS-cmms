@@ -21,6 +21,7 @@ import { useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWor
 import { useFacilitiesQuery } from '@/hooks/facility/useFacilityQueries';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import { isTooLarge, tooLargeMessage } from '@/lib/uploadLimits';
 
 // Form schema
 const invoiceItemSchema = z.object({
@@ -168,10 +169,10 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
         });
         return false;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (isTooLarge(file)) { // 15 MB per file (src/lib/uploadLimits.ts)
         toast({
           title: "File too large",
-          description: `${file.name} is larger than 10MB. Please choose a smaller file.`,
+          description: tooLargeMessage(file),
           variant: "destructive",
         });
         return false;
@@ -782,7 +783,7 @@ const InvoiceitemForm = ({ isEditMode = false }: InvoiceitemFormProps) => {
                       Upload Files
                     </Button>
                     <span className="text-xs text-gray-500">
-                      Supported: PDF, DOCX, Images (Max 10MB each)
+                      Supported: PDF, DOCX, Images (up to 15 MB per file)
                     </span>
                   </div>
                   <input

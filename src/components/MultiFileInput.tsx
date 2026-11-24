@@ -1,14 +1,9 @@
 // src/components/MultiFileInput.tsx
 // Pick several files, one or many at a time; each picked file can be removed before saving.
+// Each file can be up to 15 MB; a file over that is listed as not attached, with the reason.
 import { useRef, useState } from 'react';
 import { FileText, Paperclip, X } from 'lucide-react';
-
-// The server refuses any submission over 1 MB, so all attachments together must stay under it.
-// A little headroom is left for the rest of the form.
-const MAX_TOTAL_BYTES = 1_000_000;
-
-const formatSize = (bytes: number) =>
-  bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+import { checkFiles, formatFileSize as formatSize, MAX_FILE_MB } from '@/lib/uploadLimits';
 
 interface Props {
   id: string;
@@ -22,7 +17,7 @@ interface Props {
 
 const MultiFileInput = ({ id, files, onChange, accept, disabled, invalid, hint }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [rejected, setRejected] = useState<File[]>([]);
+  const [rejected, setRejected] = useState<{ file: File; reason: string }[]>([]);
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
 
   return (
@@ -46,39 +41,26 @@ const MultiFileInput = ({ id, files, onChange, accept, disabled, invalid, hint }
         disabled={disabled}
         className="sr-only"
         onChange={(e) => {
-          const picked = Array.from(e.target.files ?? []);
-          const accepted: File[] = [];
-          const refused: File[] = [];
-          let running = totalBytes;
-          picked.forEach((file) => {
-            if (running + file.size <= MAX_TOTAL_BYTES) {
-              accepted.push(file);
-              running += file.size;
-            } else {
-              refused.push(file);
-            }
-          });
+          // Each file can be up to 15 MB (see src/lib/uploadLimits.ts).
+          const { accepted, refused } = checkFiles(Array.from(e.target.files ?? []), totalBytes);
           setRejected(refused);
           if (accepted.length) onChange([...files, ...accepted]);
           if (inputRef.current) inputRef.current.value = '';
         }}
       />
       {hint && !files.length && <p className="text-xs text-gray-500">{hint}</p>}
-      <p className="text-xs text-amber-700">
-        Maximum 1 MB for all attachments combined. Files larger than 1 MB cannot be uploaded. Reduce photo size or
-        save PDFs at a lower quality before attaching.
-      </p>
+      <p className="text-xs text-gray-500">Up to {MAX_FILE_MB} MB per file.</p>
       {rejected.length > 0 && (
         <div role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-          <p className="font-medium">Not attached, over the 1 MB limit:</p>
+          <p className="font-medium">Not attached:</p>
           <ul className="mt-1 list-disc pl-4">
-            {rejected.map((file, index) => (
+            {rejected.map(({ file, reason }, index) => (
               <li key={`${file.name}-${index}`} className="break-all">
-                {file.name} ({formatSize(file.size)})
+                {file.name} ({formatSize(file.size)}): {reason}
               </li>
             ))}
           </ul>
-          <p className="mt-1">Make the file smaller, or remove another attachment to free up space, then try again.</p>
+          <p className="mt-1">Make the file smaller, then try again.</p>
         </div>
       )}
       {files.length > 0 && (
@@ -106,7 +88,7 @@ const MultiFileInput = ({ id, files, onChange, accept, disabled, invalid, hint }
               </li>
             ))}
           </ul>
-          <p className="text-xs text-gray-500">{formatSize(totalBytes)} of 1 MB used</p>
+          <p className="text-xs text-gray-500">{formatSize(totalBytes)} attached</p>
         </>
       )}
     </div>

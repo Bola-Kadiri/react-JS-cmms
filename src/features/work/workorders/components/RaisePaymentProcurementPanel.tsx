@@ -23,6 +23,7 @@ import { workorderKeys } from '@/hooks/workorder/useWorkorderQueries';
 import {
   procurementSubmitWithoutPo, procurementSubmitWithPo, raisePaymentResubmit, RaisePaymentQuoteLine,
 } from '@/services/raisePaymentProcurementApi';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 interface Props {
   workorder: Workorder;
@@ -252,7 +253,7 @@ const RaisePaymentProcurementPanel = ({ workorder, userRole, currentUserId }: Pr
                 <label htmlFor="po-file" className="font-medium text-gray-700">
                   PO document{poNeeded ? <span className="text-red-500 ml-1">*</span> : <span className="ml-2 text-xs font-normal text-gray-500">Not needed</span>}
                 </label>
-                <Input id="po-file" type="file" accept=".pdf,.png,.jpg,.jpeg" disabled={!poNeeded} onChange={(e) => setPoFile(e.target.files?.[0] ?? null)} />
+                <Input id="po-file" type="file" accept=".pdf,.png,.jpg,.jpeg" disabled={!poNeeded} onChange={(e) => { const [ok] = keepUploadable(Array.from(e.target.files ?? []).slice(0, 1)); setPoFile(ok ?? null); if (!ok) e.target.value = ''; }} />
               </div>
               {!poNeeded && (
                 <div className="md:col-span-2 space-y-3">

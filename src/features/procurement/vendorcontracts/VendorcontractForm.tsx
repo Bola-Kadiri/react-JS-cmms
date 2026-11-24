@@ -13,6 +13,7 @@ import { VendorContract } from '@/types/vendorcontract';
 import { useVendorContractQuery, useCreateVendorContract, useUpdateVendorContract } from '@/hooks/vendorcontract/useVendorcontractQueries';
 import { useVendorsQuery } from '@/hooks/vendor/useVendorQueries';
 import { usePpmReviewersQuery } from '@/hooks/ppm/usePpmQueries';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 // Form schema definition
 const vendorcontractSchema = z.object({
@@ -117,7 +118,7 @@ const VendorcontractForm = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const filesArray = Array.from(files);
+      const filesArray = keepUploadable(Array.from(files));
       const currentFiles = vendorcontractForm.getValues('attachment') || [];
       vendorcontractForm.setValue('attachment', [...currentFiles, ...filesArray]);
       
@@ -397,7 +398,7 @@ const VendorcontractForm = () => {
                       Click to upload or drag and drop
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      PDF, DOC, DOCX up to 10MB each
+                      PDF, DOC, DOCX, up to 15 MB per file
                     </p>
                   </div>
                   <input

@@ -19,6 +19,7 @@ import { usePurchaseorderQuery, useCreatePurchaseorder, useUpdatePurchaseorder }
 
 import { useList } from '@/hooks/crud/useCrudOperations';
 import { toast } from '@/components/ui/use-toast';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 const ownerEndpoint = 'accounts/api/users/';
 const vendorEndpoint = 'accounts/api/vendors/';
@@ -186,7 +187,7 @@ const PurchaseorderForm = () => {
   // Handle file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const filesArray = Array.from(e.target.files);
+      const filesArray = keepUploadable(Array.from(e.target.files));
       
       // Update form value
       const currentFiles = purchaseorderForm.getValues("attachments");
@@ -631,7 +632,7 @@ const PurchaseorderForm = () => {
                               Click to upload or drag and drop
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              PDF, Word, Excel, Images (max. 10MB each)
+                              PDF, Word, Excel, Images (up to 15 MB per file)
                             </p>
                           </div>
                         </div>

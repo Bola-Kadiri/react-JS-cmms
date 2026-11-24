@@ -19,6 +19,7 @@ import { Facility } from '@/pages/facility/facilities/FacilityManagementPage';
 import { usePersonnelQuery, useCreatePersonnel, useUpdatePersonnel } from '@/hooks/personnel/usePersonnelQueries';
 import { Category } from '@/types/category';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { keepUploadable } from '@/lib/uploadLimits';
 
 const userEndpoint = 'accounts/api/users/';
 const catEndpoint = 'accounts/api/categories/';
@@ -100,7 +101,7 @@ const PersonnelForm = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const filesArray = Array.from(e.target.files);
+      const filesArray = keepUploadable(Array.from(e.target.files));
       personnelForm.setValue('documents', [...personnelForm.getValues('documents'), ...filesArray]);
       setFileNames(prev => [...prev, ...filesArray.map(file => file.name)]);
     }

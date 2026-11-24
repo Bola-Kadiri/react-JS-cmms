@@ -18,6 +18,7 @@ import {
 import { useReviewersQuery, useApproversQuery } from '@/hooks/workrequest/useWorkrequestQueries';
 import { toast } from '@/components/ui/use-toast';
 import { useTypedTranslation } from '@/hooks/useTypedTranslation';
+import { isTooLarge } from '@/lib/uploadLimits';
 
 const WorkordercompletionForm = () => {
   const { t } = useTypedTranslation('work');
@@ -106,7 +107,7 @@ const WorkordercompletionForm = () => {
         });
         return false;
       }
-      if (file.size > 10 * 1024 * 1024) {
+      if (isTooLarge(file)) { // 15 MB per file (src/lib/uploadLimits.ts)
         toast({
           title: t('wcc.form.toast.fileTooLarge'),
           description: t('wcc.form.toast.fileTooLargeDesc', { name: file.name }),
